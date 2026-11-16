@@ -88,6 +88,9 @@ p{margin:0;line-height:1.5}
 .badge.on{color:var(--heal);border-color:var(--heal)}
 .code{font-family:var(--f-disp);font-size:52px;line-height:1;letter-spacing:.14em;color:var(--torch2)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.codein{width:8em;text-transform:uppercase;letter-spacing:.2em;font-size:18px;text-align:center}
+.codein::placeholder{letter-spacing:.2em;color:var(--muted);opacity:.6}
 input.txt{background:var(--stone);border:1px solid var(--line);border-radius:8px;color:var(--fg);padding:9px 10px;font:inherit;max-width:100%}
 .netwarn{background:#4a2420;color:#ffd0c8;padding:6px 16px;font-size:13px;text-align:center}
 #chat{position:fixed;top:0;right:0;bottom:0;width:min(360px,100%);background:var(--stone2);border-left:1px solid var(--line);z-index:55;display:flex;flex-direction:column;
@@ -146,7 +149,7 @@ input.txt{background:var(--stone);border:1px solid var(--line);border-radius:8px
 .bar span{position:absolute;inset:0;font-size:10px;font-weight:700;line-height:11px;text-align:center;font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 1px 1px #000}
 .blk{font-size:12px;font-weight:700;color:#bfe0ff;background:#22436a;border-radius:6px;padding:0 6px}
 .chips{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;min-height:4px}
-.chip{font-size:11px;border-radius:5px;padding:1px 5px;background:var(--stone3);border:0;line-height:1.4}
+.chip{cursor:pointer;font-size:11px;border-radius:5px;padding:1px 5px;background:var(--stone3);border:0;line-height:1.4}
 .chip.str{color:#ffb38a}.chip.dex{color:#9be0a8}.chip.vuln{color:#ff8fc7}.chip.weak{color:#c6b3ff}.chip.poison{color:#9de07f}.chip.spine{color:#ffd27a}.chip.pw{color:var(--torch2);background:#3a2f1f}
 .herorow{display:flex;align-items:center;gap:12px;padding:6px 16px;flex-wrap:wrap;justify-content:center}
 .hero{flex-direction:row;gap:10px;min-width:240px;max-width:380px;flex:1;text-align:left}
@@ -209,6 +212,11 @@ button.card:hover{transform:translateY(-8px)}
 @keyframes rise{to{transform:translate(-50%,-150%);opacity:0}}
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#0d0b12;border:1px solid var(--torch);color:var(--fg);padding:9px 14px;border-radius:10px;z-index:70;max-width:min(90vw,420px);font-size:14px;text-align:center}
 @media (max-width:520px){
+  .allies{gap:4px;padding:0 8px}
+  .ally{width:calc(33.3% - 3px);min-width:0;padding:3px 5px;gap:4px}
+  .ally .spr{width:24px;height:auto}.ally .nm{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ally small{font-size:10px}
+  .ally .chips{display:none}
+  .enemy{min-width:96px}
   .card{width:100px;min-height:150px;padding:5px 5px 7px}
   .card .cname{font-size:13px}.card .cdesc{font-size:11.5px}
   .hand{min-height:160px;gap:4px}
@@ -1154,7 +1162,7 @@ function cardHTML(c,o={}){
     <span class="cdesc"><span>${d.x(vals(c)).replace(KW,'<b>$1</b>')}${d.ex?' <b>Esaurisci.</b>':''}</span></span></${tag}>`;
 }
 function chips(t,pw){
-  let h=Object.entries(t.st).filter(([k,v])=>v).map(([k,v])=>`<button class="chip ${k}" onclick="event.stopPropagation();stInfo('${k}')">${STN[k][0]} ${v}</button>`).join('');
+  let h=Object.entries(t.st).filter(([k,v])=>v).map(([k,v])=>`<span class="chip ${k}" role="button" tabindex="0" onclick="event.stopPropagation();stInfo('${k}')">${STN[k][0]} ${v}</span>`).join('');
   if(pw)h+=Object.entries(pw).map(([k,v])=>`<span class="chip pw">${POWN[k]} ${v}</span>`).join('');
   return `<div class="chips">${h}</div>`;
 }
@@ -1253,9 +1261,9 @@ function mpMenuHTML(){
     <div class="row"><button class="btn" onclick="${joining?'leaveRoom()':"screen='title';render()"}">← Indietro</button></div>
     <h2>Multigiocatore</h2>
     ${joining?`<div class="panel"><b>Mi collego alla stanza ${esc(joining)}...</b><span class="muted">Se non succede niente entro qualche secondo, controlla il codice.</span></div>`:`
-    <div class="panel"><label for="pname"><b>Il tuo nome</b></label><input id="pname" class="txt" maxlength="16" value="${esc(myName)}" placeholder="Per esempio: Manu" autocomplete="off"></div>
+    <div class="panel"><label for="pname"><b>Il tuo nome</b></label><input id="pname" class="txt" style="width:100%;max-width:360px" maxlength="16" value="${esc(myName)}" placeholder="Per esempio: Manu" autocomplete="off"></div>
     <div class="panel"><h3>Crea una stanza</h3><p class="muted">Diventi l'host: scegli il livello e avvii la partita quando tutti sono pronti.</p><div><button class="btn primary" onclick="createRoom()">Crea stanza</button></div></div>
-    <div class="panel"><h3>Entra in una stanza</h3><div class="row"><input id="jcode" class="txt" maxlength="4" placeholder="CODICE" value="${esc(UI.joinCode)}" style="width:9ch;text-transform:uppercase;letter-spacing:.15em" autocomplete="off">
+    <div class="panel"><h3>Entra in una stanza</h3><div class="row"><label for="jcode" class="sr">Codice della stanza</label><input id="jcode" class="txt codein" maxlength="4" placeholder="ABCD" value="${esc(UI.joinCode)}" autocomplete="off" autocapitalize="characters" onkeydown="if(event.key==='Enter')joinRoom(this.value)">
       <button class="btn primary" onclick="joinRoom($('#jcode').value)">Entra</button></div></div>
     <p class="note">Nessuno deve registrarsi: basta il nome e il codice di 4 lettere. Se chi ha creato la stanza esce, un altro giocatore prende il suo posto e la partita continua.</p>`}
   </div></main>`;
