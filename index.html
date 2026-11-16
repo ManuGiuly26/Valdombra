@@ -289,6 +289,8 @@ body.noanim #gltip{transition:none}
 .card.unknown{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:repeating-linear-gradient(45deg,#2a2536,#2a2536 8px,#241f2f 8px,#241f2f 16px);color:var(--muted);border-color:#3d3650}.card.unknown .cname{font-size:26px;color:#6d6585}
 .bestiary{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.beast{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;background:var(--stone2);border:1px solid var(--line);border-radius:10px;padding:10px}.beast.boss{border-color:var(--blood)}.beast small{color:var(--muted);font-size:11.5px}.beast.unk b{color:var(--muted)}
 .prow.unk{opacity:.6}.favc{display:flex;flex-direction:column;align-items:center;gap:4px}
+.chip.form{background:#2c3a22;color:#bfe7a0}.chip.elem{background:#3a2a1c;color:#ffcf9a}.chip.e-acqua{background:#1c2c3a;color:#a8dcff}.chip.e-terra{background:#33291c;color:#e3c68f}.chip.e-aria{background:#26303a;color:#e2f2ff}.chip.minion{background:#2a2438;color:#e0d8ff;display:inline-flex;align-items:center;gap:3px}.chip.pet{background:#2f2a22;color:#f0d9b0}
+.classcard.locked .ic{filter:brightness(.35) grayscale(.6)}.classcard .price{margin-top:4px}
 .cdesc .gained{color:#2f7a2a;font-style:normal;font-weight:600}
 .float.dmg{color:#ff6b5c}.float.blk{color:#9fd0ff}.float.heal{color:var(--heal)}.float.psn{color:var(--poison)}
 @keyframes rise{to{transform:translate(-50%,-150%);opacity:0}}
@@ -339,6 +341,14 @@ class RNG{constructor(s){this.s=s|0}
 /* ================= PIXEL ART ================= */
 const PAL={i:'#cfeeff',I:'#7fb3d5',k:'#1b1424',s:'#f2c48f',S:'#c98d5c',h:'#7a4a24',H:'#4e2d14',m:'#cfd6e0',M:'#7f8a9b',r:'#c8402f',R:'#7d211b',b:'#3f6fc2',B:'#25427a',p:'#8656c4',P:'#4d2c7a',g:'#63a94e',G:'#2f6b2a',y:'#f0bf45',Y:'#a8741c',w:'#f6f2e8',W:'#a3a1ad',n:'#8f5d33',N:'#5a3820',e:'#ff4433',E:'#ffe066',c:'#2f2a3a',C:'#4a4458',o:'#ec7f2c',O:'#a84d16',t:'#5fd6c6',T:'#238a7c',l:'#9be06a',L:'#4c8f2e',f:'#ffd9a0'};
 const SPR={
+necromante:["................", ".....kkkkkk..kk.", "....kPPPPPPk.kwk", "...kPppppppPkwek", "...kPpkkkkpPkkwk", "...kPkWWWWkPk.N.", "...kPkeWWekPk.N.", "....kkWWWWkk..N.", "...kPPPkkPPPk.N.", "..kPpPPPPPpPPkN.", "..kPpPlllPpPPkN.", "..kWkPPPPPPkWkN.", "..kPpPPPPPpPk.N.", "...kPPPPPPPPk.N.", "....kkkkkkkk..k.", "................"],
+ranger:["................", "......kkkk......", ".....kGGGGk.....", "....kGGGGGGk..k.", "....kkssssk..kNk", "....kskssksk.kNk", "....kssssssk.kNk", ".....kGssGk..kNk", "...kkGGggGGkkkNk", "..knkGggggGknkNk", "..knkGgnngGknk.k", "..kskGggggGksk..", "...k.kNNNNk.k...", ".....kNk.kNk....", ".....kkk.kkk....", "................"],
+druido:["................", "...kk......kk...", "..kNnk....kNnk..", "...kNnkkkkNnk...", "....kLLLLLLk....", "...kLsssssLk....", "...kskssksk.....", "...kssssssk...k.", "....kwwwwk...kgk", "...kLwwwwLk..kNk", "..kLLLggLLLk.kNk", "..kLgLggLgLkkkNk", "..kskLggLksk.kNk", "...k.kLLk.k..kNk", "....kNk.kNk...k.", "....kkk.kkk....."],
+monaco:["................", "......kkkk......", ".....kssssk.....", "....kssssssk....", "....kskssksk....", "....kssssssk....", ".....kssssk.....", "...kkkooookkk...", "..ksskooookssk..", "..kskkoyyokksk..", "...k.kooook.k...", ".....kOOOOk.....", ".....koooook....", "....kook.kook...", "....kssk.kssk...", "....kkkk.kkkk..."],
+guardiano:["................", "....kkkkkkkk....", "...kmmmmmmmmk...", "...kmMkkkkMmk...", "...kmkekkekmk...", "...kmMMMMMMmk...", "..kkkkmMMmkkkk..", ".kbbbbkmmkMMMMk.", "kbBbbbkMMkMmmMk.", "kbbyybkmmkMMMMk.", "kbbyybkMMkMmmMk.", "kbbbbbkmmkkkkk..", "kbBbbbkMMMMk....", ".kbbbkkmkkmk....", "..kkk.kMk.kMk...", "......kkk.kkk..."],
+paladino:[".......yy.......", "......kyyk......", ".....kmmmmk.....", "....kmmmmmmk....", "....kmkkkkmk....", "....kmskkskm.k..", ".....kssssk.kEk.", "...kkwwyywwkkEk.", "..kwwwwyywwwkEk.", "..kwkyyyyyykkEk.", "..kwkwwyywwkkyk.", "..kskwwyywwk.Y..", "...k.kmmmmk.....", ".....kmk.kmk....", ".....kmk.kmk....", "....kkkk.kkkk..."],
+scheletro_s:["............", "...kkkkk....", "..kwwwwwk...", "..kwkwkwk...", "..kwwwwwk...", "...kwkwk....", "..kkwwwkk...", ".kwkwkwkwk..", "...kwwwk....", "...kwkwk....", "...kk.kk....", "............"],
+
 imp:["................", "..k..........k..", ".kRk........kRk.", ".kRrkkkkkkkkrRk.", "..krrrrrrrrrrk..", "..krEEkrrkEErk..", "..krrrrrrrrrrk.k", "...krrkwwkrrk.kE", "k...krrrrrrk.kEk", "kRk.kkrRRrkk.kyk", "kRRkkrrrrrrkkkyk", ".kRkrrrrrrrrk.yk", "..kkkrRrrRrk..yk", "....krrkkrrk..k.", "....kRk..kRk....", "...kkk..kkk....."],
 salamandra:["................", "................", "................", "...........kkk..", "..........kooEk.", ".........koooook", "....kkkkkkooOOk.", "..kkoyoyoyooOk..", ".koooooooooOk...", "kOooyoyoyoooOk..", "OkkOOOOOOOOOk...", "o..kOk.kOk.kOk..", "...kk..kk..kk...", "................", "................", "................"],
 segugio:["................", "..o.o...........", ".oEoEo..........", ".kkkkk.k........", "kCCCCkkCk.......", "kCeCCCCCCk......", "kCCCCCCCCCkkkkk.", "kwkwCCCCCCCCCCo.", ".kkkCCCCCCCCCoEo", "...kCCCccccCCko.", "...kCCkkkkkCCk..", "...kCk....kCk...", "...kok....kok...", "...kk.....kk....", "................", "................"],
@@ -637,6 +647,13 @@ drago:[
 ],
 };
 const ICONS={
+r_teschio:["............", "...kkkkkk...", "..kwwwwwwk..", ".kwwwwwwwwk.", ".kwkkwwkkwk.", ".kwkkwwkkwk.", ".kwwwkkwwwk.", "..kwwwwwwk..", "...kwkwkk...", "...kwkwkk...", "....kkkk....", "............"],
+r_fischietto:["............", "............", "........kk..", ".......knk..", "..kkkkkknk..", ".knnnnnnnk..", "kNnknnnnnk..", "kNnknnnnk...", ".kNNNNNNk...", "..kkkkkk....", "............", "............"],
+r_seme:["............", ".....kk.....", "....kgGk....", "...kgGGk....", "....kGk.....", "....kNk.....", "...kNnNk....", "..kNnnnNk...", "..kNnnnNk...", "...kNnNk....", "....kkk.....", "............"],
+r_rosario:["............", "...kkkkk....", "..kTk.kTk...", ".kTk...kTk..", ".kTk...kTk..", ".kTk...kTk..", "..kTk.kTk...", "...kTkTk....", "....kTk.....", "...kyyyk....", "....kyk.....", "............"],
+r_scudotorre:["............", "..kkkkkkkk..", ".kbbbbbbbbk.", ".kbmmmmmmbk.", ".kbmbbbbmbk.", ".kbmbyybmbk.", ".kbmbyybmbk.", ".kbmbbbbmbk.", "..kbmmmmbk..", "...kbbbbk...", "....kkkk....", "............"],
+r_giuramento:["............", "....kkkk....", "...kyyyyk...", "..kyEEEEyk..", "..kyEyyEyk..", "..kyEEEEyk..", "...kyEEyk...", "....kyyk....", "...kmmmmk...", "..kmmkkmmk..", "...kk..kk...", "............"],
+
 e_forgia:["............", "....o..o....", "...oEooEo...", "...oEEEEo...", "..kkkkkkkk..", ".kMMMMMMMMk.", "kMmmmmmmmmMk", ".kkkMMMMkkk.", "...kMMMMk...", "..kMMMMMMk..", "..kkkkkkkk..", "............"],
 e_patto:["....kkkk....", "..kkyyyykk..", ".kyykyykyyk.", ".kykrkkrkyk.", "kyykrrrrkyyk", "kykrkrrkrkyk", "kykkrrrrkkyk", "kyyykrrkyyyk", ".kyykkkkyyk.", ".kyyyyyyyyk.", "..kkyyyykk..", "....kkkk...."],
 r_braciere:["............", "...o..o.....", "..oEooEo.o..", "..oEEEEEoEo.", "...oEEEEEo..", "..kkkkkkkk..", ".kMMMMMMMMk.", "..kMmmmmMk..", "...kMMMMk...", "....kMMk....", "...kkkkkk...", "............"],
@@ -957,6 +974,148 @@ const STN={stun:['Stordito','Salta la sua prossima azione.'],burn:['Bruciatura',
   vuln:['Vulnerabile','Subisce il 50% di danni in più dagli attacchi. Cala di 1 a fine turno.'],weak:['Debole','Infligge il 25% di danni in meno. Cala di 1 a fine turno.'],
   poison:['Veleno','A inizio turno perde PV pari al Veleno, poi il Veleno cala di 1.'],spine:['Spine','Chi ti attacca subisce questi danni.']};
 const POWN={vigil:'Vigilanza',furia:'Furia',arcano:'Potere Arcano',arcimago:'Arcimago',intrise:'Lame Intrise',rapide:'Mani Rapide',aura:'Aura Protettiva',inno:'Inno Divino'};
+/* ================= EROI SBLOCCABILI ================= */
+Object.assign(CLASSES,{
+  necromante:{n:'Necromante',hp:66,price:120,relic:'teschio',desc:'Condanna i nemici a morte e comanda un esercito di scheletri che combattono e parano i colpi per lui.',
+    deck:['toccogelido','toccogelido','toccogelido','toccogelido','ossaprot','ossaprot','ossaprot','ossaprot','evocascheletro','marchiomorte']},
+  ranger:{n:'Ranger',hp:72,price:120,relic:'fischietto',desc:'Arciere con un lupo fedele al fianco. Marchia le prede e lascia che il branco le finisca.',
+    deck:['freccia','freccia','freccia','freccia','riparo','riparo','riparo','riparo','marchiocacc','azzanna']},
+  druido:{n:'Druido',hp:74,price:120,relic:'seme',desc:'Si trasforma in Orso, Pantera, Serpente o Gufo: ogni forma cambia il modo di combattere.',
+    deck:['artiglio','artiglio','artiglio','artiglio','corteccia','corteccia','corteccia','corteccia','mutaforma','morso']},
+  monaco:{n:'Monaco',hp:70,price:120,relic:'rosario',desc:'Attinge a Fuoco, Acqua, Terra e Aria: ogni colpo porta con sé l\'elemento scelto.',
+    deck:['pugno','pugno','pugno','pugno','paratamani','paratamani','paratamani','paratamani','respiro','raffica']},
+  guardiano:{n:'Guardiano',hp:95,price:120,relic:'scudotorre',desc:'Il tank del gruppo: provoca i nemici, prende i colpi al posto degli alleati e trasforma l\'Armatura in danni.',
+    deck:['fendpesante','fendpesante','fendpesante','fendpesante','muroacciaio','muroacciaio','muroacciaio','muroacciaio','provoca','spintascudo']},
+  paladino:{n:'Paladino',hp:78,price:120,relic:'giuramento',desc:'Guerriero sacro: accumula Fervore combattendo e lo scatena in castighi divini e aure per il gruppo.',
+    deck:['colposacro','colposacro','colposacro','colposacro','scudogiur','scudogiur','scudogiur','scudogiur','castigo','imposizione']},
+});
+Object.assign(RELICS,{
+  teschio:{n:'Teschio Rituale',ic:'',d:'All\'inizio di ogni combattimento evochi uno Scheletro.'},
+  fischietto:{n:'Fischietto del Lupo',ic:'',d:'Combatti con il tuo Lupo: prima del turno dei nemici attacca il nemico marchiato (o uno a caso) per 4 danni.'},
+  seme:{n:'Seme Antico',ic:'',d:'La prima volta che ti trasformi in ogni combattimento peschi 2 carte.'},
+  rosario:{n:'Rosario di Giada',ic:'',d:'Ogni volta che scegli un elemento ottieni 3 Armatura.'},
+  scudotorre:{n:'Scudo a Torre',ic:'',d:'Inizi ogni combattimento con 10 Armatura e Provocazione.'},
+  giuramento:{n:'Sigillo del Giuramento',ic:'',d:'Ogni volta che giochi un Attacco o subisci danni ottieni 1 Fervore.'},
+});
+STARTER_RELICS.push('teschio','fischietto','seme','rosario','scudotorre','giuramento');
+Object.assign(STN,{
+  doom:['Condanna','Quando tocca ai nemici, se la Condanna è pari o superiore ai PV rimasti, il nemico muore all\'istante.'],
+  mark:['Marchio','Ogni attacco degli eroi gli infligge danni in più pari al Marchio.'],
+  taunt:['Provocazione','I nemici attaccano questo eroe invece degli alleati. Cala di 1 dopo ogni turno dei nemici.'],
+  fervor:['Fervore','Si accumula con gli Attacchi e quando subisci danni. Alcune carte del Paladino lo consumano.'],
+});
+Object.assign(POWN,{bosco:'Cuore del Bosco',maledizione:'Maledizione Strisciante',ossa:'Signore delle Ossa',addestr:'Addestramento',istinto:'Istinto Selvaggio',natura:'Spirito della Natura',armonia:'Armonia',fortezza:'Fortezza',rappr:'Rappresaglia',corazza:'Corazza Vivente',coraggio:'Aura di Coraggio',zelo:'Zelo'});
+const FORMS={orso:['Orso','+2 Armatura da ogni carta che dà Armatura e 3 Armatura all\'inizio di ogni turno.'],pantera:['Pantera','I tuoi Attacchi infliggono 3 danni in più.'],serpente:['Serpente','Ogni tuo Attacco applica 2 Veleno.'],gufo:['Gufo','All\'inizio di ogni turno peschi 2 carte in più.']};
+const ELEMS={fuoco:['Fuoco','Ogni tuo Attacco applica 2 Bruciatura al bersaglio.'],acqua:['Acqua','Ogni tuo Attacco ti fa recuperare 2 PV.'],terra:['Terra','Ogni tuo Attacco ti dà 3 Armatura.'],aria:['Aria','Ogni tuo Attacco infligge anche 3 danni a un nemico casuale.']};
+const FORMK=Object.keys(FORMS),ELEMK=Object.keys(ELEMS);
+/* --- meccaniche --- */
+function SUMMON(n){const h=g.hero;h.min=h.min||[];for(let i=0;i<n;i++){if(h.min.length>=5)break;h.min.push({hp:5,atk:3})}fx('hero','+'+n+' Scheletr'+(n>1?'i':'o'),'heal')}
+function taunter(){const c=R.combat;if(!c)return null;const t=Object.keys(c.heroes).filter(p=>!c.heroes[p].down&&c.heroes[p].st.taunt>0);return t.length?t[0]:null}
+function retarget(){const p=taunter();if(!p)return;R.combat.enemies.forEach(e=>{const it=e.intent;if(!it||e.hp<=0||it.aoe)return;if(it.tg)it.tg=p;if(it.tgs)it.tgs=it.tgs.map(()=>p)})}
+function TAUNT(n){S(g.hero,'taunt',n);retarget()}
+function FERV(n){S(g.hero,'fervor',n)}
+function setForm(k){const h=g.hero;if(!FORMS[k])k='orso';const first=!h.formed;h.form=k;h.formed=1;fx('hero',FORMS[k][0]+'!','heal');if(first&&has('seme'))D(2)}
+function setElem(k){const h=g.hero;if(!ELEMS[k])k='fuoco';h.elem=k;fx('hero',ELEMS[k][0]+'!','heal');if(has('rosario'))B(3)}
+function inForm(k){return g.hero&&g.hero.form===k}
+function inElem(k){return g.hero&&g.hero.elem===k}
+function petHit(t,mult=1){const h=g.hero;if(!h.pet||!alive().length)return;const a=alive();t=t&&t.hp>0?t:(a.find(e=>e.st.mark)||rng.pick(a));const d=h.pet.atk+(h.pw.addestr||0)*2;
+  for(let i=0;i<mult;i++){if(t.hp<=0)break;hurtEnemy(t,calcDmg(d,{st:{},hand:[]},t));g.hit.add(t)}if(h.pw.istinto)B(h.pw.istinto*2)}
+function elemHit(h){const tg=[...g.hit].filter(e=>e.hp>0);const n=h.pw.armonia?2:1;
+  for(let k=0;k<n;k++){if(h.elem==='fuoco'&&tg[0])S(tg[0],'burn',2);if(h.elem==='acqua')H(2);if(h.elem==='terra')B(3);if(h.elem==='aria'){const a=alive();if(a.length){const e=rng.pick(a);hurtEnemy(e,3)}}}}
+function allyAttacks(){const c=R.combat;Object.keys(c.heroes).forEach(pid=>{const h=c.heroes[pid];if(h.down)return;ctx(pid);g.hit=new Set();
+  (h.min||[]).forEach(m=>{const a=alive();if(!a.length)return;const e=a.find(x=>x.st.doom)||rng.pick(a);hurtEnemy(e,m.atk+(h.pw.ossa||0)*2)});
+  if(h.pet)petHit(null)})}
+function doomCheck(e){if(e.hp>0&&e.st.doom&&e.st.doom>=e.hp){ctx(null);fx(eid(e),'Condannato!','psn');e.hp=0;e.dead=true;return true}return false}
+const soloHero=()=>party().length<=1;
+/* --- carte --- */
+Object.assign(CARDS,{
+/* Necromante */
+toccogelido:{n:'Tocco Gelido',cl:'necromante',t:'A',r:'B',c:1,tg:1,v:{d:5,m:3},u:{d:7,m:4},x:v=>`Infliggi ${v.d} danni. Applica ${v.m} Condanna.`,f:(v,t)=>{A(t,v.d);S(t,'doom',v.m)}},
+ossaprot:{n:'Ossa Protettive',cl:'necromante',t:'S',r:'B',c:1,v:{b:5},u:{b:8},x:v=>`Ottieni ${v.b} Armatura.`,f:v=>B(v.b)},
+evocascheletro:{n:'Evoca Scheletro',cl:'necromante',t:'S',r:'B',c:1,v:{n:1},u:{n:2},x:v=>`Evoca ${v.n>1?v.n+' Scheletri':'uno Scheletro'} (5 PV, 3 danni). Gli Scheletri attaccano prima dei nemici e parano i colpi diretti a te.`,f:v=>SUMMON(v.n)},
+marchiomorte:{n:'Marchio di Morte',cl:'necromante',t:'S',r:'B',c:1,tg:1,v:{m:8},u:{m:12},x:v=>`Applica ${v.m} Condanna.`,f:(v,t)=>S(t,'doom',v.m)},
+sentenza:{n:'Raddoppia la Sentenza',cl:'necromante',t:'S',r:'U',c:1,tg:1,ex:1,v:{},u:{},cu:0,x:()=>`Raddoppia la Condanna del nemico.`,f:(v,t)=>{if(t&&t.st.doom)t.st.doom*=2}},
+mietitura:{n:'Mietitura',cl:'necromante',t:'A',r:'U',c:2,ex:1,v:{p:50},u:{p:75},x:v=>`Infliggi a TUTTI i nemici danni pari al ${v.p}% della loro Condanna.`,f:v=>alive().forEach(e=>{const d=Math.floor((e.st.doom||0)*v.p/100);if(d)hurtEnemy(e,d)})},
+esercito:{n:'Esercito d\'Ossa',cl:'necromante',t:'S',r:'U',c:2,v:{n:2},u:{n:3},x:v=>`Evoca ${v.n} Scheletri.`,f:v=>SUMMON(v.n)},
+sacrservi:{n:'Sacrificio dei Servi',cl:'necromante',t:'S',r:'U',c:1,v:{m:6},u:{m:9},x:v=>`Distruggi tutti i tuoi Scheletri: per ognuno applichi ${v.m} Condanna a TUTTI i nemici.`,f:v=>{const h=g.hero,n=(h.min||[]).length;h.min=[];if(n)SA('doom',v.m*n)}},
+malstrisc:{n:'Maledizione Strisciante',cl:'necromante',t:'P',r:'U',c:1,v:{m:3},u:{m:4},x:v=>`All'inizio di ogni tuo turno applichi ${v.m} Condanna a TUTTI i nemici.`,f:v=>P('maledizione',v.m)},
+signoreossa:{n:'Signore delle Ossa',cl:'necromante',t:'P',r:'R',c:2,cu:1,v:{},u:{},x:()=>`I tuoi Scheletri infliggono 2 danni in più. Evoca uno Scheletro.`,f:()=>{P('ossa',1);SUMMON(1)}},
+risveglio:{n:'Risveglio',cl:'necromante',t:'S',r:'C',c:1,v:{dr:1},u:{dr:2},x:v=>`Evoca uno Scheletro. Pesca ${v.dr} ${v.dr>1?'carte':'carta'}.`,f:v=>{SUMMON(1);D(v.dr)}},
+spirale:{n:'Spirale di Morte',cl:'necromante',t:'A',r:'C',c:1,v:{d:4,m:3},u:{d:6,m:4},x:v=>`Infliggi ${v.d} danni e applica ${v.m} Condanna a TUTTI i nemici.`,f:v=>{AA(v.d);SA('doom',v.m)}},
+toccofine:{n:'Tocco della Fine',cl:'necromante',t:'A',r:'R',c:2,tg:1,ex:1,v:{},u:{},cu:1,x:()=>`Infliggi danni pari alla Condanna del nemico.`,f:(v,t)=>{if(t&&t.st.doom)hurtEnemy(t,t.st.doom)}},
+anime:{n:'Raccolto di Anime',cl:'necromante',t:'S',r:'C',c:0,tg:1,v:{m:4},u:{m:6},x:v=>`Applica ${v.m} Condanna. Se il nemico ha già Condanna, pesca 1 carta.`,f:(v,t)=>{const had=t&&t.st.doom;S(t,'doom',v.m);if(had)D(1)}},
+/* Ranger */
+freccia:{n:'Freccia',cl:'ranger',t:'A',r:'B',c:1,tg:1,v:{d:6},u:{d:9},x:v=>`Infliggi ${v.d} danni.`,f:(v,t)=>A(t,v.d)},
+riparo:{n:'Riparo',cl:'ranger',t:'S',r:'B',c:1,v:{b:5},u:{b:8},x:v=>`Ottieni ${v.b} Armatura.`,f:v=>B(v.b)},
+marchiocacc:{n:'Marchio del Cacciatore',cl:'ranger',t:'S',r:'B',c:1,tg:1,v:{m:3},u:{m:5},x:v=>`Applica ${v.m} Marchio. Il tuo Lupo attacca per primo i nemici marchiati.`,f:(v,t)=>S(t,'mark',v.m)},
+azzanna:{n:'Azzanna!',cl:'ranger',t:'A',r:'B',c:1,tg:1,v:{n:1},u:{n:2},x:v=>`Il tuo Lupo attacca subito il nemico${v.n>1?' 2 volte':''}.`,f:(v,t)=>petHit(t,v.n)},
+raffica:{n:'Raffica di Frecce',cl:'ranger',t:'A',r:'C',c:1,v:{d:3,n:3},u:{d:4,n:3},x:v=>`Infliggi ${v.d} danni a nemici casuali ${v.n} volte.`,f:v=>AR(v.d,v.n)},
+perforante:{n:'Freccia Perforante',cl:'ranger',t:'A',r:'C',c:2,tg:1,v:{d:12,s:1},u:{d:16,s:2},x:v=>`Infliggi ${v.d} danni. Applica ${v.s} Vulnerabile.`,f:(v,t)=>{A(t,v.d);S(t,'vuln',v.s)}},
+addestramento:{n:'Addestramento',cl:'ranger',t:'P',r:'U',c:1,v:{},u:{},cu:0,x:()=>`Il tuo Lupo infligge 2 danni in più.`,f:()=>P('addestr',1)},
+ululato:{n:'Ululato',cl:'ranger',t:'S',r:'U',c:1,v:{},u:{},cu:0,x:()=>`Il tuo Lupo attacca TUTTI i nemici.`,f:()=>alive().forEach(e=>petHit(e))},
+tiromirato:{n:'Tiro Mirato',cl:'ranger',t:'A',r:'C',c:1,tg:1,v:{d:7},u:{d:10},x:v=>`Infliggi ${v.d} danni. Raddoppia il Marchio del nemico.`,f:(v,t)=>{A(t,v.d);if(t&&t.st.mark)t.st.mark*=2}},
+trappola:{n:'Trappola',cl:'ranger',t:'S',r:'C',c:1,tg:1,v:{w:2,m:2},u:{w:2,m:4},x:v=>`Applica ${v.w} Debole e ${v.m} Marchio.`,f:(v,t)=>{S(t,'weak',v.w);S(t,'mark',v.m)}},
+branco:{n:'Caccia di Branco',cl:'ranger',t:'A',r:'U',c:1,tg:1,v:{d:5},u:{d:8},x:v=>`Infliggi ${v.d} danni, poi il tuo Lupo attacca lo stesso nemico.`,f:(v,t)=>{A(t,v.d);petHit(t)}},
+pioggia:{n:'Pioggia di Frecce',cl:'ranger',t:'A',r:'U',c:2,v:{d:7,m:1},u:{d:10,m:2},x:v=>`Infliggi ${v.d} danni a TUTTI i nemici e applica ${v.m} Marchio a tutti.`,f:v=>{AA(v.d);SA('mark',v.m)}},
+istinto:{n:'Istinto Selvaggio',cl:'ranger',t:'P',r:'R',c:1,v:{},u:{},inn:0,uinn:1,x:()=>`Ogni volta che il tuo Lupo attacca, ottieni 2 Armatura.`,f:()=>P('istinto',1)},
+falco:{n:'Sguardo del Falco',cl:'ranger',t:'S',r:'C',c:0,v:{dr:2},u:{dr:3},x:v=>`Pesca ${v.dr} carte.`,f:v=>D(v.dr)},
+/* Druido */
+mutaforma:{n:'Mutaforma',cl:'druido',t:'S',r:'B',c:1,cu:0,inn:1,choose:FORMK.map(k=>FORMS[k][0]),v:{},u:{},x:()=>`Trasformati nell'animale che scegli: Orso, Pantera, Serpente o Gufo. Ogni forma ha il suo potere.`,f:(v,t,a,pk)=>setForm(FORMK[pk|0])},
+artiglio:{n:'Artiglio',cl:'druido',t:'A',r:'B',c:1,tg:1,v:{d:6},u:{d:9},x:v=>`Infliggi ${v.d} danni. In forma di Pantera, colpisci 2 volte.`,f:(v,t)=>A(t,v.d,inForm('pantera')?2:1)},
+corteccia:{n:'Pelle di Corteccia',cl:'druido',t:'S',r:'B',c:1,v:{b:5},u:{b:8},x:v=>`Ottieni ${v.b} Armatura. In forma di Orso, ottienine altri ${v.b}.`,f:v=>{B(v.b);if(inForm('orso'))B(v.b)}},
+morso:{n:'Morso Velenoso',cl:'druido',t:'A',r:'B',c:1,tg:1,v:{d:4,p:3},u:{d:6,p:4},x:v=>`Infliggi ${v.d} danni. Applica ${v.p} Veleno (il doppio in forma di Serpente).`,f:(v,t)=>{A(t,v.d);S(t,'poison',inForm('serpente')?2*v.p:v.p)}},
+occhiogufo:{n:'Occhio del Gufo',cl:'druido',t:'S',r:'C',c:1,v:{dr:2},u:{dr:3},x:v=>`Pesca ${v.dr} carte. In forma di Gufo ottieni anche 1 Energia.`,f:v=>{D(v.dr);if(inForm('gufo'))E(1)}},
+ruggito:{n:'Ruggito',cl:'druido',t:'S',r:'C',c:1,v:{w:1,b:6},u:{w:2,b:8},x:v=>`Applica ${v.w} Debole a TUTTI i nemici. In forma di Orso ottieni anche ${v.b} Armatura.`,f:v=>{SA('weak',v.w);if(inForm('orso'))B(v.b)}},
+balzo:{n:'Balzo',cl:'druido',t:'A',r:'C',c:1,tg:1,v:{d:8},u:{d:11},x:v=>`Infliggi ${v.d} danni. In forma di Pantera pesca 1 carta.`,f:(v,t)=>{A(t,v.d);if(inForm('pantera'))D(1)}},
+spiritonat:{n:'Spirito della Natura',cl:'druido',t:'P',r:'U',c:1,v:{h:2},u:{h:3},x:v=>`All'inizio di ogni tuo turno recuperi ${v.h} PV.`,f:v=>P('natura',v.h)},
+furiaforesta:{n:'Furia della Foresta',cl:'druido',t:'A',r:'U',c:2,v:{d:5},u:{d:7},x:v=>`Infliggi ${v.d} danni a TUTTI i nemici 2 volte (3 in forma di Pantera).`,f:v=>{const n=inForm('pantera')?3:2;for(let k=0;k<n;k++)AA(v.d)}},
+muta:{n:'Muta',cl:'druido',t:'S',r:'C',c:0,choose:FORMK.map(k=>FORMS[k][0]),v:{dr:1},u:{dr:2},x:v=>`Cambia forma scegliendo l'animale. Pesca ${v.dr} ${v.dr>1?'carte':'carta'}.`,f:(v,t,a,pk)=>{setForm(FORMK[pk|0]);D(v.dr)}},
+spire:{n:'Spire Soffocanti',cl:'druido',t:'S',r:'U',c:1,tg:1,v:{p:5},u:{p:8},x:v=>`Applica ${v.p} Veleno. In forma di Serpente, raddoppia il Veleno del nemico.`,f:(v,t)=>{S(t,'poison',v.p);if(inForm('serpente')&&t&&t.st.poison)t.st.poison*=2}},
+cuorebosco:{n:'Cuore del Bosco',cl:'druido',t:'P',r:'R',c:2,cu:1,v:{},u:{},x:()=>`Ottieni il potere di tutte le forme a metà: +1 Armatura da ogni carta che dà Armatura e +1 danno a ogni Attacco.`,f:()=>{P('bosco',1)}},
+/* Monaco */
+respiro:{n:'Respiro degli Elementi',cl:'monaco',t:'S',r:'B',c:0,inn:1,choose:ELEMK.map(k=>ELEMS[k][0]),v:{},u:{},uinn:1,x:()=>`Scegli un elemento: Fuoco, Acqua, Terra o Aria. Ogni tuo Attacco ne applicherà l'effetto.`,f:(v,t,a,pk)=>setElem(ELEMK[pk|0])},
+pugno:{n:'Pugno',cl:'monaco',t:'A',r:'B',c:1,tg:1,v:{d:6},u:{d:9},x:v=>`Infliggi ${v.d} danni.`,f:(v,t)=>A(t,v.d)},
+paratamani:{n:'Parata a Mani Nude',cl:'monaco',t:'S',r:'B',c:1,v:{b:5},u:{b:8},x:v=>`Ottieni ${v.b} Armatura.`,f:v=>B(v.b)},
+rafficapugni:{n:'Raffica di Pugni',cl:'monaco',t:'A',r:'B',c:1,tg:1,v:{d:3},u:{d:4},x:v=>`Infliggi ${v.d} danni 2 volte. L'elemento si applica a ogni colpo.`,f:(v,t)=>{A(t,v.d);if(g.hero.elem){elemHit(g.hero);g.hit=new Set([t])}A(t,v.d)}},
+calcio:{n:'Calcio Rotante',cl:'monaco',t:'A',r:'C',c:1,v:{d:5},u:{d:8},x:v=>`Infliggi ${v.d} danni a TUTTI i nemici.`,f:v=>AA(v.d)},
+esplosione:{n:'Esplosione degli Elementi',cl:'monaco',t:'A',r:'U',c:1,ex:1,v:{n:1},u:{n:2},x:v=>`Consuma l'elemento attivo per un grande effetto${v.n>1?', due volte':''}: Fuoco 6 Bruciatura a tutti · Acqua recuperi 8 PV · Terra 14 Armatura · Aria 5 danni a tutti 2 volte.`,
+  f:v=>{const e=g.hero.elem;if(!e)return;for(let k=0;k<v.n;k++){if(e==='fuoco')SA('burn',6);if(e==='acqua')H(8);if(e==='terra')B(14);if(e==='aria'){AA(5);AA(5)}}g.hero.elem=null}},
+armonia:{n:'Armonia',cl:'monaco',t:'P',r:'R',c:2,cu:1,v:{},u:{},x:()=>`L'effetto dell'elemento si applica 2 volte a ogni Attacco.`,f:()=>P('armonia',1)},
+meditazione:{n:'Meditazione',cl:'monaco',t:'S',r:'C',c:1,choose:ELEMK.map(k=>ELEMS[k][0]),v:{dr:2},u:{dr:3},x:v=>`Pesca ${v.dr} carte e scegli un elemento.`,f:(v,t,a,pk)=>{D(v.dr);setElem(ELEMK[pk|0])}},
+colpodrago:{n:'Colpo del Drago',cl:'monaco',t:'A',r:'U',c:2,tg:1,v:{d:12},u:{d:16},x:v=>`Infliggi ${v.d} danni. L'effetto dell'elemento si applica 3 volte.`,f:(v,t)=>{A(t,v.d);const h=g.hero;if(h.elem){elemHit(h);elemHit(h)}}},
+palmo:{n:'Palmo Curativo',cl:'monaco',t:'S',r:'C',c:1,ally:1,v:{h:4},u:{h:6},x:v=>W(`Recuperi ${v.h} PV (il doppio con Acqua).`,`Tu o un alleato recuperate ${v.h} PV (il doppio con Acqua).`),f:(v,t,a)=>HA(a,inElem('acqua')?2*v.h:v.h)},
+roccia:{n:'Pelle di Roccia',cl:'monaco',t:'S',r:'C',c:1,v:{b:7,x:5},u:{b:9,x:7},x:v=>`Ottieni ${v.b} Armatura (${v.x} in più con Terra).`,f:v=>B(inElem('terra')?v.b+v.x:v.b)},
+ventoprof:{n:'Vento Profondo',cl:'monaco',t:'S',r:'U',c:1,v:{e:1,dr:1},u:{e:2,dr:1},x:v=>`Ottieni ${v.e} Energia e pesca ${v.dr} carta. Con Aria, pesca 2 carte in più.`,f:v=>{E(v.e);D(inElem('aria')?v.dr+2:v.dr)}},
+/* Guardiano (tank) */
+fendpesante:{n:'Fendente Pesante',cl:'guardiano',t:'A',r:'B',c:1,tg:1,v:{d:6},u:{d:9},x:v=>`Infliggi ${v.d} danni.`,f:(v,t)=>A(t,v.d)},
+muroacciaio:{n:'Muro d\'Acciaio',cl:'guardiano',t:'S',r:'B',c:1,v:{b:6},u:{b:9},x:v=>`Ottieni ${v.b} Armatura.`,f:v=>B(v.b)},
+provoca:{n:'Provocazione',cl:'guardiano',t:'S',r:'B',c:1,v:{b:5,n:1},u:{b:8,n:1},x:v=>`Ottieni ${v.b} Armatura e Provocazione: i nemici attaccano te invece degli alleati.`,f:v=>{B(v.b);TAUNT(v.n)}},
+spintascudo:{n:'Spinta dello Scudo',cl:'guardiano',t:'A',r:'B',c:1,tg:1,v:{d:4},u:{d:6},x:v=>W(`Infliggi ${v.d} danni più la tua Armatura.`,`Infliggi ${v.d} danni. Se non hai alleati in piedi, aggiungi danni pari alla tua Armatura.`),f:(v,t)=>A(t,v.d+(soloHero()?g.hero.blk:0))},
+ultimobal:{n:'Ultimo Baluardo',cl:'guardiano',t:'A',r:'R',c:2,tg:1,v:{m:2},u:{m:3},x:v=>W(`Infliggi danni pari a ${v.m} volte la tua Armatura.`,`Infliggi danni pari alla tua Armatura (${v.m} volte se non hai alleati in piedi).`),f:(v,t)=>A(t,g.hero.blk*(soloHero()?v.m:1))},
+scudotutti:{n:'Scudo per Tutti',cl:'guardiano',t:'S',r:'C',c:1,v:{b:5},u:{b:7},x:v=>W(`Ottieni ${v.b} Armatura 2 volte.`,`Tu e tutti gli alleati ottenete ${v.b} Armatura.`),f:v=>{if(solo){B(v.b);B(v.b)}else party().forEach(p=>BA(p,v.b))}},
+interposizione:{n:'Interposizione',cl:'guardiano',t:'S',r:'C',c:1,v:{b:9},u:{b:12},x:v=>`Ottieni ${v.b} Armatura e Provocazione per 2 turni dei nemici.`,f:v=>{B(v.b);TAUNT(2)}},
+fortezza:{n:'Fortezza',cl:'guardiano',t:'P',r:'R',c:3,cu:2,v:{},u:{},x:()=>`La tua Armatura non si azzera più all'inizio del turno.`,f:()=>P('fortezza',1)},
+rappresaglia:{n:'Rappresaglia',cl:'guardiano',t:'P',r:'U',c:1,v:{d:3},u:{d:5},x:v=>`Ogni volta che un nemico ti colpisce, subisce ${v.d} danni.`,f:v=>P('rappr',v.d)},
+corazzaviva:{n:'Corazza Vivente',cl:'guardiano',t:'P',r:'U',c:2,v:{b:3},u:{b:5},x:v=>`All'inizio di ogni tuo turno ottieni ${v.b} Armatura per ogni eroe in piedi (te compreso).`,f:v=>P('corazza',v.b)},
+pugnoferro:{n:'Pugno di Ferro',cl:'guardiano',t:'A',r:'C',c:1,tg:1,v:{d:8,w:1},u:{d:10,w:2},x:v=>`Infliggi ${v.d} danni. Applica ${v.w} Debole.`,f:(v,t)=>{A(t,v.d);S(t,'weak',v.w)}},
+barriera:{n:'Barriera Totale',cl:'guardiano',t:'S',r:'U',c:2,ex:1,v:{b:20},u:{b:28},x:v=>`Ottieni ${v.b} Armatura.`,f:v=>B(v.b)},
+scossa:{n:'Scossa Sismica',cl:'guardiano',t:'A',r:'C',c:2,v:{d:7},u:{d:10},x:v=>`Infliggi ${v.d} danni a TUTTI i nemici. Ottieni Armatura pari ai nemici colpiti ×3.`,f:v=>{const n=alive().length;AA(v.d);B(n*3)}},
+/* Paladino */
+colposacro:{n:'Colpo Sacro',cl:'paladino',t:'A',r:'B',c:1,tg:1,v:{d:6},u:{d:9},x:v=>`Infliggi ${v.d} danni.`,f:(v,t)=>A(t,v.d)},
+scudogiur:{n:'Scudo del Giuramento',cl:'paladino',t:'S',r:'B',c:1,v:{b:5},u:{b:8},x:v=>`Ottieni ${v.b} Armatura.`,f:v=>B(v.b)},
+castigo:{n:'Castigo Divino',cl:'paladino',t:'A',r:'B',c:2,tg:1,v:{d:8,k:3},u:{d:10,k:4},x:v=>`Consuma tutto il Fervore: infliggi ${v.d} danni più ${v.k} per ogni Fervore.`,f:(v,t)=>{const f=g.hero.st.fervor||0;delete g.hero.st.fervor;A(t,v.d+v.k*f)}},
+imposizione:{n:'Imposizione delle Mani',cl:'paladino',t:'S',r:'B',c:1,ally:1,v:{h:4},u:{h:6},x:v=>W(`Recuperi ${v.h} PV e ottieni 1 Fervore.`,`Tu o un alleato recuperate ${v.h} PV. Ottieni 1 Fervore.`),f:(v,t,a)=>{HA(a,v.h);FERV(1)}},
+giudizio:{n:'Giudizio',cl:'paladino',t:'A',r:'C',c:1,tg:1,v:{d:6},u:{d:8},x:v=>`Infliggi ${v.d} danni. Se hai almeno 3 Fervore, colpisci invece TUTTI i nemici.`,f:(v,t)=>{if((g.hero.st.fervor||0)>=3)AA(v.d);else A(t,v.d)}},
+caricaben:{n:'Carica Benedetta',cl:'paladino',t:'A',r:'C',c:1,tg:1,v:{d:8,f:1},u:{d:11,f:2},x:v=>`Infliggi ${v.d} danni. Ottieni ${v.f} Fervore in più.`,f:(v,t)=>{A(t,v.d);FERV(v.f)}},
+scudosacro:{n:'Scudo Sacro',cl:'paladino',t:'S',r:'C',c:1,v:{b:4,k:2},u:{b:6,k:3},x:v=>`Ottieni ${v.b} Armatura più ${v.k} per ogni Fervore (non lo consuma).`,f:v=>B(v.b+v.k*(g.hero.st.fervor||0))},
+martellofede:{n:'Martello della Fede',cl:'paladino',t:'A',r:'R',c:2,v:{k:3},u:{k:4},x:v=>`Consuma tutto il Fervore: infliggi ${v.k} danni a TUTTI i nemici per ogni Fervore.`,f:v=>{const f=g.hero.st.fervor||0;delete g.hero.st.fervor;if(f)AA(v.k*f)}},
+zelo:{n:'Zelo',cl:'paladino',t:'P',r:'U',c:1,v:{},u:{},cu:0,x:()=>`Ogni volta che subisci danni ottieni 1 Fervore in più.`,f:()=>P('zelo',1)},
+voto:{n:'Voto Solenne',cl:'paladino',t:'S',r:'C',c:0,ex:1,v:{f:2},u:{f:3},x:v=>`Ottieni ${v.f} Fervore.`,f:v=>FERV(v.f)},
+coraggio:{n:'Aura di Coraggio',cl:'paladino',t:'P',r:'U',c:2,cu:1,v:{},u:{},x:()=>W('Ottieni 2 Forza.','Tu e tutti gli alleati ottenete 1 Forza.'),f:()=>{if(solo)S(g.hero,'str',2);else party().forEach(p=>S(g.heroes[p],'str',1))}},
+luceacc:{n:'Luce Accecante',cl:'paladino',t:'S',r:'C',c:1,v:{w:2},u:{w:3},x:v=>`Applica ${v.w} Debole a TUTTI i nemici. Ottieni 1 Fervore.`,f:v=>{SA('weak',v.w);FERV(1)}},
+protettore:{n:'Voto del Protettore',cl:'paladino',t:'S',r:'U',c:1,ally:1,v:{b:7},u:{b:10},x:v=>W(`Ottieni ${v.b} Armatura e 2 Fervore.`,`Tu o un alleato ottenete ${v.b} Armatura. Ottieni 2 Fervore.`),f:(v,t,a)=>{BA(a,v.b);FERV(2)}},
+});
+
 const NODEIC={combat:1,elite:1,event:1,rest:1,shop:1,treasure:1,boss:1};
 const NODEN={combat:'Nemici',elite:'Élite',event:'Evento',rest:'Falò',shop:'Mercante',treasure:'Tesoro',boss:'Boss'};
 const ROWS=15, SK='valdombra-run-v1', LK='valdombra-livello-v1', LK2='valdombra-livelli-v2', BK='valdombra-vinti', MAXLVL=5;
@@ -1051,7 +1210,7 @@ function checkProgress(){
 
 /* Azioni dei giocatori (eseguite dall'host) */
 const ACT={
-  cls:(a,P)=>{if(R.phase==='lobby'&&CLASSES[a.cls])P.cls=a.cls},
+  cls:(a,P)=>{if((R.phase==='lobby'||R.phase==='end')&&CLASSES[a.cls])P.cls=a.cls},
   ready:(a,P)=>{if(R.phase==='lobby')P.ready=!P.ready},
   start:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host)startRunRoom(a.lvl|0,a.seed,R.lmode,R.ldg)},
   dg:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host&&DUNGEONS[a.d])R.ldg=a.d},
@@ -1228,10 +1387,11 @@ function rollIntents(){
     it.tg=pick();
     if((it.x||1)>1&&t.length>1){it.tgs=[it.tg];for(let k=1;k<it.x;k++)it.tgs.push(rng.next()<.4?it.tgs[k-1]:pick())}
   });
+  retarget();
 }
 function startTurn(){
   const c=R.combat;c.turn++;
-  Object.values(c.heroes).forEach(h=>{h.blk=0;h.played={};delete h.st.spine});
+  Object.values(c.heroes).forEach(h=>{if(!h.pw.fortezza)h.blk=0;h.played={};delete h.st.spine});
   Object.keys(c.heroes).forEach(pid=>{const h=c.heroes[pid];if(h.down)return;ctx(pid);heroTurnStart(h,c.turn)});
   checkEnd();
 }
@@ -1245,6 +1405,8 @@ function heroTurnStart(h,turn){
     if(hasT('g2')||hasT('m2'))h.blk+=5;if(hasT('g3'))S(h,'str',1);if(hasT('l3'))S(h,'dex',1);if(hasT('m1'))dr++;if(hasT('m5')||hasT('l5'))en++;
     if(hasT('m3'))alive().forEach(e=>hurtEnemy(e,4));if(hasT('l2'))SA('poison',2);if(hasT('c3'))Object.keys(g.heroes).forEach(p=>BA(p,4));
     if(R.daily&&R.daily.mod==='veleno')SA('poison',3);
+    if(has('teschio'))SUMMON(1);if(has('fischietto'))h.pet={atk:4+TE('pet')};if(has('scudotorre')){h.blk+=10;TAUNT(1)}
+    {const b=TE('blk');if(b)h.blk+=b;if(TE('str'))S(h,'str',TE('str'));if(TE('dex'))S(h,'dex',TE('dex'));en+=TE('en1');dr+=TE('dr1');if(TE('summon'))SUMMON(TE('summon'));if(TE('doomAll'))SA('doom',TE('doomAll'));if(TE('markAll'))SA('mark',TE('markAll'));if(TE('fervor'))S(h,'fervor',TE('fervor'))}
     if(has('ancora'))h.blk+=10;if(has('amuleto'))SA('weak',1);if(has('lanternasp'))SA('burn',3);if(has('mantonero')){h.blk+=8;S(h,'dex',1)}if(has('fiala'))SA('poison',2);if(has('corno'))SA('vuln',1);
   }
   if(has('dado')&&turn%3===0)en++;
@@ -1252,6 +1414,9 @@ function heroTurnStart(h,turn){
   if(has('braciere'))alive().forEach(e=>hurtEnemy(e,2));
   if(has('simbolo'))H(1);
   if(pw.furia)S(h,'str',pw.furia);
+  if(h.form==='orso'){h.blk+=3;fx('hero','+3','blk')}if(h.form==='gufo')dr+=2;
+  if(pw.maledizione)SA('doom',pw.maledizione);if(pw.natura)H(pw.natura);
+  if(pw.corazza){const n=party().length;h.blk+=pw.corazza*n;fx('hero','+'+pw.corazza*n,'blk')}
   if(pw.arcimago)en+=pw.arcimago;
   if(pw.rapide)dr+=pw.rapide;
   if(pw.aura)party().forEach(p=>{const x=g.heroes[p];x.blk+=pw.aura;fxq.push({k:'h-'+p,txt:'+'+pw.aura,cls:'blk'})});
@@ -1259,7 +1424,7 @@ function heroTurnStart(h,turn){
   h.energy=en;D(dr);
   const frz=h.hand.filter(c=>c.id==='gelo').length;if(frz)h.energy=Math.max(0,h.energy-frz);
 }
-function calcDmg(base,src,tgt){let d=base+(src.st.str||0);if(src.st.weak)d*=.75;if(tgt&&tgt.st&&tgt.st.vuln)d*=1.5;return Math.max(0,Math.floor(d))}
+function calcDmg(base,src,tgt){let d=base+(src.st.str||0);if(src.hand){if(src.form==='pantera')d+=3;if(src.pw&&src.pw.bosco)d+=1;if(tgt&&tgt.st&&tgt.st.mark)d+=tgt.st.mark}if(src.st.weak)d*=.75;if(tgt&&tgt.st&&tgt.st.vuln)d*=1.5;return Math.max(0,Math.floor(d))}
 const enemyBase=(e,it)=>Math.round((it.d+(e.bonus||0))*(e.dm||1));
 function eid(e){return 'e'+R.combat.enemies.indexOf(e)}
 function hurtEnemy(e,d){
@@ -1274,7 +1439,9 @@ function heroDown(){
   run.hp=0;if(g&&g.hero){g.hero.down=true;g.hero.disc.push(...g.hero.hand);g.hero.hand=[];fx('hero','A terra!','dmg')}
 }
 function hurtHero(d){
-  const h=g.hero;const b=Math.min(h.blk,d);h.blk-=b;const r=d-b;
+  const h=g.hero;const b=Math.min(h.blk,d);h.blk-=b;let r=d-b;
+  if(r>0&&h.min&&h.min.length){const m=h.min[0];m.hp-=r;fx('hero','Lo Scheletro para','blk');if(m.hp<=0)h.min.shift();r=0;heroDown();return}
+  if(r>0&&has('giuramento'))S(h,'fervor',1+(h.pw.zelo||0));
   if(r>0){run.hp-=r;if(run.stx)run.stx.taken+=r;fx('hero','-'+r,'dmg')}else fx('hero','Parato','blk');
   heroDown();
 }
@@ -1282,7 +1449,7 @@ function hurtHero(d){
 function A(t,n,h=1){for(let i=0;i<h;i++){if(!t||t.hp<=0)break;hurtEnemy(t,calcDmg(n,g.hero,t));g.hit.add(t)}}
 function AA(n){alive().forEach(e=>{hurtEnemy(e,calcDmg(n,g.hero,e));g.hit.add(e)})}
 function AR(n,h){for(let i=0;i<h;i++){const a=alive();if(!a.length)break;const e=rng.pick(a);hurtEnemy(e,calcDmg(n,g.hero,e));g.hit.add(e)}}
-function B(n){const v=Math.max(0,n+(g.hero.st.dex||0));g.hero.blk+=v;STX('blk',v);fx('hero','+'+v,'blk')}
+function B(n){const v=Math.max(0,n+(g.hero.st.dex||0)+(g.hero.form==='orso'?2:0)+(g.hero.pw.bosco||0));g.hero.blk+=v;STX('blk',v);fx('hero','+'+v,'blk')}
 function S(t,k,n){if(!t||(t.hp!==undefined&&t.hp<=0))return;t.st[k]=(t.st[k]||0)+n}
 function SA(k,n){alive().forEach(e=>S(e,k,n))}
 function D(n){const h=g.hero;for(let i=0;i<n;i++){if(h.hand.length>=10)break;if(!h.draw.length){if(!h.disc.length)break;h.draw=rng.shuffle(h.disc);h.disc=[]}h.hand.push(h.draw.pop())}}
@@ -1321,6 +1488,7 @@ function playCard(u,j,ap,pk){
   d.f(d.xc?{...vals(card),X}:vals(card),t,d.ally?ap:CUR,pk,card);
   if(d.grow){if(d.perm===2)PERM(card);else if(!d.perm)card.g=(card.g||0)+1}
   if(d.t==='A'&&h.pw.intrise)g.hit.forEach(e=>S(e,'poison',h.pw.intrise));
+  if(d.t==='A'){if(h.form==='serpente')g.hit.forEach(e=>S(e,'poison',2));if(h.elem)elemHit(h);if(has('giuramento'))FERV(1)}
   if(d.t==='S'&&h.pw.arcano)alive().forEach(e=>hurtEnemy(e,h.pw.arcano));
   if(d.t==='S'&&h.pw.vigil)B(h.pw.vigil);
   h.played=h.played||{};h.played[d.t]=(h.played[d.t]||0)+1;if(run.stx&&d.t!=='X')run.stx.cards[card.id]=(run.stx.cards[card.id]||0)+1;
@@ -1346,8 +1514,10 @@ function endHeroTurn(){
 async function enemyPhase(){
   const c=R.combat;if(!c||c.busy)return;c.busy=true;
   await wait(10);commit();await wait(300);
+  if(Object.values(c.heroes).some(h=>!h.down&&((h.min&&h.min.length)||h.pet))){allyAttacks();commit();await wait(350);if(R.combat!==c)return;if(!alive().length){c.busy=false;checkEnd();checkProgress();commit();return}}
   for(const e of c.enemies){
     if(R.combat!==c)return;if(e.hp<=0)continue;e.blk=0;
+    if(doomCheck(e)){commit();await wait(350);continue}
     if(e.st.poison){ctx(null);const p=e.st.poison;e.hp-=p;fx(eid(e),'-'+p,'psn');e.st.poison--;
       if(e.hp<=0){e.hp=0;e.dead=true;commit();await wait(250);continue}}
     if(e.st.burn){ctx(null);const b=e.st.burn;e.hp-=b;fx(eid(e),'-'+b,'dmg');e.st.burn=Math.floor(b/2);if(!e.st.burn)delete e.st.burn;
@@ -1357,6 +1527,7 @@ async function enemyPhase(){
     if(Object.values(c.heroes).every(h=>h.down))break;
   }
   if(R.combat!==c)return;
+  Object.values(c.heroes).forEach(h=>{if(h.st.taunt){h.st.taunt--;if(!h.st.taunt)delete h.st.taunt}});
   c.enemies.forEach(decay);c.busy=false;
   if(!checkEnd()){rollIntents();startTurn()}
   checkProgress();commit();
@@ -1369,8 +1540,8 @@ function doIntent(e){
   if(it.summon&&alive().length<5){const ne=mkEnemy(it.summon);c.enemies.push(ne);fx(eid(ne),'Evocato!','blk')}
   if(it.heal){const b=e.hp;e.hp=Math.min(e.max,e.hp+Math.round(it.heal*(1+.7*(c.n-1))));fx(eid(e),'+'+(e.hp-b),'heal')}
   if(it.d||it.deb||it.curse){
-    const fix=p=>{if(p&&c.heroes[p]&&!c.heroes[p].down)return p;const t=targetable();return t.length?rng.pick(t):null};
-    const hitOnce=()=>{hurtHero(calcDmg(enemyBase(e,it),e,g.hero));if(g.hero.st.spine)hurtEnemy(e,g.hero.st.spine);if(has('scaglia')&&!g.hero.down)hurtEnemy(e,3)};
+    const fix=p=>{const tt=taunter();if(tt)return tt;if(p&&c.heroes[p]&&!c.heroes[p].down)return p;const t=targetable();return t.length?rng.pick(t):null};
+    const hitOnce=()=>{hurtHero(calcDmg(enemyBase(e,it),e,g.hero));if(g.hero.st.spine)hurtEnemy(e,g.hero.st.spine);if(has('scaglia')&&!g.hero.down)hurtEnemy(e,3);if(g.hero.pw.rappr&&!g.hero.down)hurtEnemy(e,g.hero.pw.rappr)};
     const debuff=()=>{if(g.hero.down)return;if(it.deb)g.hero.st[it.deb]=(g.hero.st[it.deb]||0)+it.dn;if(it.curse)addCurse(it.curse,it.cn||1)};
     if(it.aoe){for(const p of targetable()){ctx(p);if(it.d)hitOnce();debuff();if(e.hp<=0)break}return}
     if(it.d)for(let k=0;k<(it.x||1);k++){const p=fix(it.tgs?it.tgs[k]:it.tg);if(!p)break;ctx(p);hitOnce();if(e.hp<=0)break}
@@ -1385,7 +1556,7 @@ function checkEnd(){
 }
 function winCombat(){
   const c=R.combat,kind=c.kind,pids=Object.keys(c.heroes);
-  pids.forEach(pid=>{ctx(pid);if(c.heroes[pid].down)run.hp=Math.max(1,Math.floor(run.max*.25));else{if(has('elmo'))H(6);if(has('martellonano')){const ids=run.deck.map((c,i)=>i).filter(i=>canUp(run.deck[i]));if(ids.length)run.deck[rng.pick(ids)].up=true}if(hasT('g5')||hasT('c2'))H(5);if(has('calice')){run.max++;run.hp++}}});
+  pids.forEach(pid=>{ctx(pid);if(c.heroes[pid].down)run.hp=Math.max(1,Math.floor(run.max*.25));else{if(has('elmo'))H(6);if(TE('heal'))H(TE('heal'));if(has('martellonano')){const ids=run.deck.map((c,i)=>i).filter(i=>canUp(run.deck[i]));if(ids.length)run.deck[rng.pick(ids)].up=true}if(hasT('g5')||hasT('c2'))H(5);if(has('calice')){run.max++;run.hp++}}});
   R.combat=null;g=null;
   if(kind==='boss'){if(R.mode!=='surv'){endRun(true);return}newCycle()}
   R.phase='room';
@@ -1616,6 +1787,8 @@ function clickCard(i){
   if(d.tg&&a.length>1){UI.sel=(UI.sel&&UI.sel.k==='c'&&UI.sel.uid===c.uid)?null:{k:'c',uid:c.uid};render();return}
   if(d.ally&&!solo&&party().length>1){UI.sel=(UI.sel&&UI.sel.uid===c.uid)?null:{k:'c',uid:c.uid,ally:1};render();if(UI.sel)toast('Tocca l\'eroe da aiutare (anche te stesso)');return}
   if(d.ally){UI.sel=null;send({t:'play',uid:c.uid,a:ME});return}
+  if(d.choose){UI.sel=null;const desc=lab=>{const f=FORMK.find(k=>FORMS[k][0]===lab);if(f)return FORMS[f][1];const e=ELEMK.find(k=>ELEMS[k][0]===lab);return e?ELEMS[e][1]:''};
+    modal={title:d.n,cancel:true,list:[],html:`<div class="opts" style="max-width:520px;margin:0 auto">${d.choose.map((lab,i)=>`<button class="opt" onclick="modal=null;send({t:'play',uid:${c.uid},pk:${i}})"><b>${lab}</b><br><span class="muted">${desc(lab)}</span></button>`).join('')}</div>`};render();return}
   if(d.pick&&h.disc.length){UI.sel=null;modal={title:'Scegli una carta dagli scarti',list:h.disc.map(x=>({c:x,i:x.uid})),cb:pk=>send({t:'play',uid:c.uid,pk}),cancel:true};render();return}
   UI.sel=null;send({t:'play',uid:c.uid,j:d.tg&&a[0]?g.enemies.indexOf(a[0]):null});
 }
@@ -1663,7 +1836,17 @@ function restHealUI(){toast('Recuperi '+Math.floor(run.max*.3)+' PV.');send({t:'
 function restForgeUI(){openPicker(run.deck.map((c,i)=>i).filter(i=>canUp(run.deck[i])),'Scegli una carta da potenziare',i=>{toast(CARDS[run.deck[i].id].n+' potenziata!');send({t:'restForge',i})},true,{preview:true})}
 function chooseEv(k){const ev=EVENTS.find(e=>e.id===run.event.id);const o=ev.opts[k];if(o.req&&!o.req())return;
   if(o.pick)openPicker(run.deck.map((c,i)=>i),'Scegli una carta da dimenticare',i=>send({t:'ev',k,i}));else send({t:'ev',k})}
-function setCls(k){pickCls=k;if(R&&R.phase==='lobby')send({t:'cls',cls:k});else render()}
+const HEROES_K='valdombra-eroi';
+function getHeroes(){try{const a=JSON.parse(load(HEROES_K));return Array.isArray(a)?a.filter(k=>CLASSES[k]):[]}catch(e){return[]}}
+const heroOwned=k=>!!CLASSES[k]&&(!CLASSES[k].price||getHeroes().includes(k));
+function openBuyHero(k){const c=CLASSES[k],cr=getCrowns();
+  modal={title:'Sblocca il '+c.n,cancel:true,list:[],html:`<div class="panel" style="max-width:560px;margin:0 auto;align-items:center;text-align:center">${sprImg(k,96)}<p>${c.desc}</p>
+    <p class="muted">${c.hp} PV · Reliquia iniziale: ${relIc(c.relic,16)} <b>${RELICS[c.relic].n}</b>: ${RELICS[c.relic].d}</p>
+    <div class="row" style="justify-content:center"><button class="btn primary" ${cr<c.price?'disabled':''} onclick="buyHero('${k}')">${ic('i_crown',16)} Sblocca per ${c.price} Corone</button><button class="btn" onclick="closeModal()">Non ora</button></div>
+    <p class="muted" style="font-size:13px">Hai ${cr} Corone.${cr<c.price?' Ne guadagni vincendo un dungeon o in Sopravvivenza.':''} L'eroe resta sbloccato per sempre${ACC?' sul tuo profilo':''}.</p></div>`};render()}
+function buyHero(k){const c=CLASSES[k];if(!c||heroOwned(k))return;const cr=getCrowns();if(cr<c.price){toast('Corone insufficienti.');return}
+  setCrowns(cr-c.price);const h=getHeroes();h.push(k);store(HEROES_K,JSON.stringify(h));modal=null;sfx('fanfare');toast(c.n+' sbloccato!');setCls(k)}
+function setCls(k){if(!heroOwned(k)){openBuyHero(k);return}pickCls=k;if(R&&R.phase==='lobby')send({t:'cls',cls:k});else render()}
 function startGame(){
   const notReady=active().filter(p=>!R.players[p].ready&&p!==R.host);
   if(notReady.length){toast('Aspetta che siano tutti pronti: '+notReady.map(pname).join(', '));return}
@@ -1692,6 +1875,7 @@ function viewDeck(){openView([...run.deck].sort((a,b)=>CARDS[a.id].n.localeCompa
 function viewPile(k){const h=g&&g.hero;if(!h)return;const L={draw:[[...h.draw].sort((a,b)=>CARDS[a.id].n.localeCompare(CARDS[b.id].n)),'Pila di pesca (ordine nascosto)'],disc:[h.disc,'Pila degli scarti'],exh:[h.exh,'Carte esaurite']}[k];openView(L[0],L[1])}
 let toastT;function toast(msg){let t=$('.toast');if(!t){t=document.createElement('div');t.className='toast';t.setAttribute('role','status');document.body.appendChild(t)}t.textContent=msg;clearTimeout(toastT);toastT=setTimeout(()=>t.remove(),2400)}
 function relicInfo(id){toast(RELICS[id].n+': '+RELICS[id].d)}
+function xInfo(t,k){if(t==='f')toast(FORMS[k][0]+': '+FORMS[k][1]);else if(t==='e')toast(ELEMS[k][0]+': '+ELEMS[k][1]);else if(t==='m')toast('Scheletri: attaccano prima dei nemici e ognuno para un colpo diretto a te, poi si rompe.');else toast('Lupo: attacca prima dei nemici, preferendo quelli con il Marchio.')}
 function stInfo(k){toast(STN[k][0]+': '+STN[k][1])}
 
 /* ================= FX ================= */
@@ -1706,7 +1890,7 @@ function flushFx(list){
 }
 
 /* ================= RENDER ================= */
-const KW=/(Vulnerabile|Debole|Veleno|Bruciatura|Stordito|Forza|Destrezza|Armatura|Spine|TUTTI)/g;
+const KW=/(Vulnerabile|Debole|Veleno|Bruciatura|Stordito|Forza|Destrezza|Armatura|Spine|TUTTI|Condanna|Marchio|Provocazione|Fervore|Scheletri|Scheletro)/g;
 const GLOSS={
   inn:['Innata',"All'inizio di ogni combattimento questa carta è sempre nella tua mano."],
   ex:['Esaurisci','Dopo averla giocata la carta sparisce fino alla fine del combattimento. Al combattimento dopo torna nel mazzo.'],
@@ -1720,14 +1904,18 @@ const GLOSS={
   stato:['Stato','Carta negativa, di solito messa dai nemici. Sparisce a fine combattimento.'],
   unpl:['Ingiocabile','Non puoi giocarla: occupa solo spazio nella mano.'],
   all:['TUTTI','Colpisce ogni nemico ancora in piedi.'],
+  skel:['Scheletro','Servo evocato dal Necromante (massimo 5): prima del turno dei nemici attacca per 3 danni, e para un colpo diretto a te prima di rompersi.'],
+  pet:['Lupo','Compagno del Ranger: prima del turno dei nemici attacca, preferendo i nemici con il Marchio.'],
+  forma:['Forme del Druido','Orso: +2 Armatura dalle carte e 3 a inizio turno · Pantera: Attacchi +3 danni · Serpente: gli Attacchi applicano 2 Veleno · Gufo: peschi 2 carte in più.'],
+  elem:['Elementi del Monaco','Fuoco: gli Attacchi applicano 2 Bruciatura · Acqua: recuperi 2 PV · Terra: ottieni 3 Armatura · Aria: 3 danni a un nemico casuale.'],
   grp:['Carta di gruppo','Diventa più forte se un alleato ha già giocato un certo tipo di carta in questo turno. Da solo conta quello che hai giocato tu. Giocatela dopo i compagni!'],
   cheap:['Sconto',"Il costo di questa carta scende quando giochi carte di un certo tipo nello stesso turno."],
 };
-const GLST={Vulnerabile:'vuln',Debole:'weak',Veleno:'poison',Bruciatura:'burn',Stordito:'stun',Forza:'str',Destrezza:'dex',Spine:'spine'};
+const GLST={Condanna:'doom',Marchio:'mark',Provocazione:'taunt',Fervore:'fervor',Vulnerabile:'vuln',Debole:'weak',Veleno:'poison',Bruciatura:'burn',Stordito:'stun',Forza:'str',Destrezza:'dex',Spine:'spine'};
 function glKeys(c,d){
   const t=d.x(vals(c));const k=[];
   if(d.xc)k.push('xc');if(innOf(c))k.push('inn');if(d.t==='P')k.push('pow');if(d.t==='X')k.push('stato');if(d.unplay)k.push('unpl');if(d.disc)k.push('cheap');
-  if(d.grow&&!d.perm)k.push('grow');if(/per tutta la partita|per sempre/i.test(t))k.push('perm');if(d.back)k.push('back');if(exOf(c))k.push('ex');if(d.dt)k.push('disc');if(d.grp)k.push('grp');
+  if(d.grow&&!d.perm)k.push('grow');if(/per tutta la partita|per sempre/i.test(t))k.push('perm');if(d.back)k.push('back');if(exOf(c))k.push('ex');if(d.dt)k.push('disc');if(d.grp)k.push('grp');if(/Scheletr/.test(t))k.push('skel');if(/Lupo/.test(t))k.push('pet');if(/forma di|Trasformati|Cambia forma/.test(t))k.push('forma');if(d.cl==='monaco'&&/elemento|Fuoco|Acqua|Terra|Aria/.test(t))k.push('elem');
   if(/Armatura/.test(t))k.push('blk');if(/TUTTI/.test(t))k.push('all');
   Object.keys(GLST).forEach(w=>{if(new RegExp(w).test(t))k.push(GLST[w])});
   return [...new Set(k)];
@@ -1768,6 +1956,10 @@ function liveNote(c,d){const h=typeof g!=='undefined'&&g&&g.hero;if(!h||!h.hand|
 function chips(t,pw){
   let h=Object.entries(t.st).filter(([k,v])=>v).map(([k,v])=>`<span class="chip ${k}" role="button" tabindex="0" onclick="event.stopPropagation();stInfo('${k}')">${STN[k][0]} ${v}</span>`).join('');
   if(pw)h+=Object.entries(pw).map(([k,v])=>`<span class="chip pw">${POWN[k]} ${v}</span>`).join('');
+  if(t.form)h+=`<span class="chip form" role="button" tabindex="0" onclick="event.stopPropagation();xInfo('f','${t.form}')">${FORMS[t.form][0]}</span>`;
+  if(t.elem)h+=`<span class="chip elem e-${t.elem}" role="button" tabindex="0" onclick="event.stopPropagation();xInfo('e','${t.elem}')">${ELEMS[t.elem][0]}</span>`;
+  if(t.min&&t.min.length)h+=`<span class="chip minion" role="button" tabindex="0" onclick="event.stopPropagation();xInfo('m')">${ic('scheletro_s',12)} ${t.min.length} · ${t.min[0].atk+(t.pw&&t.pw.ossa?2:0)} dan.</span>`;
+  if(t.pet)h+=`<span class="chip pet" role="button" tabindex="0" onclick="event.stopPropagation();xInfo('p')">Lupo · ${t.pet.atk+((t.pw&&t.pw.addestr)||0)*2} dan.</span>`;
   return `<div class="chips">${h}</div>`;
 }
 function hpBar(hp,max){return `<div class="bar"><i style="width:${Math.max(0,hp/max*100)}%"></i><span>${Math.max(0,hp)}/${max}</span></div>`}
@@ -1870,9 +2062,9 @@ function render(fxs){
 }
 
 function classPicker(){
-  return `<div class="classes">${Object.entries(CLASSES).map(([k,c])=>`<button class="classcard ${pickCls===k?'on':''}" onclick="setCls('${k}')" aria-pressed="${pickCls===k}">
-      <span class="ic">${sprImg(k,64)}</span><span class="nm">${c.n}</span><span>${c.desc}</span>
-      <small>${c.hp} PV · Reliquia: ${relIc(c.relic,16)} ${RELICS[c.relic].n}</small><small class="clv">Livello ${heroLv(k)} · ${getTal().filter(t=>TALENTS[k].some(x=>x.id===t)).length}/5 abilità</small></button>`).join('')}</div>`;
+  return `<div class="classes">${Object.entries(CLASSES).map(([k,c])=>{const own=heroOwned(k);return `<button class="classcard ${pickCls===k?'on':''} ${own?'':'locked'}" onclick="setCls('${k}')" aria-pressed="${pickCls===k}">
+      <span class="ic">${sprImg(k,64)}</span><span class="nm">${own?'':ic('i_lock',14)+' '}${c.n}</span><span>${c.desc}</span>
+      <small>${c.hp} PV · Reliquia: ${relIc(c.relic,16)} ${RELICS[c.relic].n}</small>${own?`<small class="clv">Livello ${heroLv(k)} · ${getTal().filter(t=>TALENTS[k].some(x=>x.id===t)).length}/5 abilità</small>`:`<span class="price">${ic('i_crown',14)} ${c.price} Corone per sbloccarlo</span>`}</button>`}).join('')}</div>`;
 }
 function levelPicker(){
   return `<div class="panel" style="gap:10px"><div class="lvls">${Array.from({length:MAXLVL+1},(_,i)=>{const ok=i<=getUnlocked(R&&R.phase==='lobby'?(R.ldg||'rocca'):pickDg);return `<button class="lvl ${pickLvl===i?'on':''}" ${ok?`onclick="pickLvl=${i};render()"`:'disabled'} aria-pressed="${pickLvl===i}" aria-label="Livello ${i}${ok?'':' (bloccato)'}">${ok?i:ic('i_lock',18)}</button>`}).join('')}</div>
@@ -2206,7 +2398,17 @@ const TALENTS={
   ladro:[{id:'l1',lv:2,cost:20,n:'Tasche Profonde',d:'Inizi la partita con 40 oro in più.'},{id:'l2',lv:3,cost:40,n:'Lame Unte',d:'All\'inizio di ogni combattimento applichi 2 Veleno a TUTTI i nemici.'},{id:'l3',lv:5,cost:60,n:'Passo Felpato',d:'Inizi ogni combattimento con 1 Destrezza.'},{id:'l4',lv:7,cost:90,n:'Coltello Fidato',d:'Inizi la partita con Lama Affamata+ nel mazzo.'},{id:'l5',lv:10,cost:120,n:'Primo Colpo',d:'Hai 1 Energia in più al primo turno di ogni combattimento.'}],
   chierico:[{id:'c1',lv:2,cost:20,n:'Benedizione',d:'Inizi la partita con 8 PV massimi in più.'},{id:'c2',lv:3,cost:40,n:'Grazia',d:'Dopo ogni combattimento vinto recuperi 5 PV.'},{id:'c3',lv:5,cost:60,n:'Aura Sacra',d:'All\'inizio di ogni combattimento tu e i tuoi alleati ottenete 4 Armatura.'},{id:'c4',lv:7,cost:90,n:'Reliquiario',d:'Inizi la partita con Inno Crescente+ nel mazzo.'},{id:'c5',lv:10,cost:120,n:'Miracolo',d:'Inizi la partita con la Piuma di Fenice: la prima volta che moriresti, torni in vita.'}],
 };
+Object.assign(TALENTS,{
+  necromante:[{id:'n1',lv:2,cost:20,n:'Patto di Sangue',d:'Inizi la partita con 6 PV massimi in più.',e:{hp:6}},{id:'n2',lv:3,cost:40,n:'Legione',d:'Inizi ogni combattimento con uno Scheletro in più.',e:{summon:1}},{id:'n3',lv:5,cost:60,n:'Presagio',d:'All\'inizio di ogni combattimento applichi 4 Condanna a TUTTI i nemici.',e:{doomAll:4}},{id:'n4',lv:7,cost:90,n:'Grimorio Nero',d:'Inizi la partita con Marchio di Morte+ nel mazzo.',e:{card:'marchiomorte'}},{id:'n5',lv:10,cost:120,n:'Re dei Morti',d:'Hai 1 Energia in più al primo turno di ogni combattimento.',e:{en1:1}}],
+  ranger:[{id:'r1',lv:2,cost:20,n:'Bisaccia',d:'Inizi la partita con 40 oro in più.',e:{gold:40}},{id:'r2',lv:3,cost:40,n:'Lupo Alfa',d:'Il tuo Lupo infligge 2 danni in più.',e:{pet:2}},{id:'r3',lv:5,cost:60,n:'Occhio della Preda',d:'All\'inizio di ogni combattimento applichi 2 Marchio a TUTTI i nemici.',e:{markAll:2}},{id:'r4',lv:7,cost:90,n:'Faretra Elfica',d:'Inizi la partita con Raffica di Frecce+ nel mazzo.',e:{card:'raffica'}},{id:'r5',lv:10,cost:120,n:'Maestro Cacciatore',d:'Hai 1 Energia in più al primo turno di ogni combattimento.',e:{en1:1}}],
+  druido:[{id:'d1',lv:2,cost:20,n:'Radici Profonde',d:'Inizi la partita con 8 PV massimi in più.',e:{hp:8}},{id:'d2',lv:3,cost:40,n:'Rigenerazione',d:'Dopo ogni combattimento vinto recuperi 5 PV.',e:{heal:5}},{id:'d3',lv:5,cost:60,n:'Passo Leggero',d:'Inizi ogni combattimento con 1 Destrezza.',e:{dex:1}},{id:'d4',lv:7,cost:90,n:'Ira del Bosco',d:'Inizi la partita con Furia della Foresta+ nel mazzo.',e:{card:'furiaforesta'}},{id:'d5',lv:10,cost:120,n:'Arcidruido',d:'Hai 1 Energia in più al primo turno di ogni combattimento.',e:{en1:1}}],
+  monaco:[{id:'k1',lv:2,cost:20,n:'Corpo Temprato',d:'Inizi la partita con 6 PV massimi in più.',e:{hp:6}},{id:'k2',lv:3,cost:40,n:'Guardia Alta',d:'Inizi ogni combattimento con 5 Armatura.',e:{blk:5}},{id:'k3',lv:5,cost:60,n:'Pugni di Ferro',d:'Inizi ogni combattimento con 1 Forza.',e:{str:1}},{id:'k4',lv:7,cost:90,n:'Arte del Drago',d:'Inizi la partita con Colpo del Drago+ nel mazzo.',e:{card:'colpodrago'}},{id:'k5',lv:10,cost:120,n:'Mente Vuota',d:'Peschi 1 carta in più al primo turno di ogni combattimento.',e:{dr1:1}}],
+  guardiano:[{id:'t1',lv:2,cost:20,n:'Fisico Possente',d:'Inizi la partita con 10 PV massimi in più.',e:{hp:10}},{id:'t2',lv:3,cost:40,n:'Corazza Doppia',d:'Inizi ogni combattimento con 6 Armatura in più.',e:{blk:6}},{id:'t3',lv:5,cost:60,n:'Braccio Forte',d:'Inizi ogni combattimento con 1 Forza.',e:{str:1}},{id:'t4',lv:7,cost:90,n:'Bastione',d:'Inizi la partita con Barriera Totale+ nel mazzo.',e:{card:'barriera'}},{id:'t5',lv:10,cost:120,n:'Incrollabile',d:'Dopo ogni combattimento vinto recuperi 6 PV.',e:{heal:6}}],
+  paladino:[{id:'p1',lv:2,cost:20,n:'Benedetto',d:'Inizi la partita con 8 PV massimi in più.',e:{hp:8}},{id:'p2',lv:3,cost:40,n:'Fede Ardente',d:'Inizi ogni combattimento con 2 Fervore.',e:{fervor:2}},{id:'p3',lv:5,cost:60,n:'Cura del Crociato',d:'Dopo ogni combattimento vinto recuperi 4 PV.',e:{heal:4}},{id:'p4',lv:7,cost:90,n:'Lancia Sacra',d:'Inizi la partita con Carica Benedetta+ nel mazzo.',e:{card:'caricaben'}},{id:'p5',lv:10,cost:120,n:'Campione della Luce',d:'Hai 1 Energia in più al primo turno di ogni combattimento.',e:{en1:1}}],
+});
 const ALL_TAL=Object.values(TALENTS).flat().map(t=>t.id);
+const TALBY={};Object.values(TALENTS).flat().forEach(t=>TALBY[t.id]=t);
+function TE(k){if(!run||!run.talents)return 0;return run.talents.reduce((a,id)=>a+((TALBY[id]&&TALBY[id].e&&TALBY[id].e[k])||0),0)}
 function getXP(){let x=null;try{x=JSON.parse(load(XK))}catch(e){}return x&&typeof x==='object'?x:{}}
 function heroLv(cls){const x=getXP()[cls]|0;let l=1;while(l<MAXHLV&&x>=XP_LV[l+1])l++;return l}
 function getTal(){let t=null;try{t=JSON.parse(load(TK))}catch(e){}return Array.isArray(t)?t.filter(k=>ALL_TAL.includes(k)):[]}
@@ -2219,6 +2421,7 @@ function applyTalents(P){
   if(T('l1'))P.gold+=40;
   if(T('g4'))P.deck.push({id:'lamainsaz',up:true});if(T('m4'))P.deck.push({id:'fiammavor',up:true});if(T('l4'))P.deck.push({id:'lamaaffam',up:true});if(T('c4'))P.deck.push({id:'innocresc',up:true});
   if(T('c5')&&!P.relics.includes('piuma'))P.relics.push('piuma');
+  P.talents.forEach(id=>{const t=TALBY[id];if(!t||!t.e)return;const e=t.e;if(e.hp){P.max+=e.hp;P.hp+=e.hp}if(e.gold)P.gold+=e.gold;if(e.card)P.deck.push({id:e.card,up:true})});
 }
 function buyTalent(cls,id){
   const t=(TALENTS[cls]||[]).find(x=>x.id===id);if(!t)return;const own=getTal();if(own.includes(id))return;
@@ -2348,7 +2551,7 @@ function startVoteAnim(va){
 }
 function paintAnim(){document.querySelectorAll('.mapsvg .node').forEach(n=>{n.classList.toggle('spin',!!UI.anim&&n.dataset.k===UI.anim.cur)})}
 /* ================= IMPOSTAZIONI ================= */
-const VERSION='v4.1',VDATE='16/11';
+const VERSION='v5.0',VDATE='16/11';
 const SET_K='valdombra-impostazioni';
 const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:true};
 let SET=(()=>{try{return Object.assign({},SET_DEF,JSON.parse(load(SET_K)||'{}'))}catch(e){return Object.assign({},SET_DEF)}})();
@@ -2358,6 +2561,10 @@ function applySet(){
   const v=$('#ver');if(v)v.innerHTML=`${ic('i_gear',12)}${VERSION} · ${VDATE}`;
   AU.vol();
 }
+const REDEEM=[3345803154,1602759940];
+function redeem(){const el=$('#rcode');const c=(el&&el.value||'').trim().toUpperCase().replace(/\s+/g,'');if(!c)return;
+  if(hashStr('vd1#'+c)===REDEEM[0]&&hashStr('vd2#'+c)===REDEEM[1]){setCrowns(getCrowns()+1000);sfx('fanfare');toast('Codice valido: +1000 Corone! Ora ne hai '+getCrowns()+'.');if(el)el.value='';render()}
+  else{sfx('dmg');toast('Codice non valido.')}}
 function openSettings(){modal={title:'Impostazioni',settings:true,cancel:true,list:[]};render()}
 const swb=(k,lab,sub)=>`<div class="srow"><div class="lab">${lab}${sub?`<small>${sub}</small>`:''}</div><button class="sw" aria-pressed="${!!SET[k]}" aria-label="${lab}" onclick="setTog('${k}')"></button></div>`;
 const sld=(k,lab)=>`<div class="srow sl"><div class="lab">${lab}</div><input type="range" min="0" max="100" step="5" value="${Math.round(SET[k]*100)}" aria-label="${lab}" oninput="setVol('${k}',this.value)" onchange="setVol('${k}',this.value,1)"><span class="val" id="v-${k}">${Math.round(SET[k]*100)}%</span></div>`;
@@ -2380,9 +2587,10 @@ function settingsHTML(){
     </div>
     <div class="panel"><h4>${ic('i_gear',18)} Informazioni</h4>
       <div class="srow"><div class="lab">Versione</div><b>${VERSION} · ${VDATE}</b></div>
+      <div class="srow"><div class="lab">Codice<small>Hai un codice? Scrivilo qui.</small></div><input id="rcode" class="txt" maxlength="40" style="max-width:200px" autocomplete="off" placeholder="Codice"><button class="btn" onclick="redeem()">Usa</button></div>
       <div class="srow"><div class="lab">Profilo</div><b>${ACC?esc(ACC.nome):'nessuno'}</b><button class="btn" onclick="openProfilo()">${ACC?'Gestisci':'Accedi'}</button></div>
       ${inRoom?`<div class="srow"><div class="lab">Stanza</div><b>${R.code}</b></div><div class="srow"><div class="lab">Connessione</div><b>${isHost?'Sei tu a guidare la stanza':'Collegato'}</b></div>`:''}
-      <p class="muted" style="font-size:13px">Novità di questa versione: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
+      <p class="muted" style="font-size:13px">Novità di questa versione: sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
       <p class="muted" style="font-size:13px">Le impostazioni (audio, chat, grafica) valgono solo per questo dispositivo. I progressi di gioco seguono il tuo profilo.</p>
       <div><button class="btn" onclick="SET=Object.assign({},SET_DEF);saveSet();render()">Ripristina le impostazioni</button></div>
     </div></div>`;
@@ -2645,7 +2853,7 @@ function dailyEndHTML(score,kills){
 
 /* ================= PROFILO ONLINE (stessi progressi su ogni dispositivo) ================= */
 const ACC_K='valdombra-account';
-const SYNC_KEYS=[LK2,BK,CK,ZK,PK,XK,TK,XPK,SOLO_K,DAILY_K,SEEN_K,STAT_K,STATP_K];
+const SYNC_KEYS=[LK2,BK,CK,ZK,PK,XK,TK,XPK,SOLO_K,DAILY_K,SEEN_K,STAT_K,STATP_K,HEROES_K];
 let ACC=(()=>{try{const a=JSON.parse(localStorage.getItem(ACC_K));return a&&a.nome&&a.token?a:null}catch(e){return null}})();
 const ACCS={busy:false,state:'',msg:'',gen:0,timer:null,last:0};
 function accKeep(){try{ACC?localStorage.setItem(ACC_K,JSON.stringify(ACC)):localStorage.removeItem(ACC_K)}catch(e){}}
@@ -2657,7 +2865,7 @@ function accMerge(srv,loc){
   const num=k=>{const a=parseInt(o[k]||'0',10)||0,b=parseInt(loc[k]||'0',10)||0;o[k]=String(Math.max(a,b))};
   const uni=k=>{const a=J(o[k])||[],b=J(loc[k])||[];o[k]=JSON.stringify([...new Set([...a,...b])].slice(-80))};
   const mx=k=>{const a=J(o[k])||{},b=J(loc[k])||{};const r={...a};Object.keys(b).forEach(x=>r[x]=Math.max(r[x]|0,b[x]|0));o[k]=JSON.stringify(r)};
-  num(CK);mx(XK);mx(LK2);uni(TK);uni(BK);uni(PK);uni(XPK);uni(STATP_K);
+  num(CK);mx(XK);mx(LK2);uni(TK);uni(BK);uni(PK);uni(XPK);uni(STATP_K);uni(HEROES_K);
   {const a=J(o[SEEN_K])||{},b=J(loc[SEEN_K])||{};const r={};['c','e','r','p'].forEach(k=>r[k]=[...new Set([...(a[k]||[]),...(b[k]||[])])]);o[SEEN_K]=JSON.stringify(r)}
   {const deep=(a,b)=>{if(typeof a==='number'||typeof b==='number')return Math.max(+a||0,+b||0);const r={...(a||{})};Object.keys(b||{}).forEach(k=>r[k]=deep(r[k],b[k]));return r};o[STAT_K]=JSON.stringify(deep(J(o[STAT_K])||{},J(loc[STAT_K])||{}))}
   [ZK,SOLO_K].forEach(k=>{if(loc[k]!=null)o[k]=loc[k]});if(typeof SEEN!=='undefined')SEEN=null;
