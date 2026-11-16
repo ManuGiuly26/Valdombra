@@ -4,7 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Assedio a Valdombra: deckbuilder roguelike fantasy da giocare nel browser.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%90%89%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#16131d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Valdombra">
 <style>*,*::before,*::after{box-sizing:border-box}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Assedio a Valdombra</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -86,11 +93,11 @@ p{margin:0;line-height:1.5}
 .lvl[disabled]{opacity:.45;cursor:not-allowed;font-size:14px}
 .party{display:flex;gap:8px;overflow-x:auto;padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line)}
 .pm{display:flex;align-items:center;gap:8px;background:var(--stone2);border:1px solid var(--line);border-radius:10px;padding:4px 10px;flex:none;width:170px}
-.pm b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pm .bar{height:9px}.pm small{display:block;font-size:11px;color:var(--muted)}
+.pm b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pm .bar{height:15px;margin:2px 0}.pm .bar span{font-size:11px}.pm small{display:block;font-size:11px;color:var(--muted)}
 .pm.off{opacity:.45}.ok{color:var(--heal)}
 .allies{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;padding:0 16px}
 .ally{flex-direction:row;gap:6px;padding:4px 8px;width:170px;text-align:left}
-.ally .info{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}.ally .bar{height:9px}.ally small{font-size:11px}
+.ally .info{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}.ally .bar{height:16px;min-width:130px}.ally .bar span{font-size:11.5px}.ally small{font-size:11px}
 .ally.down,.hero.down{opacity:.45;filter:grayscale(.8)}
 .tgt{color:var(--muted);font-weight:500;font-size:12px}
 .mapsvg .vbadge{fill:var(--torch2);stroke:#2a1a08;stroke-width:2}.mapsvg .vbadge-t{font-size:15px;font-weight:700;fill:#2a1a08;text-anchor:middle;dominant-baseline:central;pointer-events:none}
@@ -108,19 +115,24 @@ input.txt{background:var(--stone);border:1px solid var(--line);border-radius:8px
 .netwarn{background:#4a2420;color:#ffd0c8;padding:6px 16px;font-size:13px;text-align:center}
 #chat{position:fixed;top:0;right:0;bottom:0;width:min(360px,100%);background:var(--stone2);border-left:1px solid var(--line);z-index:55;display:flex;flex-direction:column;
   padding-block:max(10px,env(safe-area-inset-top,0px)) max(10px,env(safe-area-inset-bottom,0px));padding-right:env(safe-area-inset-right,0px);box-shadow:-10px 0 30px rgba(0,0,0,.4)}
-#chat .chead{display:flex;align-items:center;gap:8px;padding:0 12px 8px;border-bottom:1px solid var(--line)}
+#chat .chead{padding-top:20px!important;display:flex;align-items:center;gap:8px;padding:0 12px 8px;border-bottom:1px solid var(--line)}
 #chatlog{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
 .msg{background:var(--stone3);border-radius:10px;padding:6px 10px;max-width:90%;align-self:flex-start;overflow-wrap:anywhere}
 .msg.me{align-self:flex-end;background:#4a3a22}.msg b{display:block;font-size:12px;color:var(--torch2)}
 #chatform{display:flex;gap:6px;padding:8px 12px 0;border-top:1px solid var(--line)}
 #chatform input{flex:1;min-width:0}
 .quick{display:flex;gap:4px;flex-wrap:wrap;padding:6px 12px 0}.quick button{font-size:12px;padding:3px 8px}
+.chatfab{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:50;box-shadow:0 6px 18px rgba(0,0,0,.45);padding:12px 18px;font-size:16px}.chatfab .dot{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:var(--blood);color:#fff;font-size:11px;margin-left:6px}
 .chatbtn .dot{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:var(--blood);color:#fff;font-size:11px;margin-left:4px}
 .note{background:var(--stone2);border:1px dashed var(--line);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--muted)}
 
 /* Map */
 .mapwrap{flex:1;overflow:auto;position:relative}
 .mapsvg{display:block;width:100%;max-width:560px;margin:0 auto}
+.mapsvg .plan polyline{fill:none;stroke:var(--pc);stroke-width:5;stroke-linecap:round;stroke-linejoin:round;opacity:.85;pointer-events:none}.mapsvg .plan circle{fill:var(--pc);stroke:#1b1424;stroke-width:2;pointer-events:none}
+.mapsvg .node.drawable{cursor:pointer}.mapsvg .node.drawable circle:first-child{stroke:#fff;stroke-dasharray:6 4}
+.plantools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px max(16px,env(safe-area-inset-left,0px));background:var(--stone2);border-bottom:1px solid var(--line);font-size:13.5px}
+.pdot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:baseline;border:1px solid rgba(0,0,0,.5);flex:none}
 .mapsvg .edge{stroke:#4d4661;stroke-width:3;stroke-dasharray:2 8;stroke-linecap:round}
 .mapsvg .edge.done{stroke:var(--torch);stroke-dasharray:none;opacity:.8}
 .mapsvg .node circle{fill:var(--stone2);stroke:#5a5370;stroke-width:3}
@@ -163,6 +175,9 @@ input.txt{background:var(--stone);border:1px solid var(--line);border-radius:8px
 .dg.dg-cripte{background:linear-gradient(135deg,#1d2433,#211e2b)}.dg.dg-cripte.on{border-color:#8fd3ff;box-shadow:0 0 0 1px #8fd3ff,0 0 22px rgba(143,211,255,.18)}
 .dg[disabled]{opacity:.55;cursor:not-allowed}.dg .dgart{line-height:0;flex:none}.dg .dgtx{display:flex;flex-direction:column;gap:3px;min-width:0}
 .spr.locked{filter:brightness(.25) grayscale(1)}
+.dg.dg-abisso{background:linear-gradient(135deg,#33201a,#26181b)}.dg.dg-abisso.on{border-color:#ff7a3a;box-shadow:0 0 0 1px #ff7a3a,0 0 22px rgba(255,122,58,.2)}
+body[data-dg="abisso"]{background-image:radial-gradient(ellipse at 50% 110%,rgba(255,110,40,.16),transparent 60%)}
+body[data-dg="abisso"] .mapsvg .edge.done{stroke:#ff7a3a}body[data-dg="abisso"] .votebanner:not(.fin){background:linear-gradient(#46241a,#2d1712);border-color:#ff7a3a;color:#ffd9c2}
 body[data-dg="cripte"]{background-image:radial-gradient(ellipse at 50% -10%,rgba(143,211,255,.12),transparent 60%)}
 body[data-dg="cripte"] .mapsvg .edge.done{stroke:#8fd3ff}body[data-dg="cripte"] .votebanner:not(.fin){background:linear-gradient(#1f3346,#16202d);border-color:#8fd3ff;color:#cfeeff}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;font-size:13px;color:var(--muted);padding:10px 16px;border-top:1px solid var(--line);background:var(--stone2)}
@@ -194,7 +209,7 @@ body[data-dg="cripte"] .mapsvg .edge.done{stroke:#8fd3ff}body[data-dg="cripte"] 
 .intent .atk{color:#ff8c7f}.intent .def{color:#8cc4ff}.intent .buf{color:var(--torch2)}.intent .deb{color:#c49bff}
 .bar{width:100%;height:12px;background:#0d0b12;border-radius:6px;overflow:hidden;position:relative;border:1px solid #000}
 .bar i{display:block;height:100%;background:linear-gradient(#e2574a,#9e2c23)}
-.bar span{position:absolute;inset:0;font-size:10px;font-weight:700;line-height:11px;text-align:center;font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 1px 1px #000}
+.bar span{position:absolute;inset:0;font-size:10px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;text-align:center;font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 1px 1px #000}
 .blk{font-size:12px;font-weight:700;color:#bfe0ff;background:#22436a;border-radius:6px;padding:0 6px}
 .chips{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;min-height:4px}
 .chip{cursor:pointer;font-size:11px;border-radius:5px;padding:1px 5px;background:var(--stone3);border:0;line-height:1.4}
@@ -265,6 +280,15 @@ button.card:hover{transform:translateY(-8px)}
 #gltip[hidden]{display:none}#gltip b{display:block;color:var(--torch2);font-weight:800;font-size:14.5px;margin-bottom:1px}
 body.noanim #gltip{transition:none}
 .accform{display:flex;flex-direction:column;gap:10px}.accform label{display:flex;flex-direction:column;gap:4px;font-weight:600}.accform .txt{max-width:360px}
+.awards{display:flex;flex-wrap:wrap;gap:8px}.award{display:flex;align-items:center;gap:8px;background:var(--stone3);border:1px solid var(--line);border-radius:10px;padding:8px 10px;flex:1;min-width:150px}.award>div{display:flex;flex-direction:column;line-height:1.2}.award small{color:var(--torch2);font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.sumtab{display:flex;flex-direction:column;gap:8px}.sumrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:8px}.sumname{display:flex;flex-direction:column;min-width:160px;flex:1}.sumname .muted{font-size:13px}
+.sumcells{display:grid;grid-template-columns:repeat(6,minmax(54px,1fr));gap:6px;flex:2;min-width:300px}.sumcells span{display:flex;flex-direction:column;align-items:center;font-size:11.5px;color:var(--muted);background:var(--stone3);border-radius:8px;padding:4px 2px}.sumcells b{font-size:17px;color:var(--fg);font-variant-numeric:tabular-nums}
+@media (max-width:520px){.sumcells{grid-template-columns:repeat(3,1fr);min-width:0;width:100%;flex-basis:100%}}
+.dmod{background:#2a2140;border:1px solid #6b4bb8;border-radius:8px;padding:8px 10px}.dmod b{color:#c9b3ff;margin-right:4px}
+.dboard{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}.dboard li{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:8px;background:var(--stone3)}.dboard li.me{outline:2px solid var(--torch)}.dboard .pos{width:24px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}.dboard li b:first-of-type{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dboard .pt{color:var(--torch2);font-variant-numeric:tabular-nums}
+.card.unknown{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:repeating-linear-gradient(45deg,#2a2536,#2a2536 8px,#241f2f 8px,#241f2f 16px);color:var(--muted);border-color:#3d3650}.card.unknown .cname{font-size:26px;color:#6d6585}
+.bestiary{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.beast{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;background:var(--stone2);border:1px solid var(--line);border-radius:10px;padding:10px}.beast.boss{border-color:var(--blood)}.beast small{color:var(--muted);font-size:11.5px}.beast.unk b{color:var(--muted)}
+.prow.unk{opacity:.6}.favc{display:flex;flex-direction:column;align-items:center;gap:4px}
 .cdesc .gained{color:#2f7a2a;font-style:normal;font-weight:600}
 .float.dmg{color:#ff6b5c}.float.blk{color:#9fd0ff}.float.heal{color:var(--heal)}.float.psn{color:var(--poison)}
 @keyframes rise{to{transform:translate(-50%,-150%);opacity:0}}
@@ -278,7 +302,7 @@ body.noanim #gltip{transition:none}
   .herorow{padding:4px 8px;gap:8px}.energy{width:48px;height:48px;font-size:22px}.hero{min-width:0}.hero .face .spr{width:44px;height:auto}
   .allies{gap:4px;padding:0 8px}
   .ally{width:calc(33.3% - 3px);min-width:0;padding:3px 5px;gap:4px}
-  .ally>.spr{width:24px;height:auto}.ally .nm{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ally small{font-size:10px}
+  .ally>.spr{width:24px;height:auto}.ally .nm{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ally small{font-size:10px}.ally .bar{height:14px;min-width:0}.ally .bar span{font-size:10.5px}
   .ally .chips{display:none}
   .enemy{min-width:96px}
   .card{width:100px;min-height:150px;padding:5px 5px 7px}
@@ -297,7 +321,7 @@ body.noanim #gltip{transition:none}
 <aside id="chat" hidden aria-label="Chat di gioco">
   <div class="chead"><h3 style="flex:1">Chat del gruppo</h3><button class="btn" onclick="toggleChat(false)">Chiudi</button></div>
   <div id="chatlog"></div>
-  <div class="quick"><button class="btn" type="button" onclick="quickMsg(this)">Andiamo a sinistra!</button><button class="btn" type="button" onclick="quickMsg(this)">Andiamo a destra!</button><button class="btn" type="button" onclick="quickMsg(this)">Mi serve un falò</button><button class="btn" type="button" onclick="quickMsg(this)">Attacchiamo quello</button><button class="btn" type="button" onclick="quickMsg(this)">Ho poca vita!</button><button class="btn" type="button" onclick="quickMsg(this)">Bel colpo!</button></div>
+  <div class="quick" id="chatquick"></div>
   <form id="chatform" autocomplete="off"><input id="chatin" class="txt" maxlength="200" placeholder="Scrivi un messaggio..."><button class="btn primary" type="submit">Invia</button></form>
 </aside>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
@@ -315,6 +339,15 @@ class RNG{constructor(s){this.s=s|0}
 /* ================= PIXEL ART ================= */
 const PAL={i:'#cfeeff',I:'#7fb3d5',k:'#1b1424',s:'#f2c48f',S:'#c98d5c',h:'#7a4a24',H:'#4e2d14',m:'#cfd6e0',M:'#7f8a9b',r:'#c8402f',R:'#7d211b',b:'#3f6fc2',B:'#25427a',p:'#8656c4',P:'#4d2c7a',g:'#63a94e',G:'#2f6b2a',y:'#f0bf45',Y:'#a8741c',w:'#f6f2e8',W:'#a3a1ad',n:'#8f5d33',N:'#5a3820',e:'#ff4433',E:'#ffe066',c:'#2f2a3a',C:'#4a4458',o:'#ec7f2c',O:'#a84d16',t:'#5fd6c6',T:'#238a7c',l:'#9be06a',L:'#4c8f2e',f:'#ffd9a0'};
 const SPR={
+imp:["................", "..k..........k..", ".kRk........kRk.", ".kRrkkkkkkkkrRk.", "..krrrrrrrrrrk..", "..krEEkrrkEErk..", "..krrrrrrrrrrk.k", "...krrkwwkrrk.kE", "k...krrrrrrk.kEk", "kRk.kkrRRrkk.kyk", "kRRkkrrrrrrkkkyk", ".kRkrrrrrrrrk.yk", "..kkkrRrrRrk..yk", "....krrkkrrk..k.", "....kRk..kRk....", "...kkk..kkk....."],
+salamandra:["................", "................", "................", "...........kkk..", "..........kooEk.", ".........koooook", "....kkkkkkooOOk.", "..kkoyoyoyooOk..", ".koooooooooOk...", "kOooyoyoyoooOk..", "OkkOOOOOOOOOk...", "o..kOk.kOk.kOk..", "...kk..kk..kk...", "................", "................", "................"],
+segugio:["................", "..o.o...........", ".oEoEo..........", ".kkkkk.k........", "kCCCCkkCk.......", "kCeCCCCCCk......", "kCCCCCCCCCkkkkk.", "kwkwCCCCCCCCCCo.", ".kkkCCCCCCCCCoEo", "...kCCCccccCCko.", "...kCCkkkkkCCk..", "...kCk....kCk...", "...kok....kok...", "...kk.....kk....", "................", "................"],
+nano:["................", ".....kkkkkk.....", "....kmmmmmmk....", "...kmMMMMMMmk...", "...kkkkkkkkkk...", "....kskssksk....", "....ksssssskkk..", "...kooooooookMk.", "..kOooooooookMk.", "..ksoooooooksNk.", "..kkkNNyyNNkk.N.", "....kNNNNNNk..N.", "....kmmkkmmk..k.", "....kNNk.kNNk...", "....kkkk.kkkk...", "................"],
+demone:["k..............k", "kRk..........kRk", ".kRk.kkkkkk.kRk.", "..kRkrrrrrrkRk..", "...krrrrrrrrk...", "...krEEkkEErk...", "...krrrrrrrrk...", "..kkrkwkkwkrkk..", ".kRrkrrrrrrkrRk.", "kRrrkkrrrrkkrrRk", "kRrkrrrRRrrrkrRk", "kRkkrrrrrrrrkkRk", ".k.krRrrrrRrk.k.", "...krrkkkkrrk...", "...kRRk..kRRk...", "...kkkk..kkkk..."],
+automa:["................", ".....kkkkkk.....", "....kYYYYYYk....", "....kYkEEkYk....", "....kYYYYYYk....", ".....kkMMkk.....", "..kkkYYYYYYkkk..", ".kYYkYyoyyYkYYk.", ".kYkkYyyyyYkkYk.", ".kYk.kYYYYk.kYk.", ".kMk.kNNNNk.kMk.", ".kkk.kYkkYk.kkk.", ".....kYk.kYk....", ".....kYk.kYk....", "....kkkk.kkkk...", "................"],
+sacerdote:[".......kk.......", "......kook......", ".....koEEok.....", "......kook......", ".....kkkkkk.....", "....kRRRRRRk....", "....kRkkkkRk....", "....kRkEkEkk....", "...kkRRkkRRkk.k.", "..kRRrrrrrrRRkok", "..kRrrryyrrrRkEk", "..kRrrrrrrrrRkk.", "..kRrrrrrrrrRk..", "..kRRrrrrrrRRk..", "...kkkkkkkkkk...", "................"],
+tiranno:["k......................k", "kRk..................kRk", ".kRk................kRk.", "..kRk...kkkkkkkk...kRk..", "...kRk.krrrrrrrrk.kRk...", "....kRkrrrrrrrrrrkRk....", ".....krrEEkrrrkEErrk....", ".....krrEEkrrrkEErrk....", ".....krrrrrrrrrrrrrk....", "......krkwkwkkwkwkrk....", "......krrrrrrrrrrrrk....", "..kkkkkkrrrrrrrrrrkkkkkk", ".kRRRRrkkrrrrrrrkkrRRRRk", "kRrrrrrrkrrryyrrrkrrrrrk", "kRrrkkrrkrryooyrrkrrkkrk", "kRrk..krkrrryyrrrkrk..kk", ".kk...krkrrrrrrrrkrk....", "......kkkrRrrrrRrkkk....", ".......krrrrrrrrrrk.....", ".......krrrkkkkrrrk..o..", "......kRRrk....kRRRk.oEo", "......kRRk......kRRk.oo.", ".....kkkkk......kkkkk...", "........................"],
+
 spettro:["................", ".....kkkkkk.....", "....kiiiiiik....", "...kiiiiiiiik...", "...kikkiikkik...", "...kikEiikEik...", "...kiiiiiiiik...", "..kiiiikkiiiik..", "..kiiiiiiiiiik..", "..kiiiiiiiiiIk..", "..kiiiiiiiiIIk..", "..kIiiiiiiIIIk..", "..kIIIIIIIIIIk..", "..kIkIIkIIkIk...", "..k.k..k..k.k...", "................"],
 zombi:["................", ".....kkkkkk.....", "....kLLlLLLk....", "....kLlLLLLk....", "....kLkLLkLk....", "....kLeLLeLk....", "....kLLLLLLk....", "....kLkwkwLk....", ".....kLLLLk.....", "kkkkkNnnnnNk....", "kLLLkNnnRnNk....", "kkkkkNnnnnNk....", ".....kNnnNk.....", ".....kBk.kBk....", ".....kBk.kBk....", ".....kkk.kkk...."],
 ragno:["................", "................", "..k..........k..", ".k.k........k.k.", "k...k..kk..k...k", "....kkkPPkkk....", ".kkk.kPPPPk.kkk.", "k...kPePPePk...k", "...kPPPPPPPPk...", "..kPPpPPPPpPPk..", ".k.kPPPPPPPPk.k.", "k...kPPPPPPk...k", "...k.kkkkkk.k...", "..k..........k..", "................", "................"],
@@ -604,6 +637,13 @@ drago:[
 ],
 };
 const ICONS={
+e_forgia:["............", "....o..o....", "...oEooEo...", "...oEEEEo...", "..kkkkkkkk..", ".kMMMMMMMMk.", "kMmmmmmmmmMk", ".kkkMMMMkkk.", "...kMMMMk...", "..kMMMMMMk..", "..kkkkkkkk..", "............"],
+e_patto:["....kkkk....", "..kkyyyykk..", ".kyykyykyyk.", ".kykrkkrkyk.", "kyykrrrrkyyk", "kykrkrrkrkyk", "kykkrrrrkkyk", "kyyykrrkyyyk", ".kyykkkkyyk.", ".kyyyyyyyyk.", "..kkyyyykk..", "....kkkk...."],
+r_braciere:["............", "...o..o.....", "..oEooEo.o..", "..oEEEEEoEo.", "...oEEEEEo..", "..kkkkkkkk..", ".kMMMMMMMMk.", "..kMmmmmMk..", "...kMMMMk...", "....kMMk....", "...kkkkkk...", "............"],
+r_martellonano:["............", ".kkkkkk.....", "kMMMMMMk....", "kMmmmmmk....", "kMMMMMMk....", ".kkkNNkk....", "....kNk.....", "....kNk.....", "....kNk.....", "....kNk.....", "....kkk.....", "............"],
+r_cuoreabisso:["............", "..kk...kk...", ".kRrk.kRrk..", "kRrrrkrrrRk.", "kRrEErrrrRk.", "kRrrrrrrrRk.", ".kRrrrrrRk..", "..kRrrrRk...", "...kRrRk....", "....kRk.....", ".....k......", "............"],
+r_scaglia:["............", "....kkkk....", "...kooook...", "..koyoyook..", "..kooooook..", ".koyoyoyook.", ".kooooooook.", ".kOooooooOk.", "..kOooooOk..", "...kOOOOk...", "....kkkk....", "............"],
+
 r_amuleto:["..k......k..", "...k....k...", "....k..k....", ".....kk.....", "....kiik....", "...kiIiik...", "..kiIiiiIk..", "...kiiiik...", "....kIIk....", ".....kk.....", "............", "............"],
 r_calice:["............", "..kkkkkkkk..", ".kyrrrrrryk.", ".kyrRrrrryk.", "..kyrrrryk..", "...kyyyyk...", "....kyyk....", "....kyyk....", "....kyyk....", "...kyyyyk...", "..kkkkkkkk..", "............"],
 r_ossa:["............", ".kkkkk......", ".kWwwk......", ".kwkwk......", ".kwwWk.kkkkk", ".kkkkk.kWwwk", ".......kwkwk", ".......kwwWk", ".......kkkkk", "............", "............", "............"],
@@ -797,6 +837,15 @@ sfogo:{n:"Sfogo d'Ira",cl:'guerriero',t:'A',r:'U',c:1,tg:1,dt:'S',v:{d:7},u:{d:1
 paginebr:{n:'Pagine Bruciate',cl:'mago',t:'A',r:'U',c:1,tg:1,dt:'S',v:{d:6,b:2},u:{d:8,b:3},x:v=>`Scarta tutte le Abilità dalla tua mano. Per ognuna infliggi ${v.d} danni e applica ${v.b} Bruciatura.`,f:(v,t)=>{const n=DISC('S');if(n){A(t,v.d,n);if(t&&t.hp>0)S(t,'burn',v.b*n)}}},
 ventaglio:{n:'Lancio a Ventaglio',cl:'ladro',t:'A',r:'U',c:1,dt:'A',v:{d:5},u:{d:7},x:v=>`Scarta tutti gli Attacchi dalla tua mano. Per ognuno infliggi ${v.d} danni a TUTTI i nemici.`,f:v=>{const n=DISC('A');for(let k=0;k<n;k++)AA(v.d)}},
 martirio:{n:'Martirio della Luce',cl:'chierico',t:'A',r:'U',c:1,tg:1,dt:'X',v:{d:9},u:{d:13},x:v=>`Scarta tutte le carte Stato dalla tua mano (anche quelle che ti mettono i nemici). Infliggi ${v.d} danni per ognuna.`,f:(v,t)=>{const n=DISC('X');if(n)A(t,v.d,n)}},
+/* --- carte di gruppo: più forti se un alleato ha giocato una certa carta in questo turno --- */
+assalto:{n:'Assalto Coordinato',cl:'guerriero',t:'A',r:'C',c:1,tg:1,grp:'A',v:{d:7},u:{d:10},x:v=>`Infliggi ${v.d} danni. `+W('Se hai già giocato un Attacco in questo turno','Se un alleato ha già giocato un Attacco in questo turno')+`, infliggili 2 volte.`,f:(v,t)=>A(t,v.d,ALLY('A')?2:1)},
+testuggine:{n:'Formazione a Testuggine',cl:'guerriero',t:'S',r:'U',c:1,grp:'S',v:{b:6},u:{b:9},x:v=>`Ottieni ${v.b} Armatura. `+W('Se hai già giocato un\'Abilità in questo turno','Se un alleato ha già giocato un\'Abilità in questo turno')+W(`, ottienine altri ${v.b}.`,`, anche tutti gli alleati ottengono ${v.b} Armatura.`),f:v=>{B(v.b);if(ALLY('S')){if(solo)B(v.b);else Object.keys(g.heroes).filter(p=>p!==CUR).forEach(p=>BA(p,v.b))}}},
+catalisi:{n:'Catalisi Arcana',cl:'mago',t:'S',r:'C',c:1,grp:'A',v:{dr:1,e:2},u:{dr:2,e:2},x:v=>`Pesca ${v.dr} ${v.dr>1?'carte':'carta'}. `+W('Se hai già giocato un Attacco in questo turno','Se un alleato ha già giocato un Attacco in questo turno')+`, ottieni ${v.e} Energia.`,f:v=>{D(v.dr);if(ALLY('A'))E(v.e)}},
+tempestacong:{n:'Tempesta Congiunta',cl:'mago',t:'A',r:'U',c:2,grp:'A',v:{d:7},u:{d:10},x:v=>`Infliggi ${v.d} danni a TUTTI i nemici, `+W('2 volte se hai già giocato un Attacco in questo turno.','più 1 volta per ogni alleato che ha giocato un Attacco in questo turno.'),f:v=>{const n=1+ALLYN('A');for(let k=0;k<n;k++)AA(v.d)}},
+imboscata:{n:'Imboscata',cl:'ladro',t:'A',r:'C',c:1,tg:1,grp:'A',v:{d:6,p:4},u:{d:8,p:6},x:v=>`Infliggi ${v.d} danni. `+W('Se hai già giocato un Attacco in questo turno','Se un alleato ha già giocato un Attacco in questo turno')+`, applica ${v.p} Veleno e pesca 1 carta.`,f:(v,t)=>{A(t,v.d);if(ALLY('A')){S(t,'poison',v.p);D(1)}}},
+diversivo:{n:'Diversivo',cl:'ladro',t:'S',r:'U',c:0,grp:'S',v:{w:1},u:{w:2},x:v=>`Applica ${v.w} Vulnerabile a TUTTI i nemici. `+W('Se hai già giocato un\'Abilità in questo turno','Se un alleato ha già giocato un\'Abilità in questo turno')+`, ottieni 1 Energia.`,f:v=>{SA('vuln',v.w);if(ALLY('S'))E(1)}},
+benecomune:{n:'Benedizione Comune',cl:'chierico',t:'S',r:'C',c:1,ex:1,grp:'S',v:{h:3},u:{h:5},x:v=>W(`Recuperi ${v.h} PV. `,`Tu e tutti gli alleati recuperate ${v.h} PV. `)+W('Se hai già giocato un\'Abilità in questo turno','Se un alleato ha già giocato un\'Abilità in questo turno')+`, il doppio.`,f:v=>{const n=ALLY('S')?2*v.h:v.h;Object.keys(g.heroes).forEach(p=>HA(p,n))}},
+luceguida:{n:'Luce Guida',cl:'chierico',t:'S',r:'U',c:1,cu:0,grp:'A',v:{b:5},u:{},x:v=>W('Se hai già giocato un Attacco in questo turno','Se un alleato ha già giocato un Attacco in questo turno')+W(', ottieni 1 Forza. Altrimenti ottieni '+v.b+' Armatura.',', tu e tutti gli alleati ottenete 1 Forza. Altrimenti ottenete tutti '+v.b+' Armatura.'),f:v=>{const ok=ALLY('A');Object.keys(g.heroes).forEach(p=>{const h=g.heroes[p];if(h.down)return;if(ok)S(h,'str',1);else BA(p,v.b)})}},
 };
 
 const RELICS={
@@ -843,10 +892,17 @@ Object.assign(RELICS,{
   anello:{n:'Anello del Lich',ic:'',d:'Ogni volta che uccidi un nemico ottieni 1 Energia.'},
   mantonero:{n:'Mantello della Notte',ic:'',d:'Inizi ogni combattimento con 8 Armatura e 1 Destrezza.'},
 });
+Object.assign(RELICS,{
+  braciere:{n:'Braciere Eterno',ic:'',d:'All\'inizio di ogni tuo turno infliggi 2 danni a tutti i nemici.'},
+  martellonano:{n:'Martello Nanico',ic:'',d:'Alla fine di ogni combattimento vinto potenzi una carta casuale del mazzo.'},
+  cuoreabisso:{n:'Cuore dell\'Abisso',ic:'',d:'Ottieni 1 Energia in più ogni turno, ma all\'inizio di ogni turno perdi 1 PV.'},
+  scaglia:{n:'Scaglia di Salamandra',ic:'',d:'Ogni volta che un nemico ti colpisce, subisce 3 danni.'},
+});
 const STARTER_RELICS=['elmo','grimorio','fiala','simbolo'];
 const CRYPT_RELICS=['amuleto','calice','ossa','lanternasp','anello','mantonero'];
-const RELIC_POOL=Object.keys(RELICS).filter(k=>!STARTER_RELICS.includes(k)&&!CRYPT_RELICS.includes(k));
-const ALL_RELICS=[...RELIC_POOL,...CRYPT_RELICS];
+const ABYSS_RELICS=['braciere','martellonano','cuoreabisso','scaglia'];
+const RELIC_POOL=Object.keys(RELICS).filter(k=>!STARTER_RELICS.includes(k)&&!CRYPT_RELICS.includes(k)&&!ABYSS_RELICS.includes(k));
+const ALL_RELICS=[...RELIC_POOL,...CRYPT_RELICS,...ABYSS_RELICS];
 
 const POTIONS={
   cura:{n:'Pozione di Cura',col:'#d9534f',d:'Recuperi 15 PV. Si può bere anche fuori dal combattimento.',f:()=>H(15)},
@@ -883,6 +939,14 @@ Object.assign(ENEMIES,{
   golem:{n:'Golem d\'Ossa',hp:[85,92],elite:1,blk:10,ai:e=>[{b:12,d:6,curse:'ferita',cn:2},{d:14},{d:4,x:3}][e.t%3]},
   vampiro:{n:'Signore Vampiro',hp:[66,72],elite:1,ai:e=>[{d:10,heal:8},{d:6,x:2,curse:'paura',cn:1},{s:2,b:8}][e.t%3]},
   strega:{n:'Strega del Gelo',hp:[60,66],elite:1,ai:e=>[{d:7,aoe:1,curse:'gelo',cn:1},{d:12},{summon:'spettro',b:6}][e.t%3]},
+  imp:{n:'Diavoletto delle Braci',hp:[12,15],ai:(e,r)=>r.next()<.55?{d:4,x:2}:{d:3,deb:'weak',dn:1}},
+  salamandra:{n:'Salamandra Ardente',hp:[22,26],ai:e=>e.t%3===2?{b:6,d:5}:{d:8}},
+  segugio:{n:'Segugio Infernale',hp:[18,22],ai:(e,r)=>r.next()<.6?{d:5,x:2}:{d:10}},
+  nano:{n:'Nano Rinnegato',hp:[25,29],blk:4,ai:e=>[{b:10,d:3},{d:11},{d:6,deb:'vuln',dn:1}][e.t%3]},
+  demone:{n:'Demone della Fornace',hp:[92,98],elite:1,ai:e=>[{d:9,aoe:1,curse:'ustione',cn:1},{s:3,b:10},{d:7,x:2}][e.t%3]},
+  automa:{n:'Automa di Bronzo',hp:[96,102],elite:1,blk:15,ai:e=>[{b:16},{d:18},{d:6,x:3,curse:'ferita',cn:1}][e.t%3]},
+  sacerdote:{n:'Gran Sacerdote della Fiamma',hp:[72,78],elite:1,ai:e=>[{summon:'imp',b:8},{d:8,aoe:1},{heal:12,s:2,all:1,curse:'paura',cn:1}][e.t%3]},
+  tiranno:{n:'Azhrakel, Tiranno dell\'Abisso',hp:[300,300],boss:1,ai:e=>e.hp>e.max/2?[{b:15,s:2},{d:7,x:3},{d:14,aoe:1,curse:'ustione',cn:1},{summon:'imp',d:10}][e.t%4]:[{d:10,x:3},{d:18,aoe:1},{s:4,b:20,curse:'maledizione',cn:1},{d:25,deb:'vuln',dn:2}][e.t%4]},
   lich:{n:'Morvath, il Re Lich',hp:[240,240],boss:1,ai:e=>[{summon:'scheletro',b:12},{d:7,aoe:1,deb:'poison',dn:2,curse:'maledizione',cn:1},{d:18},{d:5,x:3},{s:3,b:15}][e.t%5]},
 });
 const EASY=[['goblin'],['ratto','ratto'],['melma'],['scheletro']];
@@ -910,6 +974,13 @@ const DUNGEONS={
     pots:['cura','pelle','rapida','energia','viverna','gelida','sangue'],
     winT:'Le Cripte sono purificate!',winD:'Morvath torna polvere e il gelo si scioglie. Il vostro nome entra nelle leggende.',loseD:'Il gelo delle Cripte vi avvolge. Morvath aggiunge altri servi al suo esercito.',cycleT:'Morvath si rialza dalle ceneri, più forte di prima'},
 };
+DUNGEONS.abisso={n:'Abisso di Braceferro',boss:'tiranno',bossN:'Azhrakel',crowns:100,req:'cripte',desc:'Le fornaci sotto la montagna, piene di demoni, automi e nani rinnegati. In fondo attende Azhrakel, che a metà vita entra in furia.',
+    easy:[['imp','imp'],['salamandra'],['segugio'],['nano']],
+    hard:[['nano','imp'],['segugio','segugio'],['salamandra','imp','imp'],['nano','salamandra'],['segugio','imp'],['imp','imp','imp'],['nano','nano']],
+    elites:[['demone'],['automa'],['sacerdote']],
+    pots:['cura','fuoco','forza','pelle','energia','sangue','gelida'],
+    winT:'L\'Abisso è sigillato!',winD:'Azhrakel precipita nelle fiamme da cui è nato. Valdombra è finalmente in pace: siete leggenda.',loseD:'Le fornaci dell\'Abisso divorano un altro gruppo di eroi.',cycleT:'Azhrakel risale dalle fiamme, più furioso di prima'};
+DUNGEONS.abisso.relics=[...ABYSS_RELICS,'cuore','dado','piuma','sacchetto','anello','calice'];
 DUNGEONS.rocca.relics=RELIC_POOL;DUNGEONS.cripte.relics=[...CRYPT_RELICS,'cuore','dado','piuma','orbe','sacchetto'];
 const DG=()=>DUNGEONS[(R&&R.dg)||'rocca'];
 let pickDg='rocca';
@@ -987,12 +1058,16 @@ const ACT={
   mode:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host)R.lmode=a.m==='surv'?'surv':'norm'},
   kick:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host&&a.p!==R.host){delete R.players[a.p];R.order=R.order.filter(x=>x!==a.p)}},
   again:(a,P,pid)=>{if(R.phase==='end'&&pid===R.host)toLobby()},
+  restart:(a,P,pid)=>{if(R.phase!=='end'||pid!==R.host||R.daily)return;const dg=R.dg||'rocca',mode=R.mode;const lvl=mode==='surv'?0:Math.max(0,Math.min(MAXLVL,a.lvl|0,getUnlocked(dg)));
+    R.voteAnim=null;R.plans={};startRunRoom(lvl,'',mode,dg);R.lbId=null},
   vote:(a,P,pid)=>{if(R.phase==='map'&&!R.voteAnim&&availNodes().some(n=>n.y===a.y&&n.x===a.x)){const v=a.y+','+a.x;if(R.votes[pid]===v)delete R.votes[pid];else R.votes[pid]=v}},
   play:a=>playCard(a.uid,a.j,a.a,a.pk),
   potion:a=>usePotion(a.i,a.j),
   dropPot:(a,P)=>{if(P.potions[a.i])P.potions.splice(a.i,1)},
   drink:(a,P)=>{if(R.phase!=='combat'&&P.potions[a.i]==='cura'){P.potions.splice(a.i,1);H(15)}},
   end:()=>endHeroTurn(),
+  unend:()=>{const c=R.combat,h=g&&g.hero;if(!c||c.busy||c.won||!h||!h.ended||h.down||!h.undo)return;const u=h.undo;
+    h.disc.splice(u.discLen);h.hand=u.hand;h.blk=u.blk;h.st=u.st;if(run.hp>0)run.hp=Math.max(run.hp,u.hp);h.ended=false;delete h.undo},
   takeGold:(a,P)=>{const r=P.reward;if(P.screen==='reward'&&r){P.gold+=r.gold;r.gold=0}},
   takePotion:(a,P)=>{const r=P.reward;if(P.screen==='reward'&&r&&r.potion){givePotion(P,r.potion);r.potion=null}},
   potSwap:(a,P)=>{if(P.pendPot&&P.potions[a.i]){P.potions[a.i]=P.pendPot;P.pendPot=null}},
@@ -1035,6 +1110,18 @@ function genMap(r){
     else{const p=r.next();n.type=(y>=5&&p<.15)?'elite':(p<.27&&y>=4&&y!==ROWS-2)?'rest':(p<.34&&y>=2)?'shop':p<.56?'event':'combat'}});
   return map;
 }
+const PCOL=['#ffb347','#6ec3ff','#ff6f91','#7ee07e','#c39bff','#ffe45c','#4fd6c6','#ff9257'];
+const pcol=pid=>PCOL[Math.max(0,R.order.indexOf(pid))%PCOL.length];
+function planValid(path){if(!Array.isArray(path)||!R.map)return [];const out=[];let prev=R.pos?R.map[R.pos.y][R.pos.x]:null;
+  for(const q of path.slice(0,ROWS+1)){if(!Array.isArray(q))break;const y=q[0]|0,x=q[1]|0;const n=R.map[y]&&R.map[y][x];if(!n)break;
+    if(prev?!(prev.y+1===y&&prev.next.includes(x)):y!==0)break;out.push([y,x]);prev=n}return out}
+ACT.plan=(a,P,pid)=>{if(R.phase!=='map')return;R.plans=R.plans||{};const v=planValid(a.p);if(v.length)R.plans[pid]=v;else delete R.plans[pid]};
+function planTap(y,x){const mine=planValid((R.plans||{})[ME]);const last=mine[mine.length-1];
+  if(last&&last[0]===y&&last[1]===x)mine.pop();
+  else{const prev=last?R.map[last[0]][last[1]]:(R.pos?R.map[R.pos.y][R.pos.x]:null);const ok=prev?(prev.y+1===y&&prev.next.includes(x)):y===0;
+    if(!ok){toast('Tocca un nodo collegato alla fine del tuo percorso.');return}mine.push([y,x])}
+  send({t:'plan',p:mine})}
+function nodeTap(y,x){if(UI.draw)planTap(y,x);else vote(y,x)}
 function availNodes(){
   if(!R.map)return[];
   if(!R.pos)return R.map[0].filter(Boolean);
@@ -1058,7 +1145,7 @@ function finishVote(){
 function newLobby(code){return{code,v:0,host:ME,phase:'lobby',order:[ME],players:{[ME]:{pid:ME,name:myName||'Eroe',cls:pickCls,ready:true}},lvl:0,seed:'',rs:0,votes:{}}}
 function initPlayer(P){
   const cl=CLASSES[P.cls];
-  Object.assign(P,{hp:cl.hp,max:cl.hp,gold:99,deck:cl.deck.map(id=>({id,up:false})),relics:[cl.relic],potions:['cura'],kills:0,removes:0,piumaUsed:false,
+  Object.assign(P,{hp:cl.hp,max:cl.hp,gold:99,deck:cl.deck.map(id=>({id,up:false})),relics:[cl.relic],potions:['cura'],kills:0,removes:0,piumaUsed:false,stx:{dmg:0,heal:0,blk:0,taken:0,top:0,cards:{}},
     screen:null,done:true,reward:null,shop:null,event:null,treasure:null});
 }
 function startRunRoom(lvl,seed,mode,dg){
@@ -1070,12 +1157,27 @@ function startRunRoom(lvl,seed,mode,dg){
   rng=new RNG(hashStr(seed+'#'+R.order.map(p=>R.players[p].cls).join('')));
   R.order.forEach(p=>{const P=R.players[p];const tal=P.tal;initPlayer(P);applyLoadout(P);P.tal=tal;applyTalents(P)});
 }
+function soloRestart(lvl){const P=R.players.solo;pickCls=P.cls;pickDg=R.dg||'rocca';pickMode=R.mode==='surv'?'surv':'norm';pickLvl=Math.max(0,Math.min(MAXLVL,lvl|0));UI.lbMsg='';UI.dMsg='';R=null;g=null;startSolo()}
+function againBtns(){
+  if(R.daily)return `<button class="btn primary" onclick="R=null;g=null;screen='title';render()">Torna al menu</button>`;
+  const L=R.lvl||0,surv=R.mode==='surv',host=solo||R.host===ME;
+  if(!host)return '<span class="muted">L\'host può far ripartire il gruppo.</span><button class="btn" onclick="leaveRoom(true)">Esci dalla stanza</button>';
+  const go=l=>solo?`soloRestart(${l})`:`UI.lbMsg='';send({t:'restart',lvl:${l}})`;
+  const back=solo?`<button class="btn" onclick="R=null;g=null;UI.lbMsg='';screen='title';render()">Cambia eroe o dungeon</button>`:`<button class="btn" onclick="UI.lbMsg='';send({t:'again'})">Torna alla stanza</button><button class="btn" onclick="UI.lbMsg='';leaveRoom(true)">Esci dalla stanza</button>`;
+  let main='';
+  if(surv)main=`<button class="btn primary" onclick="${go(0)}">Ricomincia la Sopravvivenza</button>`;
+  else if(R.win&&L<MAXLVL)main=`<button class="btn primary" onclick="${go(L+1)}">Continua: Assedio ${L+1}</button><button class="btn" onclick="${go(L)}">Rigioca all'Assedio ${L}</button>`;
+  else if(R.win)main=`<button class="btn primary" onclick="${go(L)}">Rigioca all'Assedio ${L} (il massimo)</button>`;
+  else main=`<button class="btn primary" onclick="${go(L)}">Riprova${L?' all\'Assedio '+L:''}</button>${L>0?`<button class="btn" onclick="${go(L-1)}">Riprova all'Assedio ${L-1}</button>`:''}`;
+  return main+back;
+}
 function toLobby(){
   R.order.forEach(p=>{const P=R.players[p];R.players[p]={pid:p,name:P.name,cls:P.cls,ready:p===R.host}});
   Object.assign(R,{phase:'lobby',combat:null,map:null,win:null,votes:{}});
 }
 function enterNode(y,x){
   R.pos={y,x};R.path.push([y,x]);R.floor=y+1;const t=R.map[y][x].type;
+  if(R.plans)Object.keys(R.plans).forEach(p=>{const pl=R.plans[p];if(pl&&pl[0]&&pl[0][0]===y&&pl[0][1]===x&&pl.length>1)R.plans[p]=pl.slice(1);else delete R.plans[p]});
   const D=DG();
   if(t==='combat')return startCombat(rng.pick(y<3?D.easy:D.hard),'combat');
   if(t==='elite')return startCombat(rng.pick(D.elites),'elite');
@@ -1101,10 +1203,13 @@ function endRun(win){R.phase='end';R.win=win;R.combat=null;g=null}
 function startCombat(ids,kind){
   const L=R.lvl||0,party=active(),n=Math.max(1,party.length);
   const cy=(R.cycle||1)-1,surv=R.mode==='surv';
-  ids=[...ids];if((n>=5||(surv&&n>=3))&&kind==='combat')ids.push(rng.pick(['goblin','ratto','lupo']));
-  if(surv&&cy>=2&&kind==='combat')ids.push(rng.pick(['scheletro','bandito','lupo']));
-  const hpM=(1+.7*(n-1))*(1+.4*cy),dM=(1+.1*(n-1))*(1+.15*cy);
-  R.combat={kind,n,turn:0,busy:false,won:false,heroes:{},hpM,dM,L,enemies:[]};
+  const minions=DG().easy.flat(),strong=DG().hard.flat();
+  ids=[...ids];if((n>=4||(surv&&n>=2))&&kind==='combat')ids.push(rng.pick(minions));
+  if(surv&&cy>=1&&kind==='combat')ids.push(rng.pick(strong));
+  if(surv&&cy>=3&&kind==='combat')ids.push(rng.pick(strong));
+  const big=kind==='elite'||kind==='boss';
+  const hpM=1.15*(big?1.1:1)*(1+.7*(n-1))*(1+.5*cy),dM=1.12*(1+.1*(n-1))*(1+.2*cy);
+  R.combat={kind,n,turn:0,busy:false,won:false,heroes:{},hpM:hpM*(R.daily&&R.daily.mod==='potenti'?1.25:1),dM,L,enemies:[]};
   ids.forEach(id=>R.combat.enemies.push(mkEnemy(id)));
   party.forEach(pid=>{const P=R.players[pid];P.deck.forEach(c=>{if(!c.k)c.k=uid++});const sh=rng.shuffle(P.deck.map(c=>({...c,uid:uid++})));R.combat.heroes[pid]={blk:0,st:{},pw:{},draw:[...sh.filter(c=>!innOf(c)),...sh.filter(innOf)],hand:[],disc:[],exh:[],energy:0,ended:false,down:false}});
   R.phase='combat';R.order.forEach(p=>{R.players[p].screen=null;R.players[p].done=true});
@@ -1131,7 +1236,7 @@ function startTurn(){
   checkEnd();
 }
 function heroTurnStart(h,turn){
-  h.ended=false;g.hit=new Set();
+  h.ended=false;delete h.undo;g.hit=new Set();
   if(h.st.poison){const pz=h.st.poison;run.hp-=pz;fx('hero','-'+pz,'psn');h.st.poison--;if(!h.st.poison)delete h.st.poison;heroDown();if(h.down)return}
   let en=3,dr=5;const pw=h.pw;
   if(turn===1){
@@ -1139,9 +1244,12 @@ function heroTurnStart(h,turn){
     if(has('pietra'))S(h,'str',1);if(has('mantello'))S(h,'dex',1);
     if(hasT('g2')||hasT('m2'))h.blk+=5;if(hasT('g3'))S(h,'str',1);if(hasT('l3'))S(h,'dex',1);if(hasT('m1'))dr++;if(hasT('m5')||hasT('l5'))en++;
     if(hasT('m3'))alive().forEach(e=>hurtEnemy(e,4));if(hasT('l2'))SA('poison',2);if(hasT('c3'))Object.keys(g.heroes).forEach(p=>BA(p,4));
+    if(R.daily&&R.daily.mod==='veleno')SA('poison',3);
     if(has('ancora'))h.blk+=10;if(has('amuleto'))SA('weak',1);if(has('lanternasp'))SA('burn',3);if(has('mantonero')){h.blk+=8;S(h,'dex',1)}if(has('fiala'))SA('poison',2);if(has('corno'))SA('vuln',1);
   }
   if(has('dado')&&turn%3===0)en++;
+  if(has('cuoreabisso')){en++;if(run.hp>1){run.hp--;fx('hero','-1','dmg')}}
+  if(has('braciere'))alive().forEach(e=>hurtEnemy(e,2));
   if(has('simbolo'))H(1);
   if(pw.furia)S(h,'str',pw.furia);
   if(pw.arcimago)en+=pw.arcimago;
@@ -1155,8 +1263,9 @@ function calcDmg(base,src,tgt){let d=base+(src.st.str||0);if(src.st.weak)d*=.75;
 const enemyBase=(e,it)=>Math.round((it.d+(e.bonus||0))*(e.dm||1));
 function eid(e){return 'e'+R.combat.enemies.indexOf(e)}
 function hurtEnemy(e,d){
-  if(e.hp<=0)return;const b=Math.min(e.blk,d);e.blk-=b;const r=d-b;e.hp-=r;
+  if(e.hp<=0)return;const b=Math.min(e.blk,d);e.blk-=b;const r=d-b;if(r>0&&run&&run.stx){const real=Math.min(r,e.hp);run.stx.dmg+=real;run.stx.top=Math.max(run.stx.top,real)}e.hp-=r;
   fx(eid(e),r>0?'-'+r:'Parato',r>0?'dmg':'blk');
+  if(e.id==='tiranno'&&!e.rage&&e.hp>0&&e.hp<=e.max/2){e.rage=1;e.st.str=(e.st.str||0)+3;e.blk=0;fx(eid(e),'FURIA!','dmg')}
   if(e.hp<=0){e.hp=0;if(!e.dead){e.dead=true;if(run){run.kills++;if(has('zanna'))H(3);if(has('anello')&&g&&g.hero)g.hero.energy++}}}
 }
 function heroDown(){
@@ -1166,18 +1275,20 @@ function heroDown(){
 }
 function hurtHero(d){
   const h=g.hero;const b=Math.min(h.blk,d);h.blk-=b;const r=d-b;
-  if(r>0){run.hp-=r;fx('hero','-'+r,'dmg')}else fx('hero','Parato','blk');
+  if(r>0){run.hp-=r;if(run.stx)run.stx.taken+=r;fx('hero','-'+r,'dmg')}else fx('hero','Parato','blk');
   heroDown();
 }
 /* Effetti usati dalle carte */
 function A(t,n,h=1){for(let i=0;i<h;i++){if(!t||t.hp<=0)break;hurtEnemy(t,calcDmg(n,g.hero,t));g.hit.add(t)}}
 function AA(n){alive().forEach(e=>{hurtEnemy(e,calcDmg(n,g.hero,e));g.hit.add(e)})}
 function AR(n,h){for(let i=0;i<h;i++){const a=alive();if(!a.length)break;const e=rng.pick(a);hurtEnemy(e,calcDmg(n,g.hero,e));g.hit.add(e)}}
-function B(n){const v=Math.max(0,n+(g.hero.st.dex||0));g.hero.blk+=v;fx('hero','+'+v,'blk')}
+function B(n){const v=Math.max(0,n+(g.hero.st.dex||0));g.hero.blk+=v;STX('blk',v);fx('hero','+'+v,'blk')}
 function S(t,k,n){if(!t||(t.hp!==undefined&&t.hp<=0))return;t.st[k]=(t.st[k]||0)+n}
 function SA(k,n){alive().forEach(e=>S(e,k,n))}
 function D(n){const h=g.hero;for(let i=0;i<n;i++){if(h.hand.length>=10)break;if(!h.draw.length){if(!h.disc.length)break;h.draw=rng.shuffle(h.disc);h.disc=[]}h.hand.push(h.draw.pop())}}
 function E(n){g.hero.energy+=n}
+function ALLYN(tp){const c=R.combat;if(!c||!g.hero)return 0;if(solo)return (g.hero.played&&g.hero.played[tp])?1:0;return Object.keys(c.heroes).filter(p=>p!==CUR&&c.heroes[p].played&&c.heroes[p].played[tp]).length}
+function ALLY(tp){return ALLYN(tp)>0}
 function KO(t){return !!t&&t.hp<=0}
 function MAXHP(n){run.max+=n;run.hp+=n;fx('hero','+'+n+' PV max','heal')}
 function GOLD(n){run.gold+=n;fx('hero','+'+n+' oro','blk')}
@@ -1194,9 +1305,10 @@ function playFree(n){const c=R.combat,h=g.hero;
 }
 function RD(pk){const h=g.hero;if(!h.disc.length||h.hand.length>=10)return;let i=h.disc.findIndex(c=>c.uid===pk);if(i<0)i=h.disc.length-1;h.hand.push(h.disc.splice(i,1)[0])}
 const party=()=>Object.keys(g.heroes).filter(p=>!g.heroes[p].down);
-function BA(pid,n){const h=g.heroes[pid];if(!h||h.down)return;const v=Math.max(0,n+(g.hero.st.dex||0));h.blk+=v;fxq.push({k:'h-'+pid,txt:'+'+v,cls:'blk'})}
-function HA(pid,n){const P=R.players[pid],h=g.heroes[pid];if(!P||(h&&h.down))return;const b=P.hp;P.hp=Math.min(P.max,P.hp+n);const d=P.hp-b;if(d>0)fxq.push({k:'h-'+pid,txt:'+'+d,cls:'heal'})}
-function H(n){if(!run)return;const b=run.hp;run.hp=Math.min(run.max,run.hp+n);const d=run.hp-b;if(d>0&&g&&g.hero)fx('hero','+'+d,'heal')}
+function BA(pid,n){const h=g.heroes[pid];if(!h||h.down)return;const v=Math.max(0,n+(g.hero.st.dex||0));h.blk+=v;STX('blk',v);fxq.push({k:'h-'+pid,txt:'+'+v,cls:'blk'})}
+function HA(pid,n){const P=R.players[pid],h=g.heroes[pid];if(!P||(h&&h.down))return;const b=P.hp;P.hp=Math.min(P.max,P.hp+n);const d=P.hp-b;if(d>0){fxq.push({k:'h-'+pid,txt:'+'+d,cls:'heal'});STX('heal',d)}}
+function H(n){if(!run)return;const b=run.hp;run.hp=Math.min(run.max,run.hp+n);const d=run.hp-b;if(d>0)STX('heal',d);if(d>0&&g&&g.hero)fx('hero','+'+d,'heal')}
+function STX(k,n){const P=R&&CUR&&R.players[CUR];if(P&&P.stx)P.stx[k]+=n}
 function L(n){run.hp-=n;fx('hero','-'+n,'dmg');heroDown()}
 function P(k,n){g.hero.pw[k]=(g.hero.pw[k]||0)+n}
 
@@ -1211,7 +1323,7 @@ function playCard(u,j,ap,pk){
   if(d.t==='A'&&h.pw.intrise)g.hit.forEach(e=>S(e,'poison',h.pw.intrise));
   if(d.t==='S'&&h.pw.arcano)alive().forEach(e=>hurtEnemy(e,h.pw.arcano));
   if(d.t==='S'&&h.pw.vigil)B(h.pw.vigil);
-  h.played=h.played||{};h.played[d.t]=(h.played[d.t]||0)+1;
+  h.played=h.played||{};h.played[d.t]=(h.played[d.t]||0)+1;if(run.stx&&d.t!=='X')run.stx.cards[card.id]=(run.stx.cards[card.id]||0)+1;
   if(d.t==='A'&&h.played.A===3&&has('ossa'))D(1);
   if(d.t!=='P'){if(exOf(card))h.exh.push(card);else if(d.back)h.draw.push(card);else h.disc.push(card)}
   checkEnd();
@@ -1225,6 +1337,7 @@ function usePotion(i,j){
 function addCurse(id,n){const h=g.hero;for(let i=0;i<n;i++)h.draw.splice(rng.int(0,h.draw.length),0,{id,up:false,uid:uid++});fx('hero','+'+n+' '+CARDS[id].n,'psn')}
 function endHeroTurn(){
   const h=g&&g.hero;if(!h||h.ended||h.down||R.combat.busy)return;
+  h.undo={hand:h.hand.slice(),discLen:h.disc.length,blk:h.blk,st:JSON.parse(JSON.stringify(h.st)),hp:run.hp};
   const burn=h.hand.reduce((s,c)=>s+(CARDS[c.id].endHp||0),0);if(burn&&!h.ended){L(burn)}
   h.disc.push(...h.hand);h.hand=[];
   if(has('orbe')&&h.blk===0){h.blk=6;fx('hero','+6','blk')}
@@ -1257,7 +1370,7 @@ function doIntent(e){
   if(it.heal){const b=e.hp;e.hp=Math.min(e.max,e.hp+Math.round(it.heal*(1+.7*(c.n-1))));fx(eid(e),'+'+(e.hp-b),'heal')}
   if(it.d||it.deb||it.curse){
     const fix=p=>{if(p&&c.heroes[p]&&!c.heroes[p].down)return p;const t=targetable();return t.length?rng.pick(t):null};
-    const hitOnce=()=>{hurtHero(calcDmg(enemyBase(e,it),e,g.hero));if(g.hero.st.spine)hurtEnemy(e,g.hero.st.spine)};
+    const hitOnce=()=>{hurtHero(calcDmg(enemyBase(e,it),e,g.hero));if(g.hero.st.spine)hurtEnemy(e,g.hero.st.spine);if(has('scaglia')&&!g.hero.down)hurtEnemy(e,3)};
     const debuff=()=>{if(g.hero.down)return;if(it.deb)g.hero.st[it.deb]=(g.hero.st[it.deb]||0)+it.dn;if(it.curse)addCurse(it.curse,it.cn||1)};
     if(it.aoe){for(const p of targetable()){ctx(p);if(it.d)hitOnce();debuff();if(e.hp<=0)break}return}
     if(it.d)for(let k=0;k<(it.x||1);k++){const p=fix(it.tgs?it.tgs[k]:it.tg);if(!p)break;ctx(p);hitOnce();if(e.hp<=0)break}
@@ -1272,7 +1385,7 @@ function checkEnd(){
 }
 function winCombat(){
   const c=R.combat,kind=c.kind,pids=Object.keys(c.heroes);
-  pids.forEach(pid=>{ctx(pid);if(c.heroes[pid].down)run.hp=Math.max(1,Math.floor(run.max*.25));else{if(has('elmo'))H(6);if(hasT('g5')||hasT('c2'))H(5);if(has('calice')){run.max++;run.hp++}}});
+  pids.forEach(pid=>{ctx(pid);if(c.heroes[pid].down)run.hp=Math.max(1,Math.floor(run.max*.25));else{if(has('elmo'))H(6);if(has('martellonano')){const ids=run.deck.map((c,i)=>i).filter(i=>canUp(run.deck[i]));if(ids.length)run.deck[rng.pick(ids)].up=true}if(hasT('g5')||hasT('c2'))H(5);if(has('calice')){run.max++;run.hp++}}});
   R.combat=null;g=null;
   if(kind==='boss'){if(R.mode!=='surv'){endRun(true);return}newCycle()}
   R.phase='room';
@@ -1341,6 +1454,13 @@ const EVENTS=[
  {id:'altarnero',dg:['cripte'],n:'Altare d\'Ossa',spr:'e_altarnero',txt:'Un altare costruito con ossa umane. Un sussurro ti offre un patto: «Un ricordo in cambio della vita.»',
   opts:[{t:'Sacrifica una carta',s:'Rimuovi una carta e recuperi 15 PV.',pick:1,req:()=>run.deck.length>1,why:()=>'Ti serve almeno un\'altra carta nel mazzo.',f:i=>{if(!run.deck[i])return null;const c=run.deck.splice(i,1)[0];H(15);return `${CARDS[c.id].n} brucia sull'altare. Senti le ferite richiudersi.`}},
         {t:'Prosegui',s:'Non succede niente.',f:()=>'Il sussurro si spegne alle tue spalle.'}]},
+ {id:'forgia',dg:['abisso'],n:'Forgia Abbandonata',spr:'e_forgia',txt:'Un\'incudine nanica brilla ancora di calore. Accanto, un mantice e un mucchio di monete annerite.',
+  opts:[{t:'Lavora alla forgia',s:'Potenzi 2 carte casuali. Perdi 8 PV.',f:()=>{const idx=rng.shuffle(run.deck.map((c,i)=>i).filter(i=>canUp(run.deck[i]))).slice(0,2);idx.forEach(i=>run.deck[i].up=true);run.hp=Math.max(1,run.hp-8);
+          return idx.length?`Il martello canta: ${idx.map(i=>CARDS[run.deck[i].id].n).join(' e ')} potenziate. Ti bruci le mani.`:'Non hai niente da forgiare, ma ti bruci lo stesso.'}},
+        {t:'Raccogli le monete',s:'+35 oro.',f:()=>{run.gold+=35;return 'Le monete sono ancora tiepide.'}}]},
+ {id:'patto',dg:['abisso'],n:'Patto Demoniaco',spr:'e_patto',txt:'Una pergamena fluttua tra le fiamme. Una voce profonda: «Una reliquia dell\'Abisso, in cambio di un po\' della tua vita.»',
+  opts:[{t:'Firma il patto',s:'Ottieni una reliquia dell\'Abisso. Perdi 8 PV massimi.',req:()=>run.max>20,why:()=>'Sei troppo debole per firmare.',f:()=>{const pool=ABYSS_RELICS.filter(r=>!run.relics.includes(r));run.max-=8;run.hp=Math.min(run.hp,run.max);if(!pool.length){run.gold+=60;return 'Hai già tutto ciò che l\'Abisso può darti: ricevi 60 oro.'}const r=rng.pick(pool);gainRelic(r);return `Il patto è firmato col sangue: ottieni ${RELICS[r].n}.`}},
+        {t:'Brucia la pergamena',s:'Non succede niente.',f:()=>'La voce ride mentre la pergamena si consuma.'}]},
  {id:'pozzo',n:'Pozzo dei Desideri',ic:'',txt:'Un vecchio pozzo coperto di muschio. Si dice che chi getta una moneta possa dimenticare un brutto ricordo.',
   opts:[{t:'Getta 20 monete',s:'Rimuovi una carta dal mazzo.',pick:1,req:()=>run.gold>=20&&run.deck.length>1,why:()=>run.gold<20?'Ti servono 20 oro.':'Ti serve almeno un\'altra carta nel mazzo.',f:i=>{if(!run.deck[i]||run.gold<20)return null;run.gold-=20;const c=run.deck.splice(i,1)[0];return `${CARDS[c.id].n} svanisce dalla tua memoria.`}},
         {t:'Prosegui',s:'Non succede niente.',f:()=>'Il pozzo resta in silenzio alle tue spalle.'}]},
@@ -1600,13 +1720,14 @@ const GLOSS={
   stato:['Stato','Carta negativa, di solito messa dai nemici. Sparisce a fine combattimento.'],
   unpl:['Ingiocabile','Non puoi giocarla: occupa solo spazio nella mano.'],
   all:['TUTTI','Colpisce ogni nemico ancora in piedi.'],
+  grp:['Carta di gruppo','Diventa più forte se un alleato ha già giocato un certo tipo di carta in questo turno. Da solo conta quello che hai giocato tu. Giocatela dopo i compagni!'],
   cheap:['Sconto',"Il costo di questa carta scende quando giochi carte di un certo tipo nello stesso turno."],
 };
 const GLST={Vulnerabile:'vuln',Debole:'weak',Veleno:'poison',Bruciatura:'burn',Stordito:'stun',Forza:'str',Destrezza:'dex',Spine:'spine'};
 function glKeys(c,d){
   const t=d.x(vals(c));const k=[];
   if(d.xc)k.push('xc');if(innOf(c))k.push('inn');if(d.t==='P')k.push('pow');if(d.t==='X')k.push('stato');if(d.unplay)k.push('unpl');if(d.disc)k.push('cheap');
-  if(d.grow&&!d.perm)k.push('grow');if(/per tutta la partita|per sempre/i.test(t))k.push('perm');if(d.back)k.push('back');if(exOf(c))k.push('ex');if(d.dt)k.push('disc');
+  if(d.grow&&!d.perm)k.push('grow');if(/per tutta la partita|per sempre/i.test(t))k.push('perm');if(d.back)k.push('back');if(exOf(c))k.push('ex');if(d.dt)k.push('disc');if(d.grp)k.push('grp');
   if(/Armatura/.test(t))k.push('blk');if(/TUTTI/.test(t))k.push('all');
   Object.keys(GLST).forEach(w=>{if(new RegExp(w).test(t))k.push(GLST[w])});
   return [...new Set(k)];
@@ -1642,6 +1763,7 @@ function cardHTML(c,o={}){
 }
 function liveNote(c,d){const h=typeof g!=='undefined'&&g&&g.hero;if(!h||!h.hand||!h.hand.includes(c))return '';
   if(d.xc)return ` <i class="gained">Ora X = ${h.energy}.</i>`;
+  if(d.grp&&R&&R.combat){const n=ALLYN(d.grp);return n?` <i class="gained">Combo attiva${!solo&&n>1?' ×'+n:''}!</i>`:''}
   if(d.dt){const n=h.hand.filter(x=>x!==c&&CARDS[x.id].t===d.dt).length;return ` <i class="gained">In mano: ${n}.</i>`}return ''}
 function chips(t,pw){
   let h=Object.entries(t.st).filter(([k,v])=>v).map(([k,v])=>`<span class="chip ${k}" role="button" tabindex="0" onclick="event.stopPropagation();stInfo('${k}')">${STN[k][0]} ${v}</span>`).join('');
@@ -1686,11 +1808,11 @@ function partyHTML(){
   return `<div class="party">${R.order.map(p=>{const P=R.players[p];const on=isOnline(p);let st='';
     if(!on)st='disconnesso';else if(R.phase==='map')st=R.votes[p]?'<span class="ok">✓ ha votato</span>':'sta scegliendo';
     else if(R.phase==='room')st=P.done?'<span class="ok">✓ pronto</span>':'sta scegliendo';
-    return `<div class="pm ${on?'':'off'}">${sprImg(P.cls,30)}<div style="min-width:0;flex:1"><b>${esc(P.name)}${p===ME?' (tu)':''}</b>${hpBar(P.hp,P.max)}<small>${st}</small></div></div>`}).join('')}</div>`;
+    return `<div class="pm ${on?'':'off'}">${sprImg(P.cls,30)}<div style="min-width:0;flex:1"><b><span class="pdot" style="background:${pcol(p)}"></span>${esc(P.name)}${p===ME?' (tu)':''}</b>${hpBar(P.hp,P.max)}<small>${st}</small></div></div>`}).join('')}</div>`;
 }
 
 function render(fxs){
-  const app=$('#app');let h='';
+  const app=$('#app');let h='';if(!R||R.phase!=='map')UI.draw=false;
   if(!R)h=screen==='mp'?mpMenuHTML():titleHTML();
   else{
     ctx(ME);const P=R.players[ME];
@@ -1707,7 +1829,7 @@ function render(fxs){
   }
   if(R&&R.players[ME]){
     const P=R.players[ME];
-    if(!solo&&R.phase==='lobby'){const zj=JSON.stringify(getZaino())+JSON.stringify(getTal());if(UI.sentZ!==R.code+zj){UI.sentZ=R.code+zj;setTimeout(()=>send({t:'loadout',z:getZaino(),tal:getTal()}),0)}}
+    if(!solo&&(R.phase==='lobby'||R.phase==='end')){const zj=JSON.stringify(getZaino())+JSON.stringify(getTal());if(UI.sentZ!==R.code+zj){UI.sentZ=R.code+zj;setTimeout(()=>send({t:'loadout',z:getZaino(),tal:getTal()}),0)}}
     else UI.sentZ=null;
     if(P.zApplied&&UI.zClr!==R.code+R.seed){UI.zClr=R.code+R.seed;setZaino({});if(R.phase==='map'&&R.floor===0)toast('Dallo zaino: '+P.zApplied)}
   }
@@ -1722,6 +1844,9 @@ function render(fxs){
   if(modal&&modal.settings)modal.html=settingsHTML();
   if(modal&&modal.crescita)modal.html=crescitaHTML();
   if(modal&&modal.profilo)modal.html=profiloHTML();
+  if(modal&&modal.dboard)modal.html=dailyBoardHTML();
+  if(modal&&modal.diario)modal.html=diarioHTML();
+  if(R&&!solo&&SET.chat&&!chatOpen&&R.players[ME]&&(R.phase==='lobby'||R.phase==='end')){const n=Math.max(0,((R.chat||[]).length)-chatSeen);h+=`<button class="btn primary chatfab" onclick="toggleChat(true)" aria-label="Apri la chat">Chat${n?`<span class="dot">${n}</span>`:''}</button>`}
   if(modal)h+=`<div class="modal" role="dialog" aria-label="${modal.title}"><div class="mhead"><h3 style="flex:1">${modal.title}</h3>${modal.cancel?'<button class="btn" onclick="closeModal()">Chiudi</button>':''}</div>
     <div class="mbody">${modal.html||pickerGrid()}</div></div>`;
   // mantieni la posizione di scorrimento se la schermata è la stessa
@@ -1740,6 +1865,7 @@ function render(fxs){
   renderChat();
   flushFx(fxs);
   musicFollow();
+  try{seenTrack();if(R&&R.phase==='end')statsAward()}catch(e){}
   if(!glTouch){const hv=document.querySelector('.card[data-gl]:hover');if(hv)glShow(hv);else glHide()}
 }
 
@@ -1766,16 +1892,19 @@ function titleHTML(){
     <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><span style="line-height:0">${ic('i_crown',34)}</span><div style="flex:1;min-width:200px"><b style="font-size:17px">Bottega della Rocca</b><br><span class="muted">${getCrowns()} Corone${zEmpty(getZaino())?'':' · Zaino: '+zText(getZaino())}</span></div><button class="btn" onclick="openBottega()">Apri la bottega</button></div>
     <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><span style="line-height:0">${ic('i_buff',34)}</span><div style="flex:1;min-width:200px"><b style="font-size:17px">Classifiche</b><br><span class="muted">I migliori giocatori in Sopravvivenza, da soli e in gruppo.</span></div><button class="btn" onclick="openBoard('solo')">Guarda le classifiche</button></div>
     <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap;${ACC?'':'border-color:var(--torch)'}"><span style="line-height:0">${ic('i_gear',34)}</span><div style="flex:1;min-width:200px"><b style="font-size:17px">${ACC?'Profilo: '+esc(ACC.nome):'Profilo'}</b><br><span class="muted">${ACC?(ACCS.state==='err'?esc(ACCS.msg):'Progressi salvati online: li ritrovi su telefono e PC.'):'Crea un profilo o accedi per avere gli stessi progressi su telefono e PC.'}</span></div><button class="btn ${ACC?'':'primary'}" onclick="openProfilo()">${ACC?'Gestisci':'Accedi o crea'}</button></div>
+    ${dailyPanel()}
+    ${installPanel()}
+    <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><span style="line-height:0">${ic('event',34)}</span><div style="flex:1;min-width:200px"><b style="font-size:17px">Diario dell'eroe</b><br><span class="muted">Statistiche delle tue partite ed enciclopedia di carte, mostri, reliquie e pozioni scoperti.</span></div><div class="row"><button class="btn" onclick="openDiario('stat')">Statistiche</button><button class="btn" onclick="openDiario('c')">Enciclopedia</button></div></div>
     <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><span style="line-height:0">${sprImg(pickCls,34)}</span><div style="flex:1;min-width:200px"><b style="font-size:17px">Crescita degli eroi</b><br><span class="muted">${Object.keys(CLASSES).map(k=>CLASSES[k].n+' liv. '+heroLv(k)).join(' · ')}</span></div><button class="btn" onclick="openCrescita()">Abilità uniche</button></div>
     <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><span style="line-height:0">${ic('i_note',34)}</span><div style="flex:1;min-width:200px"><b style="font-size:17px">Impostazioni</b><br><span class="muted">Musica ${SET.mute?'disattivata':Math.round(SET.mus*100)+'%'} · Effetti ${SET.mute?'disattivati':Math.round(SET.sfx*100)+'%'} · Chat ${SET.chat?'attiva':'nascosta'}</span></div><button class="btn" onclick="openSettings()">Apri</button></div>
     ${mpContinueHTML()}
     ${sp?`<div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:200px"><b>Partita in corso (da solo)</b><br><span class="muted">${sprImg(sp.cls,22,'inl')} ${CLASSES[sp.cls].n} · Piano ${sv.floor}${sv.lvl?' · Assedio '+sv.lvl:''} · Seed ${sv.seed}</span></div><button class="btn primary" onclick="continueSolo()">Continua</button></div>`:''}
-    <h3>Da solo: scegli il dungeon</h3>
-    ${dungeonPicker(pickDg,"pickDg='%';pickLvl=Math.min(pickLvl,getUnlocked('%'));render()")}
-    <h3>Scegli il tuo eroe</h3>
+    <h3>Da solo: scegli il tuo eroe</h3>
     ${classPicker()}
     <h3>Modalità</h3>
     ${modePicker(pickMode,"pickMode='%';render()")}
+    <h3>Dungeon</h3>
+    ${dungeonPicker(pickDg,"pickDg='%';pickLvl=Math.min(pickLvl,getUnlocked('%'));render()")}
     ${pickMode==='surv'?`<div class="panel"><label for="sname"><b>Il tuo nome per la classifica</b></label><input id="sname" class="txt" style="width:100%;max-width:360px" maxlength="16" value="${esc(myName)}" placeholder="Per esempio: Manu" autocomplete="off"></div>`:''}
     ${pickMode==='surv'?'<p class="note">In Sopravvivenza il Livello di Assedio non si usa: la difficoltà cresce da sola a ogni ciclo, ed è uguale per tutti in classifica.</p>':`<h3>Livello di Assedio</h3>
     ${levelPicker()}`}
@@ -1821,8 +1950,8 @@ function lobbyHTML(){
       ${host&&p!==ME?`<button class="btn" onclick="send({t:'kick',p:'${p}'})" aria-label="Rimuovi ${esc(P.name)}">✕</button>`:''}</div>`}).join('')}</div>
     <h3>Scegli il tuo eroe</h3>
     ${classPicker()}
-    <h3>Dungeon</h3>${host?dungeonPicker(R.ldg||'rocca',"send({t:'dg',d:'%'})"):`<p class="muted">L'host ha scelto: <b style="color:var(--fg)">${DUNGEONS[R.ldg||'rocca'].n}</b></p>`}
     <h3>Modalità</h3>${host?modePicker(R.lmode||'norm',"send({t:'mode',m:'%'})"):`<p class="muted">L'host ha scelto: <b style="color:var(--fg)">${R.lmode==='surv'?'Sopravvivenza':'Normale'}</b></p>`}
+    <h3>Dungeon</h3>${host?dungeonPicker(R.ldg||'rocca',"send({t:'dg',d:'%'})"):`<p class="muted">L'host ha scelto: <b style="color:var(--fg)">${DUNGEONS[R.ldg||'rocca'].n}</b></p>`}
     ${host?`${R.lmode==='surv'?'<p class="note">In Sopravvivenza il Livello di Assedio non si usa: la difficoltà cresce da sola a ogni ciclo.</p>':`<h3>Livello di Assedio</h3>${levelPicker()}`}
       <div class="seedrow"><label for="seed" class="muted">Seed (opzionale)</label><input id="seed" maxlength="12" value="${esc(UI.seed)}" oninput="UI.seed=this.value" placeholder="casuale" autocomplete="off">
       <button class="btn primary" onclick="startGame()" style="padding:10px 22px;font-size:17px" ${notReady.length?'aria-disabled="true"':''}>Avvia la partita</button></div>
@@ -1845,10 +1974,15 @@ function mapScreen(){
   const av=new Set(availNodes().map(n=>n.y+','+n.x));
   const tally={};active().forEach(p=>{const v=R.votes[p];if(v)tally[v]=(tally[v]||0)+1});const myV=R.votes[ME];
   let lines='',nodes='';
+  const mine=planValid((R.plans||{})[ME]),mlast=mine[mine.length-1];
+  const drawOk=n=>{if(solo||!UI.draw)return false;if(mlast&&mlast[0]===n.y&&mlast[1]===n.x)return true;const prev=mlast?map[mlast[0]][mlast[1]]:(R.pos?map[R.pos.y][R.pos.x]:null);return prev?(prev.y+1===n.y&&prev.next.includes(n.x)):n.y===0};
+  let plans='';if(!solo){const ids=R.order.filter(p=>R.players[p]&&planValid((R.plans||{})[p]).length);
+    ids.forEach((p,i)=>{const pl=planValid(R.plans[p]);const off=(i-(ids.length-1)/2)*6;const pts=(R.pos?[[R.pos.y,R.pos.x]]:[]).concat(pl).map(([y,x])=>{const[a,b]=pos(map[y][x]);return (a+off)+','+(b+off*.4)});
+      plans+=`<g class="plan" style="--pc:${pcol(p)}"><polyline points="${pts.join(' ')}"/>${pl.map(([y,x])=>{const[a,b]=pos(map[y][x]);return `<circle cx="${a+off}" cy="${b+off*.4}" r="6"/>`}).join('')}</g>`})}
   map.forEach(row=>row.forEach(n=>{if(!n)return;const[x1,y1]=pos(n);
     n.next.forEach(nx=>{const m=map[n.y+1][nx];const[x2,y2]=pos(m);lines+=`<line class="edge ${doneE.has(n.y+','+n.x+'>'+m.y+','+m.x)?'done':''}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`});
-    const k=n.y+','+n.x;const cur=R.pos&&R.pos.y===n.y&&R.pos.x===n.x;const r=n.type==='boss'?44:24;
-    nodes+=`<g data-k="${k}" class="node ${UI.anim&&UI.anim.cur===k?'spin':''} ${UI.anim&&UI.anim.done&&UI.anim.win===k?'win':''} ${done.has(k)?'done':''} ${cur?'cur':''} ${av.has(k)?'avail':''} ${myV===k?'voted':''} ${n.type==='boss'?'boss':''}" ${av.has(k)?`onclick="vote(${n.y},${n.x})" role="button" tabindex="0" aria-label="${NODEN[n.type]}, piano ${n.y+1}" onkeydown="if(event.key==='Enter')vote(${n.y},${n.x})"`:''}>
+    const k=n.y+','+n.x;const cur=R.pos&&R.pos.y===n.y&&R.pos.x===n.x;const r=n.type==='boss'?44:24;const tap=drawOk(n);
+    nodes+=`<g data-k="${k}" class="node ${UI.anim&&UI.anim.cur===k?'spin':''} ${UI.anim&&UI.anim.done&&UI.anim.win===k?'win':''} ${done.has(k)?'done':''} ${cur?'cur':''} ${av.has(k)&&!UI.draw?'avail':''} ${tap&&UI.draw?'drawable':''} ${myV===k?'voted':''} ${n.type==='boss'?'boss':''}" ${(UI.draw?tap:av.has(k))?`onclick="nodeTap(${n.y},${n.x})" role="button" tabindex="0" aria-label="${NODEN[n.type]}, piano ${n.y+1}" onkeydown="if(event.key==='Enter')nodeTap(${n.y},${n.x})"`:''}>
       <circle cx="${x1}" cy="${y1}" r="${r}"/><image href="${spr(n.type)}" x="${x1-r*.62}" y="${y1-r*.62}" width="${r*1.24}" height="${r*1.24}" style="image-rendering:pixelated"/><title>${NODEN[n.type]}</title>
       ${tally[k]&&!solo?`<circle class="vbadge" cx="${x1+r*.8}" cy="${y1-r*.8}" r="12"/><text class="vbadge-t" x="${x1+r*.8}" y="${y1-r*.8}">${tally[k]}</text>`:''}</g>`;
   }));
@@ -1858,7 +1992,9 @@ function mapScreen(){
   if(va){const wn=R.map[+va.win.split(',')[0]][+va.win.split(',')[1]];const fin=UI.anim&&UI.anim.done;
     banner=`<div class="votebanner ${fin?'fin':''}" role="status">${va.tie?(fin?`La sorte ha scelto: <b>${NODEN[wn.type]}</b>`:`Pareggio! ${va.opts.map(k=>va.tally[k]).join(' a ')} · la sorte decide...`):
       (fin?`Si va: <b>${NODEN[wn.type]}</b> (${va.tally[va.win]} voti contro ${Object.values(va.tally).reduce((a,b)=>a+b,0)-va.tally[va.win]})`:`Vince la maggioranza...`)}</div>`}
-  return `<main class="flush">${banner}<div class="mapwrap" id="mapwrap"><svg class="mapsvg" id="mapsvg" viewBox="0 0 ${W} ${H}" aria-label="Mappa della Rocca">${lines}${nodes}</svg></div>
+  const tools=solo||R.voteAnim?'':`<div class="plantools">${UI.draw?`<span class="pdot" style="background:${pcol(ME)}"></span><span class="muted" style="flex:1;min-width:180px">Tocca i nodi uno dopo l'altro per disegnare il tuo percorso: gli altri lo vedono col tuo colore. Tocca l'ultimo nodo per toglierlo.</span>`:'<span class="muted" style="flex:1;min-width:180px">Proponi la strada al gruppo disegnando un percorso di prova.</span>'}
+    ${mine.length?`<button class="btn" onclick="send({t:'plan',p:[]})">Cancella il mio</button>`:''}<button class="btn ${UI.draw?'primary':''}" onclick="UI.draw=!UI.draw;render()">${UI.draw?'Fine, torna a votare':'Traccia un percorso'}</button></div>`;
+  return `<main class="flush">${banner}${tools}<div class="mapwrap" id="mapwrap"><svg class="mapsvg ${UI.draw?'drawing':''}" id="mapsvg" viewBox="0 0 ${W} ${H}" aria-label="Mappa della Rocca">${lines}${plans}${nodes}</svg></div>
     <div class="legend">${Object.keys(NODEIC).map(k=>`<span>${sprImg(k,16,'inl')} ${NODEN[k]}</span>`).join('')}<span style="color:var(--torch2)">${msg}</span></div></main>`;
 }
 function scrollMap(){
@@ -1887,13 +2023,13 @@ function combatScreen(){
       <div class="energy" title="Energia">${h.energy}</div>
       <div class="ent hero ${h.down?'down':''} ${sel&&sel.ally&&!h.down?'target':''}" id="ent-h-${ME}" onclick="clickHero('${ME}')"><span class="face">${sprImg(run.cls,60,'idle')}</span><div class="info"><span class="nm">${solo?cl.n:esc(run.name)} ${h.blk?`<span class="blk">${ic('i_shield',12)} ${h.blk}</span>`:''}</span>${hpBar(run.hp,run.max)}${chips(h,h.pw)}</div></div>
     </div></div>
-    <div class="hand">${hand||`<p class="muted" style="align-self:center">${h.ended?'Hai finito il turno.':'Nessuna carta in mano.'}</p>`}</div>
+    <div class="hand">${hand||`<p class="muted" style="align-self:center">${h.ended?(solo?'Hai finito il turno.':'Hai finito il turno. Finché gli altri giocano puoi ancora ripensarci con «Riprendi il turno».'):'Nessuna carta in mano.'}</p>`}</div>
     <div class="pilebar">
       <button class="btn" onclick="viewPile('draw')">Pesca ${h.draw.length}</button>
       <button class="btn" onclick="viewPile('disc')">Scarti ${h.disc.length}</button>
       ${h.exh.length?`<button class="btn" onclick="viewPile('exh')">Esaurite ${h.exh.length}</button>`:''}
       <span class="grow muted" style="font-size:13px">${status}</span>
-      <button class="btn primary" onclick="endTurnBtn()" ${g.busy||h.ended||h.down?'disabled':''}>Fine turno</button>
+      ${h.ended&&h.undo&&!g.busy&&!h.down&&!solo?`<button class="btn" onclick="send({t:'unend'})" title="Riprendi il turno finché gli altri stanno ancora giocando">Riprendi il turno</button>`:`<button class="btn primary" onclick="endTurnBtn()" ${g.busy||h.ended||h.down?'disabled':''}>Fine turno</button>`}
     </div></div></main>`;
 }
 
@@ -1953,7 +2089,7 @@ function treasureScreen(){
 }
 function endScreen(){
   const L=R.lvl||0;
-  if(R.win&&R.players[ME]&&UI.unlockSeed!==R.code+R.seed+R.t0){UI.unlockSeed=R.code+R.seed+R.t0;UI.unlocked=null;UI.newDg=null;const dg=R.dg||'rocca';
+  if(R.win&&!R.daily&&R.players[ME]&&UI.unlockSeed!==R.code+R.seed+R.t0){UI.unlockSeed=R.code+R.seed+R.t0;UI.unlocked=null;UI.newDg=null;const dg=R.dg||'rocca';
     const had=Object.keys(DUNGEONS).filter(dgUnlocked);markBeaten(dg);UI.newDg=Object.keys(DUNGEONS).find(k=>dgUnlocked(k)&&!had.includes(k))||null;
     if(L<MAXLVL&&getUnlocked(dg)<=L){setUnlocked(L+1,dg);UI.unlocked=L+1;pickLvl=L+1}}
   const kills=R.order.reduce((s,p)=>s+(R.players[p].kills||0),0);
@@ -1961,15 +2097,16 @@ function endScreen(){
   const score=Math.round((R.floor*10+kills*3+(R.win?150:0))*scoreMult(L));
   return `<main><div class="wrap"><h1 style="font-size:clamp(40px,8vw,64px)">${R.win?DG().winT:(solo?'Sei caduto':'Il gruppo è caduto')}</h1>
     <p class="lede muted">${R.win?DG().winD:DG().loseD}</p>
+    ${summaryHTML()}
     ${xpPanel()}
     ${(()=>{const n=crownsAward();return n?`<div class="panel" style="flex-direction:row;align-items:center;gap:12px;border-color:var(--torch)">${ic('i_crown',36)}<div><b style="color:var(--torch2);font-size:18px">+${n} Corone!</b><br><span class="muted">Spendile nella Bottega della Rocca prima della prossima partita. Ora ne hai ${getCrowns()}.</span></div></div>`:''})()}
     ${UI.newDg?`<div class="panel" style="flex-direction:row;align-items:center;gap:12px;border-color:var(--heal)">${sprImg(DUNGEONS[UI.newDg].boss,56)}<div><b style="color:#bff0c9;font-size:18px">Nuovo dungeon sbloccato: ${DUNGEONS[UI.newDg].n}!</b><br><span class="muted">${DUNGEONS[UI.newDg].desc}</span></div></div>`:''}
     ${UI.unlocked?`<div class="panel" style="border-color:var(--torch)"><b style="color:var(--torch2);font-size:18px">Livello di Assedio ${UI.unlocked} sbloccato (${DG().n})!</b><span class="muted">${lvlDesc(UI.unlocked)}</span></div>`:''}
+    ${R.daily?dailyEndHTML(score,kills):''}
     <div class="endstats"><div><b>${score}</b>Punteggio${L?` (×${scoreMult(L)})`:''}</div><div><b>${L}</b>Livello di Assedio</div><div><b>${R.floor}</b>Piano raggiunto</div><div><b>${kills}</b>Nemici uccisi</div></div>
     ${solo?'':`<div class="plist">${R.order.map(p=>{const P=R.players[p];return `<div class="prow">${sprImg(P.cls,32)}<div style="flex:1"><span class="nm">${esc(P.name)}</span><br><span class="muted">${CLASSES[P.cls].n} · ${P.kills||0} nemici · ${P.deck.length} carte</span></div></div>`}).join('')}</div>`}
     <p class="muted">Seed della partita: <b style="color:var(--fg)">${R.seed}</b>. Condividilo e sfida altri gruppi a fare meglio.</p>
-    <div class="row">${solo?`<button class="btn primary" onclick="R=null;g=null;screen='title';render()">Nuova partita</button>`:
-      (R.host===ME?`<button class="btn primary" onclick="send({t:'again'})">Nuova partita con il gruppo</button>`:'<span class="muted">L\'host può avviare una nuova partita.</span>')+'<button class="btn" onclick="leaveRoom(true)">Esci dalla stanza</button>'}</div></div></main>`;
+    <div class="row">${againBtns()}</div></div></main>`;
 }
 
 
@@ -2024,10 +2161,10 @@ function bottegaHTML(){
   if(z.upg)items.push([ic('rest',22),2*z.upg+' carte iniziali potenziate',"refundMeta('upg')"]);
   return `<div class="wrap" style="gap:14px">
    <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px">${ic('i_crown',40)}<div style="flex:1;min-width:200px"><b style="font-size:22px;color:var(--torch2)">${cr} Corone</b><br>
-     <span class="muted">Le guadagni completando un dungeon (${DUNGEONS.rocca.crowns} nella Rocca, ${DUNGEONS.cripte.crowns} nelle Cripte, più 20 per ogni Livello di Assedio) e in Sopravvivenza. Ciò che compri qui va nello zaino e lo usi nella prossima partita, da solo o in gruppo.</span></div></div>
+     <span class="muted">Le guadagni completando un dungeon (${DUNGEONS.rocca.crowns} nella Rocca, ${DUNGEONS.cripte.crowns} nelle Cripte, ${DUNGEONS.abisso.crowns} nell'Abisso, più 20 per ogni Livello di Assedio) e in Sopravvivenza. Ciò che compri qui va nello zaino e lo usi nella prossima partita, da solo o in gruppo.</span></div></div>
    <div class="panel"><h3>Zaino per la prossima partita</h3>${items.length?`<div class="plist">${items.map(([icn,n,on])=>`<div class="prow">${icn}<span style="flex:1">${n}</span><button class="btn" onclick="${on}">Rimuovi e rimborsa</button></div>`).join('')}</div>`:'<p class="muted">Lo zaino è vuoto.</p>'}</div>
    <div class="panel"><h3>Pozioni <span class="muted" style="font-size:14px">(massimo ${ZCAP.potions})</span></h3><div class="shopgrid">${Object.keys(POTIONS).map(k=>box(potIc(k,40),POTIONS[k].n,POTIONS[k].d,META.potion,`buyMeta('potions','${k}')`,z.potions.length>=ZCAP.potions)).join('')}</div></div>
-   <div class="panel"><h3>Reliquie <span class="muted" style="font-size:14px">(massimo ${ZCAP.relics})</span></h3><div class="shopgrid">${(dgUnlocked('cripte')?ALL_RELICS:RELIC_POOL).map(k=>box(relIc(k,40),RELICS[k].n,RELICS[k].d,META.relic,`buyMeta('relics','${k}')`,z.relics.includes(k)||z.relics.length>=ZCAP.relics)).join('')}</div></div>
+   <div class="panel"><h3>Reliquie <span class="muted" style="font-size:14px">(massimo ${ZCAP.relics})</span></h3><div class="shopgrid">${[...RELIC_POOL,...(dgUnlocked('cripte')?CRYPT_RELICS:[]),...(dgUnlocked('abisso')?ABYSS_RELICS:[])].map(k=>box(relIc(k,40),RELICS[k].n,RELICS[k].d,META.relic,`buyMeta('relics','${k}')`,z.relics.includes(k)||z.relics.length>=ZCAP.relics)).join('')}</div></div>
    <div class="panel"><h3>Altro</h3><div class="shopgrid">
      ${box(ic('i_coin',40),'Borsa del Mercenario','Inizi con 50 oro in più.',META.gold,"buyMeta('gold')",z.gold>=ZCAP.gold)}
      ${box(ic('i_heal',40),'Elisir di Vigore','Inizi con 10 PV massimi in più.',META.hp,"buyMeta('hp')",z.hp>=ZCAP.hp)}
@@ -2041,9 +2178,24 @@ function crownsAward(){
   if(R.mode==='surv'&&R.cycle>1)markBeaten(R.dg||'rocca');
   const n=R.mode==='surv'?Math.floor(totalFloors()/16*40*(DG().crowns/60)):DG().crowns+20*(R.lvl||0);setCrowns(getCrowns()+n);done.push(key);store(PK,JSON.stringify(done.slice(-50)));UI.lastAward={key,n};return n;
 }
-ACT.loadout=(a,P)=>{if(R.phase==='lobby'){P.loadout=cleanZ(a.z);P.tal=cleanTal(a.tal)}};
+ACT.loadout=(a,P)=>{if(R.phase==='lobby'||R.phase==='end'){P.loadout=cleanZ(a.z);P.tal=cleanTal(a.tal)}};
 
 
+
+
+/* ================= RIEPILOGO DI FINE PARTITA ================= */
+function summaryHTML(){
+  const ps=R.order.map(p=>R.players[p]).filter(P=>P&&P.stx);if(!ps.length)return '';
+  const fav=P=>{const e=Object.entries(P.stx.cards||{}).sort((a,b)=>b[1]-a[1])[0];return e&&CARDS[e[0]]?`${CARDS[e[0]].n} (${e[1]} volte)`:'—'};
+  const best=(k)=>ps.length>1?ps.reduce((a,b)=>(b.stx[k]>a.stx[k]?b:a)):null;
+  const aw=[];if(ps.length>1){const d=best('dmg'),h=best('heal'),b=best('blk'),t=best('taken'),k=ps.reduce((a,b)=>((b.kills||0)>(a.kills||0)?b:a));
+    if(d.stx.dmg)aw.push(['Il più distruttivo',d,d.stx.dmg+' danni']);if(h.stx.heal)aw.push(['Il guaritore',h,h.stx.heal+' PV curati']);if(b.stx.blk)aw.push(['Il muro',b,b.stx.blk+' Armatura']);
+    if(t.stx.taken)aw.push(['Il parafulmine',t,t.stx.taken+' danni subiti']);if(k.kills)aw.push(['Lo sterminatore',k,k.kills+' nemici'])}
+  return `<div class="panel"><h3>Riepilogo della partita</h3>
+    ${aw.length?`<div class="awards">${aw.map(([t,P,v])=>`<div class="award">${sprImg(P.cls,32)}<div><small>${t}</small><b>${esc(P.name)}</b><span class="muted">${v}</span></div></div>`).join('')}</div>`:''}
+    <div class="sumtab" role="table">${ps.map(P=>`<div class="sumrow" role="row">${sprImg(P.cls,28)}<div class="sumname"><b>${esc(solo?CLASSES[P.cls].n:P.name)}</b><span class="muted">Carta preferita: ${fav(P)}</span></div>
+      <div class="sumcells"><span><b>${P.stx.dmg}</b>danni</span><span><b>${P.stx.top}</b>colpo max</span><span><b>${P.stx.heal}</b>cure</span><span><b>${P.stx.blk}</b>armatura</span><span><b>${P.stx.taken}</b>subiti</span><span><b>${P.kills||0}</b>uccisioni</span></div></div>`).join('')}</div></div>`;
+}
 
 /* ================= CRESCITA DEGLI EROI ================= */
 const XK='valdombra-esperienza',TK='valdombra-talenti',XPK='valdombra-xp-premiati';
@@ -2134,12 +2286,12 @@ function survEndScreen(L,kills){
   if(R.lbId&&UI.lbFor!==R.lbId){UI.lbFor=R.lbId;UI.lb=null;UI.lbDg=R.dg||'rocca';fetchBoard(mode).then(r=>{UI.lb=r;render()})}
   return `<main><div class="wrap"><h1 style="font-size:clamp(38px,8vw,60px)">Sopravvivenza terminata</h1>
     <p class="lede muted">${solo?'Hai resistito':'Il gruppo ha resistito'} per <b style="color:var(--fg)">${totalFloors()} piani</b>${R.cycle>1?` e sconfitto ${DG().bossN} ${R.cycle-1} ${R.cycle>2?'volte':'volta'}`:''}.<br><span style="font-size:15px">${DG().n}</span></p>
+    ${summaryHTML()}
     ${xpPanel()}
     ${(()=>{const n=crownsAward();return n?`<div class="panel" style="flex-direction:row;align-items:center;gap:12px;border-color:var(--torch)">${ic('i_crown',36)}<div><b style="color:var(--torch2);font-size:18px">+${n} Corone!</b><br><span class="muted">Ora ne hai ${getCrowns()}.</span></div></div>`:''})()}
     <div class="endstats"><div><b>${score}</b>Punteggio${L?` (×${scoreMult(L)})`:''}</div><div><b>${totalFloors()}</b>Piani superati</div><div><b>${R.cycle}</b>Ciclo raggiunto</div><div><b>${kills}</b>Nemici uccisi</div></div>
     <div class="panel"><h3>Classifica ${solo?'giocatore singolo':'cooperativa'}</h3>${boardBody(UI.lbMsg?{error:UI.lbMsg}:R.lbId?UI.lb:null,R.lbId)}</div>
-    <div class="row">${solo?`<button class="btn primary" onclick="R=null;g=null;UI.lbMsg='';screen='title';render()">Nuova partita</button>`:
-      (R.host===ME?`<button class="btn primary" onclick="UI.lbMsg='';send({t:'again'})">Nuova partita con il gruppo</button>`:'<span class="muted">L\'host può avviare una nuova partita.</span>')+'<button class="btn" onclick="UI.lbMsg=\'\';leaveRoom(true)">Esci dalla stanza</button>'}</div></div></main>`;
+    <div class="row">${againBtns()}</div></div></main>`;
 }
 function boardBody(r,mine){
   if(!r)return '<p class="muted">Carico la classifica...</p>';
@@ -2160,10 +2312,19 @@ let chatOpen=false,chatSeen=0;
 ACT.chat=(a,P,pid)=>{const t=String(a.text||'').trim().slice(0,200);if(!t)return;R.chat=(R.chat||[]).concat({p:pid,n:P.name,t}).slice(-80)};
 function toggleChat(v){chatOpen=v==null?!chatOpen:v;$('#chat').hidden=!chatOpen;if(chatOpen){chatSeen=(R&&R.chat||[]).length;renderChat();setTimeout(()=>{const i=$('#chatin');if(i)i.focus()},50)}render()}
 function quickMsg(b){send({t:'chat',text:b.textContent})}
+const QUICK={
+  lobby:['Ciao a tutti!','Non sono ancora pronto','Sono pronto!','Puoi startare!','Aspettate un attimo','Che eroe fate?','Io faccio il Chierico','Che dungeon facciamo?'],
+  map:['Andiamo a sinistra!','Andiamo a destra!','Andiamo dritti','Guardate il mio percorso','Mi serve un falò','Passiamo dal mercante','Evitiamo le élite','Va bene, vi seguo'],
+  combat:['Attacchiamo quello','Ho poca vita!','Proteggetemi','Gioco dopo di te','Bel colpo!','Finisco il turno'],
+  end:['Bella partita!','Rigiochiamo?','Gg!','Ciao, alla prossima!'],
+};
+function quickHTML(){const ph=!R?'lobby':R.phase==='lobby'?'lobby':R.phase==='combat'?'combat':R.phase==='end'?'end':'map';
+  return QUICK[ph].map(t=>`<button class="btn" type="button" onclick="quickMsg(this)">${t}</button>`).join('')}
 function renderChat(){
   const list=(R&&R.chat)||[];
   if(!R||solo){$('#chat').hidden=true;chatOpen=false;chatSeen=0;return}
   if(!SET.chat){$('#chat').hidden=true;chatOpen=false;chatSeen=list.length;return}
+  const qh=quickHTML(),qe=$('#chatquick');if(qe&&qe.dataset.k!==qh){qe.innerHTML=qh;qe.dataset.k=qh}
   if(list.length>chatSeen&&!chatOpen){const m=list[list.length-1];if(m.p!==ME){if(SET.chatToast)toast(m.n+': '+m.t);sfx('msg')}}
   if(chatOpen)chatSeen=list.length;
   const log=$('#chatlog');const atBottom=log.scrollHeight-log.scrollTop-log.clientHeight<40;
@@ -2187,7 +2348,7 @@ function startVoteAnim(va){
 }
 function paintAnim(){document.querySelectorAll('.mapsvg .node').forEach(n=>{n.classList.toggle('spin',!!UI.anim&&n.dataset.k===UI.anim.cur)})}
 /* ================= IMPOSTAZIONI ================= */
-const VERSION='v3.2',VDATE='16/11';
+const VERSION='v4.1',VDATE='16/11';
 const SET_K='valdombra-impostazioni';
 const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:true};
 let SET=(()=>{try{return Object.assign({},SET_DEF,JSON.parse(load(SET_K)||'{}'))}catch(e){return Object.assign({},SET_DEF)}})();
@@ -2221,7 +2382,7 @@ function settingsHTML(){
       <div class="srow"><div class="lab">Versione</div><b>${VERSION} · ${VDATE}</b></div>
       <div class="srow"><div class="lab">Profilo</div><b>${ACC?esc(ACC.nome):'nessuno'}</b><button class="btn" onclick="openProfilo()">${ACC?'Gestisci':'Accedi'}</button></div>
       ${inRoom?`<div class="srow"><div class="lab">Stanza</div><b>${R.code}</b></div><div class="srow"><div class="lab">Connessione</div><b>${isHost?'Sei tu a guidare la stanza':'Collegato'}</b></div>`:''}
-      <p class="muted" style="font-size:13px">Novità di questa versione: profilo online, per avere gli stessi progressi su telefono e PC.</p>
+      <p class="muted" style="font-size:13px">Novità di questa versione: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
       <p class="muted" style="font-size:13px">Le impostazioni (audio, chat, grafica) valgono solo per questo dispositivo. I progressi di gioco seguono il tuo profilo.</p>
       <div><button class="btn" onclick="SET=Object.assign({},SET_DEF);saveSet();render()">Ripristina le impostazioni</button></div>
     </div></div>`;
@@ -2242,6 +2403,9 @@ const AU=(()=>{
     boss:{n:'Il respiro del drago',bpm:150,root:48,sc:HAR,ch:[[0,'m'],[-4,'M'],[1,'M'],[-5,'M']],lead:'sawtooth',bass:'pulse',dr:3,arp:0,lv:.12},
     cmap:{n:'Corridoi di brina',bpm:84,root:54,sc:MIN,ch:[[0,'m'],[-4,'M'],[0,'m'],[1,'M']],lead:'sine',bass:'long',dr:1,arp:1,lv:.24},
     ccombat:{n:'Ossa nel ghiaccio',bpm:128,root:50,sc:HAR,ch:[[0,'m'],[1,'M'],[0,'m'],[-2,'M']],lead:'triangle',bass:'pulse',dr:2,arp:0,lv:.27},
+    amap:{n:'Fornaci profonde',bpm:92,root:50,sc:HAR,ch:[[0,'m'],[1,'M'],[-2,'M'],[1,'M']],lead:'square',bass:'walk',dr:1,arp:1,lv:.12},
+    acombat:{n:'Martelli e zolfo',bpm:146,root:47,sc:HAR,ch:[[0,'m'],[1,'M'],[0,'m'],[-4,'M']],lead:'sawtooth',bass:'pulse',dr:3,arp:0,lv:.1},
+    fboss:{n:'Il Tiranno si desta',bpm:160,root:45,sc:HAR,ch:[[0,'m'],[1,'M'],[-4,'M'],[-5,'M']],lead:'square',bass:'pulse',dr:3,arp:0,lv:.13},
     victory:{n:'Gloria a Valdombra',bpm:108,root:60,sc:MAJ,ch:[[0,'M'],[5,'M'],[7,'M'],[0,'M']],lead:'square',bass:'walk',dr:1,arp:1,lv:.11},
   };
   const RHY=[[1,0,1,0,1,1,1,0],[1,2,2,0,1,0,1,0],[1,0,0,1,0,0,1,0],[1,2,1,1,1,2,0,0],[1,1,1,2,1,0,1,0],[1,2,2,2,1,2,2,0],[0,0,1,0,1,1,1,0]];
@@ -2337,10 +2501,10 @@ const AU=(()=>{
 function sfx(k){AU.sfx(k)}
 function musicCtx(){
   if(!R||R.phase==='lobby'||!R.players[ME])return 'menu';
-  const cr=R.dg==='cripte';
-  if(R.phase==='combat'&&R.combat)return R.combat.kind==='boss'?'boss':cr?'ccombat':'combat';
+  const cr=R.dg==='cripte',ab=R.dg==='abisso';
+  if(R.phase==='combat'&&R.combat)return R.combat.kind==='boss'?(ab?'fboss':'boss'):ab?'acombat':cr?'ccombat':'combat';
   if(R.phase==='end')return R.win?'victory':'menu';
-  return cr?'cmap':'map';
+  return ab?'amap':cr?'cmap':'map';
 }
 function musicFollow(){
   AU.set(musicCtx());
@@ -2355,22 +2519,149 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')AU.suspend();else AU.unlock()});
 applySet();
 
+/* ================= DIARIO: ENCICLOPEDIA E STATISTICHE ================= */
+const SEEN_K='valdombra-visti',STAT_K='valdombra-statistiche',STATP_K='valdombra-stat-premiati';
+let SEEN=null;
+function getSeen(){if(SEEN)return SEEN;let o=null;try{o=JSON.parse(load(SEEN_K))}catch(e){}o=o&&typeof o==='object'?o:{};SEEN={c:new Set(o.c||[]),e:new Set(o.e||[]),r:new Set(o.r||[]),p:new Set(o.p||[])};return SEEN}
+function seenAdd(k,ids){const S=getSeen();let ch=false;ids.forEach(id=>{if(id&&!S[k].has(id)){S[k].add(id);ch=true}});return ch}
+let seenT=null;
+function seenTrack(){
+  if(!R||!R.players[ME]||R.phase==='lobby')return;const P=R.players[ME];let ch=false;
+  ch=seenAdd('c',(P.deck||[]).map(c=>c.id))||ch;ch=seenAdd('r',P.relics||[])||ch;ch=seenAdd('p',P.potions||[])||ch;
+  const rw=P.reward;if(rw){ch=seenAdd('c',rw.cards||[])||ch;ch=seenAdd('r',[rw.relic])||ch;ch=seenAdd('p',[rw.potion])||ch}
+  const sh=P.shop;if(sh){ch=seenAdd('c',(sh.cards||[]).map(x=>x.id))||ch;ch=seenAdd('r',(sh.relics||[]).map(x=>x.id))||ch;ch=seenAdd('p',(sh.pots||sh.potions||[]).map(x=>x.id))||ch}
+  if(P.treasure)ch=seenAdd('r',[P.treasure.relic])||ch;
+  if(R.combat){ch=seenAdd('e',R.combat.enemies.map(e=>e.id))||ch;const h=R.combat.heroes[ME];if(h)ch=seenAdd('c',[...h.hand,...h.draw,...h.disc,...h.exh].map(c=>c.id))||ch}
+  if(ch){clearTimeout(seenT);seenT=setTimeout(()=>{const S=getSeen();store(SEEN_K,JSON.stringify({c:[...S.c],e:[...S.e],r:[...S.r],p:[...S.p]}))},800)}
+}
+function getStats(){try{const o=JSON.parse(load(STAT_K));return o&&typeof o==='object'?o:{}}catch(e){return{}}}
+function statsAward(){
+  if(!R||R.phase!=='end'||!R.players[ME])return;const key=R.code+':'+R.seed+':'+(R.t0||0);let done=[];try{done=JSON.parse(load(STATP_K))||[]}catch(e){}
+  if(done.includes(key))return;done.push(key);store(STATP_K,JSON.stringify(done.slice(-50)));
+  const P=R.players[ME],st=getStats(),x=P.stx||{},fl=R.mode==='surv'?totalFloors():R.floor,win=!!R.win&&R.mode!=='surv';
+  const inc=(o,k,n=1)=>{o[k]=(o[k]||0)+n};
+  inc(st,'runs');if(win)inc(st,'wins');if(!solo)inc(st,'coop');if(R.mode==='surv')inc(st,'surv');if(R.daily)inc(st,'daily');
+  inc(st,'kills',P.kills||0);inc(st,'dmg',x.dmg||0);inc(st,'heal',x.heal||0);inc(st,'blk',x.blk||0);inc(st,'floors',fl);
+  st.top=Math.max(st.top||0,x.top||0);st.best=Math.max(st.best||0,fl);if(R.mode==='surv')st.survBest=Math.max(st.survBest||0,fl);
+  st.cls=st.cls||{};const c=st.cls[P.cls]=st.cls[P.cls]||{};inc(c,'runs');if(win)inc(c,'wins');c.best=Math.max(c.best||0,fl);
+  st.dg=st.dg||{};const d=st.dg[R.dg||'rocca']=st.dg[R.dg||'rocca']||{};inc(d,'runs');if(win)inc(d,'wins');if(win)d.maxLvl=Math.max(d.maxLvl||0,R.lvl||0);
+  st.cards=st.cards||{};Object.entries(x.cards||{}).forEach(([k,n])=>inc(st.cards,k,n));
+  store(STAT_K,JSON.stringify(st));
+}
+function openDiario(tab){UI.diTab=tab||UI.diTab||'stat';modal={title:'Diario dell\'eroe',diario:true,cancel:true,list:[]};render()}
+function diarioHTML(){
+  const t=UI.diTab||'stat',S=getSeen();
+  const allC=Object.keys(CARDS).filter(k=>CARDS[k].cl!=='stato'),allE=Object.keys(ENEMIES),allR=Object.keys(RELICS),allP=Object.keys(POTIONS);
+  const tabs=[['stat','Statistiche'],['c',`Carte ${allC.filter(k=>S.c.has(k)).length}/${allC.length}`],['e',`Mostri ${allE.filter(k=>S.e.has(k)).length}/${allE.length}`],['r',`Reliquie ${allR.filter(k=>S.r.has(k)).length}/${allR.length}`],['p',`Pozioni ${allP.filter(k=>S.p.has(k)).length}/${allP.length}`]];
+  let body='';
+  if(t==='stat'){const st=getStats(),pct=(a,b)=>b?Math.round(a/b*100)+'%':'—';const fav=Object.entries(st.cards||{}).sort((a,b)=>b[1]-a[1]).slice(0,3).filter(e=>CARDS[e[0]]);
+    body=`<div class="endstats"><div><b>${st.runs||0}</b>Partite</div><div><b>${st.wins||0}</b>Vittorie</div><div><b>${pct(st.wins||0,(st.runs||0)-(st.surv||0))}</b>Vittorie su partite normali</div><div><b>${st.best||0}</b>Piano più alto</div></div>
+      <div class="endstats"><div><b>${st.kills||0}</b>Nemici uccisi</div><div><b>${st.dmg||0}</b>Danni totali</div><div><b>${st.top||0}</b>Colpo più forte</div><div><b>${st.heal||0}</b>PV curati</div></div>
+      <div class="endstats"><div><b>${st.coop||0}</b>Partite con amici</div><div><b>${st.survBest||0}</b>Record in Sopravvivenza</div><div><b>${st.daily||0}</b>Sfide del giorno</div><div><b>${st.floors||0}</b>Piani esplorati</div></div>
+      <div class="panel"><h3>Per eroe</h3><div class="plist">${Object.keys(CLASSES).map(k=>{const c=(st.cls||{})[k]||{};return `<div class="prow">${sprImg(k,30)}<div style="flex:1"><b>${CLASSES[k].n}</b> · livello ${heroLv(k)}<br><span class="muted">${c.runs||0} partite · ${c.wins||0} vittorie · piano migliore ${c.best||0}</span></div></div>`}).join('')}</div></div>
+      <div class="panel"><h3>Per dungeon</h3><div class="plist">${Object.keys(DUNGEONS).map(k=>{const d=(st.dg||{})[k]||{};return `<div class="prow">${sprImg(DUNGEONS[k].boss,30)}<div style="flex:1"><b>${DUNGEONS[k].n}</b><br><span class="muted">${d.runs||0} partite · ${d.wins||0} vittorie${d.wins?' · Assedio massimo vinto: '+(d.maxLvl||0):''}</span></div></div>`}).join('')}</div></div>
+      ${fav.length?`<div class="panel"><h3>Carte che usi di più</h3><div class="cardgrid">${fav.map(([k,n])=>`<div class="favc">${cardHTML({id:k,up:false})}<span class="muted">${n} volte</span></div>`).join('')}</div></div>`:''}
+      <p class="muted" style="font-size:13px">Le statistiche contano le partite finite da questa versione in poi${ACC?' e seguono il tuo profilo':''}.</p>`}
+  if(t==='c'){const f=UI.diCls||'all';const list=allC.filter(k=>f==='all'||CARDS[k].cl===f).sort((a,b)=>(S.c.has(b)?1:0)-(S.c.has(a)?1:0));
+    body=`<div class="row">${[['all','Tutte'],...Object.keys(CLASSES).map(k=>[k,CLASSES[k].n])].map(([k,n])=>`<button class="btn ${f===k?'primary':''}" onclick="UI.diCls='${k}';render()">${n}</button>`).join('')}</div>
+      <p class="muted" style="font-size:13px">Le carte compaiono qui quando le vedi per la prima volta: nel mazzo, nelle ricompense o dal mercante.${canHover()?' Passa sopra una carta per il glossario.':' Tieni premuta una carta per il glossario.'}</p>
+      <div class="cardgrid">${list.map(k=>S.c.has(k)?cardHTML({id:k,up:false}):`<div class="card unknown"><span class="cname">???</span><span class="ctype">${CLASSES[CARDS[k].cl]?CLASSES[CARDS[k].cl].n:''}</span></div>`).join('')}</div>`}
+  if(t==='e'){const where=id=>Object.keys(DUNGEONS).filter(d=>{const D=DUNGEONS[d];return [D.easy,D.hard,D.elites].some(L=>L.some(g=>g.includes(id)))||D.boss===id}).map(d=>DUNGEONS[d].n);
+    body=`<div class="bestiary">${allE.map(k=>{const E=ENEMIES[k],ok=S.e.has(k),w=where(k);return `<div class="beast ${ok?'':'unk'} ${E.boss?'boss':''}">${sprImg(k,E.boss?72:56,ok?'':'locked')}<b>${ok?E.n:'???'}</b>
+      <span class="muted">${E.boss?'Boss':E.elite?'Élite':'Nemico'}${ok?` · ${E.hp[0]===E.hp[1]?E.hp[0]:E.hp[0]+'–'+E.hp[1]} PV`:''}</span>${ok&&w.length?`<small>${w.join(', ')}</small>`:''}</div>`}).join('')}</div>`}
+  if(t==='r')body=`<div class="plist">${allR.map(k=>S.r.has(k)?`<div class="prow">${relIc(k,32)}<div style="flex:1"><b>${RELICS[k].n}</b><br><span class="muted">${RELICS[k].d}</span></div></div>`:`<div class="prow unk"><span style="filter:brightness(.2)">${relIc(k,32)}</span><div style="flex:1"><b>???</b><br><span class="muted">Non l'hai ancora trovata.</span></div></div>`).join('')}</div>`;
+  if(t==='p')body=`<div class="plist">${allP.map(k=>S.p.has(k)?`<div class="prow">${potIc(k,32)}<div style="flex:1"><b>${POTIONS[k].n}</b><br><span class="muted">${POTIONS[k].d}</span></div></div>`:`<div class="prow unk"><span style="filter:brightness(.2)">${potIc(k,32)}</span><div style="flex:1"><b>???</b><br><span class="muted">Non l'hai ancora trovata.</span></div></div>`).join('')}</div>`;
+  return `<div class="wrap" style="gap:12px"><div class="row">${tabs.map(([k,n])=>`<button class="btn ${t===k?'primary':''}" onclick="UI.diTab='${k}';render()">${n}</button>`).join('')}</div>${body}</div>`;
+}
+
+/* ================= SFIDA DEL GIORNO ================= */
+const DAILY_K='valdombra-giornaliera';
+const DAILY_MODS=[
+  {id:'ricco',n:'Tesoro di famiglia',d:'Inizi con 150 oro in più.'},
+  {id:'potenti',n:'Nemici temprati',d:'Tutti i nemici hanno il 25% di PV in più.'},
+  {id:'veleno',n:'Lame avvelenate',d:'All\'inizio di ogni combattimento applichi 3 Veleno a tutti i nemici.'},
+  {id:'fragile',n:'Ferito in partenza',d:'Inizi con il 25% di PV massimi in meno, ma con 2 pozioni in più.'},
+  {id:'forgia',n:'Armi affilate',d:'Inizi con 3 carte del mazzo già potenziate.'},
+  {id:'mercante',n:'Giorno di mercato',d:'Inizi con 80 oro in più e una reliquia casuale.'},
+];
+function todayKey(){const d=new Date();return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')}
+function dayLabel(k){return k.slice(6,8)+'/'+k.slice(4,6)+'/'+k.slice(0,4)}
+function dailyInfo(day){const h=hashStr('valdombra-sfida-'+day);return {day,cls:Object.keys(CLASSES)[h%4],dg:Object.keys(DUNGEONS)[(h>>>4)%Object.keys(DUNGEONS).length],mod:DAILY_MODS[(h>>>8)%DAILY_MODS.length],seed:'G'+day.slice(2)}}
+function dailyState(){try{const o=JSON.parse(load(DAILY_K));return o&&typeof o==='object'?o:{}}catch(e){return{}}}
+function dailyName(){return (myName||(ACC&&ACC.nome)||'Eroe senza nome').slice(0,16)}
+function startDaily(){
+  const el=$('#dname');if(el&&el.value.trim()){myName=el.value.trim().slice(0,16);store('valdombra-nome',myName)}
+  const info=dailyInfo(todayKey()),st=dailyState(),official=st.day!==info.day;
+  if(official)store(DAILY_K,JSON.stringify({day:info.day,started:true}));
+  solo=true;isHost=true;chan=null;ME='solo';online=new Set([ME]);pickCls=info.cls;
+  R=newLobby('SOLO');R.players.solo.name=dailyName();R.players.solo.cls=info.cls;rng=new RNG(1);
+  startRunRoom(0,info.seed,'norm',info.dg);
+  R.daily={day:info.day,mod:info.mod.id,official};
+  const P=R.players.solo,m=info.mod.id;
+  if(m==='ricco')P.gold+=150;
+  if(m==='mercante'){P.gold+=80;const pool=DUNGEONS[info.dg].relics.filter(r=>!P.relics.includes(r));if(pool.length)P.relics.push(rng.pick(pool))}
+  if(m==='fragile'){P.max=Math.round(P.max*.75);P.hp=P.max;P.potions.push('fuoco','pelle')}
+  if(m==='forgia')rng.shuffle(P.deck.map((c,i)=>i).filter(i=>canUp(P.deck[i]))).slice(0,3).forEach(i=>P.deck[i].up=true);
+  modal=null;commit();toast(official?'Sfida del giorno iniziata: questo tentativo conta per la classifica!':'Allenamento: la sfida di oggi l\'hai già giocata, questo tentativo non conta.');
+}
+function dailyPanel(){
+  const info=dailyInfo(todayKey()),st=dailyState(),done=st.day===info.day;
+  return `<div class="panel daily" style="border-color:#9b7be0"><div class="row" style="gap:12px;align-items:center">${sprImg(info.cls,44)}<div style="flex:1;min-width:200px"><b style="font-size:17px">Sfida del giorno · ${dayLabel(info.day)}</b><br>
+    <span class="muted">Stesso eroe, stessa mappa e stesse regole per tutti: <b style="color:var(--fg)">${CLASSES[info.cls].n}</b> nella <b style="color:var(--fg)">${DUNGEONS[info.dg].n}</b>.</span></div></div>
+    <div class="dmod"><b>${info.mod.n}</b> ${info.mod.d}</div>
+    <p class="muted" style="font-size:13px">Conta solo il primo tentativo del giorno. Niente zaino né abilità uniche, così è uguale per tutti. Domani c'è una sfida nuova.</p>
+    ${done?`<p><b>${st.score!=null?'Il tuo punteggio di oggi: '+st.score:'Hai già iniziato la sfida di oggi.'}</b></p>`:`<label class="muted" for="dname" style="font-size:13px">Nome in classifica</label><input id="dname" class="txt" maxlength="16" style="max-width:260px" value="${esc(dailyName()==='Eroe senza nome'?'':dailyName())}" placeholder="Il tuo nome">`}
+    <div class="row"><button class="btn ${done?'':'primary'}" onclick="startDaily()">${done?'Allenati (non conta)':'Gioca la sfida'}</button><button class="btn" onclick="openDailyBoard()">Classifica di oggi</button></div></div>`;
+}
+async function fetchDaily(day){
+  const c=sbClient();if(!c)return{error:'Classifica non disponibile qui: apri il gioco dal sito.'};
+  const {data,error}=await c.from('classifica').select('id,creato,nomi,classi,giocatori,piani,livello,punteggio').eq('modalita','solo').eq('dungeon','g'+day).order('punteggio',{ascending:false}).limit(30);
+  return error?{error:lbErr(error)}:{rows:data};
+}
+function openDailyBoard(){const day=todayKey();modal={title:'Sfida del '+dayLabel(day),dboard:true,cancel:true,list:[]};UI.dData=null;fetchDaily(day).then(r=>{UI.dData=r;render()});render()}
+function dailyBoardHTML(){const info=dailyInfo(todayKey());return `<div class="wrap" style="gap:12px"><p class="muted">${CLASSES[info.cls].n} nella ${DUNGEONS[info.dg].n} · ${info.mod.n}: ${info.mod.d}</p><div class="panel">${dailyBody(UI.dData,dailyState().id)}</div></div>`}
+function dailyBody(r,mine){
+  if(!r)return '<p class="muted">Carico la classifica...</p>';if(r.error)return `<p class="muted">${r.error}</p>`;
+  if(!r.rows.length)return '<p class="muted">Ancora nessuno ha finito la sfida di oggi. Sii il primo!</p>';
+  return `<ol class="dboard">${r.rows.map((x,i)=>`<li class="${x.id===mine?'me':''}"><span class="pos">${i+1}</span><b>${esc(x.nomi)}</b><span class="muted">piano ${x.piani}</span><b class="pt">${x.punteggio}</b></li>`).join('')}</ol>`;
+}
+async function submitDaily(score,kills){
+  const d=R.daily;if(!d||!d.official)return;const st=dailyState();if(st.day!==d.day||st.sent)return;
+  st.score=score;st.sent=true;store(DAILY_K,JSON.stringify(st));
+  const c=sbClient();if(!c){UI.dMsg='Classifica non disponibile qui: apri il gioco dal sito.';render();return}
+  const row={dungeon:'g'+d.day,modalita:'solo',nomi:R.players.solo.name.slice(0,200)||'Eroe',classi:R.players.solo.cls,giocatori:1,piani:R.floor,uccisioni:kills,livello:0,punteggio:score,stanza:null};
+  const {data,error}=await c.from('classifica').insert(row).select('id').single();
+  if(error){UI.dMsg=lbErr(error);st.sent=false;store(DAILY_K,JSON.stringify(st));render();return}
+  st.id=data.id;store(DAILY_K,JSON.stringify(st));UI.dData=null;fetchDaily(d.day).then(r=>{UI.dData=r;render()});
+}
+function dailyEndHTML(score,kills){
+  const d=R.daily;if(!d)return '';
+  if(d.official&&!dailyState().sent&&!UI.dMsg)setTimeout(()=>submitDaily(score,kills),0);
+  if(!UI.dData&&!UI.dLoading){UI.dLoading=true;fetchDaily(d.day).then(r=>{UI.dData=r;UI.dLoading=false;render()})}
+  return `<div class="panel" style="border-color:#9b7be0"><h3>Sfida del ${dayLabel(d.day)}</h3>
+    <p class="muted">${d.official?`Il tuo punteggio ufficiale di oggi: <b style="color:var(--fg)">${score}</b>.`:'Questo era un allenamento: il punteggio non entra in classifica.'}${UI.dMsg?' '+esc(UI.dMsg):''}</p>
+    ${dailyBody(UI.dData,dailyState().id)}</div>`;
+}
+
 /* ================= PROFILO ONLINE (stessi progressi su ogni dispositivo) ================= */
 const ACC_K='valdombra-account';
-const SYNC_KEYS=[LK2,BK,CK,ZK,PK,XK,TK,XPK,SOLO_K];
+const SYNC_KEYS=[LK2,BK,CK,ZK,PK,XK,TK,XPK,SOLO_K,DAILY_K,SEEN_K,STAT_K,STATP_K];
 let ACC=(()=>{try{const a=JSON.parse(localStorage.getItem(ACC_K));return a&&a.nome&&a.token?a:null}catch(e){return null}})();
 const ACCS={busy:false,state:'',msg:'',gen:0,timer:null,last:0};
 function accKeep(){try{ACC?localStorage.setItem(ACC_K,JSON.stringify(ACC)):localStorage.removeItem(ACC_K)}catch(e){}}
 function accTouched(k){if(!ACC||!SYNC_KEYS.includes(k)||ACCS.applying)return;ACC.dirty=true;ACCS.gen++;accKeep();clearTimeout(ACCS.timer);ACCS.timer=setTimeout(accPush,2500)}
 function accCollect(){const d={};SYNC_KEYS.forEach(k=>{const v=load(k);if(v!=null)d[k]=v});return d}
-function accApply(d){ACCS.applying=true;try{SYNC_KEYS.forEach(k=>{const v=d&&typeof d[k]==='string'?d[k]:null;store(k,v)})}finally{ACCS.applying=false}}
+function accApply(d){SEEN=null;ACCS.applying=true;try{SYNC_KEYS.forEach(k=>{const v=d&&typeof d[k]==='string'?d[k]:null;store(k,v)})}finally{ACCS.applying=false}}
 function accMerge(srv,loc){
   const J=x=>{try{return JSON.parse(x)}catch(e){return null}};const o=Object.assign({},srv||{});loc=loc||{};
   const num=k=>{const a=parseInt(o[k]||'0',10)||0,b=parseInt(loc[k]||'0',10)||0;o[k]=String(Math.max(a,b))};
   const uni=k=>{const a=J(o[k])||[],b=J(loc[k])||[];o[k]=JSON.stringify([...new Set([...a,...b])].slice(-80))};
   const mx=k=>{const a=J(o[k])||{},b=J(loc[k])||{};const r={...a};Object.keys(b).forEach(x=>r[x]=Math.max(r[x]|0,b[x]|0));o[k]=JSON.stringify(r)};
-  num(CK);mx(XK);mx(LK2);uni(TK);uni(BK);uni(PK);uni(XPK);
-  [ZK,SOLO_K].forEach(k=>{if(loc[k]!=null)o[k]=loc[k]});
+  num(CK);mx(XK);mx(LK2);uni(TK);uni(BK);uni(PK);uni(XPK);uni(STATP_K);
+  {const a=J(o[SEEN_K])||{},b=J(loc[SEEN_K])||{};const r={};['c','e','r','p'].forEach(k=>r[k]=[...new Set([...(a[k]||[]),...(b[k]||[])])]);o[SEEN_K]=JSON.stringify(r)}
+  {const deep=(a,b)=>{if(typeof a==='number'||typeof b==='number')return Math.max(+a||0,+b||0);const r={...(a||{})};Object.keys(b||{}).forEach(k=>r[k]=deep(r[k],b[k]));return r};o[STAT_K]=JSON.stringify(deep(J(o[STAT_K])||{},J(loc[STAT_K])||{}))}
+  [ZK,SOLO_K].forEach(k=>{if(loc[k]!=null)o[k]=loc[k]});if(typeof SEEN!=='undefined')SEEN=null;
+  {const a=J(o[DAILY_K])||{},b=J(loc[DAILY_K])||{};const pick=(b.day||'')>(a.day||'')||((b.day===a.day)&&(b.sent&&!a.sent))?b:a;if(pick.day)o[DAILY_K]=JSON.stringify(pick)}
   return o;
 }
 function accErr(e){const m=String(e&&(e.message||e.details)||e||'');
@@ -2437,6 +2728,26 @@ function profiloHTML(){
 }
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&ACC&&Date.now()-ACCS.last>20000)accPull();else if(document.visibilityState==='hidden'&&ACC&&ACC.dirty)accPush()});
 setInterval(()=>{if(ACC&&document.visibilityState==='visible'&&(!R||R.phase==='lobby')&&Date.now()-ACCS.last>90000)accPull()},30000);
+
+
+/* ================= APP INSTALLABILE ================= */
+let instEv=null;
+const isStandalone=()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}};
+const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEv=e;if(!R)render()});
+window.addEventListener('appinstalled',()=>{instEv=null;toast('Gioco installato! Lo trovi tra le tue app.');if(!R)render()});
+if('serviceWorker' in navigator&&window.isSecureContext&&/^https?:$/.test(location.protocol)&&!/claude\.ai|claudeusercontent|claude\.site/.test(location.hostname)){setTimeout(()=>navigator.serviceWorker.register('sw.js').catch(()=>{}),1500)}
+function installApp(){
+  if(instEv){instEv.prompt();instEv.userChoice.then(()=>{instEv=null;render()}).catch(()=>{});return}
+  modal={title:'Installa il gioco',cancel:true,list:[],html:`<div class="set"><div class="panel">
+    <p>Installato, il gioco si apre a schermo intero dalla sua icona, come un'app. Da soli si può giocare anche senza internet; per giocare con gli amici serve la connessione.</p>
+    ${isIOS?`<h4>iPhone e iPad</h4><ol><li>Apri il sito con <b>Safari</b>.</li><li>Tocca il tasto <b>Condividi</b> (il quadrato con la freccia verso l'alto).</li><li>Scegli <b>Aggiungi alla schermata Home</b> e poi <b>Aggiungi</b>.</li></ol>`:
+    `<h4>Android</h4><ol><li>Apri il sito con <b>Chrome</b>.</li><li>Tocca il menu con i tre puntini in alto a destra.</li><li>Scegli <b>Installa app</b> oppure <b>Aggiungi a schermata Home</b>.</li></ol>
+     <h4>PC</h4><p>Con Chrome o Edge, clicca l'icona di installazione a destra nella barra degli indirizzi, oppure Menu → <b>Installa Assedio a Valdombra</b>.</p>`}
+  </div></div>`};render();
+}
+function installPanel(){if(isStandalone())return '';
+  return `<div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><span style="line-height:0">${sprImg('drago',34)}</span><div style="flex:1;min-width:200px"><b style="font-size:17px">Installa il gioco</b><br><span class="muted">Mettilo sulla schermata Home del telefono o tra le app del PC: si apre a schermo intero e da solo funziona anche offline.</span></div><button class="btn" onclick="installApp()">${instEv?'Installa':'Come si fa'}</button></div>`}
 
 /* ================= AVVIO ================= */
 (function boot(){
