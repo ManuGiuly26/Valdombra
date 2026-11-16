@@ -291,6 +291,8 @@ body.noanim #gltip{transition:none}
 .prow.unk{opacity:.6}.favc{display:flex;flex-direction:column;align-items:center;gap:4px}
 .chip.form{background:#2c3a22;color:#bfe7a0}.chip.elem{background:#3a2a1c;color:#ffcf9a}.chip.e-acqua{background:#1c2c3a;color:#a8dcff}.chip.e-terra{background:#33291c;color:#e3c68f}.chip.e-aria{background:#26303a;color:#e2f2ff}.chip.minion{background:#2a2438;color:#e0d8ff;display:inline-flex;align-items:center;gap:3px}.chip.pet{background:#2f2a22;color:#f0d9b0}
 .classcard.locked .ic{filter:brightness(.35) grayscale(.6)}.classcard .price{margin-top:4px}
+.crownbadge{position:fixed;top:calc(env(safe-area-inset-top,0px) + 24px);right:calc(env(safe-area-inset-right,0px) + 8px);z-index:79;display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--stone2);border:1px solid var(--torch);color:var(--torch2);font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,.4)}.crownbadge b{font-size:16px;font-variant-numeric:tabular-nums}.crownbadge span{color:var(--muted);font-size:12px}.crownbadge:hover{background:var(--stone3)}
+.modal~.crownbadge,.modal + .crownbadge{display:none}
 .cdesc .gained{color:#2f7a2a;font-style:normal;font-weight:600}
 .float.dmg{color:#ff6b5c}.float.blk{color:#9fd0ff}.float.heal{color:var(--heal)}.float.psn{color:var(--poison)}
 @keyframes rise{to{transform:translate(-50%,-150%);opacity:0}}
@@ -2039,6 +2041,7 @@ function render(fxs){
   if(modal&&modal.dboard)modal.html=dailyBoardHTML();
   if(modal&&modal.diario)modal.html=diarioHTML();
   if(R&&!solo&&SET.chat&&!chatOpen&&R.players[ME]&&(R.phase==='lobby'||R.phase==='end')){const n=Math.max(0,((R.chat||[]).length)-chatSeen);h+=`<button class="btn primary chatfab" onclick="toggleChat(true)" aria-label="Apri la chat">Chat${n?`<span class="dot">${n}</span>`:''}</button>`}
+  if(!R||R.phase==='lobby'||R.phase==='end'||!R.players[ME])h+=`<button class="crownbadge" onclick="openBottega()" title="Le tue Corone: apri la Bottega" aria-label="${getCrowns()} Corone, apri la Bottega">${ic('i_crown',16)}<b>${getCrowns()}</b><span>Corone</span></button>`;
   if(modal)h+=`<div class="modal" role="dialog" aria-label="${modal.title}"><div class="mhead"><h3 style="flex:1">${modal.title}</h3>${modal.cancel?'<button class="btn" onclick="closeModal()">Chiudi</button>':''}</div>
     <div class="mbody">${modal.html||pickerGrid()}</div></div>`;
   // mantieni la posizione di scorrimento se la schermata è la stessa
@@ -2551,7 +2554,7 @@ function startVoteAnim(va){
 }
 function paintAnim(){document.querySelectorAll('.mapsvg .node').forEach(n=>{n.classList.toggle('spin',!!UI.anim&&n.dataset.k===UI.anim.cur)})}
 /* ================= IMPOSTAZIONI ================= */
-const VERSION='v5.0',VDATE='16/11';
+const VERSION='v5.1',VDATE='16/11';
 const SET_K='valdombra-impostazioni';
 const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:true};
 let SET=(()=>{try{return Object.assign({},SET_DEF,JSON.parse(load(SET_K)||'{}'))}catch(e){return Object.assign({},SET_DEF)}})();
