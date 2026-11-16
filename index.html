@@ -27,16 +27,18 @@ body{background:var(--stone);color:var(--fg);font-family:var(--f-body);font-size
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible{outline:2px solid var(--torch2);outline-offset:2px}
 #app{height:100%;display:flex;flex-direction:column}
+#ver{position:fixed;top:calc(env(safe-area-inset-top,0px) + 3px);right:calc(env(safe-area-inset-right,0px) + 8px);z-index:80;font-size:10.5px;line-height:1;letter-spacing:.04em;color:var(--muted);background:var(--stone);border:1px solid var(--line);border-radius:5px;padding:2px 6px;pointer-events:none;font-variant-numeric:tabular-nums}
 .hud{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding-block:8px;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
-  background:var(--stone2);border-bottom:1px solid var(--line);font-size:14px}
+  background:var(--stone2);border-bottom:1px solid var(--line);font-size:14px;padding-top:20px!important}
 .hud .cls{font-family:var(--f-disp);font-size:20px;color:var(--torch2)}
 .hud .stat{font-variant-numeric:tabular-nums;white-space:nowrap}
 .hud .stat b{color:var(--muted);font-weight:500;margin-right:3px;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
 .hp-t{color:#ff9a8f}.gold-t{color:var(--torch2)}
 .pots{display:flex;gap:4px}
 .pot{width:24px;height:24px;border-radius:50% 50% 45% 45%;border:2px solid var(--line);background:var(--stone3);padding:0;position:relative}
-.pot.full{border-color:rgba(255,255,255,.35)}
+.pot.full{border-color:var(--torch);display:grid;place-items:center;background:var(--stone)}
+.pot .spr{display:block}
 .pot.sel{outline:2px solid var(--torch2)}
 .relics{display:flex;gap:2px;flex-wrap:wrap}
 .relic{background:none;border:0;font-size:19px;padding:0 1px;line-height:1}
@@ -62,7 +64,7 @@ p{margin:0;line-height:1.5}
 .classes{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
 .classcard{background:var(--stone2);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:6px}
 .classcard.on{border-color:var(--torch);box-shadow:0 0 0 1px var(--torch),0 0 24px rgba(233,164,64,.18)}
-.classcard .ic{font-size:40px;line-height:1}
+.classcard .ic{line-height:1}
 .classcard .nm{font-family:var(--f-disp);font-size:26px;color:var(--fg)}
 .classcard small{color:var(--muted);font-size:13px}
 .seedrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -121,6 +123,27 @@ input.txt{background:var(--stone);border:1px solid var(--line);border-radius:8px
 .mapsvg .node.boss circle{stroke:var(--blood);stroke-width:4}
 .mapsvg .node.boss text{font-size:44px}
 @keyframes pulse{50%{stroke-width:7;stroke-opacity:.6}}
+.votebanner{position:relative;z-index:2;text-align:center;padding:10px 16px;background:linear-gradient(#3a2a12,#2a1f10);border-bottom:1px solid var(--torch);color:var(--torch2);font-size:16px;font-family:var(--f-card);font-weight:700}
+.votebanner.fin{background:linear-gradient(#1f3a24,#18291b);border-color:var(--heal);color:#bff0c9}
+@keyframes bannerin{from{transform:translateY(-100%);opacity:0}}
+.mapsvg .node.spin circle:first-of-type{fill:#7a5a1c;stroke:#fff;stroke-width:8}
+.mapsvg .node.win circle:first-of-type{fill:#2e5a36;stroke:var(--heal);stroke-width:8;animation:winp .5s ease-in-out 4}
+@keyframes winp{50%{stroke-width:14}}
+.pvhint{max-width:900px;margin:0 auto 6px;text-align:center}
+.pv{display:flex;flex-direction:column;align-items:center;gap:8px}
+.pvstack{display:grid}.pvstack>div{grid-area:1/1}
+.pv-up{visibility:hidden}
+.pv.on .pv-up{visibility:visible}.pv.on .pv-base{visibility:hidden}
+@media (hover:hover) and (pointer:fine){.pv:hover .pv-up{visibility:visible}.pv:hover .pv-base{visibility:hidden}}
+.card.upgraded{box-shadow:0 0 0 3px var(--heal),0 0 16px rgba(111,207,142,.5)}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.opt.on{border-color:var(--torch);box-shadow:0 0 0 1px var(--torch)}
+.board{display:flex;flex-direction:column;gap:6px}
+.brow{display:flex;align-items:center;gap:10px;background:var(--stone3);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.brow.mine{border-color:var(--torch);background:#3a2f1f}
+.brow .pos{font-family:var(--f-disp);font-size:22px;color:var(--torch2);width:28px;text-align:center;font-variant-numeric:tabular-nums}
+.brow .who{flex:1;min-width:0;display:flex;flex-direction:column}.brow .who b{overflow-wrap:anywhere}.brow .cls{line-height:0}
+.brow .pts{font-family:var(--f-disp);font-size:22px;font-variant-numeric:tabular-nums}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;font-size:13px;color:var(--muted);padding:10px 16px;border-top:1px solid var(--line);background:var(--stone2)}
 
 /* Combat */
@@ -130,6 +153,7 @@ input.txt{background:var(--stone);border:1px solid var(--line);border-radius:8px
 .btn.danger{background:#8e2a22;border-color:#d4574b;color:#fff;font-weight:700}
 .ent{position:relative;background:var(--stone2);border:1px solid var(--line);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
 .enemy{width:150px;max-width:31vw;min-width:100px}
+.ent.hero.target,.ent.ally.target{border-color:var(--heal);box-shadow:0 0 0 2px rgba(111,207,142,.55);cursor:pointer}
 .enemy.target{border-color:var(--torch2);box-shadow:0 0 0 2px rgba(255,207,122,.5);cursor:crosshair}
 .enemy.dead{opacity:.25;filter:grayscale(1)}
 .enemy.boss{width:220px;max-width:70vw}
@@ -152,7 +176,7 @@ input.txt{background:var(--stone);border:1px solid var(--line);border-radius:8px
 .blk{font-size:12px;font-weight:700;color:#bfe0ff;background:#22436a;border-radius:6px;padding:0 6px}
 .chips{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;min-height:4px}
 .chip{cursor:pointer;font-size:11px;border-radius:5px;padding:1px 5px;background:var(--stone3);border:0;line-height:1.4}
-.chip.str{color:#ffb38a}.chip.dex{color:#9be0a8}.chip.vuln{color:#ff8fc7}.chip.weak{color:#c6b3ff}.chip.poison{color:#9de07f}.chip.spine{color:#ffd27a}.chip.pw{color:var(--torch2);background:#3a2f1f}
+.chip.str{color:#ffb38a}.chip.stun{color:#ffe066}.chip.burn{color:#ff9d5c}.chip.dex{color:#9be0a8}.chip.vuln{color:#ff8fc7}.chip.weak{color:#c6b3ff}.chip.poison{color:#9de07f}.chip.spine{color:#ffd27a}.chip.pw{color:var(--torch2);background:#3a2f1f}
 .herorow{display:flex;align-items:center;gap:12px;padding:6px 16px;flex-wrap:wrap;justify-content:center}
 .hero{flex-direction:row;gap:10px;min-width:240px;max-width:380px;flex:1;text-align:left}
 .hero .face{padding-bottom:4px}
@@ -172,6 +196,7 @@ button.card:hover{transform:translateY(-8px)}
 .card.r-U{border-color:#4f86b8}.card.r-R{border-color:#d8a135;box-shadow:0 0 12px rgba(216,161,53,.45),0 3px 0 rgba(0,0,0,.35)}
 .card .cost{position:absolute;top:-9px;left:-9px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-disp);font-size:18px;
   background:radial-gradient(circle at 35% 30%,#ffe2a0,#d88a26 65%);color:#2a1505;border:2px solid #5c3a10}
+.card .cost.cheap{background:radial-gradient(circle at 35% 30%,#d6ffd9,#4fae62 65%);border-color:#1f5a2a}
 .card .cname{font-family:var(--f-card);font-weight:700;font-size:14px;line-height:1.1;margin-top:4px;text-wrap:balance}
 .card.up .cname{color:#2f7a3a}
 .card .ctype{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#fff;border-radius:4px;padding:0 6px}
@@ -185,20 +210,20 @@ button.card:hover{transform:translateY(-8px)}
 .rewards{display:flex;flex-direction:column;gap:8px}
 .ritem{display:flex;align-items:center;gap:10px;text-align:left;background:var(--stone3);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
 .ritem:hover{border-color:var(--torch)}
-.ritem .ic{font-size:22px;width:28px;text-align:center}
+.ritem .ic{width:28px;display:grid;place-items:center}
 .opts{display:flex;flex-direction:column;gap:8px}
 .opt{text-align:left;background:var(--stone3);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
 .opt:hover:not([disabled]){border-color:var(--torch)}
 .opt[disabled]{opacity:.45;cursor:not-allowed}
 .evhead{display:flex;gap:14px;align-items:center}
-.evhead .ic{font-size:54px}
+.evhead .ic{line-height:0}
 .shopgrid{display:flex;flex-wrap:wrap;gap:16px 12px;justify-content:center}
 .shopitem{display:flex;flex-direction:column;align-items:center;gap:6px}
 .price{font-weight:700;color:var(--torch2);font-variant-numeric:tabular-nums}
 .price.no{color:#8b8296}
 .sold{opacity:.25;pointer-events:none}
 .relicbox{width:122px;min-height:120px;background:var(--stone3);border:1px solid var(--line);border-radius:10px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;font-size:12px}
-.relicbox .ic{font-size:34px}
+.relicbox .ic{line-height:0;padding:2px 0}
 .endstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
 .endstats div{background:var(--stone3);border-radius:10px;padding:10px 12px}
 .endstats b{display:block;font-family:var(--f-disp);font-size:30px;color:var(--torch2);font-variant-numeric:tabular-nums}
@@ -236,6 +261,7 @@ button.card:hover{transform:translateY(-8px)}
 <body>
 
 <div id="app"></div>
+<div id="ver" aria-label="Versione del gioco">v2.1 · 16/11</div>
 <div id="fx"></div>
 <aside id="chat" hidden aria-label="Chat di gioco">
   <div class="chead"><h3 style="flex:1">Chat del gruppo</h3><button class="btn" onclick="toggleChat(false)">Chiudi</button></div>
@@ -538,6 +564,35 @@ drago:[
 ],
 };
 const ICONS={
+r_elmo:["......rr....", ".....rRr....", "...kkkkkk...", "..kmmmmmmk..", "..kmwmmmMk..", "..kmmmmmMk..", "..kMkkkkMk..", "..kMk..kMk..", "..kMk..kMk..", "..kMMkkMMk..", "...kk..kk...", "............"],
+r_grimorio:["............", "..kkkkkkkk..", ".kRrrrrrrrk.", ".kRryyyyrrk.", ".kRryrryrrk.", ".kRryyyyrrk.", ".kRrrrrrrrk.", ".kRrrrrrrrk.", ".kRwwwwwwwk.", ".kkkkkkkkkk.", "............", "............"],
+r_fiala:[".....kk.....", "....kNNk....", ".....kk.....", "....kwwk....", "....kwwk....", "...kwllwk...", "..kllllllk..", "..klwlllLk..", "..kllllllk..", "..kLlllLLk..", "...kkkkkk...", "............"],
+r_simbolo:[".....kk.....", "....kyyk....", "....kyyk....", ".kkkkyykkkk.", ".kyyyyyyyyk.", ".kkkkyykkkk.", "....kyyk....", "....kyyk....", "....kyYk....", "....kyYk....", ".....kk.....", "............"],
+r_pietra:["............", "............", "...kkkkkk...", "..kMmmmmMk..", ".kMmwwmmmMk.", ".kMmmmwwmMk.", ".kMMmmmmMMk.", "..kMMMMMMk..", "...kkkkkk...", "............", "............", "............"],
+r_mantello:["....kkkk....", "...kGggGk...", "...kgyygk...", "..kGggggGk..", "..kgggggGk..", ".kGgggggGGk.", ".kgggggggGk.", ".kgggggggGk.", "kGgggggggGGk", "kGgGgGgGgGGk", "kkkkkkkkkkkk", "............"],
+r_ancora:[".....kk.....", "....kmmk....", "....kmmk....", "..kkkmmkkk..", "..kMMmmMMk..", "..kkkmmkkk..", "....kmmk....", "k...kmmk...k", "kmk.kmmk.kmk", ".kmkkmmkkmk.", "..kmmmmmmk..", "...kkkkkk..."],
+r_lanterna:[".....kk.....", "....k..k....", "...kkkkkk...", "...kYyyYk...", "..kyoEEoyk..", "..kyoEEoyk..", "..kyooooyk..", "..kYyyyyYk..", "...kkkkkk...", "...kYYYYk...", "....kkkk....", "............"],
+r_sacchetto:["....kkkk....", ".....kk.....", "....kNNk....", "...knnnnk...", "..knnnnnnk..", ".knnnyynnnk.", ".knnyNNynnk.", ".knnnyynnnk.", ".knnnnnnnNk.", "..kNnnnnNk..", "...kkkkkk...", "............"],
+r_zanna:["............", "..kkkkkkkk..", ".kwwwwwwwWk.", "..kwwwwwWk..", "...kwwwwk...", "...kwwwWk...", "....kwwk....", "....kwWk....", ".....kk.....", "............", "............", "............"],
+r_cuore:["............", "..kkk..kkk..", ".krrrkkrrrk.", "krwrrrrrrRRk", "krrrrrrrrRRk", "krrrrrrrrRRk", ".krrrrrrRRk.", "..krrrrRRk..", "...krrRRk...", "....kRRk....", ".....kk.....", "............"],
+r_corno:["............", "..........kk", ".........kwk", "........kwfk", ".......kwfk.", "..kk..kwfk..", ".kffkkwffk..", "kfffffffk...", "kfNfNfffk...", ".kfffffk....", "..kkkkk.....", "............"],
+r_dado:["............", ".kkkkkkkkkk.", ".kwwwwwwwwk.", ".kwkwwwwkwk.", ".kwwwwwwwwk.", ".kwwwkkwwwk.", ".kwwwkkwwwk.", ".kwwwwwwwwk.", ".kwkwwwwkwk.", ".kwwwwwwwWk.", ".kkkkkkkkkk.", "............"],
+r_orbe:["............", "....kkkk....", "...kppppk...", "..kpwpppPk..", "..kpppppPk..", "..kppppPPk..", "...kpPPPk...", "...kkkkkk...", "..kYyyyyYk..", "..kkkkkkkk..", "............", "............"],
+r_piuma:["..........kk", ".........kok", "........kook", ".......kooOk", "......kooOk.", ".....kooOk..", "....kooOk...", "...kooOk....", "..kkOOk.....", ".kk.kk......", "kk..........", "............"],
+e_altare:[".....o......", "....oEo.....", ".....k......", "....kwwk....", "....kwwk....", "....kwWk....", "..kkkkkkkk..", ".kMmmmmmmMk.", ".kMMMMMMMMk.", "..kMk..kMk..", "..kMk..kMk..", "..kkk..kkk.."],
+e_fontana:[".....tt.....", "....t..t....", "...t.kk.t...", "..t.kbbk.t..", ".....kk.....", "....kmmk....", "..kkkmmkkk..", ".kbbbbbbbbk.", ".ktbtbbtbbk.", ".kMMMMMMMMk.", "..kMMMMMMk..", "...kkkkkk..."],
+e_nani:["............", "..wwwwww....", ".wwwwwwww...", ".kkkkkkkk...", ".kyyyyyYkkk.", ".kywyyyYk.k.", ".kywyyyYk.k.", ".kyyyyyYk.k.", ".kyyyyyYkkk.", ".kyyyyyYk...", ".kkkkkkkk...", "............"],
+e_biblioteca:["............", ".kkk.kkk....", ".kRk.kBk.kk.", ".krk.kbk.kgk", ".kyk.kyk.kgk", ".krk.kbk.kyk", ".krk.kbk.kgk", ".krk.kbk.kgk", ".kyk.kyk.kgk", ".krk.kbk.kGk", "kkkkkkkkkkkk", "kNNNNNNNNNNk"],
+e_statua:["....kkkk....", "...kmmmmk...", "..kmmmmmMk..", "..kmkmmkMk..", "..kmmmmmMk..", "..kmmMmmMk..", "..kmkkkmMk..", "...kmmmMk...", "....kMMk....", "..kkkkkkkk..", "..kMMMMMMk..", "..kkkkkkkk.."],
+e_pozzo:["..kkkkkkkk..", ".kRRRRRRRRk.", "..kN....Nk..", "..kN.kk.Nk..", "..kN.kM.Nk..", ".kkkkkkkkkk.", ".kMmMmMmMmk.", ".kmMmMmMmMk.", ".kbbbbbbbbk.", ".kMmMmMmMmk.", ".kkkkkkkkkk.", "............"],
+i_coin:["............", "...kkkkkk...", "..kyyyyyyk..", ".kyEyyyyyYk.", ".kyyyYYyyYk.", ".kyyYyyYyYk.", ".kyyYyyYyYk.", ".kyyyYYyyYk.", ".kyyyyyyyYk.", "..kYyyyyYk..", "...kkkkkk...", "............"],
+i_shield:["............", ".kkkkkkkkkk.", ".kbbbbbbBBk.", ".kbwbbbbBBk.", ".kbbbbbbBBk.", ".kbbbbbbBBk.", "..kbbbbBBk..", "..kbbbbBBk..", "...kbbBBk...", "....kBBk....", ".....kk.....", "............"],
+i_buff:[".....kk.....", "....kyyk....", "...kyyyyk...", "..kyyyyyyk..", ".kkkkyykkkk.", "....kyyk....", "....kyyk....", "....kyyk....", "....kyyk....", "....kYYk....", "....kkkk....", "............"],
+i_heal:["............", "....kkkk....", "....klLk....", "....klLk....", ".kkkklLkkkk.", ".klllllllLk.", ".kLLLlLLLLk.", ".kkkklLkkkk.", "....klLk....", "....kLLk....", "....kkkk....", "............"],
+i_skull:["............", "...kkkkkk...", "..kppppppk..", ".kppppppppk.", ".kpkkppkkpk.", ".kpkkppkkpk.", ".kppppppppk.", "..kppkkppk..", "...kpppPk...", "...kpkpkk...", "...kkkkk....", "............"],
+i_crown:["............","............","k....kk....k","kyk.kyyk.kyk","kyykyyyykyyk","kyyyyyyyyyyk","kyyyrryyyyyk","kyyyyyyyyyyk","kYYYYYYYYYYk","kkkkkkkkkkkk","............","............"],
+i_lock:["............", "....kkkk....", "...kMkkMk...", "...kM..Mk...", "...kM..Mk...", "..kkkkkkkk..", "..kyyyyyYk..", "..kyykkyYk..", "..kyykkyYk..", "..kyyyyyYk..", "..kkkkkkkk..", "............"],
+i_flask:["....kkkk....", ".....kk.....", "....kNNk....", "....kwwk....", "....kwwk....", "...kwxxwk...", "..kxxxxxxk..", "..kxwxxxXk..", "..kxxxxxXk..", "..kXxxxXXk..", "...kkkkkk...", "............"],
 combat:["..........kk","........kkmk",".......kmmk.","......kmmk..",".kk..kmmk...","kyyk.kmk....",".kyykmk.....","..kyyk......","..kNkyk.....",".kNk.kyk....","kNk...kk....",".k.........."],
 elite:["............","..k......k..",".kRk....kRk.",".kRRkkkkRRk.",".kRrrrrrrRk.","kRrEkrrkErRk","kRrrrrrrrrRk","kRrkwkwkwrRk",".kRrrrrrrRk.","..kRRRRRRk..","...kkkkkk...","............"],
 event:["...kkkkkk...","..kyyyyyyk..",".kyyk..kyyk.",".kkk...kyyk.","......kyyk..",".....kyyk...","....kyyk....","....kyyk....","....kkkk....","....kyyk....","....kyyk....","....kkkk...."],
@@ -552,22 +607,29 @@ function spr(name){if(sprCache[name])return sprCache[name];const a=SPR[name]||IC
   const h=a.length,w=a[0].length;const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
   a.forEach((r,y)=>[...r].forEach((ch,X)=>{const col=PAL[ch];if(col){x.fillStyle=col;x.fillRect(X,y,1,1)}}));
   return sprCache[name]=c.toDataURL();}
+function potSrc(id){const key='pot_'+id;if(sprCache[key])return sprCache[key];const col=POTIONS[id].col;const a=ICONS.i_flask;const c=document.createElement('canvas');c.width=12;c.height=12;const x=c.getContext('2d');
+  const dark=col.replace(/^#/,'').match(/../g).map(h=>Math.round(parseInt(h,16)*.62).toString(16).padStart(2,'0')).join('');
+  a.forEach((r,y)=>[...r].forEach((ch,X)=>{const v=ch==='x'?col:ch==='X'?'#'+dark:PAL[ch];if(v){x.fillStyle=v;x.fillRect(X,y,1,1)}}));return sprCache[key]=c.toDataURL()}
+const potIc=(id,px)=>`<img class="spr inl" src="${potSrc(id)}" width="${px}" height="${px}" alt="">`;
+const ic=(name,px=16)=>`<img class="spr inl" src="${spr(name)}" width="${px}" height="${px}" alt="">`;
+const relIc=(id,px=20)=>ic('r_'+id,px);
 const sprImg=(name,px,cls='')=>{const a=SPR[name]||ICONS[name];return `<img class="spr ${cls}" src="${spr(name)}" width="${px}" height="${Math.round(px*a.length/a[0].length)}" alt="">`};
 
 /* ================= DATI DI GIOCO ================= */
 const CLASSES={
-  guerriero:{n:'Guerriero',ic:'🛡️',hp:80,relic:'elmo',desc:'Armatura pesante e colpi brutali. Diventa più forte accumulando Forza.',
+  guerriero:{n:'Guerriero',ic:'',hp:80,relic:'elmo',desc:'Armatura pesante e colpi brutali. Diventa più forte accumulando Forza.',
     deck:['colpo','colpo','colpo','colpo','colpo','parata','parata','parata','parata','possente']},
-  mago:{n:'Mago',ic:'🧙',hp:65,relic:'grimorio',desc:'Fragile ma devastante. Incantesimi ad area, gelo e pesca di carte.',
+  mago:{n:'Mago',ic:'',hp:65,relic:'grimorio',desc:'Fragile ma devastante. Incantesimi ad area, gelo e pesca di carte.',
     deck:['dardo','dardo','dardo','dardo','scudoarc','scudoarc','scudoarc','scudoarc','pallafuoco','gelo']},
-  ladro:{n:'Ladro',ic:'🗡️',hp:70,relic:'fiala',desc:'Carte economiche, veleni e combo rapide. Vince con mille piccoli tagli.',
+  ladro:{n:'Ladro',ic:'',hp:70,relic:'fiala',desc:'Carte economiche, veleni e combo rapide. Vince con mille piccoli tagli.',
     deck:['pugnalata','pugnalata','pugnalata','pugnalata','pugnalata','schivata','schivata','schivata','schivata','schivata','lamaveleno','preparazione']},
-  chierico:{n:'Chierico',ic:'✨',hp:75,relic:'simbolo',desc:'Guarigione, protezione divina e luce sacra che punisce i nemici.',
+  chierico:{n:'Chierico',ic:'',hp:75,relic:'simbolo',desc:'Guarigione, protezione divina e luce sacra che punisce i nemici.',
     deck:['punizione','punizione','punizione','punizione','fede','fede','fede','fede','curaferite','luce']}
 };
 const TYPEN={A:'Attacco',S:'Abilità',P:'Potere'};
 const pl=(n,a,b)=>n===1?a:b;
 
+const W=(a,b)=>(typeof solo==='undefined'||solo)?a:b;
 const CARDS={
 /* --- Guerriero --- */
 colpo:{n:'Colpo',cl:'guerriero',t:'A',r:'B',c:1,tg:1,v:{d:6},u:{d:9},x:v=>`Infliggi ${v.d} danni.`,f:(v,t)=>A(t,v.d)},
@@ -613,37 +675,84 @@ mortale:{n:'Colpo Mortale',cl:'ladro',t:'A',r:'R',c:2,tg:1,v:{d:8,m:2},u:{d:12,m
 rapide:{n:'Mani Rapide',cl:'ladro',t:'P',r:'R',c:1,cu:0,v:{dr:1},u:{},x:v=>`All'inizio di ogni turno peschi ${v.dr} carta in più.`,f:v=>P('rapide',v.dr)},
 /* --- Chierico --- */
 punizione:{n:'Punizione Sacra',cl:'chierico',t:'A',r:'B',c:1,tg:1,v:{d:6},u:{d:9},x:v=>`Infliggi ${v.d} danni.`,f:(v,t)=>A(t,v.d)},
-fede:{n:'Scudo della Fede',cl:'chierico',t:'S',r:'B',c:1,v:{b:5},u:{b:8},x:v=>`Ottieni ${v.b} Armatura.`,f:v=>B(v.b)},
-curaferite:{n:'Cura Ferite',cl:'chierico',t:'S',r:'B',c:1,ex:1,v:{h:4},u:{h:7},x:v=>`Recuperi ${v.h} PV.`,f:v=>H(v.h)},
+fede:{n:'Scudo della Fede',cl:'chierico',t:'S',r:'B',c:1,ally:1,v:{b:5},u:{b:8},x:v=>W(`Ottieni ${v.b} Armatura.`,`Tu o un alleato ottenete ${v.b} Armatura.`),f:(v,t,a)=>BA(a,v.b)},
+curaferite:{n:'Cura Ferite',cl:'chierico',t:'S',r:'B',c:1,ex:1,ally:1,v:{h:4},u:{h:7},x:v=>W(`Recuperi ${v.h} PV.`,`Tu o un alleato recuperate ${v.h} PV.`),f:(v,t,a)=>HA(a,v.h)},
 luce:{n:'Luce Accecante',cl:'chierico',t:'A',r:'B',c:1,tg:1,v:{d:5,w:1},u:{d:7,w:2},x:v=>`Infliggi ${v.d} danni. Applica ${v.w} Debole.`,f:(v,t)=>{A(t,v.d);S(t,'weak',v.w)}},
 martello:{n:'Martello Spirituale',cl:'chierico',t:'A',r:'C',c:2,tg:1,v:{d:12,b:4},u:{d:15,b:6},x:v=>`Infliggi ${v.d} danni. Ottieni ${v.b} Armatura.`,f:(v,t)=>{A(t,v.d);B(v.b)}},
-preghiera:{n:'Preghiera',cl:'chierico',t:'S',r:'C',c:1,v:{h:2,b:5},u:{h:3,b:7},x:v=>`Ottieni ${v.b} Armatura. Recuperi ${v.h} PV.`,f:v=>{B(v.b);H(v.h)}},
-santuario:{n:'Santuario',cl:'chierico',t:'S',r:'C',c:2,v:{b:14},u:{b:18},x:v=>`Ottieni ${v.b} Armatura.`,f:v=>B(v.b)},
+preghiera:{n:'Preghiera',cl:'chierico',t:'S',r:'C',c:1,ally:1,v:{h:2,b:5},u:{h:3,b:7},x:v=>W(`Ottieni ${v.b} Armatura. Recuperi ${v.h} PV.`,`Tu o un alleato ottenete ${v.b} Armatura e recuperate ${v.h} PV.`),f:(v,t,a)=>{BA(a,v.b);HA(a,v.h)}},
+santuario:{n:'Santuario',cl:'chierico',t:'S',r:'C',c:2,ally:1,v:{b:14},u:{b:18},x:v=>W(`Ottieni ${v.b} Armatura.`,`Tu o un alleato ottenete ${v.b} Armatura.`),f:(v,t,a)=>BA(a,v.b)},
+cerchio:{n:'Cerchio di Protezione',cl:'chierico',t:'S',r:'U',c:2,v:{b:6},u:{b:9},x:v=>W(`Ottieni ${v.b} Armatura.`,`TUTTI gli eroi ottengono ${v.b} Armatura.`),f:v=>party().forEach(p=>BA(p,v.b))},
 fiamma:{n:'Fiamma Sacra',cl:'chierico',t:'A',r:'C',c:1,v:{d:4,h:1},u:{d:6,h:2},x:v=>`Infliggi ${v.d} danni a TUTTI i nemici. Recuperi ${v.h} PV.`,f:v=>{AA(v.d);H(v.h)}},
-aura:{n:'Aura Protettiva',cl:'chierico',t:'P',r:'U',c:1,v:{b:4},u:{b:6},x:v=>`All'inizio di ogni turno ottieni ${v.b} Armatura.`,f:v=>P('aura',v.b)},
+aura:{n:'Aura Protettiva',cl:'chierico',t:'P',r:'U',c:1,v:{b:4},u:{b:6},x:v=>W(`All'inizio di ogni turno ottieni ${v.b} Armatura.`,`All'inizio di ogni turno TUTTI gli eroi ottengono ${v.b} Armatura.`),f:v=>P('aura',v.b)},
 giudizio:{n:'Giudizio',cl:'chierico',t:'A',r:'U',c:2,cu:1,tg:1,v:{},u:{},x:()=>`Infliggi danni pari alla tua Armatura${g?` (${g.hero.blk})`:''}.`,f:(v,t)=>A(t,g.hero.blk)},
-benedizione:{n:'Benedizione',cl:'chierico',t:'S',r:'U',c:1,ex:1,v:{s:1,de:1},u:{s:2,de:2},x:v=>`Ottieni ${v.s} Forza e ${v.de} Destrezza.`,f:v=>{S(g.hero,'str',v.s);S(g.hero,'dex',v.de)}},
-miracolo:{n:'Miracolo',cl:'chierico',t:'S',r:'R',c:1,ex:1,v:{h:15},u:{h:22},x:v=>`Recuperi ${v.h} PV.`,f:v=>H(v.h)},
+benedizione:{n:'Benedizione',cl:'chierico',t:'S',r:'U',c:1,ex:1,ally:1,v:{s:1,de:1},u:{s:2,de:2},x:v=>W(`Ottieni ${v.s} Forza e ${v.de} Destrezza.`,`Tu o un alleato ottenete ${v.s} Forza e ${v.de} Destrezza.`),f:(v,t,a)=>{const h=g.heroes[a]||g.hero;S(h,'str',v.s);S(h,'dex',v.de)}},
+miracolo:{n:'Miracolo',cl:'chierico',t:'S',r:'R',c:1,ex:1,ally:1,v:{h:15},u:{h:22},x:v=>W(`Recuperi ${v.h} PV.`,`Tu o un alleato recuperate ${v.h} PV.`),f:(v,t,a)=>HA(a,v.h)},
+massa:{n:'Guarigione di Massa',cl:'chierico',t:'S',r:'R',c:2,ex:1,v:{h:8},u:{h:12},x:v=>W(`Recuperi ${v.h} PV.`,`TUTTI gli eroi recuperano ${v.h} PV.`),f:v=>party().forEach(p=>HA(p,v.h))},
 inno:{n:'Inno Divino',cl:'chierico',t:'P',r:'R',c:2,v:{d:5},u:{d:7},x:v=>`All'inizio di ogni turno infliggi ${v.d} danni a TUTTI i nemici.`,f:v=>P('inno',v.d)},
+/* --- carte nuove --- */
+massacro:{n:'Massacro',cl:'guerriero',t:'A',r:'U',c:3,disc:'A',v:{d:12},u:{d:16},x:v=>`Infliggi ${v.d} danni a TUTTI i nemici. Costa 1 in meno per ogni Attacco giocato nel turno.`,f:v=>AA(v.d)},
+ferro:{n:'Pelle di Ferro',cl:'guerriero',t:'S',r:'C',c:1,v:{b:6},u:{b:9},x:v=>`Ottieni ${v.b} Armatura più il doppio della tua Forza.`,f:v=>B(v.b+2*(g.hero.st.str||0))},
+carica:{n:'Carica Furiosa',cl:'guerriero',t:'A',r:'C',c:2,tg:1,disc:'S',v:{d:12},u:{d:16},x:v=>`Infliggi ${v.d} danni. Costa 1 in meno per ogni Abilità giocata nel turno.`,f:(v,t)=>A(t,v.d)},
+sfida:{n:'Sfida',cl:'guerriero',t:'S',r:'U',c:1,ex:1,v:{w:2},u:{w:3},x:v=>`Applica ${v.w} Debole a TUTTI i nemici. Ottieni 1 Forza.`,f:v=>{SA('weak',v.w);S(g.hero,'str',1)}},
+cometa:{n:'Cometa Arcana',cl:'mago',t:'A',r:'U',c:4,tg:1,disc:'S',v:{d:26},u:{d:34},x:v=>`Infliggi ${v.d} danni. Costa 1 in meno per ogni Abilità giocata nel turno.`,f:(v,t)=>A(t,v.d)},
+specchio:{n:"Specchio d'Acqua",cl:'mago',t:'S',r:'C',c:1,v:{b:6,w:1},u:{b:8,w:2},x:v=>`Ottieni ${v.b} Armatura. Applica ${v.w} Debole a TUTTI i nemici.`,f:v=>{B(v.b);SA('weak',v.w)}},
+scintilla:{n:'Scintilla',cl:'mago',t:'A',r:'C',c:0,tg:1,v:{d:3},u:{d:5},x:v=>`Infliggi ${v.d} danni. Pesca 1 carta.`,f:(v,t)=>{A(t,v.d);D(1)}},
+catena:{n:'Catena di Fulmini',cl:'mago',t:'A',r:'U',c:2,disc:'A',v:{d:7},u:{d:10},x:v=>`Infliggi ${v.d} danni a TUTTI i nemici. Costa 1 in meno per ogni Attacco giocato nel turno.`,f:v=>AA(v.d)},
+ventaglio:{n:'Ventaglio di Coltelli',cl:'ladro',t:'A',r:'C',c:1,v:{d:4},u:{d:6},x:v=>`Infliggi ${v.d} danni a TUTTI i nemici.`,f:v=>AA(v.d)},
+cappa:{n:"Cappa d'Ombra",cl:'ladro',t:'S',r:'U',c:2,disc:'A',v:{b:11},u:{b:15},x:v=>`Ottieni ${v.b} Armatura. Costa 1 in meno per ogni Attacco giocato nel turno.`,f:v=>B(v.b)},
+finale:{n:'Gran Finale',cl:'ladro',t:'A',r:'R',c:3,ex:1,disc:'A',v:{d:24},u:{d:32},x:v=>`Infliggi ${v.d} danni a TUTTI i nemici. Costa 1 in meno per ogni Attacco giocato nel turno.`,f:v=>AA(v.d)},
+paralizzante:{n:'Veleno Paralizzante',cl:'ladro',t:'S',r:'C',c:1,tg:1,v:{p:4,w:1},u:{p:6,w:2},x:v=>`Applica ${v.p} Veleno e ${v.w} Debole.`,f:(v,t)=>{S(t,'poison',v.p);S(t,'weak',v.w)}},
+sacra:{n:'Esplosione Sacra',cl:'chierico',t:'A',r:'U',c:3,disc:'S',v:{d:10,h:3},u:{d:14,h:4},x:v=>`Infliggi ${v.d} danni a TUTTI i nemici. Recuperi ${v.h} PV. Costa 1 in meno per ogni Abilità giocata nel turno.`,f:v=>{AA(v.d);H(v.h)}},
+scudoluce:{n:'Scudo di Luce',cl:'chierico',t:'S',r:'C',c:1,ally:1,v:{b:6},u:{b:9},x:v=>W(`Ottieni ${v.b} Armatura. Pesca 1 carta.`,`Tu o un alleato ottenete ${v.b} Armatura. Pesca 1 carta.`),f:(v,t,a)=>{BA(a,v.b);D(1)}},
+penitenza:{n:'Penitenza',cl:'chierico',t:'A',r:'C',c:1,tg:1,v:{d:7,s:1},u:{d:10,s:2},x:v=>`Infliggi ${v.d} danni. Applica ${v.s} Vulnerabile.`,f:(v,t)=>{A(t,v.d);S(t,'vuln',v.s)}},
+vigilanza:{n:'Vigilanza',cl:'chierico',t:'P',r:'U',c:1,v:{b:2},u:{b:3},x:v=>`Ogni volta che giochi un'Abilità ottieni ${v.b} Armatura.`,f:v=>P('vigil',v.b)},
+/* --- carte che tornano / recuperano dagli scarti --- */
+ascia:{n:'Ascia da Lancio',cl:'guerriero',t:'A',r:'C',c:1,tg:1,back:1,v:{d:7},u:{d:10},x:v=>`Infliggi ${v.d} danni.`,f:(v,t)=>A(t,v.d)},
+richiamo:{n:'Richiamo Arcano',cl:'mago',t:'S',r:'U',c:1,cu:0,pick:1,v:{},u:{},x:()=>`Metti in mano una carta a scelta dalla pila degli scarti.`,f:(v,t,a,pk)=>RD(pk)},
+boomerang:{n:'Lama Boomerang',cl:'ladro',t:'A',r:'C',c:1,tg:1,back:1,v:{d:4},u:{d:6},x:v=>`Infliggi ${v.d} danni 2 volte.`,f:(v,t)=>A(t,v.d,2)},
+frugare:{n:'Frugare',cl:'ladro',t:'S',r:'C',c:0,ex:1,pick:1,v:{},u:{},x:()=>`Metti in mano una carta a scelta dalla pila degli scarti.`,f:(v,t,a,pk)=>RD(pk)},
+ritorno:{n:'Preghiera del Ritorno',cl:'chierico',t:'S',r:'U',c:1,pick:1,v:{b:4},u:{b:7},x:v=>`Ottieni ${v.b} Armatura. Metti in mano una carta a scelta dagli scarti.`,f:(v,t,a,pk)=>{B(v.b);RD(pk)}},
+/* --- carte che indeboliscono i nemici --- */
+disarmo:{n:'Disarmare',cl:'guerriero',t:'S',r:'U',c:1,tg:1,ex:1,v:{s:2},u:{s:3},x:v=>`Il nemico perde ${v.s} Forza.`,f:(v,t)=>S(t,'str',-v.s)},
+scudata:{n:'Colpo di Scudo',cl:'guerriero',t:'A',r:'U',c:2,tg:1,ex:1,v:{d:6},u:{d:9},x:v=>`Infliggi ${v.d} danni. Il nemico è Stordito.`,f:(v,t)=>{A(t,v.d);S(t,'stun',1)}},
+incendio:{n:'Incendio',cl:'mago',t:'A',r:'C',c:1,tg:1,v:{d:4,b:4},u:{d:6,b:6},x:v=>`Infliggi ${v.d} danni. Applica ${v.b} Bruciatura.`,f:(v,t)=>{A(t,v.d);S(t,'burn',v.b)}},
+inferno:{n:'Inferno',cl:'mago',t:'S',r:'U',c:2,v:{b:5},u:{b:8},x:v=>`Applica ${v.b} Bruciatura a TUTTI i nemici.`,f:v=>SA('burn',v.b)},
+congela:{n:'Congelamento',cl:'mago',t:'S',r:'R',c:2,cu:1,tg:1,ex:1,v:{w:2},u:{},x:v=>`Il nemico è Stordito. Applica ${v.w} Debole.`,f:(v,t)=>{S(t,'stun',1);S(t,'weak',v.w)}},
+polvere:{n:'Polvere Accecante',cl:'ladro',t:'S',r:'C',c:1,v:{w:2},u:{w:3},x:v=>`Applica ${v.w} Debole a TUTTI i nemici.`,f:v=>SA('weak',v.w)},
+tendini:{n:'Taglia Tendini',cl:'ladro',t:'A',r:'U',c:1,tg:1,v:{d:5,s:1},u:{d:8,s:2},x:v=>`Infliggi ${v.d} danni. Il nemico perde ${v.s} Forza.`,f:(v,t)=>{A(t,v.d);S(t,'str',-v.s)}},
+ammonimento:{n:'Ammonimento',cl:'chierico',t:'S',r:'U',c:1,tg:1,v:{s:2,v:1},u:{s:3,v:2},x:v=>`Il nemico perde ${v.s} Forza. Applica ${v.v} Vulnerabile.`,f:(v,t)=>{S(t,'str',-v.s);S(t,'vuln',v.v)}},
+sigillo:{n:'Sigillo di Luce',cl:'chierico',t:'S',r:'R',c:2,cu:1,tg:1,ex:1,v:{},u:{},x:()=>`Il nemico è Stordito: salta la sua prossima azione.`,f:(v,t)=>S(t,'stun',1)},
 };
 
 const RELICS={
-  elmo:{n:'Elmo del Veterano',ic:'⛑️',d:'Alla fine di ogni combattimento recuperi 6 PV.',start:0},
-  grimorio:{n:'Grimorio Consunto',ic:'📕',d:'Nel primo turno di ogni combattimento peschi 2 carte in più.'},
-  fiala:{n:'Fiala Nascosta',ic:'🧪',d:'All\'inizio di ogni combattimento applichi 2 Veleno a tutti i nemici.'},
-  simbolo:{n:'Simbolo Sacro',ic:'📿',d:'All\'inizio di ogni tuo turno recuperi 1 PV.'},
-  pietra:{n:'Pietra Affilata',ic:'🪨',d:'Inizi ogni combattimento con 1 Forza.'},
-  mantello:{n:'Mantello Elfico',ic:'🧥',d:'Inizi ogni combattimento con 1 Destrezza.'},
-  ancora:{n:'Ancora di Ferro',ic:'⚓',d:'Inizi ogni combattimento con 10 Armatura.'},
-  lanterna:{n:'Lanterna del Minatore',ic:'🏮',d:'Nel primo turno di ogni combattimento ottieni 1 Energia in più.'},
-  sacchetto:{n:'Sacchetto Ingordo',ic:'👝',d:'Ottieni il 25% di oro in più dai combattimenti.'},
-  zanna:{n:'Zanna di Vampiro',ic:'🦷',d:'Ogni volta che uccidi un nemico recuperi 3 PV.'},
-  cuore:{n:'Cuore di Troll',ic:'❤️',d:'Quando la raccogli: +8 PV massimi.'},
-  corno:{n:'Corno da Guerra',ic:'📯',d:'All\'inizio di ogni combattimento applichi 1 Vulnerabile a tutti i nemici.'},
-  dado:{n:'Dado del Destino',ic:'🎲',d:'Ogni 3 turni ottieni 1 Energia in più.'},
-  orbe:{n:'Orbe di Pietra',ic:'🔮',d:'Alla fine del tuo turno, se non hai Armatura, ne ottieni 6.'},
-  piuma:{n:'Piuma di Fenice',ic:'🪶',d:'La prima volta che moriresti, torni in vita con il 30% dei PV. Poi si consuma.'},
+  elmo:{n:'Elmo del Veterano',ic:'',d:'Alla fine di ogni combattimento recuperi 6 PV.',start:0},
+  grimorio:{n:'Grimorio Consunto',ic:'',d:'Nel primo turno di ogni combattimento peschi 2 carte in più.'},
+  fiala:{n:'Fiala Nascosta',ic:'',d:'All\'inizio di ogni combattimento applichi 2 Veleno a tutti i nemici.'},
+  simbolo:{n:'Simbolo Sacro',ic:'',d:'All\'inizio di ogni tuo turno recuperi 1 PV.'},
+  pietra:{n:'Pietra Affilata',ic:'',d:'Inizi ogni combattimento con 1 Forza.'},
+  mantello:{n:'Mantello Elfico',ic:'',d:'Inizi ogni combattimento con 1 Destrezza.'},
+  ancora:{n:'Ancora di Ferro',ic:'',d:'Inizi ogni combattimento con 10 Armatura.'},
+  lanterna:{n:'Lanterna del Minatore',ic:'',d:'Nel primo turno di ogni combattimento ottieni 1 Energia in più.'},
+  sacchetto:{n:'Sacchetto Ingordo',ic:'',d:'Ottieni il 25% di oro in più dai combattimenti.'},
+  zanna:{n:'Zanna di Vampiro',ic:'',d:'Ogni volta che uccidi un nemico recuperi 3 PV.'},
+  cuore:{n:'Cuore di Troll',ic:'',d:'Quando la raccogli: +8 PV massimi.'},
+  corno:{n:'Corno da Guerra',ic:'',d:'All\'inizio di ogni combattimento applichi 1 Vulnerabile a tutti i nemici.'},
+  dado:{n:'Dado del Destino',ic:'',d:'Ogni 3 turni ottieni 1 Energia in più.'},
+  orbe:{n:'Orbe di Pietra',ic:'',d:'Alla fine del tuo turno, se non hai Armatura, ne ottieni 6.'},
+  piuma:{n:'Piuma di Fenice',ic:'',d:'La prima volta che moriresti, torni in vita con il 30% dei PV. Poi si consuma.'},
 };
+// Queste carte, potenziate, costano 1 in meno (stessi effetti)
+const CHEAPER={possente:[1,{d:8,s:2}],pallafuoco:[1,{d:7}],fulmine:[1,{d:15}],barriera:[1,{b:12}],meteora:[2,{d:24}],nube:[0,{p:3}],mortale:[1,{d:8,m:2}],
+  santuario:[1,{b:14}],martello:[1,{d:12,b:4}],massacro:[2,{d:12}],carica:[1,{d:12}],cometa:[3,{d:26}],cappa:[1,{b:11}],sacra:[2,{d:10,h:3}]};
+Object.entries(CHEAPER).forEach(([k,[cu,u]])=>{CARDS[k].cu=cu;CARDS[k].u=u});
+// Potenziamenti che tolgono Esaurisci (stessi valori: la carta torna nel mazzo)
+const UP_NOEX={grido:{s:2},mana:{e:1},curaferite:{h:5},benedizione:{s:1,de:1},sfida:{w:2},frugare:{},disarmo:{s:2}};
+Object.entries(UP_NOEX).forEach(([k,u])=>{CARDS[k].uex=0;CARDS[k].u=u});
+// Potenziamenti che rendono la carta Innata (sempre nella prima mano)
+['preparazione','furia','potere','intrise','aura','vigilanza','scintilla','ventaglio'].forEach(k=>{CARDS[k].uinn=1});
+CARDS.spalle.inn=1;
+const exOf=c=>{const d=CARDS[c.id];return !!d.ex&&!(c.up&&d.uex===0)};
+const innOf=c=>{const d=CARDS[c.id];return !!(d.inn||(c.up&&d.uinn))};
 const STARTER_RELICS=['elmo','grimorio','fiala','simbolo'];
 const RELIC_POOL=Object.keys(RELICS).filter(k=>!STARTER_RELICS.includes(k));
 
@@ -659,27 +768,27 @@ const POTIONS={
 
 /* Nemici: ai(e,r) restituisce l'intenzione del turno. d=danno, x=colpi, b=armatura, s=forza, deb=debuff al giocatore */
 const ENEMIES={
-  goblin:{n:'Goblin Predone',ic:'👺',hp:[13,17],ai:(e,r)=>r.next()<.6?{d:6}:{d:3,b:4}},
-  ratto:{n:'Ratto delle Fogne',ic:'🐀',hp:[9,12],ai:(e,r)=>r.next()<.5?{d:3,x:2}:{d:5}},
-  melma:{n:'Melma Acida',ic:'🟢',hp:[24,28],ai:e=>e.t%3===1?{d:4,deb:'weak',dn:1}:{d:8}},
-  scheletro:{n:'Scheletro Guerriero',ic:'💀',hp:[18,22],ai:e=>e.t%2?{d:4,b:6}:{d:8}},
-  coboldo:{n:'Coboldo Sciamano',ic:'🦎',hp:[14,18],ai:(e,r)=>e.t===0?{s:2,all:1}:(r.next()<.7?{d:5}:{d:2,deb:'vuln',dn:1})},
-  lupo:{n:'Lupo Famelico',ic:'🐺',hp:[16,20],ai:(e,r)=>r.next()<.5?{d:4,x:2}:{d:7}},
-  bandito:{n:'Bandito della Strada',ic:'🥷',hp:[20,24],ai:e=>e.t%3===2?{b:8,d:3}:{d:9}},
-  orco:{n:'Orco Capoguerra',ic:'👹',hp:[70,76],elite:1,ai:e=>e.t===0?{s:3}:[{b:10,d:5},{d:11},{d:5,x:2}][e.t%3]},
-  troll:{n:'Troll di Palude',ic:'🧌',hp:[80,86],elite:1,ai:e=>[{d:12},{d:7,deb:'weak',dn:2},{heal:14,b:6}][e.t%3]},
-  cavaliere:{n:'Cavaliere Caduto',ic:'⚜️',hp:[58,64],elite:1,blk:12,ai:e=>[{d:14},{b:14,s:2},{d:5,x:3}][e.t%3]},
-  drago:{n:'Ignivora, Drago della Rocca',ic:'🐉',hp:[210,210],boss:1,ai:e=>[{b:15,s:2},{d:16},{d:5,x:3},{d:8,deb:'weak',dn:2},{d:10,deb:'vuln',dn:2}][e.t%5]},
+  goblin:{n:'Goblin Predone',ic:'',hp:[13,17],ai:(e,r)=>r.next()<.6?{d:6}:{d:3,b:4}},
+  ratto:{n:'Ratto delle Fogne',ic:'',hp:[9,12],ai:(e,r)=>r.next()<.5?{d:3,x:2}:{d:5}},
+  melma:{n:'Melma Acida',ic:'',hp:[24,28],ai:e=>e.t%3===1?{d:4,deb:'weak',dn:1}:{d:8}},
+  scheletro:{n:'Scheletro Guerriero',ic:'',hp:[18,22],ai:e=>e.t%2?{d:4,b:6}:{d:8}},
+  coboldo:{n:'Coboldo Sciamano',ic:'',hp:[14,18],ai:(e,r)=>e.t===0?{s:2,all:1}:(r.next()<.7?{d:5}:{d:2,deb:'vuln',dn:1})},
+  lupo:{n:'Lupo Famelico',ic:'',hp:[16,20],ai:(e,r)=>r.next()<.5?{d:4,x:2}:{d:7}},
+  bandito:{n:'Bandito della Strada',ic:'',hp:[20,24],ai:e=>e.t%3===2?{b:8,d:3}:{d:9}},
+  orco:{n:'Orco Capoguerra',ic:'',hp:[70,76],elite:1,ai:e=>e.t===0?{s:3}:[{d:8,aoe:1},{d:11},{d:5,x:2}][e.t%3]},
+  troll:{n:'Troll di Palude',ic:'',hp:[80,86],elite:1,ai:e=>[{d:12},{d:7,deb:'weak',dn:2},{heal:14,b:6}][e.t%3]},
+  cavaliere:{n:'Cavaliere Caduto',ic:'',hp:[58,64],elite:1,blk:12,ai:e=>[{d:14},{b:14,s:2},{d:5,x:3}][e.t%3]},
+  drago:{n:'Ignivora, Drago della Rocca',ic:'',hp:[210,210],boss:1,ai:e=>[{b:15,s:2},{d:6,x:3},{d:12,aoe:1},{d:8,deb:'weak',dn:2},{d:10,deb:'vuln',dn:2}][e.t%5]},
 };
 const EASY=[['goblin'],['ratto','ratto'],['melma'],['scheletro']];
 const HARD=[['scheletro','coboldo'],['lupo','lupo'],['bandito','goblin'],['melma','ratto'],['goblin','goblin','coboldo'],['scheletro','ratto','ratto'],['bandito','lupo']];
 const ELITES=[['orco'],['troll'],['cavaliere']];
 
-const STN={str:['Forza','Aumenta i danni di ogni attacco.'],dex:['Destrezza','Aumenta l\'Armatura ottenuta dalle carte.'],
+const STN={stun:['Stordito','Salta la sua prossima azione.'],burn:['Bruciatura','A inizio turno perde PV pari alla Bruciatura, poi la Bruciatura si dimezza.'],str:['Forza','Aumenta i danni di ogni attacco.'],dex:['Destrezza','Aumenta l\'Armatura ottenuta dalle carte.'],
   vuln:['Vulnerabile','Subisce il 50% di danni in più dagli attacchi. Cala di 1 a fine turno.'],weak:['Debole','Infligge il 25% di danni in meno. Cala di 1 a fine turno.'],
   poison:['Veleno','A inizio turno perde PV pari al Veleno, poi il Veleno cala di 1.'],spine:['Spine','Chi ti attacca subisce questi danni.']};
-const POWN={furia:'Furia',arcano:'Potere Arcano',arcimago:'Arcimago',intrise:'Lame Intrise',rapide:'Mani Rapide',aura:'Aura Protettiva',inno:'Inno Divino'};
-const NODEIC={combat:'⚔️',elite:'👹',event:'❓',rest:'🔥',shop:'💰',treasure:'🎁',boss:'🐉'};
+const POWN={vigil:'Vigilanza',furia:'Furia',arcano:'Potere Arcano',arcimago:'Arcimago',intrise:'Lame Intrise',rapide:'Mani Rapide',aura:'Aura Protettiva',inno:'Inno Divino'};
+const NODEIC={combat:1,elite:1,event:1,rest:1,shop:1,treasure:1,boss:1};
 const NODEN={combat:'Nemici',elite:'Élite',event:'Evento',rest:'Falò',shop:'Mercante',treasure:'Tesoro',boss:'Boss'};
 const ROWS=15, SK='valdombra-run-v1', LK='valdombra-livello-v1', MAXLVL=10;
 function getUnlocked(){try{return Math.min(MAXLVL,parseInt(localStorage.getItem(LK)||'0',10)||0)}catch(e){return 0}}
@@ -694,6 +803,7 @@ const SB_URL='https://ucwuhzupgsvtphsdmlqf.supabase.co', SB_KEY='sb_publishable_
 let R=null;                       // stato della stanza (l'host è l'arbitro, gli altri ne ricevono una copia)
 let ME=null, CUR=null, run=null, g=null, rng=null;
 let isHost=true, solo=true, chan=null, sbc=null, online=new Set();
+let pickMode='norm';
 let screen='title', modal=null, pickCls='guerriero', pickLvl=0, uid=Math.floor(Math.random()*1e6), fxq=[];
 const UI={sel:null,seed:'',joinCode:'',status:'',unlockSeed:null,unlocked:null};
 let hostTimer=null, joinTimer=null;
@@ -702,7 +812,8 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 const has=id=>!!(run&&run.relics&&run.relics.includes(id));
 const alive=()=>g?g.enemies.filter(e=>e.hp>0):[];
 const vals=c=>c.up?{...CARDS[c.id].v,...CARDS[c.id].u}:CARDS[c.id].v;
-const costOf=c=>{const d=CARDS[c.id];return c.up&&d.cu!=null?d.cu:d.c};
+const baseCost=c=>{const d=CARDS[c.id];return c.up&&d.cu!=null?d.cu:d.c};
+const costOf=c=>{let v=baseCost(c);const d=CARDS[c.id];if(d.disc&&typeof g!=='undefined'&&g&&g.hero&&g.hero.played)v=Math.max(0,v-(g.hero.played[d.disc]||0));return v};
 const canUp=c=>!c.up&&CARDS[c.id].u!==undefined;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 const ABC='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -736,7 +847,7 @@ function dispatch(pid,a){
 }
 function checkProgress(){
   if(!R||!isHost)return;
-  if(R.phase==='map'){const act=active();if(act.length&&act.every(p=>R.votes[p]))resolveVote()}
+  if(R.phase==='map'){if(R.voteAnim)return;const act=active();if(act.length&&act.every(p=>R.votes[p]))resolveVote()}
   else if(R.phase==='room'){if(active().every(p=>R.players[p].done)){R.phase='map';R.votes={};R.order.forEach(p=>R.players[p].screen=null)}}
   else if(R.phase==='combat'){const c=R.combat;if(c&&!c.busy&&!c.won){const hs=Object.keys(c.heroes).filter(p=>!c.heroes[p].down&&isOnline(p));if(hs.length&&hs.every(p=>c.heroes[p].ended))enemyPhase()}}
 }
@@ -745,11 +856,12 @@ function checkProgress(){
 const ACT={
   cls:(a,P)=>{if(R.phase==='lobby'&&CLASSES[a.cls])P.cls=a.cls},
   ready:(a,P)=>{if(R.phase==='lobby')P.ready=!P.ready},
-  start:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host)startRunRoom(a.lvl|0,a.seed)},
+  start:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host)startRunRoom(a.lvl|0,a.seed,R.lmode)},
+  mode:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host)R.lmode=a.m==='surv'?'surv':'norm'},
   kick:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host&&a.p!==R.host){delete R.players[a.p];R.order=R.order.filter(x=>x!==a.p)}},
   again:(a,P,pid)=>{if(R.phase==='end'&&pid===R.host)toLobby()},
-  vote:(a,P,pid)=>{if(R.phase==='map'&&availNodes().some(n=>n.y===a.y&&n.x===a.x))R.votes[pid]=a.y+','+a.x},
-  play:a=>playCard(a.uid,a.j),
+  vote:(a,P,pid)=>{if(R.phase==='map'&&!R.voteAnim&&availNodes().some(n=>n.y===a.y&&n.x===a.x))R.votes[pid]=a.y+','+a.x},
+  play:a=>playCard(a.uid,a.j,a.a,a.pk),
   potion:a=>usePotion(a.i,a.j),
   drink:(a,P)=>{if(R.phase!=='combat'&&P.potions[a.i]==='cura'){P.potions.splice(a.i,1);H(15)}},
   end:()=>endHeroTurn(),
@@ -794,7 +906,15 @@ function availNodes(){
 function resolveVote(){
   const tally={};active().forEach(p=>{const v=R.votes[p];if(v)tally[v]=(tally[v]||0)+1});
   const max=Math.max(...Object.values(tally));const best=Object.keys(tally).filter(k=>tally[k]===max);
-  const [y,x]=rng.pick(best).split(',').map(Number);R.votes={};enterNode(y,x);
+  const win=rng.pick(best),opts=Object.keys(tally);
+  if(solo||opts.length<2){R.votes={};const [y,x]=win.split(',').map(Number);enterNode(y,x);return}
+  // voti diversi: mostra a tutti chi vince prima di partire
+  const tie=best.length>1;R.voteAnim={id:Math.floor(Math.random()*1e9),opts:tie?best:opts,tally,win,tie,ms:tie?3600:2200};
+  setTimeout(finishVote,R.voteAnim.ms+400);
+}
+function finishVote(){
+  if(!R||!isHost||!R.voteAnim||R.phase!=='map')return;
+  const [y,x]=R.voteAnim.win.split(',').map(Number);R.voteAnim=null;R.votes={};enterNode(y,x);checkProgress();commit();
 }
 
 /* ================= PARTITA ================= */
@@ -804,12 +924,12 @@ function initPlayer(P){
   Object.assign(P,{hp:cl.hp,max:cl.hp,gold:99,deck:cl.deck.map(id=>({id,up:false})),relics:[cl.relic],potions:['cura'],kills:0,removes:0,piumaUsed:false,
     screen:null,done:true,reward:null,shop:null,event:null,treasure:null});
 }
-function startRunRoom(lvl,seed){
+function startRunRoom(lvl,seed,mode){
   R.order=R.order.filter(p=>isOnline(p));Object.keys(R.players).forEach(p=>{if(!R.order.includes(p))delete R.players[p]});
   seed=String(seed||'').trim().toUpperCase().slice(0,12)||newSeed();
-  Object.assign(R,{seed,lvl:Math.max(0,Math.min(MAXLVL,lvl)),map:genMap(new RNG(hashStr(seed+'#map'))),pos:null,path:[],floor:0,votes:{},seenEv:[],combat:null,win:null,phase:'map'});
+  Object.assign(R,{seed,mode:mode==='surv'?'surv':'norm',cycle:1,lbId:null,t0:Date.now(),lvl:Math.max(0,Math.min(MAXLVL,lvl)),map:genMap(new RNG(hashStr(seed+'#map'))),pos:null,path:[],floor:0,votes:{},seenEv:[],combat:null,win:null,phase:'map'});
   rng=new RNG(hashStr(seed+'#'+R.order.map(p=>R.players[p].cls).join('')));
-  R.order.forEach(p=>initPlayer(R.players[p]));
+  R.order.forEach(p=>{initPlayer(R.players[p]);applyLoadout(R.players[p])});
 }
 function toLobby(){
   R.order.forEach(p=>{const P=R.players[p];R.players[p]={pid:p,name:P.name,cls:P.cls,ready:p===R.host}});
@@ -830,29 +950,47 @@ function enterNode(y,x){
     else if(t==='treasure'){const r=randomRelic();const gold=rng.int(25,50);P.gold+=gold;if(r)gainRelic(r);P.treasure={relic:r,gold};P.screen='treasure'}
   });
 }
+function newCycle(){
+  R.cycle++;R.map=genMap(new RNG(hashStr(R.seed+'#map'+R.cycle)));R.pos=null;R.path=[];R.floor=0;R.votes={};
+  R.order.forEach(p=>{const P=R.players[p];P.hp=Math.min(P.max,P.hp+Math.floor(P.max*.3))});
+}
+const totalFloors=()=>((R.cycle||1)-1)*(ROWS+1)+(R.floor||0);
 function endRun(win){R.phase='end';R.win=win;R.combat=null;g=null}
 
 /* ================= COMBATTIMENTO ================= */
 function startCombat(ids,kind){
   const L=R.lvl||0,party=active(),n=Math.max(1,party.length);
-  ids=[...ids];if(n>=5&&kind==='combat')ids.push(rng.pick(['goblin','ratto','lupo']));
-  const hpM=1+.7*(n-1),dM=1+.1*(n-1);
+  const cy=(R.cycle||1)-1,surv=R.mode==='surv';
+  ids=[...ids];if((n>=5||(surv&&n>=3))&&kind==='combat')ids.push(rng.pick(['goblin','ratto','lupo']));
+  if(surv&&cy>=2&&kind==='combat')ids.push(rng.pick(['scheletro','bandito','lupo']));
+  const hpM=(1+.7*(n-1))*(1+.4*cy),dM=(1+.1*(n-1))*(1+.15*cy);
   R.combat={kind,n,turn:0,busy:false,won:false,heroes:{},
     enemies:ids.map(id=>{const d=ENEMIES[id];const strong=!!(d.elite||d.boss);const hp=Math.round(rng.int(d.hp[0],d.hp[1])*(1+.1*L+(strong?.05*L:0))*hpM);
       return{id,n:d.n,hp,max:hp,blk:d.blk?Math.round(d.blk*hpM):0,st:{},t:0,dead:false,boss:!!d.boss,bonus:dmgBonus(L,strong),dm:dM}})};
-  party.forEach(pid=>{const P=R.players[pid];R.combat.heroes[pid]={blk:0,st:{},pw:{},draw:rng.shuffle(P.deck.map(c=>({...c,uid:uid++}))),hand:[],disc:[],exh:[],energy:0,ended:false,down:false}});
+  party.forEach(pid=>{const P=R.players[pid];const sh=rng.shuffle(P.deck.map(c=>({...c,uid:uid++})));R.combat.heroes[pid]={blk:0,st:{},pw:{},draw:[...sh.filter(c=>!innOf(c)),...sh.filter(innOf)],hand:[],disc:[],exh:[],energy:0,ended:false,down:false}});
   R.phase='combat';R.order.forEach(p=>{R.players[p].screen=null;R.players[p].done=true});
   g=R.combat;rollIntents();startTurn();
 }
 function targetable(){const c=R.combat;let t=Object.keys(c.heroes).filter(p=>!c.heroes[p].down&&isOnline(p));if(!t.length)t=Object.keys(c.heroes).filter(p=>!c.heroes[p].down);return t}
-function rollIntents(){R.combat.enemies.forEach(e=>{if(e.hp<=0)return;e.intent=ENEMIES[e.id].ai(e,rng);e.t++;if(e.intent.d||e.intent.deb){const t=targetable();e.intent.tg=t.length?rng.pick(t):null}})}
+function rollIntents(){
+  // i nemici si dividono i bersagli: ognuno preferisce chi è stato scelto meno
+  const load={};
+  R.combat.enemies.forEach(e=>{if(e.hp<=0)return;const it=e.intent=ENEMIES[e.id].ai(e,rng);e.t++;
+    if(!(it.d||it.deb))return;const t=targetable();if(!t.length){it.tg=null;return}
+    const pick=()=>{const m=Math.min(...t.map(p=>load[p]||0));const r=rng.pick(t.filter(p=>(load[p]||0)===m));load[r]=(load[r]||0)+1;return r};
+    if(it.aoe){t.forEach(p=>load[p]=(load[p]||0)+1);it.tg=null;return}
+    it.tg=pick();
+    if((it.x||1)>1&&t.length>1){it.tgs=[it.tg];for(let k=1;k<it.x;k++)it.tgs.push(rng.next()<.4?it.tgs[k-1]:pick())}
+  });
+}
 function startTurn(){
   const c=R.combat;c.turn++;
+  Object.values(c.heroes).forEach(h=>{h.blk=0;h.played={};delete h.st.spine});
   Object.keys(c.heroes).forEach(pid=>{const h=c.heroes[pid];if(h.down)return;ctx(pid);heroTurnStart(h,c.turn)});
   checkEnd();
 }
 function heroTurnStart(h,turn){
-  h.ended=false;h.blk=0;delete h.st.spine;g.hit=new Set();
+  h.ended=false;g.hit=new Set();
   let en=3,dr=5;const pw=h.pw;
   if(turn===1){
     if(has('lanterna'))en++;if(has('grimorio'))dr+=2;
@@ -864,7 +1002,7 @@ function heroTurnStart(h,turn){
   if(pw.furia)S(h,'str',pw.furia);
   if(pw.arcimago)en+=pw.arcimago;
   if(pw.rapide)dr+=pw.rapide;
-  if(pw.aura){h.blk+=pw.aura;fx('hero','+'+pw.aura,'blk')}
+  if(pw.aura)party().forEach(p=>{const x=g.heroes[p];x.blk+=pw.aura;fxq.push({k:'h-'+p,txt:'+'+pw.aura,cls:'blk'})});
   if(pw.inno)alive().forEach(e=>hurtEnemy(e,pw.inno));
   h.energy=en;D(dr);
 }
@@ -895,19 +1033,26 @@ function S(t,k,n){if(!t||(t.hp!==undefined&&t.hp<=0))return;t.st[k]=(t.st[k]||0)
 function SA(k,n){alive().forEach(e=>S(e,k,n))}
 function D(n){const h=g.hero;for(let i=0;i<n;i++){if(h.hand.length>=10)break;if(!h.draw.length){if(!h.disc.length)break;h.draw=rng.shuffle(h.disc);h.disc=[]}h.hand.push(h.draw.pop())}}
 function E(n){g.hero.energy+=n}
+function RD(pk){const h=g.hero;if(!h.disc.length||h.hand.length>=10)return;let i=h.disc.findIndex(c=>c.uid===pk);if(i<0)i=h.disc.length-1;h.hand.push(h.disc.splice(i,1)[0])}
+const party=()=>Object.keys(g.heroes).filter(p=>!g.heroes[p].down);
+function BA(pid,n){const h=g.heroes[pid];if(!h||h.down)return;const v=Math.max(0,n+(g.hero.st.dex||0));h.blk+=v;fxq.push({k:'h-'+pid,txt:'+'+v,cls:'blk'})}
+function HA(pid,n){const P=R.players[pid],h=g.heroes[pid];if(!P||(h&&h.down))return;const b=P.hp;P.hp=Math.min(P.max,P.hp+n);const d=P.hp-b;if(d>0)fxq.push({k:'h-'+pid,txt:'+'+d,cls:'heal'})}
 function H(n){if(!run)return;const b=run.hp;run.hp=Math.min(run.max,run.hp+n);const d=run.hp-b;if(d>0&&g&&g.hero)fx('hero','+'+d,'heal')}
 function L(n){run.hp-=n;fx('hero','-'+n,'dmg');heroDown()}
 function P(k,n){g.hero.pw[k]=(g.hero.pw[k]||0)+n}
 
-function playCard(u,j){
+function playCard(u,j,ap,pk){
   const c=R.combat,h=g&&g.hero;if(!c||c.busy||c.won||!h||h.ended||h.down)return;
   const i=h.hand.findIndex(x=>x.uid===u);if(i<0)return;const card=h.hand[i];const d=CARDS[card.id];const cost=costOf(card);if(cost>h.energy)return;
   let t=null;if(d.tg){t=c.enemies[j];if(!t||t.hp<=0){t=alive()[0];if(!t)return}}
   h.hand.splice(i,1);h.energy-=cost;g.hit=new Set();
-  d.f(vals(card),t);
+  if(d.ally&&!(ap&&c.heroes[ap]&&!c.heroes[ap].down))ap=CUR;
+  d.f(vals(card),t,d.ally?ap:CUR,pk);
   if(d.t==='A'&&h.pw.intrise)g.hit.forEach(e=>S(e,'poison',h.pw.intrise));
   if(d.t==='S'&&h.pw.arcano)alive().forEach(e=>hurtEnemy(e,h.pw.arcano));
-  if(d.t!=='P')(d.ex?h.exh:h.disc).push(card);
+  if(d.t==='S'&&h.pw.vigil)B(h.pw.vigil);
+  h.played=h.played||{};h.played[d.t]=(h.played[d.t]||0)+1;
+  if(d.t!=='P'){if(exOf(card))h.exh.push(card);else if(d.back)h.draw.push(card);else h.disc.push(card)}
   checkEnd();
 }
 function usePotion(i,j){
@@ -929,6 +1074,9 @@ async function enemyPhase(){
     if(R.combat!==c)return;if(e.hp<=0)continue;e.blk=0;
     if(e.st.poison){ctx(null);const p=e.st.poison;e.hp-=p;fx(eid(e),'-'+p,'psn');e.st.poison--;
       if(e.hp<=0){e.hp=0;e.dead=true;commit();await wait(250);continue}}
+    if(e.st.burn){ctx(null);const b=e.st.burn;e.hp-=b;fx(eid(e),'-'+b,'dmg');e.st.burn=Math.floor(b/2);if(!e.st.burn)delete e.st.burn;
+      if(e.hp<=0){e.hp=0;e.dead=true;commit();await wait(250);continue}}
+    if(e.st.stun){e.st.stun--;if(!e.st.stun)delete e.st.stun;fx(eid(e),'Stordito!','blk');commit();await wait(450);continue}
     doIntent(e);commit();await wait(450);
     if(Object.values(c.heroes).every(h=>h.down))break;
   }
@@ -944,10 +1092,12 @@ function doIntent(e){
   if(it.s)(it.all?alive():[e]).forEach(x=>x.st.str=(x.st.str||0)+it.s);
   if(it.heal){const b=e.hp;e.hp=Math.min(e.max,e.hp+Math.round(it.heal*(1+.7*(c.n-1))));fx(eid(e),'+'+(e.hp-b),'heal')}
   if(it.d||it.deb){
-    let tg=it.tg;if(!tg||!c.heroes[tg]||c.heroes[tg].down){const t=targetable();if(!t.length)return;tg=rng.pick(t)}
-    ctx(tg);
-    if(it.d)for(let k=0;k<(it.x||1);k++){hurtHero(calcDmg(enemyBase(e,it),e,g.hero));if(g.hero.st.spine)hurtEnemy(e,g.hero.st.spine);if(g.hero.down||e.hp<=0)break}
-    if(it.deb&&!g.hero.down)g.hero.st[it.deb]=(g.hero.st[it.deb]||0)+it.dn;
+    const fix=p=>{if(p&&c.heroes[p]&&!c.heroes[p].down)return p;const t=targetable();return t.length?rng.pick(t):null};
+    const hitOnce=()=>{hurtHero(calcDmg(enemyBase(e,it),e,g.hero));if(g.hero.st.spine)hurtEnemy(e,g.hero.st.spine)};
+    const debuff=()=>{if(it.deb&&!g.hero.down)g.hero.st[it.deb]=(g.hero.st[it.deb]||0)+it.dn};
+    if(it.aoe){for(const p of targetable()){ctx(p);if(it.d)hitOnce();debuff();if(e.hp<=0)break}return}
+    if(it.d)for(let k=0;k<(it.x||1);k++){const p=fix(it.tgs?it.tgs[k]:it.tg);if(!p)break;ctx(p);hitOnce();if(e.hp<=0)break}
+    const pd=fix(it.tg);if(pd){ctx(pd);debuff()}
   }
 }
 function checkEnd(){
@@ -960,12 +1110,12 @@ function winCombat(){
   const c=R.combat,kind=c.kind,pids=Object.keys(c.heroes);
   pids.forEach(pid=>{ctx(pid);if(c.heroes[pid].down)run.hp=Math.max(1,Math.floor(run.max*.25));else if(has('elmo'))H(6)});
   R.combat=null;g=null;
-  if(kind==='boss'){endRun(true);return}
+  if(kind==='boss'){if(R.mode!=='surv'){endRun(true);return}newCycle()}
   R.phase='room';
   R.order.forEach(pid=>{const P=R.players[pid];if(!pids.includes(pid)||!isOnline(pid)){P.done=true;P.screen=null;return}
-    ctx(pid);let gold=kind==='elite'?rng.int(25,35):rng.int(10,20);gold=Math.round(gold*(1+.1*(R.lvl||0)));if(has('sacchetto'))gold=Math.round(gold*1.25);
-    P.reward={title:kind==='elite'?'Élite sconfitta!':'Vittoria!',gold,cards:rollCards(3,kind==='elite'),
-      potion:rng.next()<(kind==='elite'?.6:.4)?rng.pick(Object.keys(POTIONS)):null,relic:kind==='elite'?randomRelic():null};
+    ctx(pid);const big=kind==='elite'||kind==='boss';let gold=big?rng.int(25,35):rng.int(10,20);gold=Math.round(gold*(1+.1*(R.lvl||0)));if(has('sacchetto'))gold=Math.round(gold*1.25);
+    P.reward={title:kind==='boss'?'Drago sconfitto! Inizia il ciclo '+R.cycle:kind==='elite'?'Élite sconfitta!':'Vittoria!',gold,cards:rollCards(3,big),
+      potion:rng.next()<(big?.6:.4)?rng.pick(Object.keys(POTIONS)):null,relic:big?randomRelic():null};
     P.screen='reward';P.done=false});
 }
 
@@ -998,19 +1148,19 @@ function buy(kind,k){
 function removePrice(){return 75+run.removes*25}
 
 const EVENTS=[
- {id:'altare',n:'Altare Dimenticato',ic:'🕯️',txt:'In una cappella in rovina, un altare di pietra nera pulsa di luce rossa. Una voce sussurra: «Un tributo di sangue, e avrai un dono.»',
-  opts:[{t:'Offri il tuo sangue',s:'Perdi 8 PV. Ottieni una reliquia casuale.',f:()=>{run.hp=Math.max(1,run.hp-8);const r=randomRelic();if(!r)return 'L\'altare tace. Non ha più nulla da darti.';gainRelic(r);return `Il dolore è breve. Sull'altare appare: ${RELICS[r].ic} ${RELICS[r].n}.`}},
+ {id:'altare',n:'Altare Dimenticato',ic:'',txt:'In una cappella in rovina, un altare di pietra nera pulsa di luce rossa. Una voce sussurra: «Un tributo di sangue, e avrai un dono.»',
+  opts:[{t:'Offri il tuo sangue',s:'Perdi 8 PV. Ottieni una reliquia casuale.',f:()=>{run.hp=Math.max(1,run.hp-8);const r=randomRelic();if(!r)return 'L\'altare tace. Non ha più nulla da darti.';gainRelic(r);return `Il dolore è breve. Sull'altare appare: ${RELICS[r].n}.`}},
         {t:'Allontanati',s:'Non succede niente.',f:()=>'Lasci l\'altare alle sue ombre.'}]},
- {id:'fontana',n:'Fontana Incantata',ic:'⛲',txt:'Acqua limpida sgorga dalla bocca di una statua di ninfa. Sul fondo della vasca luccicano monete antiche.',
+ {id:'fontana',n:'Fontana Incantata',ic:'',txt:'Acqua limpida sgorga dalla bocca di una statua di ninfa. Sul fondo della vasca luccicano monete antiche.',
   opts:[{t:'Bevi',s:'Recuperi il 30% dei PV massimi.',f:()=>{const h=Math.floor(run.max*.3);H(h);return `Ti senti rinvigorito. Recuperi ${h} PV.`}},
         {t:'Raccogli le monete',s:'+45 oro, perdi 5 PV.',f:()=>{run.gold+=45;run.hp=Math.max(1,run.hp-5);return 'L\'acqua gelida ti morde le mani, ma le tasche sono più pesanti.'}}]},
- {id:'nani',n:'Taverna dei Nani',ic:'🍺',txt:'Tre nani giocano a dadi su un barile. «Ehi, straniero! Una partita? La posta è 30 monete.»',
+ {id:'nani',n:'Taverna dei Nani',ic:'',txt:'Tre nani giocano a dadi su un barile. «Ehi, straniero! Una partita? La posta è 30 monete.»',
   opts:[{t:'Gioca a dadi',s:'Paghi 30 oro. Metà delle volte ne vinci 75.',req:()=>run.gold>=30,f:()=>{run.gold-=30;if(rng.next()<.5){run.gold+=75;return 'Doppio sei! I nani brontolano e pagano: +75 oro.'}return 'Hai perso. I nani ridono e brindano alla tua salute.'}},
         {t:'Bevi una birra e riposa',s:'Recuperi 8 PV.',f:()=>{H(8);return 'La birra nanica è forte, ma ti scalda le ossa.'}}]},
- {id:'biblioteca',n:'Biblioteca Abbandonata',ic:'📚',txt:'Scaffali crollati e pergamene ovunque. Alcune tecniche di combattimento sono ancora leggibili.',
+ {id:'biblioteca',n:'Biblioteca Abbandonata',ic:'',txt:'Scaffali crollati e pergamene ovunque. Alcune tecniche di combattimento sono ancora leggibili.',
   opts:[{t:'Studia le pergamene',s:'Scegli una carta tra 3.',f:()=>{run.reward={title:'Pergamene antiche',gold:0,cards:rollCards(3,false),potion:null,relic:null};run.screen='reward';return null}},
         {t:'Dormi tra i libri',s:'Recuperi 12 PV.',f:()=>{H(12);return 'Un sonno profondo e senza sogni.'}}]},
- {id:'statua',n:'Statua dell\'Eroe Antico',ic:'🗿',txt:'La statua di un eroe dimenticato stringe una spada spezzata. Toccarla ti riempie di visioni di battaglie passate, e di dolore.',
+ {id:'statua',n:'Statua dell\'Eroe Antico',ic:'',txt:'La statua di un eroe dimenticato stringe una spada spezzata. Toccarla ti riempie di visioni di battaglie passate, e di dolore.',
   opts:[{t:'Tocca la statua',s:'Potenzi 2 carte casuali. Perdi 6 PV massimi.',f:()=>{const idx=rng.shuffle(run.deck.map((c,i)=>i).filter(i=>canUp(run.deck[i]))).slice(0,2);idx.forEach(i=>run.deck[i].up=true);run.max-=6;run.hp=Math.min(run.hp,run.max);
           return idx.length?`Potenziate: ${idx.map(i=>CARDS[run.deck[i].id].n).join(' e ')}.`:'Le visioni svaniscono: non hai nulla da potenziare.'}},
         {t:'Rendi omaggio e prosegui',s:'Non succede niente.',f:()=>'Chini il capo davanti all\'eroe e riprendi il cammino.'}]},
@@ -1018,7 +1168,7 @@ const EVENTS=[
   opts:[{t:'Compra una pozione',s:'Paghi 25 oro, ottieni una pozione casuale.',req:()=>run.gold>=25&&run.potions.length<3,f:()=>{run.gold-=25;const p=rng.pick(Object.keys(POTIONS));run.potions.push(p);return `Ottieni: ${POTIONS[p].n}. Il goblin morde la moneta, soddisfatto.`}},
         {t:'Derubali',s:'Combatti contro due goblin.',solo:1,f:()=>{startCombat(['goblin','goblin'],'combat');return null}},
         {t:'Ignorali',s:'Non succede niente.',f:()=>'Li superi senza dire una parola.'}]},
- {id:'pozzo',n:'Pozzo dei Desideri',ic:'🪙',txt:'Un vecchio pozzo coperto di muschio. Si dice che chi getta una moneta possa dimenticare un brutto ricordo.',
+ {id:'pozzo',n:'Pozzo dei Desideri',ic:'',txt:'Un vecchio pozzo coperto di muschio. Si dice che chi getta una moneta possa dimenticare un brutto ricordo.',
   opts:[{t:'Getta 20 monete',s:'Rimuovi una carta dal mazzo.',pick:1,req:()=>run.gold>=20&&run.deck.length>1,f:i=>{if(!run.deck[i]||run.gold<20)return null;run.gold-=20;const c=run.deck.splice(i,1)[0];return `${CARDS[c.id].n} svanisce dalla tua memoria.`}},
         {t:'Prosegui',s:'Non succede niente.',f:()=>'Il pozzo resta in silenzio alle tue spalle.'}]},
 ];
@@ -1050,7 +1200,7 @@ function onState(pl){
 function remapPid(o,n){
   R.players[n]=R.players[o];R.players[n].pid=n;delete R.players[o];R.order=R.order.map(x=>x===o?n:x);
   if(R.votes&&R.votes[o]){R.votes[n]=R.votes[o];delete R.votes[o]}
-  const c=R.combat;if(c&&c.heroes[o]){c.heroes[n]=c.heroes[o];delete c.heroes[o];c.enemies.forEach(e=>{if(e.intent&&e.intent.tg===o)e.intent.tg=n})}
+  const c=R.combat;if(c&&c.heroes[o]){c.heroes[n]=c.heroes[o];delete c.heroes[o];c.enemies.forEach(e=>{if(e.intent&&e.intent.tg===o)e.intent.tg=n;if(e.intent&&e.intent.tgs)e.intent.tgs=e.intent.tgs.map(x=>x===o?n:x)})}
   if(R.host===o)R.host=n;(R.chat||[]).forEach(m=>{if(m.p===o)m.p=n});
 }
 function onHello(p){
@@ -1074,6 +1224,7 @@ function checkHost(){
 function becomeHost(msg){
   isHost=true;R.host=ME;rng=new RNG(0);rng.s=R.rs|0;
   if(R.combat){R.combat.busy=false;if(R.combat.won){R.combat.won=false;checkEnd()}}
+  if(R.voteAnim)setTimeout(finishVote,1500);
   toast(msg||'L\'host è uscito: ora sei tu a guidare la stanza.');checkProgress();commit();
 }
 function rememberRoom(code){store('valdombra-room',code);try{location.hash=code}catch(e){}}
@@ -1111,7 +1262,7 @@ function leaveRoom(forget){
 }
 function removePlayer(pid){
   delete R.players[pid];R.order=R.order.filter(x=>x!==pid);if(R.votes)delete R.votes[pid];
-  const c=R.combat;if(c&&c.heroes[pid]){delete c.heroes[pid];c.enemies.forEach(e=>{if(e.intent&&e.intent.tg===pid)e.intent.tg=null})}
+  const c=R.combat;if(c&&c.heroes[pid]){delete c.heroes[pid];c.enemies.forEach(e=>{if(e.intent&&e.intent.tg===pid)e.intent.tg=null;if(e.intent&&e.intent.tgs)e.intent.tgs=e.intent.tgs.map(x=>x===pid?null:x)})}
   if(c&&!Object.keys(c.heroes).length){R.combat=null;R.phase='map';R.votes={}}
 }
 ACT.abandon=(a,P,pid)=>{
@@ -1154,8 +1305,10 @@ function saveName(){const el=$('#pname');const n=(el?el.value:myName).trim().sli
 /* ================= SOLO ================= */
 function startSolo(){
   solo=true;isHost=true;chan=null;ME='solo';online=new Set([ME]);
-  R=newLobby('SOLO');R.players.solo.name=CLASSES[pickCls].n;rng=new RNG(1);
-  startRunRoom(Math.min(pickLvl,getUnlocked()),($('#seed')&&$('#seed').value)||'');commit();
+  R=newLobby('SOLO');R.players.solo.name=CLASSES[pickCls].n;R.players.solo.loadout=getZaino();rng=new RNG(1);
+  if($('#sname')&&$('#sname').value.trim()){myName=$('#sname').value.trim().slice(0,16);store('valdombra-nome',myName)}
+  if(pickMode==='surv'&&myName)R.players.solo.name=myName;
+  startRunRoom(Math.min(pickLvl,getUnlocked()),($('#seed')&&$('#seed').value)||'',pickMode);commit();
 }
 function continueSolo(){const s=load(SOLO_K);if(!s)return;solo=true;isHost=true;chan=null;ME='solo';online=new Set([ME]);R=JSON.parse(s);rng=new RNG(0);rng.s=R.rs|0;commit()}
 
@@ -1165,10 +1318,16 @@ function clickCard(i){
   if(costOf(c)>h.energy){toast('Energia insufficiente');return}
   const a=alive();
   if(d.tg&&a.length>1){UI.sel=(UI.sel&&UI.sel.k==='c'&&UI.sel.uid===c.uid)?null:{k:'c',uid:c.uid};render();return}
+  if(d.ally&&!solo&&party().length>1){UI.sel=(UI.sel&&UI.sel.uid===c.uid)?null:{k:'c',uid:c.uid,ally:1};render();if(UI.sel)toast('Tocca l\'eroe da aiutare (anche te stesso)');return}
+  if(d.ally){UI.sel=null;send({t:'play',uid:c.uid,a:ME});return}
+  if(d.pick&&h.disc.length){UI.sel=null;modal={title:'Scegli una carta dagli scarti',list:h.disc.map(x=>({c:x,i:x.uid})),cb:pk=>send({t:'play',uid:c.uid,pk}),cancel:true};render();return}
   UI.sel=null;send({t:'play',uid:c.uid,j:d.tg&&a[0]?g.enemies.indexOf(a[0]):null});
 }
+function clickHero(pid){
+  if(!UI.sel||!UI.sel.ally||!g||!g.heroes[pid]||g.heroes[pid].down)return;const s=UI.sel;UI.sel=null;send({t:'play',uid:s.uid,a:pid});
+}
 function clickEnemy(j){
-  if(!UI.sel||!g||!g.enemies[j]||g.enemies[j].hp<=0)return;const s=UI.sel;UI.sel=null;
+  if(!UI.sel||UI.sel.ally||!g||!g.enemies[j]||g.enemies[j].hp<=0)return;const s=UI.sel;UI.sel=null;
   if(s.k==='c')send({t:'play',uid:s.uid,j});else send({t:'potion',i:s.i,j});
 }
 function clickPotion(i){
@@ -1191,7 +1350,7 @@ function buyUI(kind,k){const it=run.shop[kind][k];if(it.sold)return;if(run.gold<
 function shopRemoveUI(){if(run.shop.removeUsed)return;if(run.gold<removePrice()){toast('Oro insufficiente');return}
   openPicker(run.deck.map((c,i)=>i),'Scegli una carta da rimuovere',i=>{toast(CARDS[run.deck[i].id].n+' rimossa');send({t:'shopRemove',i})})}
 function restHealUI(){toast('Recuperi '+Math.floor(run.max*.3)+' PV.');send({t:'restHeal'})}
-function restForgeUI(){openPicker(run.deck.map((c,i)=>i).filter(i=>canUp(run.deck[i])),'Scegli una carta da potenziare',i=>{toast(CARDS[run.deck[i].id].n+' potenziata!');send({t:'restForge',i})})}
+function restForgeUI(){openPicker(run.deck.map((c,i)=>i).filter(i=>canUp(run.deck[i])),'Scegli una carta da potenziare',i=>{toast(CARDS[run.deck[i].id].n+' potenziata!');send({t:'restForge',i})},true,{preview:true})}
 function chooseEv(k){const ev=EVENTS.find(e=>e.id===run.event.id);const o=ev.opts[k];if(o.req&&!o.req())return;
   if(o.pick)openPicker(run.deck.map((c,i)=>i),'Scegli una carta da dimenticare',i=>send({t:'ev',k,i}));else send({t:'ev',k})}
 function setCls(k){pickCls=k;if(R&&R.phase==='lobby')send({t:'cls',cls:k});else render()}
@@ -1206,14 +1365,23 @@ function copyInvite(){copyText(inviteLink(),'Link d\'invito copiato!')}
 function copySeed(){copyText(R.seed,'Seed copiato: '+R.seed)}
 
 /* ================= MODALI ================= */
-function openPicker(indices,title,cb,cancel=true){modal={title,list:indices.map(i=>({c:run.deck[i],i})),cb,cancel};render()}
+function openPicker(indices,title,cb,cancel=true,opt={}){UI.pvSel=null;modal={title,list:indices.map(i=>({c:run.deck[i],i})),cb,cancel,preview:!!opt.preview};render()}
+const canHover=()=>{try{return matchMedia('(hover: hover) and (pointer: fine)').matches}catch(e){return false}};
+function pvClick(k){if(canHover()||UI.pvSel===k)pickerPick(k);else{UI.pvSel=k;render()}}
+function pickerGrid(){
+  if(!modal.preview)return `<div class="cardgrid">${modal.list.map((it,k)=>cardHTML(it.c,modal.cb?{click:`pickerPick(${k})`}:{})).join('')||'<p class="muted">Nessuna carta.</p>'}</div>`;
+  if(!modal.list.length)return '<p class="muted">Tutte le carte sono già potenziate.</p>';
+  return `<p class="muted pvhint">${canHover()?'Passa sopra una carta per vedere come diventa potenziata, poi cliccala per confermare.':'Tocca una carta per vedere come diventa potenziata, poi tocca <b>Potenzia</b> per confermare.'}</p>
+   <div class="cardgrid">${modal.list.map((it,k)=>`<div class="pv ${UI.pvSel===k?'on':''}"><div class="pvstack"><div class="pv-base">${cardHTML(it.c,{click:`pvClick(${k})`})}</div><div class="pv-up">${cardHTML({...it.c,up:true},{click:`pvClick(${k})`,cls:'upgraded'})}</div></div>
+     ${UI.pvSel===k?`<button class="btn primary" onclick="pickerPick(${k})">Potenzia</button>`:''}</div>`).join('')}</div>`;
+}
 function openView(cards,title){modal={title,list:cards.map(c=>({c})),cb:null,cancel:true};render()}
 function pickerPick(k){const m=modal;modal=null;m.cb(m.list[k].i);render()}
 function closeModal(){modal=null;render()}
 function viewDeck(){openView([...run.deck].sort((a,b)=>CARDS[a.id].n.localeCompare(CARDS[b.id].n)),'Il tuo mazzo ('+run.deck.length+' carte)')}
 function viewPile(k){const h=g&&g.hero;if(!h)return;const L={draw:[[...h.draw].sort((a,b)=>CARDS[a.id].n.localeCompare(CARDS[b.id].n)),'Pila di pesca (ordine nascosto)'],disc:[h.disc,'Pila degli scarti'],exh:[h.exh,'Carte esaurite']}[k];openView(L[0],L[1])}
 let toastT;function toast(msg){let t=$('.toast');if(!t){t=document.createElement('div');t.className='toast';t.setAttribute('role','status');document.body.appendChild(t)}t.textContent=msg;clearTimeout(toastT);toastT=setTimeout(()=>t.remove(),2400)}
-function relicInfo(id){toast(RELICS[id].ic+' '+RELICS[id].n+': '+RELICS[id].d)}
+function relicInfo(id){toast(RELICS[id].n+': '+RELICS[id].d)}
 function stInfo(k){toast(STN[k][0]+': '+STN[k][1])}
 
 /* ================= FX ================= */
@@ -1227,12 +1395,12 @@ function flushFx(list){
 }
 
 /* ================= RENDER ================= */
-const KW=/(Vulnerabile|Debole|Veleno|Forza|Destrezza|Armatura|Spine|TUTTI)/g;
+const KW=/(Vulnerabile|Debole|Veleno|Bruciatura|Stordito|Forza|Destrezza|Armatura|Spine|TUTTI)/g;
 function cardHTML(c,o={}){
   const d=CARDS[c.id];const tag=o.click?'button':'div';
   return `<${tag} class="card t-${d.t} r-${d.r} ${c.up?'up':''} ${o.cls||''}" ${o.click?`onclick="${o.click}" aria-label="${d.n}"`:''}>
-    <span class="cost">${costOf(c)}</span><span class="cname">${d.n}${c.up?'+':''}</span><span class="ctype">${TYPEN[d.t]}</span>
-    <span class="cdesc"><span>${d.x(vals(c)).replace(KW,'<b>$1</b>')}${d.ex?' <b>Esaurisci.</b>':''}</span></span></${tag}>`;
+    <span class="cost ${costOf(c)<CARDS[c.id].c?'cheap':''}">${costOf(c)}</span><span class="cname">${d.n}${c.up?'+':''}</span><span class="ctype">${TYPEN[d.t]}</span>
+    <span class="cdesc"><span>${innOf(c)?'<b>Innata.</b> ':''}${d.x(vals(c)).replace(KW,'<b>$1</b>')}${d.back?' <b>Ritorna</b> in cima al mazzo.':''}${exOf(c)?' <b>Esaurisci.</b>':''}</span></span></${tag}>`;
 }
 function chips(t,pw){
   let h=Object.entries(t.st).filter(([k,v])=>v).map(([k,v])=>`<span class="chip ${k}" role="button" tabindex="0" onclick="event.stopPropagation();stInfo('${k}')">${STN[k][0]} ${v}</span>`).join('');
@@ -1242,13 +1410,16 @@ function chips(t,pw){
 function hpBar(hp,max){return `<div class="bar"><i style="width:${Math.max(0,hp/max*100)}%"></i><span>${Math.max(0,hp)}/${max}</span></div>`}
 function intentHTML(e){
   const it=e.intent;if(!it||e.hp<=0)return '<div class="intent" style="visibility:hidden">-</div>';
+  if(e.st.stun)return `<div class="intent"><span class="buf">${ic('i_skull',14)} Stordito: salta il turno</span></div>`;
   const tgtH=(it.tg&&g.heroes[it.tg])||g.hero;const p=[];
-  if(it.d){const d=calcDmg(enemyBase(e,it),e,tgtH);p.push(`<span class="atk">⚔ ${d}${it.x>1?'×'+it.x:''}</span>`)}
-  if(it.b)p.push(`<span class="def">🛡 ${Math.round(it.b*(e.dm||1))}</span>`);
-  if(it.s)p.push(`<span class="buf">▲ Forza${it.all?' a tutti':''}</span>`);
-  if(it.heal)p.push(`<span class="def">✚ Cura</span>`);
-  if(it.deb)p.push(`<span class="deb">☠ ${STN[it.deb][0]}</span>`);
-  const tg=!solo&&it.tg&&(it.d||it.deb)?`<span class="tgt">→ ${it.tg===ME?'te':esc(pname(it.tg))}</span>`:'';
+  if(it.d){const d=calcDmg(enemyBase(e,it),e,tgtH);p.push(`<span class="atk">${ic('combat',14)} ${d}${it.x>1?'×'+it.x:''}</span>`)}
+  if(it.b)p.push(`<span class="def">${ic('i_shield',14)} ${Math.round(it.b*(e.dm||1))}</span>`);
+  if(it.s)p.push(`<span class="buf">${ic('i_buff',14)} Forza${it.all?' a tutti':''}</span>`);
+  if(it.heal)p.push(`<span class="def">${ic('i_heal',14)} Cura</span>`);
+  if(it.deb)p.push(`<span class="deb">${ic('i_skull',14)} ${STN[it.deb][0]}</span>`);
+  const nm=p=>p===ME?'te':esc(pname(p));
+  const who=it.aoe?(solo?'':'tutti'):!solo&&(it.d||it.deb)?(it.tgs?[...new Set(it.tgs)].map(nm).join(', '):it.tg?nm(it.tg):''):'';
+  const tg=who?`<span class="tgt">→ ${who}</span>`:'';
   return `<div class="intent">${p.join(' ')} ${tg}</div>`;
 }
 function hud(){
@@ -1257,9 +1428,9 @@ function hud(){
     <span class="cls">${sprImg(run.cls,26,'inl')} ${solo?cl.n:esc(run.name)}</span>
     <span class="stat hp-t"><b>PV</b>${Math.max(0,run.hp)}/${run.max}</span>
     <span class="stat gold-t"><b>Oro</b>${run.gold}</span>
-    <span class="stat"><b>Piano</b>${R.floor}/${ROWS+1}</span>${R.lvl?`<span class="stat" style="color:#ff9a8f"><b>Assedio</b>${R.lvl}</span>`:''}
-    <span class="pots">${[0,1,2].map(i=>{const id=run.potions[i];return id?`<button class="pot full ${UI.sel&&UI.sel.k==='p'&&UI.sel.i===i?'sel':''}" style="background:${POTIONS[id].col}" title="${POTIONS[id].n}: ${POTIONS[id].d}" aria-label="${POTIONS[id].n}" onclick="clickPotion(${i})"></button>`:'<span class="pot" aria-hidden="true"></span>'}).join('')}</span>
-    <span class="relics">${run.relics.map(r=>`<button class="relic" title="${RELICS[r].n}: ${RELICS[r].d}" aria-label="${RELICS[r].n}" onclick="relicInfo('${r}')">${RELICS[r].ic}</button>`).join('')}</span>
+    <span class="stat"><b>Piano</b>${R.floor}/${ROWS+1}</span>${R.mode==='surv'?`<span class="stat" style="color:var(--torch2)"><b>Ciclo</b>${R.cycle}</span>`:''}${R.lvl?`<span class="stat" style="color:#ff9a8f"><b>Assedio</b>${R.lvl}</span>`:''}
+    <span class="pots">${[0,1,2].map(i=>{const id=run.potions[i];return id?`<button class="pot full ${UI.sel&&UI.sel.k==='p'&&UI.sel.i===i?'sel':''}" title="${POTIONS[id].n}: ${POTIONS[id].d}" aria-label="${POTIONS[id].n}" onclick="clickPotion(${i})">${potIc(id,20)}</button>`:'<span class="pot" aria-hidden="true"></span>'}).join('')}</span>
+    <span class="relics">${run.relics.map(r=>`<button class="relic" title="${RELICS[r].n}: ${RELICS[r].d}" aria-label="${RELICS[r].n}" onclick="relicInfo('${r}')">${relIc(r,22)}</button>`).join('')}</span>
     <span class="grow"></span>
     ${solo?'':`<button class="btn" onclick="copyInvite()" title="Copia il link d'invito">Stanza ${R.code}</button>`}
     <button class="btn" onclick="copySeed()" title="Condividi questo seed per giocare la stessa mappa">Seed ${R.seed}</button>
@@ -1291,10 +1462,28 @@ function render(fxs){
       else if(R.phase==='end')h+=endScreen();
     }
   }
+  if(R&&R.players[ME]){
+    const P=R.players[ME];
+    if(!solo&&R.phase==='lobby'){const zj=JSON.stringify(getZaino());if(UI.sentZ!==R.code+zj){UI.sentZ=R.code+zj;setTimeout(()=>send({t:'loadout',z:getZaino()}),0)}}
+    else UI.sentZ=null;
+    if(P.zApplied&&UI.zClr!==R.code+R.seed){UI.zClr=R.code+R.seed;setZaino({});if(R.phase==='map'&&R.floor===0)toast('Dallo zaino: '+P.zApplied)}
+  }
+  if(modal&&modal.bottega)modal.html=bottegaHTML();
+  if(modal&&modal.board)modal.html=boardModalHTML();
   if(modal)h+=`<div class="modal" role="dialog" aria-label="${modal.title}"><div class="mhead"><h3 style="flex:1">${modal.title}</h3>${modal.cancel?'<button class="btn" onclick="closeModal()">Chiudi</button>':''}</div>
-    <div class="mbody">${modal.html||`<div class="cardgrid">${modal.list.map((it,k)=>cardHTML(it.c,modal.cb?{click:`pickerPick(${k})`}:{})).join('')||'<p class="muted">Nessuna carta.</p>'}</div>`}</div></div>`;
+    <div class="mbody">${modal.html||pickerGrid()}</div></div>`;
+  // mantieni la posizione di scorrimento se la schermata è la stessa
+  const SCR=['main','#mapwrap','#cscroll','.hand','.party','.mbody'];
+  const P0=R&&R.players[ME];
+  const key=R?[R.code,R.phase,R.floor,P0?P0.screen:'',R.phase==='combat'&&R.combat?R.combat.enemies.length:''].join('|'):'t:'+screen;
+  const mkey=modal?modal.title:'';
+  const saved={};if(UI.lastKey===key)SCR.forEach(q=>{const el=$(q);if(el&&(q!=='.mbody'||UI.lastModal===mkey))saved[q]=[el.scrollTop,el.scrollLeft]});
   app.innerHTML=h;
-  if(R&&R.phase==='map')scrollMap();
+  const same=UI.lastKey===key;UI.lastKey=key;UI.lastModal=mkey;
+  Object.entries(saved).forEach(([q,[t,l]])=>{const el=$(q);if(el){el.scrollTop=t;el.scrollLeft=l}});
+  if(R&&R.phase==='map'&&!same)scrollMap();
+  if(R&&R.voteAnim&&(!UI.anim||UI.anim.id!==R.voteAnim.id))startVoteAnim(R.voteAnim);
+  if(R&&!R.voteAnim&&UI.anim)UI.anim=null;
   renderChat();
   flushFx(fxs);
 }
@@ -1302,10 +1491,10 @@ function render(fxs){
 function classPicker(){
   return `<div class="classes">${Object.entries(CLASSES).map(([k,c])=>`<button class="classcard ${pickCls===k?'on':''}" onclick="setCls('${k}')" aria-pressed="${pickCls===k}">
       <span class="ic">${sprImg(k,64)}</span><span class="nm">${c.n}</span><span>${c.desc}</span>
-      <small>${c.hp} PV · Reliquia: ${RELICS[c.relic].ic} ${RELICS[c.relic].n}</small></button>`).join('')}</div>`;
+      <small>${c.hp} PV · Reliquia: ${relIc(c.relic,16)} ${RELICS[c.relic].n}</small></button>`).join('')}</div>`;
 }
 function levelPicker(){
-  return `<div class="panel" style="gap:10px"><div class="lvls">${Array.from({length:MAXLVL+1},(_,i)=>{const ok=i<=getUnlocked();return `<button class="lvl ${pickLvl===i?'on':''}" ${ok?`onclick="pickLvl=${i};render()"`:'disabled'} aria-pressed="${pickLvl===i}" aria-label="Livello ${i}${ok?'':' (bloccato)'}">${ok?i:'🔒'}</button>`}).join('')}</div>
+  return `<div class="panel" style="gap:10px"><div class="lvls">${Array.from({length:MAXLVL+1},(_,i)=>{const ok=i<=getUnlocked();return `<button class="lvl ${pickLvl===i?'on':''}" ${ok?`onclick="pickLvl=${i};render()"`:'disabled'} aria-pressed="${pickLvl===i}" aria-label="Livello ${i}${ok?'':' (bloccato)'}">${ok?i:ic('i_lock',18)}</button>`}).join('')}</div>
       <p class="muted">${lvlDesc(pickLvl)}</p>
       <p class="muted" style="font-size:13px">Sconfiggi il drago per sbloccare il livello successivo (massimo ${MAXLVL}).</p></div>`;
 }
@@ -1319,10 +1508,15 @@ function titleHTML(){
       <p class="lede muted">La Rocca di Valdombra è caduta nelle mani di un drago. Scegli un eroe, costruisci il tuo mazzo lungo la strada e scala i 15 piani della rocca fino alla tana di Ignivora. Da solo o con fino a ${MAXP} amici.</p>
     </div>
     <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap;border-color:var(--torch)"><div style="flex:1;min-width:200px"><b style="font-size:17px">Gioca con gli amici</b><br><span class="muted">Crea una stanza e manda il codice, oppure entra con il codice di un amico.</span></div><button class="btn primary" onclick="screen='mp';render()">Multigiocatore</button></div>
+    <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><span style="line-height:0">${ic('i_crown',34)}</span><div style="flex:1;min-width:200px"><b style="font-size:17px">Bottega della Rocca</b><br><span class="muted">${getCrowns()} Corone${zEmpty(getZaino())?'':' · Zaino: '+zText(getZaino())}</span></div><button class="btn" onclick="openBottega()">Apri la bottega</button></div>
+    <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><span style="line-height:0">${ic('i_buff',34)}</span><div style="flex:1;min-width:200px"><b style="font-size:17px">Classifiche</b><br><span class="muted">I migliori giocatori in Sopravvivenza, da soli e in gruppo.</span></div><button class="btn" onclick="openBoard('solo')">Guarda le classifiche</button></div>
     ${mpContinueHTML()}
     ${sp?`<div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:200px"><b>Partita in corso (da solo)</b><br><span class="muted">${sprImg(sp.cls,22,'inl')} ${CLASSES[sp.cls].n} · Piano ${sv.floor}${sv.lvl?' · Assedio '+sv.lvl:''} · Seed ${sv.seed}</span></div><button class="btn primary" onclick="continueSolo()">Continua</button></div>`:''}
     <h3>Da solo: scegli il tuo eroe</h3>
     ${classPicker()}
+    <h3>Modalità</h3>
+    ${modePicker(pickMode,"pickMode='%';render()")}
+    ${pickMode==='surv'?`<div class="panel"><label for="sname"><b>Il tuo nome per la classifica</b></label><input id="sname" class="txt" style="width:100%;max-width:360px" maxlength="16" value="${esc(myName)}" placeholder="Per esempio: Manu" autocomplete="off"></div>`:''}
     <h3>Livello di Assedio</h3>
     ${levelPicker()}
     <div class="seedrow"><label for="seed" class="muted">Seed (opzionale)</label><input id="seed" maxlength="12" placeholder="${newSeed()}" autocomplete="off">
@@ -1359,13 +1553,15 @@ function lobbyHTML(){
     <div class="panel" style="align-items:flex-start"><span class="muted" style="letter-spacing:.15em;text-transform:uppercase;font-size:12px">Codice della stanza</span>
       <span class="code">${R.code}</span><div class="row"><button class="btn primary" onclick="copyInvite()">Copia link d'invito</button><span class="muted" style="font-size:13px">oppure detta il codice ai tuoi amici</span></div></div>
     ${UI.status?`<div class="netwarn">${UI.status}</div>`:''}
+    <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><span style="line-height:0">${ic('i_crown',30)}</span><div style="flex:1;min-width:200px"><b>Bottega della Rocca</b><br><span class="muted">${getCrowns()} Corone${zEmpty(getZaino())?' · zaino vuoto':' · Porti: '+zText(getZaino())}</span></div><button class="btn" onclick="openBottega()">Apri la bottega</button></div>
     <h3>Giocatori (${R.order.length}/${MAXP})</h3>
     <div class="plist">${R.order.map(p=>{const P=R.players[p];const on=isOnline(p);return `<div class="prow" style="${on?'':'opacity:.45'}">${sprImg(P.cls,36)}
-      <div style="flex:1;min-width:0"><span class="nm">${esc(P.name)}${p===ME?' (tu)':''}</span><br><span class="muted">${CLASSES[P.cls].n}${on?'':' · disconnesso'}</span></div>
+      <div style="flex:1;min-width:0"><span class="nm">${esc(P.name)}${p===ME?' (tu)':''}</span><br><span class="muted">${CLASSES[P.cls].n}${on?'':' · disconnesso'}${P.loadout&&!zEmpty(cleanZ(P.loadout))?' · porta: '+zText(cleanZ(P.loadout)):''}</span></div>
       ${p===R.host?'<span class="badge on">Host</span>':`<span class="badge ${P.ready?'on':''}">${P.ready?'Pronto':'Non pronto'}</span>`}
       ${host&&p!==ME?`<button class="btn" onclick="send({t:'kick',p:'${p}'})" aria-label="Rimuovi ${esc(P.name)}">✕</button>`:''}</div>`}).join('')}</div>
     <h3>Scegli il tuo eroe</h3>
     ${classPicker()}
+    <h3>Modalità</h3>${host?modePicker(R.lmode||'norm',"send({t:'mode',m:'%'})"):`<p class="muted">L'host ha scelto: <b style="color:var(--fg)">${R.lmode==='surv'?'Sopravvivenza':'Normale'}</b></p>`}
     ${host?`<h3>Livello di Assedio</h3>${levelPicker()}
       <div class="seedrow"><label for="seed" class="muted">Seed (opzionale)</label><input id="seed" maxlength="12" value="${esc(UI.seed)}" oninput="UI.seed=this.value" placeholder="casuale" autocomplete="off">
       <button class="btn primary" onclick="startGame()" style="padding:10px 22px;font-size:17px" ${notReady.length?'aria-disabled="true"':''}>Avvia la partita</button></div>
@@ -1391,13 +1587,17 @@ function mapScreen(){
   map.forEach(row=>row.forEach(n=>{if(!n)return;const[x1,y1]=pos(n);
     n.next.forEach(nx=>{const m=map[n.y+1][nx];const[x2,y2]=pos(m);lines+=`<line class="edge ${doneE.has(n.y+','+n.x+'>'+m.y+','+m.x)?'done':''}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`});
     const k=n.y+','+n.x;const cur=R.pos&&R.pos.y===n.y&&R.pos.x===n.x;const r=n.type==='boss'?44:24;
-    nodes+=`<g class="node ${done.has(k)?'done':''} ${cur?'cur':''} ${av.has(k)?'avail':''} ${myV===k?'voted':''} ${n.type==='boss'?'boss':''}" ${av.has(k)?`onclick="vote(${n.y},${n.x})" role="button" tabindex="0" aria-label="${NODEN[n.type]}, piano ${n.y+1}" onkeydown="if(event.key==='Enter')vote(${n.y},${n.x})"`:''}>
+    nodes+=`<g data-k="${k}" class="node ${UI.anim&&UI.anim.cur===k?'spin':''} ${UI.anim&&UI.anim.done&&UI.anim.win===k?'win':''} ${done.has(k)?'done':''} ${cur?'cur':''} ${av.has(k)?'avail':''} ${myV===k?'voted':''} ${n.type==='boss'?'boss':''}" ${av.has(k)?`onclick="vote(${n.y},${n.x})" role="button" tabindex="0" aria-label="${NODEN[n.type]}, piano ${n.y+1}" onkeydown="if(event.key==='Enter')vote(${n.y},${n.x})"`:''}>
       <circle cx="${x1}" cy="${y1}" r="${r}"/><image href="${spr(n.type)}" x="${x1-r*.62}" y="${y1-r*.62}" width="${r*1.24}" height="${r*1.24}" style="image-rendering:pixelated"/><title>${NODEN[n.type]}</title>
       ${tally[k]&&!solo?`<circle class="vbadge" cx="${x1+r*.8}" cy="${y1-r*.8}" r="12"/><text class="vbadge-t" x="${x1+r*.8}" y="${y1-r*.8}">${tally[k]}</text>`:''}</g>`;
   }));
   const act=active();const nv=act.filter(p=>R.votes[p]).length;
-  const msg=solo?'Tocca un nodo illuminato per avanzare':`Votate il prossimo passo: ${nv}/${act.length} voti${myV?' · puoi cambiare voto finché votano tutti':''}`;
-  return `<main class="flush"><div class="mapwrap" id="mapwrap"><svg class="mapsvg" id="mapsvg" viewBox="0 0 ${W} ${H}" aria-label="Mappa della Rocca">${lines}${nodes}</svg></div>
+  const msg=solo?'Tocca un nodo illuminato per avanzare':R.voteAnim?'Voto chiuso: si parte!':`Votate il prossimo passo: ${nv}/${act.length} voti${myV?' · puoi cambiare voto finché votano tutti':''}`;
+  const va=R.voteAnim;let banner=R.mode==='surv'&&R.cycle>1&&!R.pos?`<div class="votebanner" role="status">Ciclo ${R.cycle}: la Rocca si risveglia più forte di prima</div>`:'';
+  if(va){const wn=R.map[+va.win.split(',')[0]][+va.win.split(',')[1]];const fin=UI.anim&&UI.anim.done;
+    banner=`<div class="votebanner ${fin?'fin':''}" role="status">${va.tie?(fin?`La sorte ha scelto: <b>${NODEN[wn.type]}</b>`:`Pareggio! ${va.opts.map(k=>va.tally[k]).join(' a ')} · la sorte decide...`):
+      (fin?`Si va: <b>${NODEN[wn.type]}</b> (${va.tally[va.win]} voti contro ${Object.values(va.tally).reduce((a,b)=>a+b,0)-va.tally[va.win]})`:`Vince la maggioranza...`)}</div>`}
+  return `<main class="flush">${banner}<div class="mapwrap" id="mapwrap"><svg class="mapsvg" id="mapsvg" viewBox="0 0 ${W} ${H}" aria-label="Mappa della Rocca">${lines}${nodes}</svg></div>
     <div class="legend">${Object.keys(NODEIC).map(k=>`<span>${sprImg(k,16,'inl')} ${NODEN[k]}</span>`).join('')}<span style="color:var(--torch2)">${msg}</span></div></main>`;
 }
 function scrollMap(){
@@ -1409,22 +1609,22 @@ function scrollMap(){
 
 function combatScreen(){
   const sel=UI.sel,h=g.hero;
-  const en=g.enemies.map((e,j)=>`<button class="ent enemy ${e.boss?'boss':''} ${e.hp<=0?'dead':''} ${sel&&e.hp>0?'target':''}" id="ent-e${j}" onclick="clickEnemy(${j})" ${e.hp<=0?'disabled':''} aria-label="${e.n}, ${e.hp} PV">
+  const en=g.enemies.map((e,j)=>`<button class="ent enemy ${e.boss?'boss':''} ${e.hp<=0?'dead':''} ${sel&&!sel.ally&&e.hp>0?'target':''}" id="ent-e${j}" onclick="clickEnemy(${j})" ${e.hp<=0?'disabled':''} aria-label="${e.n}, ${e.hp} PV">
       ${intentHTML(e)}<span class="face">${sprImg(e.id,e.boss?150:(ENEMIES[e.id].elite?96:80),'idle')}</span><span class="nm">${e.n}</span>${hpBar(e.hp,e.max)}
-      ${e.blk?`<span class="blk">🛡 ${e.blk}</span>`:''}${chips(e)}</button>`).join('');
+      ${e.blk?`<span class="blk">${ic('i_shield',12)} ${e.blk}</span>`:''}${chips(e)}</button>`).join('');
   const cl=CLASSES[run.cls];
-  const allies=Object.keys(g.heroes).filter(p=>p!==ME).map(p=>{const a=g.heroes[p],P=R.players[p];return `<div class="ent ally ${a.down?'down':''}" id="ent-h-${p}">${sprImg(P.cls,34,'idle')}
-    <div class="info"><span class="nm">${esc(P.name)} ${a.blk?`<span class="blk">🛡 ${a.blk}</span>`:''}</span>${hpBar(P.hp,P.max)}${chips(a)}<small class="muted">${!isOnline(p)?'disconnesso':a.down?'a terra':a.ended?'<span class="ok">✓ fine turno</span>':'sta giocando'}</small></div></div>`}).join('');
+  const allies=Object.keys(g.heroes).filter(p=>p!==ME).map(p=>{const a=g.heroes[p],P=R.players[p];return `<div class="ent ally ${a.down?'down':''} ${sel&&sel.ally&&!a.down?'target':''}" id="ent-h-${p}" onclick="clickHero('${p}')">${sprImg(P.cls,34,'idle')}
+    <div class="info"><span class="nm">${esc(P.name)} ${a.blk?`<span class="blk">${ic('i_shield',12)} ${a.blk}</span>`:''}</span>${hpBar(P.hp,P.max)}${chips(a)}<small class="muted">${!isOnline(p)?'disconnesso':a.down?'a terra':a.ended?'<span class="ok">✓ fine turno</span>':'sta giocando'}</small></div></div>`}).join('');
   const hand=h.hand.map((c,i)=>cardHTML(c,{click:`clickCard(${i})`,cls:(sel&&sel.k==='c'&&sel.uid===c.uid?'sel ':'')+(costOf(c)>h.energy||h.ended?'cant':'')})).join('');
   const heroes=Object.keys(g.heroes).filter(p=>!g.heroes[p].down&&isOnline(p));const ended=heroes.filter(p=>g.heroes[p].ended).length;
-  let status=sel?'Scegli un nemico come bersaglio':'Turno '+g.turn;
+  let status=sel?(sel.ally?'Scegli l\'eroe da aiutare':'Scegli un nemico come bersaglio'):'Turno '+g.turn;
   if(g.busy)status='Turno dei nemici...';else if(h.down)status='Sei a terra: ti rialzi a fine combattimento';else if(h.ended&&!solo)status=`In attesa degli altri (${ended}/${heroes.length})`;
   return `<main class="flush"><div class="combat"><div class="cscroll" id="cscroll">
     <div class="enemies">${en}</div>
     ${allies?`<div class="allies">${allies}</div>`:''}
     <div class="herorow">
       <div class="energy" title="Energia">${h.energy}</div>
-      <div class="ent hero ${h.down?'down':''}" id="ent-h-${ME}"><span class="face">${sprImg(run.cls,60,'idle')}</span><div class="info"><span class="nm">${solo?cl.n:esc(run.name)} ${h.blk?`<span class="blk">🛡 ${h.blk}</span>`:''}</span>${hpBar(run.hp,run.max)}${chips(h,h.pw)}</div></div>
+      <div class="ent hero ${h.down?'down':''} ${sel&&sel.ally&&!h.down?'target':''}" id="ent-h-${ME}" onclick="clickHero('${ME}')"><span class="face">${sprImg(run.cls,60,'idle')}</span><div class="info"><span class="nm">${solo?cl.n:esc(run.name)} ${h.blk?`<span class="blk">${ic('i_shield',12)} ${h.blk}</span>`:''}</span>${hpBar(run.hp,run.max)}${chips(h,h.pw)}</div></div>
     </div></div>
     <div class="hand">${hand||`<p class="muted" style="align-self:center">${h.ended?'Hai finito il turno.':'Nessuna carta in mano.'}</p>`}</div>
     <div class="pilebar">
@@ -1448,22 +1648,22 @@ function roomScreen(P){
 function rewardScreen(){
   const r=run.reward;
   return `<main><div class="wrap"><h2>${r.title}</h2><div class="panel"><div class="rewards">
-    ${r.gold?`<button class="ritem" onclick="send({t:'takeGold'})"><span class="ic">🪙</span><span>${r.gold} monete d'oro</span></button>`:''}
-    ${r.potion?`<button class="ritem" onclick="takePotionUI()"><span class="ic"><span class="pot full" style="display:inline-block;background:${POTIONS[r.potion].col}"></span></span><span><b>${POTIONS[r.potion].n}</b><br><span class="muted">${POTIONS[r.potion].d}</span></span></button>`:''}
-    ${r.relic?`<button class="ritem" onclick="takeRelicUI()"><span class="ic">${RELICS[r.relic].ic}</span><span><b>${RELICS[r.relic].n}</b><br><span class="muted">${RELICS[r.relic].d}</span></span></button>`:''}
+    ${r.gold?`<button class="ritem" onclick="send({t:'takeGold'})"><span class="ic">${ic('i_coin',24)}</span><span>${r.gold} monete d'oro</span></button>`:''}
+    ${r.potion?`<button class="ritem" onclick="takePotionUI()"><span class="ic">${potIc(r.potion,28)}</span><span><b>${POTIONS[r.potion].n}</b><br><span class="muted">${POTIONS[r.potion].d}</span></span></button>`:''}
+    ${r.relic?`<button class="ritem" onclick="takeRelicUI()"><span class="ic">${relIc(r.relic,28)}</span><span><b>${RELICS[r.relic].n}</b><br><span class="muted">${RELICS[r.relic].d}</span></span></button>`:''}
   </div>
   ${r.cards?`<h3>Aggiungi una carta al mazzo</h3><div class="cardgrid">${r.cards.map((id,k)=>cardHTML({id,up:false},{click:`takeCardUI(${k})`})).join('')}</div>
     <div><button class="btn" onclick="send({t:'skipCards'})">Salta la carta</button></div>`:''}
   </div><div><button class="btn primary" onclick="proceed()">Prosegui sulla mappa</button></div></div></main>`;
 }
 function shopScreen(){
-  const s=run.shop;const pc=p=>`<span class="price ${run.gold<p?'no':''}">🪙 ${p}</span>`;
+  const s=run.shop;const pc=p=>`<span class="price ${run.gold<p?'no':''}">${ic('i_coin',16)} ${p}</span>`;
   return `<main><div class="wrap"><div class="evhead"><span class="ic">${sprImg('shop',60)}</span><div><h2>Il Mercante Elfo</h2><p class="muted">«Merce rara per chi ha monete sonanti. Niente sconti agli avventurieri.»</p></div></div>
   <div class="panel"><h3>Carte</h3><div class="shopgrid">${s.cards.map((it,k)=>`<div class="shopitem ${it.sold?'sold':''}">${cardHTML({id:it.id,up:false},{click:`buyUI('cards',${k})`})}${pc(it.price)}</div>`).join('')}</div></div>
   <div class="panel"><h3>Reliquie e pozioni</h3><div class="shopgrid">
-    ${s.relics.map((it,k)=>`<div class="shopitem ${it.sold?'sold':''}"><button class="relicbox" onclick="buyUI('relics',${k})"><span class="ic">${RELICS[it.id].ic}</span><b>${RELICS[it.id].n}</b><span class="muted">${RELICS[it.id].d}</span></button>${pc(it.price)}</div>`).join('')}
-    ${s.potions.map((it,k)=>`<div class="shopitem ${it.sold?'sold':''}"><button class="relicbox" onclick="buyUI('potions',${k})"><span class="pot full" style="width:34px;height:34px;background:${POTIONS[it.id].col}"></span><b>${POTIONS[it.id].n}</b><span class="muted">${POTIONS[it.id].d}</span></button>${pc(it.price)}</div>`).join('')}
-    <div class="shopitem ${s.removeUsed?'sold':''}"><button class="relicbox" onclick="shopRemoveUI()"><span class="ic">🔥</span><b>Brucia una carta</b><span class="muted">Rimuovi una carta dal mazzo.</span></button>${pc(removePrice())}</div>
+    ${s.relics.map((it,k)=>`<div class="shopitem ${it.sold?'sold':''}"><button class="relicbox" onclick="buyUI('relics',${k})"><span class="ic">${relIc(it.id,40)}</span><b>${RELICS[it.id].n}</b><span class="muted">${RELICS[it.id].d}</span></button>${pc(it.price)}</div>`).join('')}
+    ${s.potions.map((it,k)=>`<div class="shopitem ${it.sold?'sold':''}"><button class="relicbox" onclick="buyUI('potions',${k})"><span class="ic">${potIc(it.id,40)}</span><b>${POTIONS[it.id].n}</b><span class="muted">${POTIONS[it.id].d}</span></button>${pc(it.price)}</div>`).join('')}
+    <div class="shopitem ${s.removeUsed?'sold':''}"><button class="relicbox" onclick="shopRemoveUI()"><span class="ic">${ic('rest',40)}</span><b>Brucia una carta</b><span class="muted">Rimuovi una carta dal mazzo.</span></button>${pc(removePrice())}</div>
   </div></div>
   <div><button class="btn primary" onclick="proceed()">Lascia il negozio</button></div></div></main>`;
 }
@@ -1475,7 +1675,7 @@ function restScreen(){
 }
 function eventScreen(){
   const ev=EVENTS.find(e=>e.id===run.event.id);
-  return `<main><div class="wrap"><div class="evhead"><span class="ic">${ev.spr?sprImg(ev.spr,60):ev.ic}</span><h2>${ev.n}</h2></div>
+  return `<main><div class="wrap"><div class="evhead"><span class="ic">${sprImg(ev.spr||'e_'+ev.id,60)}</span><h2>${ev.n}</h2></div>
     <div class="panel"><p class="lede">${ev.txt}</p>
     ${run.event.result?`<p style="color:var(--torch2)">${run.event.result}</p><div><button class="btn primary" onclick="proceed()">Prosegui</button></div>`:
     `<div class="opts">${ev.opts.map((o,k)=>(o.solo&&!solo)?'':`<button class="opt" onclick="chooseEv(${k})" ${o.req&&!o.req()?'disabled':''}><b>${o.t}</b><br><span class="muted">${o.s}</span></button>`).join('')}</div>`}
@@ -1485,17 +1685,19 @@ function treasureScreen(){
   const t=run.treasure;
   return `<main><div class="wrap"><div class="evhead"><span class="ic">${sprImg('treasure',60)}</span><h2>Forziere</h2></div>
     <div class="panel"><p class="lede">Il coperchio cigola. Dentro trovi:</p><div class="rewards">
-    <div class="ritem"><span class="ic">🪙</span><span>${t.gold} monete d'oro</span></div>
-    ${t.relic?`<div class="ritem"><span class="ic">${RELICS[t.relic].ic}</span><span><b>${RELICS[t.relic].n}</b><br><span class="muted">${RELICS[t.relic].d}</span></span></div>`:''}
+    <div class="ritem"><span class="ic">${ic('i_coin',24)}</span><span>${t.gold} monete d'oro</span></div>
+    ${t.relic?`<div class="ritem"><span class="ic">${relIc(t.relic,28)}</span><span><b>${RELICS[t.relic].n}</b><br><span class="muted">${RELICS[t.relic].d}</span></span></div>`:''}
     </div></div><div><button class="btn primary" onclick="proceed()">Prosegui</button></div></div></main>`;
 }
 function endScreen(){
   const L=R.lvl||0;
   if(R.win&&UI.unlockSeed!==R.seed+R.v){UI.unlockSeed=R.seed+R.v;UI.unlocked=null;if(L<MAXLVL&&getUnlocked()<=L){setUnlocked(L+1);UI.unlocked=L+1;pickLvl=L+1}}
   const kills=R.order.reduce((s,p)=>s+(R.players[p].kills||0),0);
+  if(R.mode==='surv')return survEndScreen(L,kills);
   const score=Math.round((R.floor*10+kills*3+(R.win?150:0))*scoreMult(L));
   return `<main><div class="wrap"><h1 style="font-size:clamp(40px,8vw,64px)">${R.win?'La Rocca è libera!':(solo?'Sei caduto':'Il gruppo è caduto')}</h1>
     <p class="lede muted">${R.win?'Ignivora giace sconfitta. I bardi canteranno dei vostri nomi per generazioni.':'Le ombre di Valdombra reclamano altri eroi. La prossima volta il mazzo sarà più forte.'}</p>
+    ${(()=>{const n=crownsAward();return n?`<div class="panel" style="flex-direction:row;align-items:center;gap:12px;border-color:var(--torch)">${ic('i_crown',36)}<div><b style="color:var(--torch2);font-size:18px">+${n} Corone!</b><br><span class="muted">Spendile nella Bottega della Rocca prima della prossima partita. Ora ne hai ${getCrowns()}.</span></div></div>`:''})()}
     ${UI.unlocked?`<div class="panel" style="border-color:var(--torch)"><b style="color:var(--torch2);font-size:18px">Livello di Assedio ${UI.unlocked} sbloccato!</b><span class="muted">${lvlDesc(UI.unlocked)}</span></div>`:''}
     <div class="endstats"><div><b>${score}</b>Punteggio${L?` (×${scoreMult(L)})`:''}</div><div><b>${L}</b>Livello di Assedio</div><div><b>${R.floor}</b>Piano raggiunto</div><div><b>${kills}</b>Nemici uccisi</div></div>
     ${solo?'':`<div class="plist">${R.order.map(p=>{const P=R.players[p];return `<div class="prow">${sprImg(P.cls,32)}<div style="flex:1"><span class="nm">${esc(P.name)}</span><br><span class="muted">${CLASSES[P.cls].n} · ${P.kills||0} nemici · ${P.deck.length} carte</span></div></div>`}).join('')}</div>`}
@@ -1504,6 +1706,125 @@ function endScreen(){
       (R.host===ME?`<button class="btn primary" onclick="send({t:'again'})">Nuova partita con il gruppo</button>`:'<span class="muted">L\'host può avviare una nuova partita.</span>')+'<button class="btn" onclick="leaveRoom(true)">Esci dalla stanza</button>'}</div></div></main>`;
 }
 
+
+
+/* ================= BOTTEGA DELLA ROCCA (prima della partita) ================= */
+const ZK='valdombra-zaino',CK='valdombra-corone',PK='valdombra-premiati';
+const META={potion:15,relic:60,gold:20,hp:30,upg:35};
+const ZCAP={potions:2,relics:2,gold:3,hp:2,upg:2};
+const crownReward=L=>60+20*L;
+function getCrowns(){return parseInt(load(CK)||'0',10)||0}
+function setCrowns(n){store(CK,String(Math.max(0,n)))}
+function getZaino(){let z=null;try{z=JSON.parse(load(ZK))}catch(e){}z=z||{};return{potions:(z.potions||[]).filter(k=>POTIONS[k]),relics:(z.relics||[]).filter(k=>RELICS[k]&&RELIC_POOL.includes(k)),gold:z.gold|0,hp:z.hp|0,upg:z.upg|0}}
+function setZaino(z){store(ZK,JSON.stringify(z))}
+const zEmpty=z=>!z||!(z.potions.length||z.relics.length||z.gold||z.hp||z.upg);
+function zText(z){if(!z)return '';const t=[];if(z.potions&&z.potions.length)t.push(z.potions.length+(z.potions.length>1?' pozioni':' pozione'));if(z.relics&&z.relics.length)t.push(z.relics.length+(z.relics.length>1?' reliquie':' reliquia'));
+  if(z.gold)t.push('+'+50*z.gold+' oro');if(z.hp)t.push('+'+10*z.hp+' PV max');if(z.upg)t.push(2*z.upg+' carte potenziate');return t.join(', ')}
+function cleanZ(z){if(!z||typeof z!=='object')return null;const c=k=>Math.max(0,Math.min(ZCAP[k],z[k]|0));
+  return{potions:(Array.isArray(z.potions)?z.potions:[]).filter(k=>POTIONS[k]).slice(0,ZCAP.potions),relics:(Array.isArray(z.relics)?z.relics:[]).filter(k=>RELIC_POOL.includes(k)).slice(0,ZCAP.relics),gold:c('gold'),hp:c('hp'),upg:c('upg')}}
+function applyLoadout(P){
+  const z=cleanZ(P.loadout);delete P.loadout;if(zEmpty(z))return;
+  z.potions.forEach(k=>{if(P.potions.length<3)P.potions.push(k)});
+  z.relics.forEach(k=>{if(!P.relics.includes(k)){P.relics.push(k);if(k==='cuore'){P.max+=8;P.hp+=8}}});
+  P.gold+=50*z.gold;P.max+=10*z.hp;P.hp+=10*z.hp;
+  rng.shuffle(P.deck.map((c,i)=>i).filter(i=>canUp(P.deck[i]))).slice(0,2*z.upg).forEach(i=>P.deck[i].up=true);
+  P.zApplied=zText(z);
+}
+function buyMeta(kind,id){
+  const z=getZaino(),cr=getCrowns();
+  const price=kind==='potions'?META.potion:kind==='relics'?META.relic:META[kind];
+  const n=kind==='potions'||kind==='relics'?z[kind].length:z[kind];
+  if(n>=ZCAP[kind]){toast('Puoi portarne al massimo '+ZCAP[kind]+' per partita.');return}
+  if(kind==='relics'&&z.relics.includes(id))return;
+  if(cr<price){toast('Corone insufficienti: vinci il dungeon per guadagnarne.');return}
+  setCrowns(cr-price);if(kind==='potions'||kind==='relics')z[kind].push(id);else z[kind]++;setZaino(z);toast('Aggiunto allo zaino per la prossima partita.');render();
+}
+function refundMeta(kind,i){
+  const z=getZaino();let price=0;
+  if(kind==='potions'||kind==='relics'){if(!z[kind][i])return;z[kind].splice(i,1);price=kind==='potions'?META.potion:META.relic}
+  else{if(!z[kind])return;z[kind]--;price=META[kind]}
+  setZaino(z);setCrowns(getCrowns()+price);render();
+}
+function openBottega(){modal={title:'Bottega della Rocca',bottega:true,cancel:true,list:[]};render()}
+function bottegaHTML(){
+  const z=getZaino(),cr=getCrowns();
+  const price=p=>`<span class="price ${cr<p?'no':''}">${ic('i_crown',16)} ${p}</span>`;
+  const box=(icon,name,desc,p,on,dis)=>`<div class="shopitem ${dis?'sold':''}"><button class="relicbox" onclick="${on}"><span class="ic">${icon}</span><b>${name}</b><span class="muted">${desc}</span></button>${price(p)}</div>`;
+  const items=[];
+  z.potions.forEach((k,i)=>items.push([potIc(k,22),POTIONS[k].n,`refundMeta('potions',${i})`]));
+  z.relics.forEach((k,i)=>items.push([relIc(k,22),RELICS[k].n,`refundMeta('relics',${i})`]));
+  if(z.gold)items.push([ic('i_coin',22),'+'+50*z.gold+' oro iniziale',"refundMeta('gold')"]);
+  if(z.hp)items.push([ic('i_heal',22),'+'+10*z.hp+' PV massimi',"refundMeta('hp')"]);
+  if(z.upg)items.push([ic('rest',22),2*z.upg+' carte iniziali potenziate',"refundMeta('upg')"]);
+  return `<div class="wrap" style="gap:14px">
+   <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px">${ic('i_crown',40)}<div style="flex:1;min-width:200px"><b style="font-size:22px;color:var(--torch2)">${cr} Corone</b><br>
+     <span class="muted">Le guadagni completando il dungeon: ${crownReward(0)} Corone, più ${crownReward(1)-crownReward(0)} per ogni Livello di Assedio. Ciò che compri qui va nello zaino e lo usi nella prossima partita, da solo o in gruppo.</span></div></div>
+   <div class="panel"><h3>Zaino per la prossima partita</h3>${items.length?`<div class="plist">${items.map(([icn,n,on])=>`<div class="prow">${icn}<span style="flex:1">${n}</span><button class="btn" onclick="${on}">Rimuovi e rimborsa</button></div>`).join('')}</div>`:'<p class="muted">Lo zaino è vuoto.</p>'}</div>
+   <div class="panel"><h3>Pozioni <span class="muted" style="font-size:14px">(massimo ${ZCAP.potions})</span></h3><div class="shopgrid">${Object.keys(POTIONS).map(k=>box(potIc(k,40),POTIONS[k].n,POTIONS[k].d,META.potion,`buyMeta('potions','${k}')`,z.potions.length>=ZCAP.potions)).join('')}</div></div>
+   <div class="panel"><h3>Reliquie <span class="muted" style="font-size:14px">(massimo ${ZCAP.relics})</span></h3><div class="shopgrid">${RELIC_POOL.map(k=>box(relIc(k,40),RELICS[k].n,RELICS[k].d,META.relic,`buyMeta('relics','${k}')`,z.relics.includes(k)||z.relics.length>=ZCAP.relics)).join('')}</div></div>
+   <div class="panel"><h3>Altro</h3><div class="shopgrid">
+     ${box(ic('i_coin',40),'Borsa del Mercenario','Inizi con 50 oro in più.',META.gold,"buyMeta('gold')",z.gold>=ZCAP.gold)}
+     ${box(ic('i_heal',40),'Elisir di Vigore','Inizi con 10 PV massimi in più.',META.hp,"buyMeta('hp')",z.hp>=ZCAP.hp)}
+     ${box(ic('rest',40),'Addestramento','Inizi con 2 carte del mazzo già potenziate.',META.upg,"buyMeta('upg')",z.upg>=ZCAP.upg)}
+   </div></div></div>`;
+}
+function crownsAward(){
+  // corone per la vittoria: una volta sola per partita, su questo dispositivo
+  if(!R||!R.players[ME]||!(R.win||(R.mode==='surv'&&totalFloors()>=8)))return null;const key=R.code+':'+R.seed+':'+(R.t0||0);let done=[];try{done=JSON.parse(load(PK))||[]}catch(e){}
+  if(done.includes(key))return UI.lastAward&&UI.lastAward.key===key?UI.lastAward.n:null;
+  const n=R.mode==='surv'?Math.floor(totalFloors()/16*40)+10*(R.lvl||0):crownReward(R.lvl||0);setCrowns(getCrowns()+n);done.push(key);store(PK,JSON.stringify(done.slice(-50)));UI.lastAward={key,n};return n;
+}
+ACT.loadout=(a,P)=>{if(R.phase==='lobby')P.loadout=cleanZ(a.z)};
+
+
+/* ================= SOPRAVVIVENZA E CLASSIFICHE ================= */
+function modePicker(cur,on){
+  const b=(m,t,d)=>`<button class="opt ${cur===m?'on':''}" onclick="${on.replace('%',m)}" aria-pressed="${cur===m}"><b>${t}</b><br><span class="muted">${d}</span></button>`;
+  return `<div class="modes">${b('norm','Normale','15 piani e il drago. Vinci per guadagnare Corone e sbloccare i Livelli di Assedio.')}${b('surv','Sopravvivenza','La rocca non finisce mai: dopo ogni drago ricomincia, più forte. Si va avanti finché cadete. Punteggio in classifica.')}</div>`;
+}
+const survScore=(kills)=>Math.round((totalFloors()*10+kills*3)*scoreMult(R.lvl||0));
+function sbClient(){if(typeof supabase==='undefined')return null;return sbc||(sbc=supabase.createClient(SB_URL,SB_KEY))}
+function lbErr(e){return e&&(e.code==='42P01'||e.code==='PGRST205'||/does not exist|schema cache/i.test(e.message||''))?'La classifica non è ancora attiva: va creata la tabella su Supabase.':'Classifica non raggiungibile in questo momento. Riprova più tardi.'}
+async function fetchBoard(mode){
+  const c=sbClient();if(!c)return{error:'Classifica non disponibile qui: apri il gioco dal sito.'};
+  const {data,error}=await c.from('classifica').select('id,creato,nomi,classi,giocatori,piani,livello,punteggio').eq('modalita',mode).order('punteggio',{ascending:false}).limit(20);
+  return error?{error:lbErr(error)}:{rows:data};
+}
+async function submitScore(){
+  const key='lb:'+R.code+':'+R.seed+':'+(R.t0||0);if(load(key))return;store(key,'1');
+  const c=sbClient();if(!c){UI.lbMsg='Classifica non disponibile qui: apri il gioco dal sito.';render();return}
+  const kills=R.order.reduce((s,p)=>s+(R.players[p].kills||0),0);
+  const row={modalita:solo?'solo':'coop',nomi:R.order.map(p=>R.players[p].name).join(', ').slice(0,200),classi:R.order.map(p=>R.players[p].cls).join(','),
+    giocatori:R.order.length,piani:totalFloors(),uccisioni:kills,livello:R.lvl||0,punteggio:survScore(kills),stanza:solo?null:R.code};
+  const {data,error}=await c.from('classifica').insert(row).select('id').single();
+  if(error){UI.lbMsg=lbErr(error);store(key,null);render();return}
+  if(R&&R.mode==='surv'){R.lbId=data.id;if(isHost)commit();else render()}
+}
+function survEndScreen(L,kills){
+  const score=survScore(kills),mode=solo?'solo':'coop';
+  if((solo||R.host===ME)&&!R.lbId&&!UI.lbMsg)setTimeout(submitScore,0);
+  if(R.lbId&&UI.lbFor!==R.lbId){UI.lbFor=R.lbId;UI.lb=null;fetchBoard(mode).then(r=>{UI.lb=r;render()})}
+  return `<main><div class="wrap"><h1 style="font-size:clamp(38px,8vw,60px)">Sopravvivenza terminata</h1>
+    <p class="lede muted">${solo?'Hai resistito':'Il gruppo ha resistito'} per <b style="color:var(--fg)">${totalFloors()} piani</b>${R.cycle>1?` e ${R.cycle-1} ${R.cycle>2?'draghi':'drago'}`:''}.</p>
+    ${(()=>{const n=crownsAward();return n?`<div class="panel" style="flex-direction:row;align-items:center;gap:12px;border-color:var(--torch)">${ic('i_crown',36)}<div><b style="color:var(--torch2);font-size:18px">+${n} Corone!</b><br><span class="muted">Ora ne hai ${getCrowns()}.</span></div></div>`:''})()}
+    <div class="endstats"><div><b>${score}</b>Punteggio${L?` (×${scoreMult(L)})`:''}</div><div><b>${totalFloors()}</b>Piani superati</div><div><b>${R.cycle}</b>Ciclo raggiunto</div><div><b>${kills}</b>Nemici uccisi</div></div>
+    <div class="panel"><h3>Classifica ${solo?'giocatore singolo':'cooperativa'}</h3>${boardBody(UI.lbMsg?{error:UI.lbMsg}:R.lbId?UI.lb:null,R.lbId)}</div>
+    <div class="row">${solo?`<button class="btn primary" onclick="R=null;g=null;UI.lbMsg='';screen='title';render()">Nuova partita</button>`:
+      (R.host===ME?`<button class="btn primary" onclick="UI.lbMsg='';send({t:'again'})">Nuova partita con il gruppo</button>`:'<span class="muted">L\'host può avviare una nuova partita.</span>')+'<button class="btn" onclick="UI.lbMsg=\'\';leaveRoom(true)">Esci dalla stanza</button>'}</div></div></main>`;
+}
+function boardBody(r,mine){
+  if(!r)return '<p class="muted">Carico la classifica...</p>';
+  if(r.error)return `<p class="muted">${r.error}</p>`;
+  if(!r.rows.length)return '<p class="muted">Ancora nessun punteggio. Gioca una partita in Sopravvivenza per entrare per primo!</p>';
+  return `<div class="board">${r.rows.map((x,i)=>`<div class="brow ${x.id===mine?'mine':''}"><span class="pos">${i+1}</span>
+    <span class="who"><span class="cls">${String(x.classi||'').split(',').filter(k=>CLASSES[k]).map(k=>sprImg(k,20,'inl')).join('')}</span><b>${esc(x.nomi)}</b><small class="muted">${x.giocatori>1?x.giocatori+' giocatori · ':''}${x.piani} piani${x.livello?' · Assedio '+x.livello:''} · ${new Date(x.creato).toLocaleDateString('it-IT')}</small></span>
+    <span class="pts">${x.punteggio}</span></div>`).join('')}</div>`;
+}
+function openBoard(mode){modal={title:'Classifiche Sopravvivenza',board:mode||'solo',cancel:true,list:[]};UI.boardData=null;fetchBoard(modal.board).then(r=>{if(modal&&modal.board){UI.boardData=r;render()}});render()}
+function boardModalHTML(){const m=modal.board;
+  return `<div class="wrap" style="gap:12px"><div class="row"><button class="btn ${m==='solo'?'primary':''}" onclick="openBoard('solo')">Giocatore singolo</button><button class="btn ${m==='coop'?'primary':''}" onclick="openBoard('coop')">Cooperativa</button></div>
+    <p class="muted">${m==='coop'?'Più giocatori ci sono, più i nemici sono numerosi e resistenti.':'Le migliori partite in solitaria.'} Il punteggio conta i piani superati, i nemici uccisi e il Livello di Assedio.</p>
+    <div class="panel">${boardBody(UI.boardData,null)}</div></div>`}
 
 /* ================= CHAT ================= */
 let chatOpen=false,chatSeen=0;
@@ -1522,6 +1843,19 @@ function renderChat(){
 function chatBtn(){if(solo||!R)return '';const n=Math.max(0,((R.chat||[]).length)-chatSeen);return `<button class="btn chatbtn" onclick="toggleChat()">Chat${n&&!chatOpen?`<span class="dot">${n}</span>`:''}</button>`}
 document.getElementById('chatform').addEventListener('submit',e=>{e.preventDefault();const i=$('#chatin');const t=i.value.trim();if(!t)return;send({t:'chat',text:t});i.value=''});
 
+
+/* ================= ANIMAZIONE DEL VOTO ================= */
+function startVoteAnim(va){
+  UI.anim={id:va.id,cur:null,done:false,win:va.win};
+  setTimeout(scrollMap,30);
+  const opts=va.opts,wi=opts.indexOf(va.win);const seq=[];
+  if(va.tie){let n=opts.length*5+wi;for(let i=0;i<=n;i++)seq.push(opts[i%opts.length])}else seq.push(va.win,null,va.win,null,va.win);
+  let t=0;const total=va.ms-500;const base=va.tie?total/seq.length/2.2:total/seq.length;
+  seq.forEach((k,i)=>{const d=va.tie?base*Math.pow(1.12,i)*(2.2*seq.length/((Math.pow(1.12,seq.length)-1)/.12)):base;t+=d;
+    setTimeout(()=>{if(!UI.anim||UI.anim.id!==va.id)return;UI.anim.cur=k;paintAnim()},Math.min(t,total))});
+  setTimeout(()=>{if(!UI.anim||UI.anim.id!==va.id)return;UI.anim.cur=null;UI.anim.done=true;render()},total+120);
+}
+function paintAnim(){document.querySelectorAll('.mapsvg .node').forEach(n=>{n.classList.toggle('spin',!!UI.anim&&n.dataset.k===UI.anim.cur)})}
 /* ================= AVVIO ================= */
 (function boot(){
   const h=(location.hash||'').replace('#','').toUpperCase();
