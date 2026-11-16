@@ -71,6 +71,35 @@ p{margin:0;line-height:1.5}
 .lvl{width:40px;height:40px;border-radius:8px;background:var(--stone3);border:1px solid var(--line);font-family:var(--f-disp);font-size:20px;font-variant-numeric:tabular-nums}
 .lvl.on{background:linear-gradient(#f0b456,#c9832a);color:#2a1a08;border-color:#ffd68f}
 .lvl[disabled]{opacity:.45;cursor:not-allowed;font-size:14px}
+.party{display:flex;gap:8px;overflow-x:auto;padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line)}
+.pm{display:flex;align-items:center;gap:8px;background:var(--stone2);border:1px solid var(--line);border-radius:10px;padding:4px 10px;flex:none;width:170px}
+.pm b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pm .bar{height:9px}.pm small{display:block;font-size:11px;color:var(--muted)}
+.pm.off{opacity:.45}.ok{color:var(--heal)}
+.allies{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;padding:0 16px}
+.ally{flex-direction:row;gap:6px;padding:4px 8px;width:170px;text-align:left}
+.ally .info{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}.ally .bar{height:9px}.ally small{font-size:11px}
+.ally.down,.hero.down{opacity:.45;filter:grayscale(.8)}
+.tgt{color:var(--muted);font-weight:500;font-size:12px}
+.mapsvg .vbadge{fill:var(--torch2);stroke:#2a1a08;stroke-width:2}.mapsvg .vbadge-t{font-size:15px;font-weight:700;fill:#2a1a08;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.mapsvg .node.voted circle:first-child{fill:#5a4320;stroke:var(--torch2);stroke-width:6}
+.plist{display:flex;flex-direction:column;gap:8px}
+.prow{display:flex;align-items:center;gap:10px;background:var(--stone2);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.prow .nm{font-weight:700}.badge{font-size:12px;border-radius:6px;padding:1px 8px;background:var(--stone);border:1px solid var(--line);white-space:nowrap}
+.badge.on{color:var(--heal);border-color:var(--heal)}
+.code{font-family:var(--f-disp);font-size:52px;line-height:1;letter-spacing:.14em;color:var(--torch2)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input.txt{background:var(--stone);border:1px solid var(--line);border-radius:8px;color:var(--fg);padding:9px 10px;font:inherit;max-width:100%}
+.netwarn{background:#4a2420;color:#ffd0c8;padding:6px 16px;font-size:13px;text-align:center}
+#chat{position:fixed;top:0;right:0;bottom:0;width:min(360px,100%);background:var(--stone2);border-left:1px solid var(--line);z-index:55;display:flex;flex-direction:column;
+  padding-block:max(10px,env(safe-area-inset-top,0px)) max(10px,env(safe-area-inset-bottom,0px));padding-right:env(safe-area-inset-right,0px);box-shadow:-10px 0 30px rgba(0,0,0,.4)}
+#chat .chead{display:flex;align-items:center;gap:8px;padding:0 12px 8px;border-bottom:1px solid var(--line)}
+#chatlog{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.msg{background:var(--stone3);border-radius:10px;padding:6px 10px;max-width:90%;align-self:flex-start;overflow-wrap:anywhere}
+.msg.me{align-self:flex-end;background:#4a3a22}.msg b{display:block;font-size:12px;color:var(--torch2)}
+#chatform{display:flex;gap:6px;padding:8px 12px 0;border-top:1px solid var(--line)}
+#chatform input{flex:1;min-width:0}
+.quick{display:flex;gap:4px;flex-wrap:wrap;padding:6px 12px 0}.quick button{font-size:12px;padding:3px 8px}
+.chatbtn .dot{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:var(--blood);color:#fff;font-size:11px;margin-left:4px}
 .note{background:var(--stone2);border:1px dashed var(--line);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--muted)}
 
 /* Map */
@@ -192,6 +221,13 @@ button.card:hover{transform:translateY(-8px)}
 
 <div id="app"></div>
 <div id="fx"></div>
+<aside id="chat" hidden aria-label="Chat di gioco">
+  <div class="chead"><h3 style="flex:1">Chat del gruppo</h3><button class="btn" onclick="toggleChat(false)">Chiudi</button></div>
+  <div id="chatlog"></div>
+  <div class="quick"><button class="btn" type="button" onclick="quickMsg(this)">Andiamo a sinistra!</button><button class="btn" type="button" onclick="quickMsg(this)">Andiamo a destra!</button><button class="btn" type="button" onclick="quickMsg(this)">Mi serve un falò</button><button class="btn" type="button" onclick="quickMsg(this)">Attacchiamo quello</button><button class="btn" type="button" onclick="quickMsg(this)">Ho poca vita!</button><button class="btn" type="button" onclick="quickMsg(this)">Bel colpo!</button></div>
+  <form id="chatform" autocomplete="off"><input id="chatin" class="txt" maxlength="200" placeholder="Scrivi un messaggio..."><button class="btn primary" type="submit">Invia</button></form>
+</aside>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
 
 <script>
 /* ================= RNG (con seed condivisibile) ================= */
@@ -638,15 +674,81 @@ function lvlDesc(L){if(!L)return 'Assedio normale: la difficoltà di base.';
   return `Nemici +${10*L}% PV${dmgBonus(L)?` e +${dmgBonus(L)} danni per colpo`:''}${L>=5?' (élite e boss ancora di più)':''}. Ricompense: +${10*L}% oro e carte rare più frequenti. Punteggio ×${scoreMult(L)}.`}
 
 /* ================= STATO ================= */
-let run=null, g=null, rng=null, screen='title', modal=null, pickCls='guerriero', pickLvl=0, uid=1, fxq=[];
+const SB_URL='https://ucwuhzupgsvtphsdmlqf.supabase.co', SB_KEY='sb_publishable_rObFkpBSbC1wsQutuOYNLg_NPzCdU7n', MAXP=8, SOLO_K='valdombra-solo-v2';
+let R=null;                       // stato della stanza (l'host è l'arbitro, gli altri ne ricevono una copia)
+let ME=null, CUR=null, run=null, g=null, rng=null;
+let isHost=true, solo=true, chan=null, sbc=null, online=new Set();
+let screen='title', modal=null, pickCls='guerriero', pickLvl=0, uid=Math.floor(Math.random()*1e6), fxq=[];
+const UI={sel:null,seed:'',joinCode:'',status:'',unlockSeed:null,unlocked:null};
+let hostTimer=null, joinTimer=null;
 const $=s=>document.querySelector(s);
-const has=id=>run&&run.relics.includes(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const has=id=>!!(run&&run.relics&&run.relics.includes(id));
 const alive=()=>g?g.enemies.filter(e=>e.hp>0):[];
 const vals=c=>c.up?{...CARDS[c.id].v,...CARDS[c.id].u}:CARDS[c.id].v;
 const costOf=c=>{const d=CARDS[c.id];return c.up&&d.cu!=null?d.cu:d.c};
 const canUp=c=>!c.up&&CARDS[c.id].u!==undefined;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
-function newSeed(){const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<6;i++)s+=a[Math.floor(Math.random()*a.length)];return s}
+const ABC='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function newSeed(n=6){let s='';for(let i=0;i<n;i++)s+=ABC[Math.floor(Math.random()*ABC.length)];return s}
+function store(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}
+function load(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function sstore(k,v){try{v==null?sessionStorage.removeItem(k):sessionStorage.setItem(k,v)}catch(e){}}
+function sload(k){try{return sessionStorage.getItem(k)}catch(e){return null}}
+function myPid(){let p=sload('valdombra-pid');if(!p){p='p'+Math.random().toString(36).slice(2,9);sstore('valdombra-pid',p)}return p}
+let myName=load('valdombra-nome')||'';
+function ctx(pid){CUR=pid;run=(pid&&R&&R.players[pid])||null;g=(R&&R.combat)||null;if(g)g.hero=(pid&&g.heroes[pid])||null}
+const isOnline=p=>solo||online.has(p);
+const active=()=>R.order.filter(p=>R.players[p]&&isOnline(p));
+const pname=p=>R&&R.players[p]?R.players[p].name:'?';
+const ser=()=>JSON.stringify(R,(k,v)=>(k==='hero'||k==='hit')?undefined:v);
+
+function commit(){
+  if(!R)return;
+  if(isHost){R.rs=rng.s;R.v=(R.v||0)+1}
+  const f=fxq;fxq=[];
+  if(isHost&&!solo&&chan){const s=ser();chan.send({type:'broadcast',event:'state',payload:{s,fx:f}});sstore('valdombra-cache-'+R.code,s)}
+  if(solo){if(R.phase==='map')store(SOLO_K,ser());else if(R.phase==='end')store(SOLO_K,null)}
+  render(f);
+}
+function send(a){if(!R)return;if(isHost)dispatch(ME,a);else if(chan)chan.send({type:'broadcast',event:'act',payload:{pid:ME,a}})}
+function dispatch(pid,a){
+  if(!R||!isHost||!a)return;const P=R.players[pid];if(!P)return;ctx(pid);
+  const h=ACT[a.t];if(h)h(a,P,pid);
+  checkProgress();commit();
+}
+function checkProgress(){
+  if(!R||!isHost)return;
+  if(R.phase==='map'){const act=active();if(act.length&&act.every(p=>R.votes[p]))resolveVote()}
+  else if(R.phase==='room'){if(active().every(p=>R.players[p].done)){R.phase='map';R.votes={};R.order.forEach(p=>R.players[p].screen=null)}}
+  else if(R.phase==='combat'){const c=R.combat;if(c&&!c.busy&&!c.won){const hs=Object.keys(c.heroes).filter(p=>!c.heroes[p].down&&isOnline(p));if(hs.length&&hs.every(p=>c.heroes[p].ended))enemyPhase()}}
+}
+
+/* Azioni dei giocatori (eseguite dall'host) */
+const ACT={
+  cls:(a,P)=>{if(R.phase==='lobby'&&CLASSES[a.cls])P.cls=a.cls},
+  ready:(a,P)=>{if(R.phase==='lobby')P.ready=!P.ready},
+  start:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host)startRunRoom(a.lvl|0,a.seed)},
+  kick:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host&&a.p!==R.host){delete R.players[a.p];R.order=R.order.filter(x=>x!==a.p)}},
+  again:(a,P,pid)=>{if(R.phase==='end'&&pid===R.host)toLobby()},
+  vote:(a,P,pid)=>{if(R.phase==='map'&&availNodes().some(n=>n.y===a.y&&n.x===a.x))R.votes[pid]=a.y+','+a.x},
+  play:a=>playCard(a.uid,a.j),
+  potion:a=>usePotion(a.i,a.j),
+  drink:(a,P)=>{if(R.phase!=='combat'&&P.potions[a.i]==='cura'){P.potions.splice(a.i,1);H(15)}},
+  end:()=>endHeroTurn(),
+  takeGold:(a,P)=>{const r=P.reward;if(P.screen==='reward'&&r){P.gold+=r.gold;r.gold=0}},
+  takePotion:(a,P)=>{const r=P.reward;if(P.screen==='reward'&&r&&r.potion&&P.potions.length<3){P.potions.push(r.potion);r.potion=null}},
+  takeRelic:(a,P)=>{const r=P.reward;if(P.screen==='reward'&&r&&r.relic){gainRelic(r.relic);r.relic=null}},
+  takeCard:(a,P)=>{const r=P.reward;if(P.screen==='reward'&&r&&r.cards&&r.cards[a.k]){addCard(r.cards[a.k]);r.cards=null}},
+  skipCards:(a,P)=>{if(P.reward)P.reward.cards=null},
+  buy:(a,P)=>{if(P.screen==='shop')buy(a.kind,a.k)},
+  shopRemove:(a,P)=>{if(P.screen!=='shop'||P.shop.removeUsed||P.gold<removePrice()||!P.deck[a.i])return;P.gold-=removePrice();P.removes++;P.shop.removeUsed=true;P.deck.splice(a.i,1)},
+  restHeal:(a,P)=>{if(P.screen!=='rest')return;H(Math.floor(P.max*.3));P.done=true;P.screen='wait'},
+  restForge:(a,P)=>{if(P.screen!=='rest'||!P.deck[a.i]||!canUp(P.deck[a.i]))return;P.deck[a.i].up=true;P.done=true;P.screen='wait'},
+  ev:(a,P)=>{if(P.screen!=='event'||!P.event||P.event.result)return;const ev=EVENTS.find(e=>e.id===P.event.id);const o=ev&&ev.opts[a.k];
+    if(!o||(o.req&&!o.req())||(o.solo&&!solo))return;const r=o.f(a.i);if(r!=null)P.event.result=r},
+  done:(a,P)=>{if(R.phase==='room'){P.done=true;P.screen='wait'}},
+};
 
 /* ================= MAPPA ================= */
 function genMap(r){
@@ -668,175 +770,198 @@ function genMap(r){
   return map;
 }
 function availNodes(){
-  if(!run.pos)return run.map[0].filter(Boolean);
-  const n=run.map[run.pos.y][run.pos.x];return n.next.map(x=>run.map[run.pos.y+1][x]);
+  if(!R.map)return[];
+  if(!R.pos)return R.map[0].filter(Boolean);
+  const n=R.map[R.pos.y][R.pos.x];return n.next.map(x=>R.map[R.pos.y+1][x]);
+}
+function resolveVote(){
+  const tally={};active().forEach(p=>{const v=R.votes[p];if(v)tally[v]=(tally[v]||0)+1});
+  const max=Math.max(...Object.values(tally));const best=Object.keys(tally).filter(k=>tally[k]===max);
+  const [y,x]=rng.pick(best).split(',').map(Number);R.votes={};enterNode(y,x);
 }
 
-/* ================= AVVIO PARTITA ================= */
-function startRun(){
-  let seed=(($('#seed')&&$('#seed').value)||'').trim().toUpperCase()||newSeed();
-  const cl=CLASSES[pickCls];
-  const mr=new RNG(hashStr(seed+'#map'));
-  rng=new RNG(hashStr(seed+'#'+pickCls));
-  run={seed,cls:pickCls,hp:cl.hp,max:cl.hp,gold:99,deck:cl.deck.map(id=>({id,up:false})),relics:[cl.relic],potions:['cura'],
-    map:genMap(mr),pos:null,path:[],floor:0,kills:0,seenEv:[],removes:0,piumaUsed:false,lvl:Math.min(pickLvl,getUnlocked())};
-  go('map');
+/* ================= PARTITA ================= */
+function newLobby(code){return{code,v:0,host:ME,phase:'lobby',order:[ME],players:{[ME]:{pid:ME,name:myName||'Eroe',cls:pickCls,ready:true}},lvl:0,seed:'',rs:0,votes:{}}}
+function initPlayer(P){
+  const cl=CLASSES[P.cls];
+  Object.assign(P,{hp:cl.hp,max:cl.hp,gold:99,deck:cl.deck.map(id=>({id,up:false})),relics:[cl.relic],potions:['cura'],kills:0,removes:0,piumaUsed:false,
+    screen:null,done:true,reward:null,shop:null,event:null,treasure:null});
 }
-function go(s){screen=s;if(s==='map')save();render()}
-function save(){try{localStorage.setItem(SK,JSON.stringify({run,rs:rng.s}))}catch(e){}}
-function clearSave(){try{localStorage.removeItem(SK)}catch(e){}}
-function loadSave(){try{const j=localStorage.getItem(SK);return j?JSON.parse(j):null}catch(e){return null}}
-function continueRun(){const s=loadSave();if(!s)return;run=s.run;rng=new RNG(0);rng.s=s.rs;go('map')}
-
-function goNode(y,x){
-  if(!availNodes().some(n=>n.y===y&&n.x===x))return;
-  run.pos={y,x};run.path.push([y,x]);run.floor=y+1;
-  const t=run.map[y][x].type;
-  if(t==='combat')startCombat(rng.pick(y<3?EASY:HARD),'combat');
-  else if(t==='elite')startCombat(rng.pick(ELITES),'elite');
-  else if(t==='boss')startCombat(['drago'],'boss');
-  else if(t==='event'){let pool=EVENTS.filter(e=>!run.seenEv.includes(e.id));if(!pool.length)pool=EVENTS;const ev=rng.pick(pool);run.seenEv.push(ev.id);run.event={id:ev.id,result:null};go('event')}
-  else if(t==='rest')go('rest');
-  else if(t==='shop'){genShop();go('shop')}
-  else if(t==='treasure'){const r=randomRelic();const gold=rng.int(25,50);run.gold+=gold;if(r)gainRelic(r,true);run.treasure={relic:r,gold};go('treasure')}
+function startRunRoom(lvl,seed){
+  R.order=R.order.filter(p=>isOnline(p));Object.keys(R.players).forEach(p=>{if(!R.order.includes(p))delete R.players[p]});
+  seed=String(seed||'').trim().toUpperCase().slice(0,12)||newSeed();
+  Object.assign(R,{seed,lvl:Math.max(0,Math.min(MAXLVL,lvl)),map:genMap(new RNG(hashStr(seed+'#map'))),pos:null,path:[],floor:0,votes:{},seenEv:[],combat:null,win:null,phase:'map'});
+  rng=new RNG(hashStr(seed+'#'+R.order.map(p=>R.players[p].cls).join('')));
+  R.order.forEach(p=>initPlayer(R.players[p]));
 }
+function toLobby(){
+  R.order.forEach(p=>{const P=R.players[p];R.players[p]={pid:p,name:P.name,cls:P.cls,ready:p===R.host}});
+  Object.assign(R,{phase:'lobby',combat:null,map:null,win:null,votes:{}});
+}
+function enterNode(y,x){
+  R.pos={y,x};R.path.push([y,x]);R.floor=y+1;const t=R.map[y][x].type;
+  if(t==='combat')return startCombat(rng.pick(y<3?EASY:HARD),'combat');
+  if(t==='elite')return startCombat(rng.pick(ELITES),'elite');
+  if(t==='boss')return startCombat(['drago'],'boss');
+  const ids=active();let evId=null;
+  if(t==='event'){let pool=EVENTS.filter(e=>!R.seenEv.includes(e.id));if(!pool.length)pool=EVENTS;evId=rng.pick(pool).id;R.seenEv.push(evId)}
+  R.phase='room';
+  R.order.forEach(pid=>{const P=R.players[pid];P.screen=null;P.done=!ids.includes(pid);if(P.done)return;ctx(pid);
+    if(t==='event'){P.event={id:evId,result:null};P.screen='event'}
+    else if(t==='rest')P.screen='rest';
+    else if(t==='shop'){genShop();P.screen='shop'}
+    else if(t==='treasure'){const r=randomRelic();const gold=rng.int(25,50);P.gold+=gold;if(r)gainRelic(r);P.treasure={relic:r,gold};P.screen='treasure'}
+  });
+}
+function endRun(win){R.phase='end';R.win=win;R.combat=null;g=null}
 
 /* ================= COMBATTIMENTO ================= */
 function startCombat(ids,kind){
-  const L=run.lvl||0;
-  g={kind,enemies:ids.map(id=>{const d=ENEMIES[id];const strong=!!(d.elite||d.boss);const hp=Math.round(rng.int(d.hp[0],d.hp[1])*(1+.1*L+(strong?.05*L:0)));return{id,n:d.n,ic:d.ic,hp,max:hp,blk:d.blk||0,st:{},t:0,dead:false,boss:!!d.boss,bonus:dmgBonus(L,strong)}}),
-    hero:{blk:0,st:{},pw:{}},draw:rng.shuffle(run.deck.map(c=>({...c,uid:uid++}))),hand:[],disc:[],exh:[],energy:0,turn:0,sel:null,busy:false,hit:new Set()};
-  rollIntents();screen='combat';startTurn();
+  const L=R.lvl||0,party=active(),n=Math.max(1,party.length);
+  ids=[...ids];if(n>=5&&kind==='combat')ids.push(rng.pick(['goblin','ratto','lupo']));
+  const hpM=1+.7*(n-1),dM=1+.1*(n-1);
+  R.combat={kind,n,turn:0,busy:false,won:false,heroes:{},
+    enemies:ids.map(id=>{const d=ENEMIES[id];const strong=!!(d.elite||d.boss);const hp=Math.round(rng.int(d.hp[0],d.hp[1])*(1+.1*L+(strong?.05*L:0))*hpM);
+      return{id,n:d.n,hp,max:hp,blk:d.blk?Math.round(d.blk*hpM):0,st:{},t:0,dead:false,boss:!!d.boss,bonus:dmgBonus(L,strong),dm:dM}})};
+  party.forEach(pid=>{const P=R.players[pid];R.combat.heroes[pid]={blk:0,st:{},pw:{},draw:rng.shuffle(P.deck.map(c=>({...c,uid:uid++}))),hand:[],disc:[],exh:[],energy:0,ended:false,down:false}});
+  R.phase='combat';R.order.forEach(p=>{R.players[p].screen=null;R.players[p].done=true});
+  g=R.combat;rollIntents();startTurn();
 }
-function rollIntents(){alive().forEach(e=>{e.intent=ENEMIES[e.id].ai(e,rng);e.t++})}
+function targetable(){const c=R.combat;let t=Object.keys(c.heroes).filter(p=>!c.heroes[p].down&&isOnline(p));if(!t.length)t=Object.keys(c.heroes).filter(p=>!c.heroes[p].down);return t}
+function rollIntents(){R.combat.enemies.forEach(e=>{if(e.hp<=0)return;e.intent=ENEMIES[e.id].ai(e,rng);e.t++;if(e.intent.d||e.intent.deb){const t=targetable();e.intent.tg=t.length?rng.pick(t):null}})}
 function startTurn(){
-  g.turn++;g.hero.blk=0;delete g.hero.st.spine;g.hit=new Set();
-  let en=3,dr=5;const pw=g.hero.pw;
-  if(g.turn===1){
+  const c=R.combat;c.turn++;
+  Object.keys(c.heroes).forEach(pid=>{const h=c.heroes[pid];if(h.down)return;ctx(pid);heroTurnStart(h,c.turn)});
+  checkEnd();
+}
+function heroTurnStart(h,turn){
+  h.ended=false;h.blk=0;delete h.st.spine;g.hit=new Set();
+  let en=3,dr=5;const pw=h.pw;
+  if(turn===1){
     if(has('lanterna'))en++;if(has('grimorio'))dr+=2;
-    if(has('pietra'))S(g.hero,'str',1);if(has('mantello'))S(g.hero,'dex',1);
-    if(has('ancora'))g.hero.blk+=10;if(has('fiala'))SA('poison',2);if(has('corno'))SA('vuln',1);
+    if(has('pietra'))S(h,'str',1);if(has('mantello'))S(h,'dex',1);
+    if(has('ancora'))h.blk+=10;if(has('fiala'))SA('poison',2);if(has('corno'))SA('vuln',1);
   }
-  if(has('dado')&&g.turn%3===0)en++;
+  if(has('dado')&&turn%3===0)en++;
   if(has('simbolo'))H(1);
-  if(pw.furia)S(g.hero,'str',pw.furia);
+  if(pw.furia)S(h,'str',pw.furia);
   if(pw.arcimago)en+=pw.arcimago;
   if(pw.rapide)dr+=pw.rapide;
-  if(pw.aura){g.hero.blk+=pw.aura;fx('hero','+'+pw.aura,'blk')}
+  if(pw.aura){h.blk+=pw.aura;fx('hero','+'+pw.aura,'blk')}
   if(pw.inno)alive().forEach(e=>hurtEnemy(e,pw.inno));
-  g.energy=en;D(dr);render();checkEnd();
+  h.energy=en;D(dr);
 }
-function calcDmg(base,src,tgt){let d=base+(src.st.str||0);if(src.st.weak)d*=.75;if(tgt.st.vuln)d*=1.5;return Math.max(0,Math.floor(d))}
-function eid(e){return 'e'+g.enemies.indexOf(e)}
+function calcDmg(base,src,tgt){let d=base+(src.st.str||0);if(src.st.weak)d*=.75;if(tgt&&tgt.st&&tgt.st.vuln)d*=1.5;return Math.max(0,Math.floor(d))}
+const enemyBase=(e,it)=>Math.round((it.d+(e.bonus||0))*(e.dm||1));
+function eid(e){return 'e'+R.combat.enemies.indexOf(e)}
 function hurtEnemy(e,d){
   if(e.hp<=0)return;const b=Math.min(e.blk,d);e.blk-=b;const r=d-b;e.hp-=r;
   fx(eid(e),r>0?'-'+r:'Parato',r>0?'dmg':'blk');
-  if(e.hp<=0){e.hp=0;if(!e.dead){e.dead=true;run.kills++;if(has('zanna'))H(3)}}
+  if(e.hp<=0){e.hp=0;if(!e.dead){e.dead=true;if(run){run.kills++;if(has('zanna'))H(3)}}}
+}
+function heroDown(){
+  if(run.hp>0)return;
+  if(has('piuma')&&!run.piumaUsed){run.piumaUsed=true;run.relics=run.relics.filter(r=>r!=='piuma');run.hp=Math.floor(run.max*.3);fx('hero','Rinato!','heal');return}
+  run.hp=0;if(g&&g.hero){g.hero.down=true;g.hero.disc.push(...g.hero.hand);g.hero.hand=[];fx('hero','A terra!','dmg')}
 }
 function hurtHero(d){
-  const b=Math.min(g.hero.blk,d);g.hero.blk-=b;const r=d-b;
+  const h=g.hero;const b=Math.min(h.blk,d);h.blk-=b;const r=d-b;
   if(r>0){run.hp-=r;fx('hero','-'+r,'dmg')}else fx('hero','Parato','blk');
-  if(run.hp<=0)phoenix();
+  heroDown();
 }
-function phoenix(){if(has('piuma')&&!run.piumaUsed){run.piumaUsed=true;run.relics=run.relics.filter(r=>r!=='piuma');run.hp=Math.floor(run.max*.3);toast('La Piuma di Fenice brucia: torni in vita!')}}
 /* Effetti usati dalle carte */
 function A(t,n,h=1){for(let i=0;i<h;i++){if(!t||t.hp<=0)break;hurtEnemy(t,calcDmg(n,g.hero,t));g.hit.add(t)}}
 function AA(n){alive().forEach(e=>{hurtEnemy(e,calcDmg(n,g.hero,e));g.hit.add(e)})}
 function AR(n,h){for(let i=0;i<h;i++){const a=alive();if(!a.length)break;const e=rng.pick(a);hurtEnemy(e,calcDmg(n,g.hero,e));g.hit.add(e)}}
 function B(n){const v=Math.max(0,n+(g.hero.st.dex||0));g.hero.blk+=v;fx('hero','+'+v,'blk')}
-function S(t,k,n){if(!t||(t!==g.hero&&t.hp<=0))return;t.st[k]=(t.st[k]||0)+n}
+function S(t,k,n){if(!t||(t.hp!==undefined&&t.hp<=0))return;t.st[k]=(t.st[k]||0)+n}
 function SA(k,n){alive().forEach(e=>S(e,k,n))}
-function D(n){for(let i=0;i<n;i++){if(g.hand.length>=10)break;if(!g.draw.length){if(!g.disc.length)break;g.draw=rng.shuffle(g.disc);g.disc=[]}g.hand.push(g.draw.pop())}}
-function E(n){g.energy+=n}
-function H(n){const b=run.hp;run.hp=Math.min(run.max,run.hp+n);const d=run.hp-b;if(d>0&&g)fx('hero','+'+d,'heal')}
-function L(n){run.hp-=n;fx('hero','-'+n,'dmg');if(run.hp<=0)phoenix()}
+function D(n){const h=g.hero;for(let i=0;i<n;i++){if(h.hand.length>=10)break;if(!h.draw.length){if(!h.disc.length)break;h.draw=rng.shuffle(h.disc);h.disc=[]}h.hand.push(h.draw.pop())}}
+function E(n){g.hero.energy+=n}
+function H(n){if(!run)return;const b=run.hp;run.hp=Math.min(run.max,run.hp+n);const d=run.hp-b;if(d>0&&g&&g.hero)fx('hero','+'+d,'heal')}
+function L(n){run.hp-=n;fx('hero','-'+n,'dmg');heroDown()}
 function P(k,n){g.hero.pw[k]=(g.hero.pw[k]||0)+n}
 
-function clickCard(i){
-  if(!g||g.busy)return;const c=g.hand[i];const d=CARDS[c.id];
-  if(costOf(c)>g.energy){toast('Energia insufficiente');return}
-  if(d.tg){const a=alive();if(a.length===1)play(i,g.enemies.indexOf(a[0]));
-    else{g.sel=(g.sel&&g.sel.k==='c'&&g.sel.i===i)?null:{k:'c',i};render()}}
-  else play(i,null);
+function playCard(u,j){
+  const c=R.combat,h=g&&g.hero;if(!c||c.busy||c.won||!h||h.ended||h.down)return;
+  const i=h.hand.findIndex(x=>x.uid===u);if(i<0)return;const card=h.hand[i];const d=CARDS[card.id];const cost=costOf(card);if(cost>h.energy)return;
+  let t=null;if(d.tg){t=c.enemies[j];if(!t||t.hp<=0){t=alive()[0];if(!t)return}}
+  h.hand.splice(i,1);h.energy-=cost;g.hit=new Set();
+  d.f(vals(card),t);
+  if(d.t==='A'&&h.pw.intrise)g.hit.forEach(e=>S(e,'poison',h.pw.intrise));
+  if(d.t==='S'&&h.pw.arcano)alive().forEach(e=>hurtEnemy(e,h.pw.arcano));
+  if(d.t!=='P')(d.ex?h.exh:h.disc).push(card);
+  checkEnd();
 }
-function clickEnemy(j){if(!g||!g.sel||g.enemies[j].hp<=0)return;if(g.sel.k==='c')play(g.sel.i,j);else usePotion(g.sel.i,j)}
-function play(i,j){
-  const c=g.hand[i];const d=CARDS[c.id];const cost=costOf(c);if(cost>g.energy)return;
-  g.hand.splice(i,1);g.energy-=cost;g.sel=null;g.hit=new Set();
-  d.f(vals(c),j!=null?g.enemies[j]:null);
-  if(d.t==='A'&&g.hero.pw.intrise)g.hit.forEach(e=>S(e,'poison',g.hero.pw.intrise));
-  if(d.t==='S'&&g.hero.pw.arcano)alive().forEach(e=>hurtEnemy(e,g.hero.pw.arcano));
-  if(d.t!=='P')(d.ex?g.exh:g.disc).push(c);
-  render();checkEnd();
+function usePotion(i,j){
+  const c=R.combat,h=g&&g.hero;if(!c||c.busy||c.won||!h||h.down)return;
+  const id=run.potions[i];if(!id)return;const p=POTIONS[id];
+  let t=null;if(p.tg){t=c.enemies[j];if(!t||t.hp<=0){t=alive()[0];if(!t)return}}
+  run.potions.splice(i,1);g.hit=new Set();p.f(t);checkEnd();
 }
-function clickPotion(i){
-  const id=run.potions[i];const p=POTIONS[id];
-  if(screen!=='combat'||!g){if(id==='cura'){run.potions.splice(i,1);H(15);toast('Recuperi 15 PV.');render()}else toast(p.n+': '+p.d+' (solo in combattimento)');return}
-  if(g.busy)return;
-  if(p.tg){const a=alive();if(a.length===1)usePotion(i,g.enemies.indexOf(a[0]));
-    else{g.sel=(g.sel&&g.sel.k==='p'&&g.sel.i===i)?null:{k:'p',i};render();if(g.sel)toast('Scegli un bersaglio')}}
-  else usePotion(i,null);
+function endHeroTurn(){
+  const h=g&&g.hero;if(!h||h.ended||h.down||R.combat.busy)return;
+  h.disc.push(...h.hand);h.hand=[];
+  if(has('orbe')&&h.blk===0){h.blk=6;fx('hero','+6','blk')}
+  decay(h);h.ended=true;
 }
-function usePotion(i,j){const id=run.potions.splice(i,1)[0];g.sel=null;g.hit=new Set();POTIONS[id].f(j!=null?g.enemies[j]:null);render();checkEnd()}
-
-async function endTurn(){
-  if(!g||g.busy)return;g.busy=true;g.sel=null;
-  g.disc.push(...g.hand);g.hand=[];
-  if(has('orbe')&&g.hero.blk===0){g.hero.blk=6;fx('hero','+6','blk')}
-  decay(g.hero);render();await wait(250);
-  for(const e of g.enemies){
-    if(e.hp<=0)continue;e.blk=0;
-    if(e.st.poison){const p=e.st.poison;e.hp-=p;fx(eid(e),'-'+p,'psn');e.st.poison--;if(e.hp<=0){e.hp=0;e.dead=true;run.kills++;if(has('zanna'))H(3);render();await wait(250);continue}}
-    doIntent(e);render();await wait(420);
-    if(run.hp<=0)break;
+async function enemyPhase(){
+  const c=R.combat;if(!c||c.busy)return;c.busy=true;
+  await wait(10);commit();await wait(300);
+  for(const e of c.enemies){
+    if(R.combat!==c)return;if(e.hp<=0)continue;e.blk=0;
+    if(e.st.poison){ctx(null);const p=e.st.poison;e.hp-=p;fx(eid(e),'-'+p,'psn');e.st.poison--;
+      if(e.hp<=0){e.hp=0;e.dead=true;commit();await wait(250);continue}}
+    doIntent(e);commit();await wait(450);
+    if(Object.values(c.heroes).every(h=>h.down))break;
   }
-  g.enemies.forEach(decay);g.busy=false;
-  if(checkEnd())return;
-  rollIntents();startTurn();
+  if(R.combat!==c)return;
+  c.enemies.forEach(decay);c.busy=false;
+  if(!checkEnd()){rollIntents();startTurn()}
+  checkProgress();commit();
 }
 function decay(t){['vuln','weak'].forEach(k=>{if(t.st[k]){t.st[k]--;if(!t.st[k])delete t.st[k]}});if(t.st.poison===0)delete t.st.poison}
 function doIntent(e){
-  const it=e.intent;if(!it)return;
-  if(it.b){e.blk+=it.b;fx(eid(e),'+'+it.b,'blk')}
+  const it=e.intent,c=R.combat;if(!it)return;
+  if(it.b){e.blk+=Math.round(it.b*(e.dm||1));fx(eid(e),'+'+Math.round(it.b*(e.dm||1)),'blk')}
   if(it.s)(it.all?alive():[e]).forEach(x=>x.st.str=(x.st.str||0)+it.s);
-  if(it.heal){const b=e.hp;e.hp=Math.min(e.max,e.hp+it.heal);fx(eid(e),'+'+(e.hp-b),'heal')}
-  if(it.d){for(let k=0;k<(it.x||1);k++){hurtHero(calcDmg(it.d+(e.bonus||0),e,g.hero));if(g.hero.st.spine)hurtEnemy(e,g.hero.st.spine);if(run.hp<=0||e.hp<=0)break}}
-  if(it.deb&&run.hp>0)g.hero.st[it.deb]=(g.hero.st[it.deb]||0)+it.dn;
+  if(it.heal){const b=e.hp;e.hp=Math.min(e.max,e.hp+Math.round(it.heal*(1+.7*(c.n-1))));fx(eid(e),'+'+(e.hp-b),'heal')}
+  if(it.d||it.deb){
+    let tg=it.tg;if(!tg||!c.heroes[tg]||c.heroes[tg].down){const t=targetable();if(!t.length)return;tg=rng.pick(t)}
+    ctx(tg);
+    if(it.d)for(let k=0;k<(it.x||1);k++){hurtHero(calcDmg(enemyBase(e,it),e,g.hero));if(g.hero.st.spine)hurtEnemy(e,g.hero.st.spine);if(g.hero.down||e.hp<=0)break}
+    if(it.deb&&!g.hero.down)g.hero.st[it.deb]=(g.hero.st[it.deb]||0)+it.dn;
+  }
 }
 function checkEnd(){
-  if(screen!=='combat'||!g)return false;
-  if(run.hp<=0){endRun(false);return true}
-  if(!alive().length){setTimeout(winCombat,450);g.busy=true;return true}
+  const c=R.combat;if(R.phase!=='combat'||!c||c.won)return true;
+  if(Object.values(c.heroes).every(h=>h.down)){endRun(false);return true}
+  if(!alive().length){c.won=true;c.busy=true;setTimeout(()=>{if(R&&R.combat===c&&isHost){winCombat();checkProgress();commit()}},550);return true}
   return false;
 }
 function winCombat(){
-  if(!g)return;const kind=g.kind;
-  if(has('elmo'))H(6);
-  g=null;
+  const c=R.combat,kind=c.kind,pids=Object.keys(c.heroes);
+  pids.forEach(pid=>{ctx(pid);if(c.heroes[pid].down)run.hp=Math.max(1,Math.floor(run.max*.25));else if(has('elmo'))H(6)});
+  R.combat=null;g=null;
   if(kind==='boss'){endRun(true);return}
-  let gold=kind==='elite'?rng.int(25,35):rng.int(10,20);gold=Math.round(gold*(1+.1*(run.lvl||0)));if(has('sacchetto'))gold=Math.round(gold*1.25);
-  run.reward={title:kind==='elite'?'Élite sconfitta!':'Vittoria!',gold,cards:rollCards(3,kind==='elite'),
-    potion:rng.next()<(kind==='elite'?.6:.4)?rng.pick(Object.keys(POTIONS)):null,relic:kind==='elite'?randomRelic():null};
-  go('reward');
+  R.phase='room';
+  R.order.forEach(pid=>{const P=R.players[pid];if(!pids.includes(pid)||!isOnline(pid)){P.done=true;P.screen=null;return}
+    ctx(pid);let gold=kind==='elite'?rng.int(25,35):rng.int(10,20);gold=Math.round(gold*(1+.1*(R.lvl||0)));if(has('sacchetto'))gold=Math.round(gold*1.25);
+    P.reward={title:kind==='elite'?'Élite sconfitta!':'Vittoria!',gold,cards:rollCards(3,kind==='elite'),
+      potion:rng.next()<(kind==='elite'?.6:.4)?rng.pick(Object.keys(POTIONS)):null,relic:kind==='elite'?randomRelic():null};
+    P.screen='reward';P.done=false});
 }
-function endRun(win){run.win=win;run.unlocked=null;const L=run.lvl||0;if(win&&L<MAXLVL&&getUnlocked()<=L){setUnlocked(L+1);run.unlocked=L+1;pickLvl=L+1}clearSave();g=null;go('end')}
 
 /* ================= RICOMPENSE / NEGOZIO / EVENTI ================= */
 function rollCards(n,elite){
   const pool=Object.keys(CARDS).filter(k=>CARDS[k].cl===run.cls&&CARDS[k].r!=='B');const out=[];
-  for(let i=0;i<n;i++){const p=rng.next()-.02*(run.lvl||0);const rar=p<(elite?.12:.05)?'R':p<(elite?.5:.37)?'U':'C';
+  for(let i=0;i<n;i++){const p=rng.next()-.02*(R.lvl||0);const rar=p<(elite?.12:.05)?'R':p<(elite?.5:.37)?'U':'C';
     let opts=pool.filter(k=>CARDS[k].r===rar&&!out.includes(k));if(!opts.length)opts=pool.filter(k=>!out.includes(k));out.push(rng.pick(opts))}
   return out;
 }
 function randomRelic(){const p=RELIC_POOL.filter(k=>!run.relics.includes(k)&&!(k==='piuma'&&run.piumaUsed));return p.length?rng.pick(p):null}
-function gainRelic(id,silent){run.relics.push(id);if(id==='cuore'){run.max+=8;run.hp+=8}if(!silent)toast('Reliquia ottenuta: '+RELICS[id].n)}
+function gainRelic(id){run.relics.push(id);if(id==='cuore'){run.max+=8;run.hp+=8}}
 function addCard(id){run.deck.push({id,up:false})}
-function takeGold(){run.gold+=run.reward.gold;run.reward.gold=0;render()}
-function takePotion(){if(run.potions.length>=3){toast('Hai già 3 pozioni.');return}run.potions.push(run.reward.potion);run.reward.potion=null;render()}
-function takeRelic(){gainRelic(run.reward.relic);run.reward.relic=null;render()}
-function takeCard(k){addCard(run.reward.cards[k]);toast(CARDS[run.reward.cards[k]].n+' aggiunta al mazzo');run.reward.cards=null;render()}
-function skipCards(){run.reward.cards=null;render()}
-
 function genShop(){
   const pool=Object.keys(CARDS).filter(k=>CARDS[k].cl===run.cls&&CARDS[k].r!=='B');
   const pickR=(r,n,ex)=>rng.shuffle(pool.filter(k=>CARDS[k].r===r&&!ex.includes(k))).slice(0,n);
@@ -848,26 +973,16 @@ function genShop(){
     potions:rng.shuffle(Object.keys(POTIONS)).slice(0,2).map(id=>({id,price:rng.int(45,55),sold:false})),removeUsed:false};
 }
 function buy(kind,k){
-  const it=run.shop[kind][k];if(it.sold)return;if(run.gold<it.price){toast('Oro insufficiente');return}
-  if(kind==='potions'&&run.potions.length>=3){toast('Hai già 3 pozioni.');return}
+  const it=run.shop[kind]&&run.shop[kind][k];if(!it||it.sold||run.gold<it.price)return;
+  if(kind==='potions'&&run.potions.length>=3)return;
   run.gold-=it.price;it.sold=true;
   if(kind==='cards')addCard(it.id);else if(kind==='relics')gainRelic(it.id);else run.potions.push(it.id);
-  render();
 }
 function removePrice(){return 75+run.removes*25}
-function shopRemove(){
-  if(run.shop.removeUsed)return;if(run.gold<removePrice()){toast('Oro insufficiente');return}
-  openPicker(run.deck.map((c,i)=>i),'Scegli una carta da rimuovere',i=>{run.gold-=removePrice();run.removes++;run.shop.removeUsed=true;const c=run.deck.splice(i,1)[0];toast(CARDS[c.id].n+' rimossa');});
-}
-function restHeal(){const h=Math.floor(run.max*.3);H(h);toast('Recuperi '+h+' PV.');go('map')}
-function restForge(){
-  const idx=run.deck.map((c,i)=>i).filter(i=>canUp(run.deck[i]));
-  openPicker(idx,'Scegli una carta da potenziare',i=>{run.deck[i].up=true;toast(CARDS[run.deck[i].id].n+' potenziata!');go('map')});
-}
 
 const EVENTS=[
  {id:'altare',n:'Altare Dimenticato',ic:'🕯️',txt:'In una cappella in rovina, un altare di pietra nera pulsa di luce rossa. Una voce sussurra: «Un tributo di sangue, e avrai un dono.»',
-  opts:[{t:'Offri il tuo sangue',s:'Perdi 8 PV. Ottieni una reliquia casuale.',f:()=>{run.hp=Math.max(1,run.hp-8);const r=randomRelic();if(!r)return 'L\'altare tace. Non ha più nulla da darti.';gainRelic(r,true);return `Il dolore è breve. Sull'altare appare: ${RELICS[r].ic} ${RELICS[r].n}.`}},
+  opts:[{t:'Offri il tuo sangue',s:'Perdi 8 PV. Ottieni una reliquia casuale.',f:()=>{run.hp=Math.max(1,run.hp-8);const r=randomRelic();if(!r)return 'L\'altare tace. Non ha più nulla da darti.';gainRelic(r);return `Il dolore è breve. Sull'altare appare: ${RELICS[r].ic} ${RELICS[r].n}.`}},
         {t:'Allontanati',s:'Non succede niente.',f:()=>'Lasci l\'altare alle sue ombre.'}]},
  {id:'fontana',n:'Fontana Incantata',ic:'⛲',txt:'Acqua limpida sgorga dalla bocca di una statua di ninfa. Sul fondo della vasca luccicano monete antiche.',
   opts:[{t:'Bevi',s:'Recuperi il 30% dei PV massimi.',f:()=>{const h=Math.floor(run.max*.3);H(h);return `Ti senti rinvigorito. Recuperi ${h} PV.`}},
@@ -876,7 +991,7 @@ const EVENTS=[
   opts:[{t:'Gioca a dadi',s:'Paghi 30 oro. Metà delle volte ne vinci 75.',req:()=>run.gold>=30,f:()=>{run.gold-=30;if(rng.next()<.5){run.gold+=75;return 'Doppio sei! I nani brontolano e pagano: +75 oro.'}return 'Hai perso. I nani ridono e brindano alla tua salute.'}},
         {t:'Bevi una birra e riposa',s:'Recuperi 8 PV.',f:()=>{H(8);return 'La birra nanica è forte, ma ti scalda le ossa.'}}]},
  {id:'biblioteca',n:'Biblioteca Abbandonata',ic:'📚',txt:'Scaffali crollati e pergamene ovunque. Alcune tecniche di combattimento sono ancora leggibili.',
-  opts:[{t:'Studia le pergamene',s:'Scegli una carta tra 3.',f:()=>{run.reward={title:'Pergamene antiche',gold:0,cards:rollCards(3,false),potion:null,relic:null};go('reward');return null}},
+  opts:[{t:'Studia le pergamene',s:'Scegli una carta tra 3.',f:()=>{run.reward={title:'Pergamene antiche',gold:0,cards:rollCards(3,false),potion:null,relic:null};run.screen='reward';return null}},
         {t:'Dormi tra i libri',s:'Recuperi 12 PV.',f:()=>{H(12);return 'Un sonno profondo e senza sogni.'}}]},
  {id:'statua',n:'Statua dell\'Eroe Antico',ic:'🗿',txt:'La statua di un eroe dimenticato stringe una spada spezzata. Toccarla ti riempie di visioni di battaglie passate, e di dolore.',
   opts:[{t:'Tocca la statua',s:'Potenzi 2 carte casuali. Perdi 6 PV massimi.',f:()=>{const idx=rng.shuffle(run.deck.map((c,i)=>i).filter(i=>canUp(run.deck[i]))).slice(0,2);idx.forEach(i=>run.deck[i].up=true);run.max-=6;run.hp=Math.min(run.hp,run.max);
@@ -884,13 +999,130 @@ const EVENTS=[
         {t:'Rendi omaggio e prosegui',s:'Non succede niente.',f:()=>'Chini il capo davanti all\'eroe e riprendi il cammino.'}]},
  {id:'goblin',n:'Mercante Goblin',spr:'goblin',txt:'Un goblin con un carretto cigolante ti sbarra la strada. «Pozione? Pozione buona! Solo 25 monete!» Dietro di lui, un altro goblin ti osserva.',
   opts:[{t:'Compra una pozione',s:'Paghi 25 oro, ottieni una pozione casuale.',req:()=>run.gold>=25&&run.potions.length<3,f:()=>{run.gold-=25;const p=rng.pick(Object.keys(POTIONS));run.potions.push(p);return `Ottieni: ${POTIONS[p].n}. Il goblin morde la moneta, soddisfatto.`}},
-        {t:'Derubali',s:'Combatti contro due goblin.',f:()=>{startCombat(['goblin','goblin'],'combat');render();return null}},
+        {t:'Derubali',s:'Combatti contro due goblin.',solo:1,f:()=>{startCombat(['goblin','goblin'],'combat');return null}},
         {t:'Ignorali',s:'Non succede niente.',f:()=>'Li superi senza dire una parola.'}]},
  {id:'pozzo',n:'Pozzo dei Desideri',ic:'🪙',txt:'Un vecchio pozzo coperto di muschio. Si dice che chi getta una moneta possa dimenticare un brutto ricordo.',
-  opts:[{t:'Getta 20 monete',s:'Rimuovi una carta dal mazzo.',req:()=>run.gold>=20&&run.deck.length>1,f:()=>{openPicker(run.deck.map((c,i)=>i),'Scegli una carta da dimenticare',i=>{run.gold-=20;const c=run.deck.splice(i,1)[0];run.event.result=`${CARDS[c.id].n} svanisce dalla tua memoria.`;render()},true);return null}},
+  opts:[{t:'Getta 20 monete',s:'Rimuovi una carta dal mazzo.',pick:1,req:()=>run.gold>=20&&run.deck.length>1,f:i=>{if(!run.deck[i]||run.gold<20)return null;run.gold-=20;const c=run.deck.splice(i,1)[0];return `${CARDS[c.id].n} svanisce dalla tua memoria.`}},
         {t:'Prosegui',s:'Non succede niente.',f:()=>'Il pozzo resta in silenzio alle tue spalle.'}]},
 ];
-function chooseEv(k){const ev=EVENTS.find(e=>e.id===run.event.id);const o=ev.opts[k];if(o.req&&!o.req())return;const r=o.f();if(r!==null){run.event.result=r;render()}}
+
+/* ================= RETE (Supabase Realtime) ================= */
+function connect(code,onReady){
+  if(typeof supabase==='undefined'){toast('Il multigiocatore non è disponibile qui: apri il gioco dal sito.');return false}
+  sbc=sbc||supabase.createClient(SB_URL,SB_KEY);
+  chan=sbc.channel('valdombra-'+code,{config:{broadcast:{self:false},presence:{key:ME}}});
+  chan.on('broadcast',{event:'state'},({payload})=>onState(payload))
+    .on('broadcast',{event:'act'},({payload})=>{if(isHost&&payload&&payload.a)dispatch(payload.pid,payload.a)})
+    .on('broadcast',{event:'hello'},({payload})=>{if(isHost)onHello(payload)})
+    .on('presence',{event:'sync'},()=>{if(!chan)return;online=new Set(Object.keys(chan.presenceState()));online.add(ME);onPresence()})
+    .subscribe(async st=>{
+      if(st==='SUBSCRIBED'){UI.status='';const tr=()=>{try{chan&&chan.track({name:myName,at:Date.now()})}catch(e){}};tr();setTimeout(tr,1200);setTimeout(tr,4000);clearInterval(window.trackIv);window.trackIv=setInterval(tr,15000);if(onReady){const f=onReady;onReady=null;f()}render()}
+      else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT'){UI.status='Connessione instabile, riprovo...';render()}
+    });
+  return true;
+}
+function onState(pl){
+  if(!pl||!pl.s)return;const r=JSON.parse(pl.s);
+  if(isHost){if(r.host===ME||(R&&r.v<=R.v))return;isHost=false}
+  R=r;sstore('valdombra-cache-'+R.code,pl.s);clearTimeout(joinTimer);checkHost();render(pl.fx||[]);
+}
+function onHello(p){
+  if(!p||!p.pid||!R)return;const name=String(p.name||'Eroe').slice(0,16);
+  if(R.players[p.pid])R.players[p.pid].name=name;
+  else if(R.phase==='lobby'&&R.order.length<MAXP){R.players[p.pid]={pid:p.pid,name,cls:CLASSES[p.cls]?p.cls:'guerriero',ready:false};R.order.push(p.pid)}
+  commit();
+}
+function onPresence(){if(!R)return;if(isHost){checkProgress();commit()}else{checkHost();render()}}
+function checkHost(){
+  if(solo||!R||isHost)return;
+  if(online.has(R.host)){clearTimeout(hostTimer);hostTimer=null;return}
+  if(hostTimer)return;
+  hostTimer=setTimeout(()=>{hostTimer=null;if(!R||isHost||online.has(R.host))return;const cand=R.order.filter(p=>online.has(p));if(cand[0]===ME)becomeHost()},4000);
+}
+function becomeHost(){
+  isHost=true;R.host=ME;rng=new RNG(0);rng.s=R.rs|0;
+  if(R.combat){R.combat.busy=false;if(R.combat.won){R.combat.won=false;checkEnd()}}
+  toast('L\'host è uscito: ora sei tu a guidare la stanza.');checkProgress();commit();
+}
+function createRoom(){
+  if(!saveName())return;
+  solo=false;isHost=true;ME=myPid();const code=newSeed(4);R=newLobby(code);rng=new RNG(hashStr(code));online=new Set([ME]);
+  if(!connect(code,()=>commit())){R=null;solo=true;return}
+  sstore('valdombra-room',code);try{location.hash=code}catch(e){}render();
+}
+function joinRoom(code){
+  code=String(code||'').trim().toUpperCase();if(code.length!==4){toast('Il codice della stanza ha 4 caratteri.');return}
+  if(!saveName())return;
+  solo=false;isHost=false;ME=myPid();R=null;online=new Set([ME]);screen='mp';UI.joining=code;
+  const hello=()=>chan&&chan.send({type:'broadcast',event:'hello',payload:{pid:ME,name:myName,cls:pickCls}});
+  if(!connect(code,()=>{hello();setTimeout(()=>{if(!R)hello()},1500);
+    joinTimer=setTimeout(()=>{if(R)return;const cached=sload('valdombra-cache-'+code);
+      if(cached){const r=JSON.parse(cached);if(r.host===ME){R=r;becomeHost();return}}
+      toast('Stanza '+code+' non trovata. Controlla il codice.');leaveRoom()},5000)}))return;
+  sstore('valdombra-room',code);try{location.hash=code}catch(e){}render();
+}
+function leaveRoom(){
+  clearInterval(window.trackIv);
+  if(chan){try{chan.unsubscribe()}catch(e){}chan=null}
+  clearTimeout(joinTimer);clearTimeout(hostTimer);hostTimer=null;
+  R=null;g=null;run=null;isHost=true;solo=true;UI.joining=null;screen='title';sstore('valdombra-room',null);
+  try{history.replaceState(null,'',location.pathname)}catch(e){}render();
+}
+function saveName(){const el=$('#pname');const n=(el?el.value:myName).trim().slice(0,16);if(!n){toast('Scrivi il tuo nome prima di continuare.');return false}myName=n;store('valdombra-nome',n);return true}
+
+/* ================= SOLO ================= */
+function startSolo(){
+  solo=true;isHost=true;chan=null;ME='solo';online=new Set([ME]);
+  R=newLobby('SOLO');R.players.solo.name=CLASSES[pickCls].n;rng=new RNG(1);
+  startRunRoom(Math.min(pickLvl,getUnlocked()),($('#seed')&&$('#seed').value)||'');commit();
+}
+function continueSolo(){const s=load(SOLO_K);if(!s)return;solo=true;isHost=true;chan=null;ME='solo';online=new Set([ME]);R=JSON.parse(s);rng=new RNG(0);rng.s=R.rs|0;commit()}
+
+/* ================= AZIONI DAL'INTERFACCIA ================= */
+function clickCard(i){
+  const h=g&&g.hero;if(!h||h.ended||h.down||g.busy)return;const c=h.hand[i];if(!c)return;const d=CARDS[c.id];
+  if(costOf(c)>h.energy){toast('Energia insufficiente');return}
+  const a=alive();
+  if(d.tg&&a.length>1){UI.sel=(UI.sel&&UI.sel.k==='c'&&UI.sel.uid===c.uid)?null:{k:'c',uid:c.uid};render();return}
+  UI.sel=null;send({t:'play',uid:c.uid,j:d.tg&&a[0]?g.enemies.indexOf(a[0]):null});
+}
+function clickEnemy(j){
+  if(!UI.sel||!g||!g.enemies[j]||g.enemies[j].hp<=0)return;const s=UI.sel;UI.sel=null;
+  if(s.k==='c')send({t:'play',uid:s.uid,j});else send({t:'potion',i:s.i,j});
+}
+function clickPotion(i){
+  const id=run&&run.potions[i];if(!id)return;const p=POTIONS[id];
+  if(R.phase==='combat'&&g&&g.hero&&!g.hero.down){
+    if(g.busy)return;const a=alive();
+    if(p.tg&&a.length>1){UI.sel=(UI.sel&&UI.sel.k==='p'&&UI.sel.i===i)?null:{k:'p',i};render();if(UI.sel)toast('Scegli un bersaglio');return}
+    send({t:'potion',i,j:p.tg&&a[0]?g.enemies.indexOf(a[0]):null});
+  }else if(id==='cura'){send({t:'drink',i});toast('Recuperi 15 PV.')}
+  else toast(p.n+': '+p.d+' (solo in combattimento)');
+}
+function endTurnBtn(){UI.sel=null;send({t:'end'})}
+function vote(y,x){send({t:'vote',y,x})}
+function proceed(){send({t:'done'})}
+function takeCardUI(k){toast(CARDS[run.reward.cards[k]].n+' aggiunta al mazzo');send({t:'takeCard',k})}
+function takePotionUI(){if(run.potions.length>=3){toast('Hai già 3 pozioni.');return}send({t:'takePotion'})}
+function takeRelicUI(){toast('Reliquia ottenuta: '+RELICS[run.reward.relic].n);send({t:'takeRelic'})}
+function buyUI(kind,k){const it=run.shop[kind][k];if(it.sold)return;if(run.gold<it.price){toast('Oro insufficiente');return}
+  if(kind==='potions'&&run.potions.length>=3){toast('Hai già 3 pozioni.');return}send({t:'buy',kind,k})}
+function shopRemoveUI(){if(run.shop.removeUsed)return;if(run.gold<removePrice()){toast('Oro insufficiente');return}
+  openPicker(run.deck.map((c,i)=>i),'Scegli una carta da rimuovere',i=>{toast(CARDS[run.deck[i].id].n+' rimossa');send({t:'shopRemove',i})})}
+function restHealUI(){toast('Recuperi '+Math.floor(run.max*.3)+' PV.');send({t:'restHeal'})}
+function restForgeUI(){openPicker(run.deck.map((c,i)=>i).filter(i=>canUp(run.deck[i])),'Scegli una carta da potenziare',i=>{toast(CARDS[run.deck[i].id].n+' potenziata!');send({t:'restForge',i})})}
+function chooseEv(k){const ev=EVENTS.find(e=>e.id===run.event.id);const o=ev.opts[k];if(o.req&&!o.req())return;
+  if(o.pick)openPicker(run.deck.map((c,i)=>i),'Scegli una carta da dimenticare',i=>send({t:'ev',k,i}));else send({t:'ev',k})}
+function setCls(k){pickCls=k;if(R&&R.phase==='lobby')send({t:'cls',cls:k});else render()}
+function startGame(){
+  const notReady=active().filter(p=>!R.players[p].ready&&p!==R.host);
+  if(notReady.length){toast('Aspetta che siano tutti pronti: '+notReady.map(pname).join(', '));return}
+  send({t:'start',lvl:Math.min(pickLvl,getUnlocked()),seed:UI.seed});
+}
+function copyText(s,ok){try{navigator.clipboard.writeText(s).then(()=>toast(ok),()=>toast(s))}catch(e){toast(s)}}
+function inviteLink(){return location.origin+location.pathname+'#'+R.code}
+function copyInvite(){copyText(inviteLink(),'Link d\'invito copiato!')}
+function copySeed(){copyText(R.seed,'Seed copiato: '+R.seed)}
 
 /* ================= MODALI ================= */
 function openPicker(indices,title,cb,cancel=true){modal={title,list:indices.map(i=>({c:run.deck[i],i})),cb,cancel};render()}
@@ -898,20 +1130,19 @@ function openView(cards,title){modal={title,list:cards.map(c=>({c})),cb:null,can
 function pickerPick(k){const m=modal;modal=null;m.cb(m.list[k].i);render()}
 function closeModal(){modal=null;render()}
 function viewDeck(){openView([...run.deck].sort((a,b)=>CARDS[a.id].n.localeCompare(CARDS[b.id].n)),'Il tuo mazzo ('+run.deck.length+' carte)')}
-function viewPile(k){if(!g)return;const L={draw:[[...g.draw].sort((a,b)=>CARDS[a.id].n.localeCompare(CARDS[b.id].n)),'Pila di pesca (ordine nascosto)'],disc:[g.disc,'Pila degli scarti'],exh:[g.exh,'Carte esaurite']}[k];openView(L[0],L[1])}
-let toastT;function toast(msg){let t=$('.toast');if(!t){t=document.createElement('div');t.className='toast';t.setAttribute('role','status');document.body.appendChild(t)}t.textContent=msg;clearTimeout(toastT);toastT=setTimeout(()=>t.remove(),2200)}
+function viewPile(k){const h=g&&g.hero;if(!h)return;const L={draw:[[...h.draw].sort((a,b)=>CARDS[a.id].n.localeCompare(CARDS[b.id].n)),'Pila di pesca (ordine nascosto)'],disc:[h.disc,'Pila degli scarti'],exh:[h.exh,'Carte esaurite']}[k];openView(L[0],L[1])}
+let toastT;function toast(msg){let t=$('.toast');if(!t){t=document.createElement('div');t.className='toast';t.setAttribute('role','status');document.body.appendChild(t)}t.textContent=msg;clearTimeout(toastT);toastT=setTimeout(()=>t.remove(),2400)}
 function relicInfo(id){toast(RELICS[id].ic+' '+RELICS[id].n+': '+RELICS[id].d)}
 function stInfo(k){toast(STN[k][0]+': '+STN[k][1])}
-function copySeed(){const s=run?run.seed:'';try{navigator.clipboard.writeText(s).then(()=>toast('Seed copiato: '+s),()=>toast('Seed: '+s))}catch(e){toast('Seed: '+s)}}
 
 /* ================= FX ================= */
-function fx(k,txt,cls){fxq.push({k,txt,cls})}
-function flushFx(){
+function fx(k,txt,cls){if(k==='hero')k='h-'+CUR;fxq.push({k,txt,cls})}
+function flushFx(list){
   const layer=$('#fx');const counts={};
-  fxq.forEach(f=>{const el=document.getElementById('ent-'+f.k);if(!el)return;const r=el.getBoundingClientRect();counts[f.k]=(counts[f.k]||0)+1;
+  (list||[]).forEach(f=>{const el=document.getElementById('ent-'+f.k);if(!el)return;const r=el.getBoundingClientRect();counts[f.k]=(counts[f.k]||0)+1;
     const d=document.createElement('div');d.className='float '+f.cls;d.textContent=f.txt;d.style.left=(r.left+r.width/2+(counts[f.k]-1)*18)+'px';d.style.top=(r.top+r.height*.35+(counts[f.k]-1)*14)+'px';
-    layer.appendChild(d);setTimeout(()=>d.remove(),1000);if(f.cls==='dmg'||f.cls==='psn'){const im=el.querySelector('.spr');if(im){im.classList.remove('hit');void im.offsetWidth;im.classList.add('hit')}}});
-  fxq=[];
+    layer.appendChild(d);setTimeout(()=>d.remove(),1000);
+    if(f.cls==='dmg'||f.cls==='psn'){const im=el.querySelector('.spr');if(im){im.classList.remove('hit');void im.offsetWidth;im.classList.add('hit')}}});
 }
 
 /* ================= RENDER ================= */
@@ -930,172 +1161,285 @@ function chips(t,pw){
 function hpBar(hp,max){return `<div class="bar"><i style="width:${Math.max(0,hp/max*100)}%"></i><span>${Math.max(0,hp)}/${max}</span></div>`}
 function intentHTML(e){
   const it=e.intent;if(!it||e.hp<=0)return '<div class="intent" style="visibility:hidden">-</div>';
-  const p=[];
-  if(it.d){const d=calcDmg(it.d+(e.bonus||0),e,g.hero);p.push(`<span class="atk">⚔ ${d}${it.x>1?'×'+it.x:''}</span>`)}
-  if(it.b)p.push(`<span class="def">🛡 ${it.b}</span>`);
+  const tgtH=(it.tg&&g.heroes[it.tg])||g.hero;const p=[];
+  if(it.d){const d=calcDmg(enemyBase(e,it),e,tgtH);p.push(`<span class="atk">⚔ ${d}${it.x>1?'×'+it.x:''}</span>`)}
+  if(it.b)p.push(`<span class="def">🛡 ${Math.round(it.b*(e.dm||1))}</span>`);
   if(it.s)p.push(`<span class="buf">▲ Forza${it.all?' a tutti':''}</span>`);
-  if(it.heal)p.push(`<span class="def">✚ ${it.heal}</span>`);
+  if(it.heal)p.push(`<span class="def">✚ Cura</span>`);
   if(it.deb)p.push(`<span class="deb">☠ ${STN[it.deb][0]}</span>`);
-  return `<div class="intent">${p.join(' ')}</div>`;
+  const tg=!solo&&it.tg&&(it.d||it.deb)?`<span class="tgt">→ ${it.tg===ME?'te':esc(pname(it.tg))}</span>`:'';
+  return `<div class="intent">${p.join(' ')} ${tg}</div>`;
 }
 function hud(){
   const cl=CLASSES[run.cls];
   return `<header class="hud">
-    <span class="cls">${sprImg(run.cls,26,'inl')} ${cl.n}</span>
+    <span class="cls">${sprImg(run.cls,26,'inl')} ${solo?cl.n:esc(run.name)}</span>
     <span class="stat hp-t"><b>PV</b>${Math.max(0,run.hp)}/${run.max}</span>
     <span class="stat gold-t"><b>Oro</b>${run.gold}</span>
-    <span class="stat"><b>Piano</b>${run.floor}/${ROWS+1}</span>${run.lvl?`<span class="stat" style="color:#ff9a8f"><b>Assedio</b>${run.lvl}</span>`:''}
-    <span class="pots">${[0,1,2].map(i=>{const id=run.potions[i];return id?`<button class="pot full ${g&&g.sel&&g.sel.k==='p'&&g.sel.i===i?'sel':''}" style="background:${POTIONS[id].col}" title="${POTIONS[id].n}: ${POTIONS[id].d}" aria-label="${POTIONS[id].n}" onclick="clickPotion(${i})"></button>`:'<span class="pot" aria-hidden="true"></span>'}).join('')}</span>
+    <span class="stat"><b>Piano</b>${R.floor}/${ROWS+1}</span>${R.lvl?`<span class="stat" style="color:#ff9a8f"><b>Assedio</b>${R.lvl}</span>`:''}
+    <span class="pots">${[0,1,2].map(i=>{const id=run.potions[i];return id?`<button class="pot full ${UI.sel&&UI.sel.k==='p'&&UI.sel.i===i?'sel':''}" style="background:${POTIONS[id].col}" title="${POTIONS[id].n}: ${POTIONS[id].d}" aria-label="${POTIONS[id].n}" onclick="clickPotion(${i})"></button>`:'<span class="pot" aria-hidden="true"></span>'}).join('')}</span>
     <span class="relics">${run.relics.map(r=>`<button class="relic" title="${RELICS[r].n}: ${RELICS[r].d}" aria-label="${RELICS[r].n}" onclick="relicInfo('${r}')">${RELICS[r].ic}</button>`).join('')}</span>
     <span class="grow"></span>
-    <button class="btn" onclick="copySeed()" title="Condividi questo seed con gli amici per giocare la stessa mappa">Seed ${run.seed}</button>
+    ${solo?'':`<button class="btn" onclick="copyInvite()" title="Copia il link d'invito">Stanza ${R.code}</button>`}
+    <button class="btn" onclick="copySeed()" title="Condividi questo seed per giocare la stessa mappa">Seed ${R.seed}</button>
     <button class="btn" onclick="viewDeck()">Mazzo ${run.deck.length}</button>
-  </header>`;
+    ${chatBtn()}${solo?'':'<button class="btn" onclick="leaveRoom()">Esci</button>'}
+  </header>${UI.status?`<div class="netwarn">${UI.status}</div>`:''}`;
+}
+function partyHTML(){
+  if(solo)return '';
+  return `<div class="party">${R.order.map(p=>{const P=R.players[p];const on=isOnline(p);let st='';
+    if(!on)st='disconnesso';else if(R.phase==='map')st=R.votes[p]?'<span class="ok">✓ ha votato</span>':'sta scegliendo';
+    else if(R.phase==='room')st=P.done?'<span class="ok">✓ pronto</span>':'sta scegliendo';
+    return `<div class="pm ${on?'':'off'}">${sprImg(P.cls,30)}<div style="min-width:0;flex:1"><b>${esc(P.name)}${p===ME?' (tu)':''}</b>${hpBar(P.hp,P.max)}<small>${st}</small></div></div>`}).join('')}</div>`;
 }
 
-function render(){
+function render(fxs){
   const app=$('#app');let h='';
-  if(screen==='title')h=titleHTML();
-  else{h=hud();
-    const S={map:mapScreen,combat:combatScreen,reward:rewardScreen,shop:shopScreen,rest:restScreen,event:eventScreen,treasure:treasureScreen,end:endScreen}[screen];
-    h+=S();
+  if(!R)h=screen==='mp'?mpMenuHTML():titleHTML();
+  else{
+    ctx(ME);const P=R.players[ME];
+    if(UI.sel&&UI.sel.k==='c'&&!(g&&g.hero&&g.hero.hand.some(c=>c.uid===UI.sel.uid)))UI.sel=null;
+    if(!P)h=notInRoomHTML();
+    else if(R.phase==='lobby')h=lobbyHTML();
+    else{
+      h=hud();
+      if(R.phase==='map')h+=partyHTML()+mapScreen();
+      else if(R.phase==='combat')h+=g&&g.hero?combatScreen():waitBoxHTML('Combattimento in corso','Ti unirai al gruppo dallo scontro successivo.');
+      else if(R.phase==='room')h+=partyHTML()+roomScreen(P);
+      else if(R.phase==='end')h+=endScreen();
+    }
   }
   if(modal)h+=`<div class="modal" role="dialog" aria-label="${modal.title}"><div class="mhead"><h3 style="flex:1">${modal.title}</h3>${modal.cancel?'<button class="btn" onclick="closeModal()">Chiudi</button>':''}</div>
     <div class="mbody"><div class="cardgrid">${modal.list.map((it,k)=>cardHTML(it.c,modal.cb?{click:`pickerPick(${k})`}:{})).join('')||'<p class="muted">Nessuna carta.</p>'}</div></div></div>`;
   app.innerHTML=h;
-  if(screen==='map')scrollMap();
-  flushFx();
+  if(R&&R.phase==='map')scrollMap();
+  renderChat();
+  flushFx(fxs);
 }
 
+function classPicker(){
+  return `<div class="classes">${Object.entries(CLASSES).map(([k,c])=>`<button class="classcard ${pickCls===k?'on':''}" onclick="setCls('${k}')" aria-pressed="${pickCls===k}">
+      <span class="ic">${sprImg(k,64)}</span><span class="nm">${c.n}</span><span>${c.desc}</span>
+      <small>${c.hp} PV · Reliquia: ${RELICS[c.relic].ic} ${RELICS[c.relic].n}</small></button>`).join('')}</div>`;
+}
+function levelPicker(){
+  return `<div class="panel" style="gap:10px"><div class="lvls">${Array.from({length:MAXLVL+1},(_,i)=>{const ok=i<=getUnlocked();return `<button class="lvl ${pickLvl===i?'on':''}" ${ok?`onclick="pickLvl=${i};render()"`:'disabled'} aria-pressed="${pickLvl===i}" aria-label="Livello ${i}${ok?'':' (bloccato)'}">${ok?i:'🔒'}</button>`}).join('')}</div>
+      <p class="muted">${lvlDesc(pickLvl)}</p>
+      <p class="muted" style="font-size:13px">Sconfiggi il drago per sbloccare il livello successivo (massimo ${MAXLVL}).</p></div>`;
+}
 function titleHTML(){
-  const sv=loadSave();
+  let sv=null;try{const s=load(SOLO_K);sv=s?JSON.parse(s):null}catch(e){}
+  const sp=sv&&sv.players&&sv.players.solo;
   return `<main><div class="wrap" style="padding-block:12px 24px">
     <div style="display:flex;flex-direction:column;gap:10px">
-      <span class="muted" style="letter-spacing:.2em;text-transform:uppercase;font-size:12px">Deckbuilder roguelike · Prototipo</span>
+      <span class="muted" style="letter-spacing:.2em;text-transform:uppercase;font-size:12px">Deckbuilder roguelike</span>
       <h1>Assedio a<br>Valdombra</h1>
-      <p class="lede muted">La Rocca di Valdombra è caduta nelle mani di un drago. Scegli un eroe, costruisci il tuo mazzo lungo la strada e scala i 15 piani della rocca fino alla tana di Ignivora.</p>
+      <p class="lede muted">La Rocca di Valdombra è caduta nelle mani di un drago. Scegli un eroe, costruisci il tuo mazzo lungo la strada e scala i 15 piani della rocca fino alla tana di Ignivora. Da solo o con fino a ${MAXP} amici.</p>
     </div>
-    ${sv?`<div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:200px"><b>Partita in corso</b><br><span class="muted">${sprImg(sv.run.cls,22,'inl')} ${CLASSES[sv.run.cls].n} · Piano ${sv.run.floor}${sv.run.lvl?' · Assedio '+sv.run.lvl:''} · Seed ${sv.run.seed}</span></div><button class="btn primary" onclick="continueRun()">Continua</button></div>`:''}
-    <h3>Scegli il tuo eroe</h3>
-    <div class="classes">${Object.entries(CLASSES).map(([k,c])=>`<button class="classcard ${pickCls===k?'on':''}" onclick="pickCls='${k}';render()" aria-pressed="${pickCls===k}">
-      <span class="ic">${sprImg(k,72)}</span><span class="nm">${c.n}</span><span>${c.desc}</span>
-      <small>${c.hp} PV · Reliquia: ${RELICS[c.relic].ic} ${RELICS[c.relic].n}</small></button>`).join('')}</div>
+    <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap;border-color:var(--torch)"><div style="flex:1;min-width:200px"><b style="font-size:17px">Gioca con gli amici</b><br><span class="muted">Crea una stanza e manda il codice, oppure entra con il codice di un amico.</span></div><button class="btn primary" onclick="screen='mp';render()">Multigiocatore</button></div>
+    ${sp?`<div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:200px"><b>Partita in corso (da solo)</b><br><span class="muted">${sprImg(sp.cls,22,'inl')} ${CLASSES[sp.cls].n} · Piano ${sv.floor}${sv.lvl?' · Assedio '+sv.lvl:''} · Seed ${sv.seed}</span></div><button class="btn primary" onclick="continueSolo()">Continua</button></div>`:''}
+    <h3>Da solo: scegli il tuo eroe</h3>
+    ${classPicker()}
     <h3>Livello di Assedio</h3>
-    <div class="panel" style="gap:10px"><div class="lvls">${Array.from({length:MAXLVL+1},(_,i)=>{const ok=i<=getUnlocked();return `<button class="lvl ${pickLvl===i?'on':''}" ${ok?`onclick="pickLvl=${i};render()"`:'disabled'} aria-pressed="${pickLvl===i}" aria-label="Livello ${i}${ok?'':' (bloccato)'}">${ok?i:'🔒'}</button>`}).join('')}</div>
-      <p class="muted">${lvlDesc(pickLvl)}</p>
-      <p class="muted" style="font-size:13px">Sconfiggi il drago per sbloccare il livello successivo (massimo ${MAXLVL}).</p></div>
+    ${levelPicker()}
     <div class="seedrow"><label for="seed" class="muted">Seed (opzionale)</label><input id="seed" maxlength="12" placeholder="${newSeed()}" autocomplete="off">
-      <button class="btn primary" onclick="startRun()" style="padding:10px 22px;font-size:17px">Inizia la scalata</button></div>
-    <div class="note"><b style="color:var(--fg)">Giocare con gli amici:</b> scrivete tutti lo stesso seed (per esempio <b>AMICI1</b>). Avrete la stessa mappa e potrete confrontare chi arriva più in alto. La modalità cooperativa in tempo reale arriva nella prossima versione.</div>
+      <button class="btn primary" onclick="startSolo()" style="padding:10px 22px;font-size:17px">Inizia la scalata</button></div>
   </div></main>`;
 }
+function mpMenuHTML(){
+  const joining=UI.joining;
+  return `<main><div class="wrap" style="padding-block:12px 24px">
+    <div class="row"><button class="btn" onclick="${joining?'leaveRoom()':"screen='title';render()"}">← Indietro</button></div>
+    <h2>Multigiocatore</h2>
+    ${joining?`<div class="panel"><b>Mi collego alla stanza ${esc(joining)}...</b><span class="muted">Se non succede niente entro qualche secondo, controlla il codice.</span></div>`:`
+    <div class="panel"><label for="pname"><b>Il tuo nome</b></label><input id="pname" class="txt" maxlength="16" value="${esc(myName)}" placeholder="Per esempio: Manu" autocomplete="off"></div>
+    <div class="panel"><h3>Crea una stanza</h3><p class="muted">Diventi l'host: scegli il livello e avvii la partita quando tutti sono pronti.</p><div><button class="btn primary" onclick="createRoom()">Crea stanza</button></div></div>
+    <div class="panel"><h3>Entra in una stanza</h3><div class="row"><input id="jcode" class="txt" maxlength="4" placeholder="CODICE" value="${esc(UI.joinCode)}" style="width:9ch;text-transform:uppercase;letter-spacing:.15em" autocomplete="off">
+      <button class="btn primary" onclick="joinRoom($('#jcode').value)">Entra</button></div></div>
+    <p class="note">Nessuno deve registrarsi: basta il nome e il codice di 4 lettere. Se chi ha creato la stanza esce, un altro giocatore prende il suo posto e la partita continua.</p>`}
+  </div></main>`;
+}
+function lobbyHTML(){
+  const host=R.host===ME;const me=R.players[ME];
+  const notReady=active().filter(p=>!R.players[p].ready&&p!==R.host);
+  return `<main><div class="wrap" style="padding-block:12px 24px">
+    <div class="row"><button class="btn" onclick="leaveRoom()">← Esci dalla stanza</button>${chatBtn()}</div>
+    <div class="panel" style="align-items:flex-start"><span class="muted" style="letter-spacing:.15em;text-transform:uppercase;font-size:12px">Codice della stanza</span>
+      <span class="code">${R.code}</span><div class="row"><button class="btn primary" onclick="copyInvite()">Copia link d'invito</button><span class="muted" style="font-size:13px">oppure detta il codice ai tuoi amici</span></div></div>
+    ${UI.status?`<div class="netwarn">${UI.status}</div>`:''}
+    <h3>Giocatori (${R.order.length}/${MAXP})</h3>
+    <div class="plist">${R.order.map(p=>{const P=R.players[p];const on=isOnline(p);return `<div class="prow" style="${on?'':'opacity:.45'}">${sprImg(P.cls,36)}
+      <div style="flex:1;min-width:0"><span class="nm">${esc(P.name)}${p===ME?' (tu)':''}</span><br><span class="muted">${CLASSES[P.cls].n}${on?'':' · disconnesso'}</span></div>
+      ${p===R.host?'<span class="badge on">Host</span>':`<span class="badge ${P.ready?'on':''}">${P.ready?'Pronto':'Non pronto'}</span>`}
+      ${host&&p!==ME?`<button class="btn" onclick="send({t:'kick',p:'${p}'})" aria-label="Rimuovi ${esc(P.name)}">✕</button>`:''}</div>`}).join('')}</div>
+    <h3>Scegli il tuo eroe</h3>
+    ${classPicker()}
+    ${host?`<h3>Livello di Assedio</h3>${levelPicker()}
+      <div class="seedrow"><label for="seed" class="muted">Seed (opzionale)</label><input id="seed" maxlength="12" value="${esc(UI.seed)}" oninput="UI.seed=this.value" placeholder="casuale" autocomplete="off">
+      <button class="btn primary" onclick="startGame()" style="padding:10px 22px;font-size:17px" ${notReady.length?'aria-disabled="true"':''}>Avvia la partita</button></div>
+      ${notReady.length?`<p class="muted">In attesa di: ${notReady.map(p=>esc(pname(p))).join(', ')}</p>`:''}`
+    :`<div class="row"><button class="btn ${me.ready?'':'primary'}" onclick="send({t:'ready'})" style="padding:10px 22px;font-size:17px">${me.ready?'Non sono pronto':'Sono pronto!'}</button>
+      <span class="muted">L'host sceglie il livello e avvia la partita.</span></div>`}
+  </div></main>`;
+}
+function notInRoomHTML(){
+  return `<main><div class="wrap"><h2>Partita già iniziata</h2><p class="lede muted">La stanza ${R.code} sta già giocando. Potrai unirti quando torneranno nella sala d'attesa.</p>
+    <div><button class="btn primary" onclick="leaveRoom()">Torna al menu</button></div></div></main>`;
+}
+function waitBoxHTML(t,s){return `<main><div class="wrap"><div class="panel"><h3>${t}</h3><p class="muted">${s}</p></div></div></main>`}
 
 function mapScreen(){
-  const map=run.map,W=700,G=86,H=(ROWS+1)*G+70;
+  const map=R.map,W=700,G=86,H=(ROWS+1)*G+70;
   const pos=n=>[50+n.x*100+n.jx,H-50-n.y*G+n.jy-(n.type==='boss'?20:0)];
-  const done=new Set(run.path.map(p=>p.join(',')));
-  const doneE=new Set();for(let i=1;i<run.path.length;i++)doneE.add(run.path[i-1].join(',')+'>'+run.path[i].join(','));
+  const done=new Set(R.path.map(p=>p.join(',')));
+  const doneE=new Set();for(let i=1;i<R.path.length;i++)doneE.add(R.path[i-1].join(',')+'>'+R.path[i].join(','));
   const av=new Set(availNodes().map(n=>n.y+','+n.x));
+  const tally={};active().forEach(p=>{const v=R.votes[p];if(v)tally[v]=(tally[v]||0)+1});const myV=R.votes[ME];
   let lines='',nodes='';
   map.forEach(row=>row.forEach(n=>{if(!n)return;const[x1,y1]=pos(n);
     n.next.forEach(nx=>{const m=map[n.y+1][nx];const[x2,y2]=pos(m);lines+=`<line class="edge ${doneE.has(n.y+','+n.x+'>'+m.y+','+m.x)?'done':''}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`});
-    const k=n.y+','+n.x;const cur=run.pos&&run.pos.y===n.y&&run.pos.x===n.x;const r=n.type==='boss'?44:24;
-    nodes+=`<g class="node ${done.has(k)?'done':''} ${cur?'cur':''} ${av.has(k)?'avail':''} ${n.type==='boss'?'boss':''}" ${av.has(k)?`onclick="goNode(${n.y},${n.x})" role="button" tabindex="0" aria-label="${NODEN[n.type]}, piano ${n.y+1}" onkeydown="if(event.key==='Enter')goNode(${n.y},${n.x})"`:''}>
-      <circle cx="${x1}" cy="${y1}" r="${r}"/><image href="${spr(n.type)}" x="${x1-r*.62}" y="${y1-r*.62}" width="${r*1.24}" height="${r*1.24}" style="image-rendering:pixelated"/><title>${NODEN[n.type]}</title></g>`;
+    const k=n.y+','+n.x;const cur=R.pos&&R.pos.y===n.y&&R.pos.x===n.x;const r=n.type==='boss'?44:24;
+    nodes+=`<g class="node ${done.has(k)?'done':''} ${cur?'cur':''} ${av.has(k)?'avail':''} ${myV===k?'voted':''} ${n.type==='boss'?'boss':''}" ${av.has(k)?`onclick="vote(${n.y},${n.x})" role="button" tabindex="0" aria-label="${NODEN[n.type]}, piano ${n.y+1}" onkeydown="if(event.key==='Enter')vote(${n.y},${n.x})"`:''}>
+      <circle cx="${x1}" cy="${y1}" r="${r}"/><image href="${spr(n.type)}" x="${x1-r*.62}" y="${y1-r*.62}" width="${r*1.24}" height="${r*1.24}" style="image-rendering:pixelated"/><title>${NODEN[n.type]}</title>
+      ${tally[k]&&!solo?`<circle class="vbadge" cx="${x1+r*.8}" cy="${y1-r*.8}" r="12"/><text class="vbadge-t" x="${x1+r*.8}" y="${y1-r*.8}">${tally[k]}</text>`:''}</g>`;
   }));
+  const act=active();const nv=act.filter(p=>R.votes[p]).length;
+  const msg=solo?'Tocca un nodo illuminato per avanzare':`Votate il prossimo passo: ${nv}/${act.length} voti${myV?' · puoi cambiare voto finché votano tutti':''}`;
   return `<main class="flush"><div class="mapwrap" id="mapwrap"><svg class="mapsvg" id="mapsvg" viewBox="0 0 ${W} ${H}" aria-label="Mappa della Rocca">${lines}${nodes}</svg></div>
-    <div class="legend">${Object.keys(NODEIC).map(k=>`<span>${sprImg(k,16,'inl')} ${NODEN[k]}</span>`).join('')}<span style="color:var(--torch2)">Tocca un nodo illuminato per avanzare</span></div></main>`;
+    <div class="legend">${Object.keys(NODEIC).map(k=>`<span>${sprImg(k,16,'inl')} ${NODEN[k]}</span>`).join('')}<span style="color:var(--torch2)">${msg}</span></div></main>`;
 }
 function scrollMap(){
   const w=$('#mapwrap'),svg=$('#mapsvg');if(!w||!svg)return;
   const H=(ROWS+1)*86+70;const sc=svg.getBoundingClientRect().height/H;
-  const y=run.pos?run.pos.y:0;const target=(H-50-y*86)*sc;
+  const y=R.pos?R.pos.y:0;const target=(H-50-y*86)*sc;
   w.scrollTop=Math.max(0,target-w.clientHeight*.7);
 }
 
 function combatScreen(){
-  const sel=g.sel;
+  const sel=UI.sel,h=g.hero;
   const en=g.enemies.map((e,j)=>`<button class="ent enemy ${e.boss?'boss':''} ${e.hp<=0?'dead':''} ${sel&&e.hp>0?'target':''}" id="ent-e${j}" onclick="clickEnemy(${j})" ${e.hp<=0?'disabled':''} aria-label="${e.n}, ${e.hp} PV">
       ${intentHTML(e)}<span class="face">${sprImg(e.id,e.boss?150:(ENEMIES[e.id].elite?96:80),'idle')}</span><span class="nm">${e.n}</span>${hpBar(e.hp,e.max)}
       ${e.blk?`<span class="blk">🛡 ${e.blk}</span>`:''}${chips(e)}</button>`).join('');
   const cl=CLASSES[run.cls];
-  const hand=g.hand.map((c,i)=>cardHTML(c,{click:`clickCard(${i})`,cls:(sel&&sel.k==='c'&&sel.i===i?'sel ':'')+(costOf(c)>g.energy?'cant':'')})).join('');
+  const allies=Object.keys(g.heroes).filter(p=>p!==ME).map(p=>{const a=g.heroes[p],P=R.players[p];return `<div class="ent ally ${a.down?'down':''}" id="ent-h-${p}">${sprImg(P.cls,34,'idle')}
+    <div class="info"><span class="nm">${esc(P.name)} ${a.blk?`<span class="blk">🛡 ${a.blk}</span>`:''}</span>${hpBar(P.hp,P.max)}${chips(a)}<small class="muted">${!isOnline(p)?'disconnesso':a.down?'a terra':a.ended?'<span class="ok">✓ fine turno</span>':'sta giocando'}</small></div></div>`}).join('');
+  const hand=h.hand.map((c,i)=>cardHTML(c,{click:`clickCard(${i})`,cls:(sel&&sel.k==='c'&&sel.uid===c.uid?'sel ':'')+(costOf(c)>h.energy||h.ended?'cant':'')})).join('');
+  const heroes=Object.keys(g.heroes).filter(p=>!g.heroes[p].down&&isOnline(p));const ended=heroes.filter(p=>g.heroes[p].ended).length;
+  let status=sel?'Scegli un nemico come bersaglio':'Turno '+g.turn;
+  if(g.busy)status='Turno dei nemici...';else if(h.down)status='Sei a terra: ti rialzi a fine combattimento';else if(h.ended&&!solo)status=`In attesa degli altri (${ended}/${heroes.length})`;
   return `<main class="flush"><div class="combat">
     <div class="enemies">${en}</div>
+    ${allies?`<div class="allies">${allies}</div>`:''}
     <div class="herorow">
-      <div class="energy" title="Energia">${g.energy}</div>
-      <div class="ent hero" id="ent-hero"><span class="face">${sprImg(run.cls,60,'idle')}</span><div class="info"><span class="nm">${cl.n} ${g.hero.blk?`<span class="blk">🛡 ${g.hero.blk}</span>`:''}</span>${hpBar(run.hp,run.max)}${chips(g.hero,g.hero.pw)}</div></div>
+      <div class="energy" title="Energia">${h.energy}</div>
+      <div class="ent hero ${h.down?'down':''}" id="ent-h-${ME}"><span class="face">${sprImg(run.cls,60,'idle')}</span><div class="info"><span class="nm">${solo?cl.n:esc(run.name)} ${h.blk?`<span class="blk">🛡 ${h.blk}</span>`:''}</span>${hpBar(run.hp,run.max)}${chips(h,h.pw)}</div></div>
     </div>
-    <div class="hand">${hand||'<p class="muted" style="align-self:center">Nessuna carta in mano.</p>'}</div>
+    <div class="hand">${hand||`<p class="muted" style="align-self:center">${h.ended?'Hai finito il turno.':'Nessuna carta in mano.'}</p>`}</div>
     <div class="pilebar">
-      <button class="btn" onclick="viewPile('draw')">Pesca ${g.draw.length}</button>
-      <button class="btn" onclick="viewPile('disc')">Scarti ${g.disc.length}</button>
-      ${g.exh.length?`<button class="btn" onclick="viewPile('exh')">Esaurite ${g.exh.length}</button>`:''}
-      <span class="grow muted" style="font-size:13px">${sel?'Scegli un nemico come bersaglio':'Turno '+g.turn}</span>
-      <button class="btn primary" onclick="endTurn()" ${g.busy?'disabled':''}>Fine turno</button>
+      <button class="btn" onclick="viewPile('draw')">Pesca ${h.draw.length}</button>
+      <button class="btn" onclick="viewPile('disc')">Scarti ${h.disc.length}</button>
+      ${h.exh.length?`<button class="btn" onclick="viewPile('exh')">Esaurite ${h.exh.length}</button>`:''}
+      <span class="grow muted" style="font-size:13px">${status}</span>
+      <button class="btn primary" onclick="endTurnBtn()" ${g.busy||h.ended||h.down?'disabled':''}>Fine turno</button>
     </div></div></main>`;
 }
 
+function roomScreen(P){
+  if(P.screen==='reward')return rewardScreen();
+  if(P.screen==='shop')return shopScreen();
+  if(P.screen==='rest')return restScreen();
+  if(P.screen==='event')return eventScreen();
+  if(P.screen==='treasure')return treasureScreen();
+  const wait=active().filter(p=>!R.players[p].done);
+  return waitBoxHTML('In attesa degli altri giocatori',wait.length?'Stanno ancora scegliendo: '+wait.map(p=>esc(pname(p))).join(', '):'Si riparte...');
+}
 function rewardScreen(){
   const r=run.reward;
   return `<main><div class="wrap"><h2>${r.title}</h2><div class="panel"><div class="rewards">
-    ${r.gold?`<button class="ritem" onclick="takeGold()"><span class="ic">🪙</span><span>${r.gold} monete d'oro</span></button>`:''}
-    ${r.potion?`<button class="ritem" onclick="takePotion()"><span class="ic"><span class="pot full" style="display:inline-block;background:${POTIONS[r.potion].col}"></span></span><span><b>${POTIONS[r.potion].n}</b><br><span class="muted">${POTIONS[r.potion].d}</span></span></button>`:''}
-    ${r.relic?`<button class="ritem" onclick="takeRelic()"><span class="ic">${RELICS[r.relic].ic}</span><span><b>${RELICS[r.relic].n}</b><br><span class="muted">${RELICS[r.relic].d}</span></span></button>`:''}
+    ${r.gold?`<button class="ritem" onclick="send({t:'takeGold'})"><span class="ic">🪙</span><span>${r.gold} monete d'oro</span></button>`:''}
+    ${r.potion?`<button class="ritem" onclick="takePotionUI()"><span class="ic"><span class="pot full" style="display:inline-block;background:${POTIONS[r.potion].col}"></span></span><span><b>${POTIONS[r.potion].n}</b><br><span class="muted">${POTIONS[r.potion].d}</span></span></button>`:''}
+    ${r.relic?`<button class="ritem" onclick="takeRelicUI()"><span class="ic">${RELICS[r.relic].ic}</span><span><b>${RELICS[r.relic].n}</b><br><span class="muted">${RELICS[r.relic].d}</span></span></button>`:''}
   </div>
-  ${r.cards?`<h3>Aggiungi una carta al mazzo</h3><div class="cardgrid">${r.cards.map((id,k)=>cardHTML({id,up:false},{click:`takeCard(${k})`})).join('')}</div>
-    <div><button class="btn" onclick="skipCards()">Salta la carta</button></div>`:''}
-  </div><div><button class="btn primary" onclick="go('map')">Prosegui sulla mappa</button></div></div></main>`;
+  ${r.cards?`<h3>Aggiungi una carta al mazzo</h3><div class="cardgrid">${r.cards.map((id,k)=>cardHTML({id,up:false},{click:`takeCardUI(${k})`})).join('')}</div>
+    <div><button class="btn" onclick="send({t:'skipCards'})">Salta la carta</button></div>`:''}
+  </div><div><button class="btn primary" onclick="proceed()">Prosegui sulla mappa</button></div></div></main>`;
 }
-
 function shopScreen(){
   const s=run.shop;const pc=p=>`<span class="price ${run.gold<p?'no':''}">🪙 ${p}</span>`;
   return `<main><div class="wrap"><div class="evhead"><span class="ic">${sprImg('shop',60)}</span><div><h2>Il Mercante Elfo</h2><p class="muted">«Merce rara per chi ha monete sonanti. Niente sconti agli avventurieri.»</p></div></div>
-  <div class="panel"><h3>Carte</h3><div class="shopgrid">${s.cards.map((it,k)=>`<div class="shopitem ${it.sold?'sold':''}">${cardHTML({id:it.id,up:false},{click:`buy('cards',${k})`})}${pc(it.price)}</div>`).join('')}</div></div>
+  <div class="panel"><h3>Carte</h3><div class="shopgrid">${s.cards.map((it,k)=>`<div class="shopitem ${it.sold?'sold':''}">${cardHTML({id:it.id,up:false},{click:`buyUI('cards',${k})`})}${pc(it.price)}</div>`).join('')}</div></div>
   <div class="panel"><h3>Reliquie e pozioni</h3><div class="shopgrid">
-    ${s.relics.map((it,k)=>`<div class="shopitem ${it.sold?'sold':''}"><button class="relicbox" onclick="buy('relics',${k})"><span class="ic">${RELICS[it.id].ic}</span><b>${RELICS[it.id].n}</b><span class="muted">${RELICS[it.id].d}</span></button>${pc(it.price)}</div>`).join('')}
-    ${s.potions.map((it,k)=>`<div class="shopitem ${it.sold?'sold':''}"><button class="relicbox" onclick="buy('potions',${k})"><span class="pot full" style="width:34px;height:34px;background:${POTIONS[it.id].col}"></span><b>${POTIONS[it.id].n}</b><span class="muted">${POTIONS[it.id].d}</span></button>${pc(it.price)}</div>`).join('')}
-    <div class="shopitem ${s.removeUsed?'sold':''}"><button class="relicbox" onclick="shopRemove()"><span class="ic">🔥</span><b>Brucia una carta</b><span class="muted">Rimuovi una carta dal mazzo.</span></button>${pc(removePrice())}</div>
+    ${s.relics.map((it,k)=>`<div class="shopitem ${it.sold?'sold':''}"><button class="relicbox" onclick="buyUI('relics',${k})"><span class="ic">${RELICS[it.id].ic}</span><b>${RELICS[it.id].n}</b><span class="muted">${RELICS[it.id].d}</span></button>${pc(it.price)}</div>`).join('')}
+    ${s.potions.map((it,k)=>`<div class="shopitem ${it.sold?'sold':''}"><button class="relicbox" onclick="buyUI('potions',${k})"><span class="pot full" style="width:34px;height:34px;background:${POTIONS[it.id].col}"></span><b>${POTIONS[it.id].n}</b><span class="muted">${POTIONS[it.id].d}</span></button>${pc(it.price)}</div>`).join('')}
+    <div class="shopitem ${s.removeUsed?'sold':''}"><button class="relicbox" onclick="shopRemoveUI()"><span class="ic">🔥</span><b>Brucia una carta</b><span class="muted">Rimuovi una carta dal mazzo.</span></button>${pc(removePrice())}</div>
   </div></div>
-  <div><button class="btn primary" onclick="go('map')">Lascia il negozio</button></div></div></main>`;
+  <div><button class="btn primary" onclick="proceed()">Lascia il negozio</button></div></div></main>`;
 }
-
 function restScreen(){
   const h=Math.floor(run.max*.3);const up=run.deck.some(canUp);
   return `<main><div class="wrap"><div class="evhead"><span class="ic">${sprImg('rest',60)}</span><div><h2>Falò</h2><p class="muted">Le braci scoppiettano. Per un momento, la Rocca sembra lontana.</p></div></div>
-    <div class="opts"><button class="opt" onclick="restHeal()"><b>Riposa</b><br><span class="muted">Recuperi ${h} PV (30% dei PV massimi).</span></button>
-    <button class="opt" onclick="restForge()" ${up?'':'disabled'}><b>Affila le armi</b><br><span class="muted">${up?'Potenzia una carta del mazzo.':'Tutte le carte sono già potenziate.'}</span></button></div></div></main>`;
+    <div class="opts"><button class="opt" onclick="restHealUI()"><b>Riposa</b><br><span class="muted">Recuperi ${h} PV (30% dei PV massimi).</span></button>
+    <button class="opt" onclick="restForgeUI()" ${up?'':'disabled'}><b>Affila le armi</b><br><span class="muted">${up?'Potenzia una carta del mazzo.':'Tutte le carte sono già potenziate.'}</span></button></div></div></main>`;
 }
-
 function eventScreen(){
   const ev=EVENTS.find(e=>e.id===run.event.id);
   return `<main><div class="wrap"><div class="evhead"><span class="ic">${ev.spr?sprImg(ev.spr,60):ev.ic}</span><h2>${ev.n}</h2></div>
     <div class="panel"><p class="lede">${ev.txt}</p>
-    ${run.event.result?`<p style="color:var(--torch2)">${run.event.result}</p><div><button class="btn primary" onclick="go('map')">Prosegui</button></div>`:
-    `<div class="opts">${ev.opts.map((o,k)=>`<button class="opt" onclick="chooseEv(${k})" ${o.req&&!o.req()?'disabled':''}><b>${o.t}</b><br><span class="muted">${o.s}</span></button>`).join('')}</div>`}
+    ${run.event.result?`<p style="color:var(--torch2)">${run.event.result}</p><div><button class="btn primary" onclick="proceed()">Prosegui</button></div>`:
+    `<div class="opts">${ev.opts.map((o,k)=>(o.solo&&!solo)?'':`<button class="opt" onclick="chooseEv(${k})" ${o.req&&!o.req()?'disabled':''}><b>${o.t}</b><br><span class="muted">${o.s}</span></button>`).join('')}</div>`}
     </div></div></main>`;
 }
-
 function treasureScreen(){
   const t=run.treasure;
   return `<main><div class="wrap"><div class="evhead"><span class="ic">${sprImg('treasure',60)}</span><h2>Forziere</h2></div>
     <div class="panel"><p class="lede">Il coperchio cigola. Dentro trovi:</p><div class="rewards">
     <div class="ritem"><span class="ic">🪙</span><span>${t.gold} monete d'oro</span></div>
     ${t.relic?`<div class="ritem"><span class="ic">${RELICS[t.relic].ic}</span><span><b>${RELICS[t.relic].n}</b><br><span class="muted">${RELICS[t.relic].d}</span></span></div>`:''}
-    </div></div><div><button class="btn primary" onclick="go('map')">Prosegui</button></div></div></main>`;
+    </div></div><div><button class="btn primary" onclick="proceed()">Prosegui</button></div></div></main>`;
 }
-
 function endScreen(){
-  const L=run.lvl||0;const score=Math.round((run.floor*10+run.kills*3+(run.win?150:0))*scoreMult(L));
-  return `<main><div class="wrap"><h1 style="font-size:clamp(40px,8vw,64px)">${run.win?'La Rocca è libera!':'Sei caduto'}</h1>
-    <p class="lede muted">${run.win?'Ignivora giace sconfitta. I bardi canteranno del tuo nome per generazioni.':'Le ombre di Valdombra reclamano un altro eroe. La prossima volta, il tuo mazzo sarà più forte.'}</p>
-    ${run.unlocked?`<div class="panel" style="border-color:var(--torch)"><b style="color:var(--torch2);font-size:18px">Livello di Assedio ${run.unlocked} sbloccato!</b><span class="muted">${lvlDesc(run.unlocked)}</span></div>`:''}
-    <div class="endstats"><div><b>${score}</b>Punteggio${L?` (×${scoreMult(L)})`:''}</div><div><b>${L}</b>Livello di Assedio</div><div><b>${run.floor}</b>Piano raggiunto</div><div><b>${run.kills}</b>Nemici uccisi</div><div><b>${run.deck.length}</b>Carte nel mazzo</div></div>
-    <p class="muted">Seed della partita: <b style="color:var(--fg)">${run.seed}</b> · ${CLASSES[run.cls].n}. Condividilo con gli amici e sfidali a fare meglio.</p>
-    <div><button class="btn primary" onclick="run=null;g=null;go('title')">Nuova partita</button></div></div></main>`;
+  const L=R.lvl||0;
+  if(R.win&&UI.unlockSeed!==R.seed+R.v){UI.unlockSeed=R.seed+R.v;UI.unlocked=null;if(L<MAXLVL&&getUnlocked()<=L){setUnlocked(L+1);UI.unlocked=L+1;pickLvl=L+1}}
+  const kills=R.order.reduce((s,p)=>s+(R.players[p].kills||0),0);
+  const score=Math.round((R.floor*10+kills*3+(R.win?150:0))*scoreMult(L));
+  return `<main><div class="wrap"><h1 style="font-size:clamp(40px,8vw,64px)">${R.win?'La Rocca è libera!':(solo?'Sei caduto':'Il gruppo è caduto')}</h1>
+    <p class="lede muted">${R.win?'Ignivora giace sconfitta. I bardi canteranno dei vostri nomi per generazioni.':'Le ombre di Valdombra reclamano altri eroi. La prossima volta il mazzo sarà più forte.'}</p>
+    ${UI.unlocked?`<div class="panel" style="border-color:var(--torch)"><b style="color:var(--torch2);font-size:18px">Livello di Assedio ${UI.unlocked} sbloccato!</b><span class="muted">${lvlDesc(UI.unlocked)}</span></div>`:''}
+    <div class="endstats"><div><b>${score}</b>Punteggio${L?` (×${scoreMult(L)})`:''}</div><div><b>${L}</b>Livello di Assedio</div><div><b>${R.floor}</b>Piano raggiunto</div><div><b>${kills}</b>Nemici uccisi</div></div>
+    ${solo?'':`<div class="plist">${R.order.map(p=>{const P=R.players[p];return `<div class="prow">${sprImg(P.cls,32)}<div style="flex:1"><span class="nm">${esc(P.name)}</span><br><span class="muted">${CLASSES[P.cls].n} · ${P.kills||0} nemici · ${P.deck.length} carte</span></div></div>`}).join('')}</div>`}
+    <p class="muted">Seed della partita: <b style="color:var(--fg)">${R.seed}</b>. Condividilo e sfida altri gruppi a fare meglio.</p>
+    <div class="row">${solo?`<button class="btn primary" onclick="R=null;g=null;screen='title';render()">Nuova partita</button>`:
+      (R.host===ME?`<button class="btn primary" onclick="send({t:'again'})">Nuova partita con il gruppo</button>`:'<span class="muted">L\'host può avviare una nuova partita.</span>')+'<button class="btn" onclick="leaveRoom()">Esci dalla stanza</button>'}</div></div></main>`;
 }
 
-render();
+
+/* ================= CHAT ================= */
+let chatOpen=false,chatSeen=0;
+ACT.chat=(a,P,pid)=>{const t=String(a.text||'').trim().slice(0,200);if(!t)return;R.chat=(R.chat||[]).concat({p:pid,n:P.name,t}).slice(-80)};
+function toggleChat(v){chatOpen=v==null?!chatOpen:v;$('#chat').hidden=!chatOpen;if(chatOpen){chatSeen=(R&&R.chat||[]).length;renderChat();setTimeout(()=>{const i=$('#chatin');if(i)i.focus()},50)}render()}
+function quickMsg(b){send({t:'chat',text:b.textContent})}
+function renderChat(){
+  const list=(R&&R.chat)||[];
+  if(!R||solo){$('#chat').hidden=true;chatOpen=false;chatSeen=0;return}
+  if(list.length>chatSeen&&!chatOpen){const m=list[list.length-1];if(m.p!==ME)toast(m.n+': '+m.t)}
+  if(chatOpen)chatSeen=list.length;
+  const log=$('#chatlog');const atBottom=log.scrollHeight-log.scrollTop-log.clientHeight<40;
+  log.innerHTML=list.length?list.map(m=>`<div class="msg ${m.p===ME?'me':''}"><b>${esc(m.n)}</b>${esc(m.t)}</div>`).join(''):'<p class="muted">Nessun messaggio. Scrivi qualcosa al gruppo!</p>';
+  if(atBottom||chatOpen)log.scrollTop=log.scrollHeight;
+}
+function chatBtn(){if(solo||!R)return '';const n=Math.max(0,((R.chat||[]).length)-chatSeen);return `<button class="btn chatbtn" onclick="toggleChat()">Chat${n&&!chatOpen?`<span class="dot">${n}</span>`:''}</button>`}
+document.getElementById('chatform').addEventListener('submit',e=>{e.preventDefault();const i=$('#chatin');const t=i.value.trim();if(!t)return;send({t:'chat',text:t});i.value=''});
+
+/* ================= AVVIO ================= */
+(function boot(){
+  const h=(location.hash||'').replace('#','').toUpperCase();
+  const saved=sload('valdombra-room');
+  if(saved&&typeof supabase!=='undefined'&&myName){render();joinRoom(saved);return}
+  if(/^[A-Z0-9]{4}$/.test(h)){UI.joinCode=h;screen='mp'}
+  render();
+})();
+
 </script>
 </body>
 </html>
