@@ -125,7 +125,9 @@ input.txt{background:var(--stone);border:1px solid var(--line);border-radius:8px
 
 /* Combat */
 .combat{flex:1;display:flex;flex-direction:column;min-height:0}
-.enemies{flex:1;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-content:center;padding:12px 16px;min-height:0;overflow:auto}
+.cscroll{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;padding-bottom:6px}
+.enemies{flex:1 0 auto;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-content:center;padding:12px 16px}
+.btn.danger{background:#8e2a22;border-color:#d4574b;color:#fff;font-weight:700}
 .ent{position:relative;background:var(--stone2);border:1px solid var(--line);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
 .enemy{width:150px;max-width:31vw;min-width:100px}
 .enemy.target{border-color:var(--torch2);box-shadow:0 0 0 2px rgba(255,207,122,.5);cursor:crosshair}
@@ -202,7 +204,7 @@ button.card:hover{transform:translateY(-8px)}
 .endstats b{display:block;font-family:var(--f-disp);font-size:30px;color:var(--torch2);font-variant-numeric:tabular-nums}
 
 /* Overlay & fx */
-.modal{position:fixed;inset:0;background:rgba(8,6,12,.82);z-index:50;display:flex;flex-direction:column;padding-block:max(16px,env(safe-area-inset-top,0px)) 16px;
+.modal{position:fixed;inset:0;background:rgba(8,6,12,.95);backdrop-filter:blur(3px);z-index:50;display:flex;flex-direction:column;padding-block:max(16px,env(safe-area-inset-top,0px)) 16px;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .modal .mhead{display:flex;align-items:center;gap:10px;max-width:900px;width:100%;margin:0 auto 8px}
 .modal .mbody{flex:1;overflow:auto}
@@ -212,6 +214,12 @@ button.card:hover{transform:translateY(-8px)}
 @keyframes rise{to{transform:translate(-50%,-150%);opacity:0}}
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#0d0b12;border:1px solid var(--torch);color:var(--fg);padding:9px 14px;border-radius:10px;z-index:70;max-width:min(90vw,420px);font-size:14px;text-align:center}
 @media (max-width:520px){
+  .enemies{gap:6px;padding:8px}
+  .enemy{width:calc(33.3% - 4px);min-width:0;max-width:none;padding:5px 4px;gap:3px}
+  .enemy .spr{width:58px;height:auto}.enemy.boss{width:min(240px,90%)}.enemy.boss .spr{width:120px}
+  .enemy .nm{font-size:11.5px}.intent{font-size:12px;padding:1px 6px;white-space:normal}
+  .hud .btn{padding:5px 9px;font-size:13px}.hud .cls{font-size:17px}
+  .herorow{padding:4px 8px;gap:8px}.energy{width:48px;height:48px;font-size:22px}.hero{min-width:0}.hero .spr{width:44px;height:auto}
   .allies{gap:4px;padding:0 8px}
   .ally{width:calc(33.3% - 3px);min-width:0;padding:3px 5px;gap:4px}
   .ally .spr{width:24px;height:auto}.ally .nm{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ally small{font-size:10px}
@@ -703,7 +711,8 @@ function store(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(
 function load(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function sstore(k,v){try{v==null?sessionStorage.removeItem(k):sessionStorage.setItem(k,v)}catch(e){}}
 function sload(k){try{return sessionStorage.getItem(k)}catch(e){return null}}
-function myPid(){let p=sload('valdombra-pid');if(!p){p='p'+Math.random().toString(36).slice(2,9);sstore('valdombra-pid',p)}return p}
+function myPid(){let p=load('valdombra-pid');if(!p){p='p'+Math.random().toString(36).slice(2,9);store('valdombra-pid',p)}return p}
+let cacheT=null,cacheS=null;function cacheState(s){cacheS=s;if(cacheT)return;cacheT=setTimeout(()=>{cacheT=null;if(R&&!solo&&cacheS)store('valdombra-cache-'+R.code,cacheS)},1500)}
 let myName=load('valdombra-nome')||'';
 function ctx(pid){CUR=pid;run=(pid&&R&&R.players[pid])||null;g=(R&&R.combat)||null;if(g)g.hero=(pid&&g.heroes[pid])||null}
 const isOnline=p=>solo||online.has(p);
@@ -715,7 +724,7 @@ function commit(){
   if(!R)return;
   if(isHost){R.rs=rng.s;R.v=(R.v||0)+1}
   const f=fxq;fxq=[];
-  if(isHost&&!solo&&chan){const s=ser();chan.send({type:'broadcast',event:'state',payload:{s,fx:f}});sstore('valdombra-cache-'+R.code,s)}
+  if(isHost&&!solo&&chan){const s=ser();chan.send({type:'broadcast',event:'state',payload:{s,fx:f}});cacheState(s)}
   if(solo){if(R.phase==='map')store(SOLO_K,ser());else if(R.phase==='end')store(SOLO_K,null)}
   render(f);
 }
@@ -1022,6 +1031,7 @@ function connect(code,onReady){
   chan.on('broadcast',{event:'state'},({payload})=>onState(payload))
     .on('broadcast',{event:'act'},({payload})=>{if(isHost&&payload&&payload.a)dispatch(payload.pid,payload.a)})
     .on('broadcast',{event:'hello'},({payload})=>{if(isHost)onHello(payload)})
+    .on('broadcast',{event:'closed'},()=>{toast('La stanza è stata chiusa.');leaveRoom(true)})
     .on('presence',{event:'sync'},()=>{if(!chan)return;online=new Set(Object.keys(chan.presenceState()));online.add(ME);onPresence()})
     .subscribe(async st=>{
       if(st==='SUBSCRIBED'){UI.status='';const tr=()=>{try{chan&&chan.track({name:myName,at:Date.now()})}catch(e){}};tr();setTimeout(tr,1200);setTimeout(tr,4000);clearInterval(window.trackIv);window.trackIv=setInterval(tr,15000);if(onReady){const f=onReady;onReady=null;f()}render()}
@@ -1032,12 +1042,26 @@ function connect(code,onReady){
 function onState(pl){
   if(!pl||!pl.s)return;const r=JSON.parse(pl.s);
   if(isHost){if(r.host===ME||(R&&r.v<=R.v))return;isHost=false}
-  R=r;sstore('valdombra-cache-'+R.code,pl.s);clearTimeout(joinTimer);checkHost();render(pl.fx||[]);
+  R=r;cacheState(pl.s);clearTimeout(joinTimer);UI.joining=null;
+  if(R.host===ME&&!isHost){isHost=true;rng=new RNG(0);rng.s=R.rs|0;toast('Ora sei tu a guidare la stanza.')}
+  if(!R.players[ME]&&R.phase!=='lobby'&&chan){const n=(UI.helloTries=(UI.helloTries||0)+1);if(n<=8&&!UI.helloT)UI.helloT=setTimeout(()=>{UI.helloT=null;if(R&&!R.players[ME]&&chan)chan.send({type:'broadcast',event:'hello',payload:{pid:ME,name:myName,cls:pickCls}})},3000)}else UI.helloTries=0;
+  checkHost();render(pl.fx||[]);
+}
+function remapPid(o,n){
+  R.players[n]=R.players[o];R.players[n].pid=n;delete R.players[o];R.order=R.order.map(x=>x===o?n:x);
+  if(R.votes&&R.votes[o]){R.votes[n]=R.votes[o];delete R.votes[o]}
+  const c=R.combat;if(c&&c.heroes[o]){c.heroes[n]=c.heroes[o];delete c.heroes[o];c.enemies.forEach(e=>{if(e.intent&&e.intent.tg===o)e.intent.tg=n})}
+  if(R.host===o)R.host=n;(R.chat||[]).forEach(m=>{if(m.p===o)m.p=n});
 }
 function onHello(p){
   if(!p||!p.pid||!R)return;const name=String(p.name||'Eroe').slice(0,16);
   if(R.players[p.pid])R.players[p.pid].name=name;
-  else if(R.phase==='lobby'&&R.order.length<MAXP){R.players[p.pid]={pid:p.pid,name,cls:CLASSES[p.cls]?p.cls:'guerriero',ready:false};R.order.push(p.pid)}
+  else{
+    // stesso nome di un giocatore disconnesso: è lui che rientra (telefono diverso o memoria cancellata)
+    const old=R.order.find(q=>q!==p.pid&&!online.has(q)&&String(R.players[q].name).toLowerCase()===name.toLowerCase());
+    if(old)remapPid(old,p.pid);
+    else if(R.phase==='lobby'&&R.order.length<MAXP){R.players[p.pid]={pid:p.pid,name,cls:CLASSES[p.cls]?p.cls:'guerriero',ready:false};R.order.push(p.pid)}
+  }
   commit();
 }
 function onPresence(){if(!R)return;if(isHost){checkProgress();commit()}else{checkHost();render()}}
@@ -1047,35 +1071,84 @@ function checkHost(){
   if(hostTimer)return;
   hostTimer=setTimeout(()=>{hostTimer=null;if(!R||isHost||online.has(R.host))return;const cand=R.order.filter(p=>online.has(p));if(cand[0]===ME)becomeHost()},4000);
 }
-function becomeHost(){
+function becomeHost(msg){
   isHost=true;R.host=ME;rng=new RNG(0);rng.s=R.rs|0;
   if(R.combat){R.combat.busy=false;if(R.combat.won){R.combat.won=false;checkEnd()}}
-  toast('L\'host è uscito: ora sei tu a guidare la stanza.');checkProgress();commit();
+  toast(msg||'L\'host è uscito: ora sei tu a guidare la stanza.');checkProgress();commit();
 }
+function rememberRoom(code){store('valdombra-room',code);try{location.hash=code}catch(e){}}
 function createRoom(){
   if(!saveName())return;
   solo=false;isHost=true;ME=myPid();const code=newSeed(4);R=newLobby(code);rng=new RNG(hashStr(code));online=new Set([ME]);
   if(!connect(code,()=>commit())){R=null;solo=true;return}
-  sstore('valdombra-room',code);try{location.hash=code}catch(e){}render();
+  rememberRoom(code);render();
 }
 function joinRoom(code){
   code=String(code||'').trim().toUpperCase();if(code.length!==4){toast('Il codice della stanza ha 4 caratteri.');return}
   if(!saveName())return;
+  if(chan){try{chan.unsubscribe()}catch(e){}chan=null}
   solo=false;isHost=false;ME=myPid();R=null;online=new Set([ME]);screen='mp';UI.joining=code;
   const hello=()=>chan&&chan.send({type:'broadcast',event:'hello',payload:{pid:ME,name:myName,cls:pickCls}});
   if(!connect(code,()=>{hello();setTimeout(()=>{if(!R)hello()},1500);
-    joinTimer=setTimeout(()=>{if(R)return;const cached=sload('valdombra-cache-'+code);
-      if(cached){const r=JSON.parse(cached);if(r.host===ME){R=r;becomeHost();return}}
-      toast('Stanza '+code+' non trovata. Controlla il codice.');leaveRoom()},5000)}))return;
-  sstore('valdombra-room',code);try{location.hash=code}catch(e){}render();
+    joinTimer=setTimeout(()=>{if(R)return;
+      // nessuno risponde: se eravamo in questa partita la riprendiamo dalla copia salvata su questo dispositivo
+      let r=null;try{r=JSON.parse(load('valdombra-cache-'+code))}catch(e){}
+      if(r&&r.players){if(!r.players[ME]){const old=r.order.find(q=>String(r.players[q].name).toLowerCase()===myName.toLowerCase());if(old){R=r;remapPid(old,ME)}}else R=r}
+      if(R){becomeHost('Nessun altro è collegato: la partita riprende da qui. Gli amici possono rientrare con il codice '+code+'.');return}
+      toast('Stanza '+code+' non trovata. Controlla il codice, oppure chiedi a chi è in partita di restare collegato.');leaveRoom(false)},5000)}))return;
+  rememberRoom(code);render();
 }
-function leaveRoom(){
+// forget=true: dimentica la stanza (non comparirà il tasto Continua)
+function leaveRoom(forget){
+  const code=R&&!solo?R.code:(UI.joining||load('valdombra-room'));
   clearInterval(window.trackIv);
   if(chan){try{chan.unsubscribe()}catch(e){}chan=null}
   clearTimeout(joinTimer);clearTimeout(hostTimer);hostTimer=null;
-  R=null;g=null;run=null;isHost=true;solo=true;UI.joining=null;screen='title';sstore('valdombra-room',null);
+  if(cacheT){clearTimeout(cacheT);cacheT=null;if(!forget&&R&&!solo&&cacheS)store('valdombra-cache-'+R.code,cacheS)}
+  if(forget===true){store('valdombra-room',null);if(code)store('valdombra-cache-'+code,null)}
+  R=null;g=null;run=null;isHost=true;solo=true;UI.joining=null;screen='title';modal=null;
   try{history.replaceState(null,'',location.pathname)}catch(e){}render();
 }
+function removePlayer(pid){
+  delete R.players[pid];R.order=R.order.filter(x=>x!==pid);if(R.votes)delete R.votes[pid];
+  const c=R.combat;if(c&&c.heroes[pid]){delete c.heroes[pid];c.enemies.forEach(e=>{if(e.intent&&e.intent.tg===pid)e.intent.tg=null})}
+  if(c&&!Object.keys(c.heroes).length){R.combat=null;R.phase='map';R.votes={}}
+}
+ACT.abandon=(a,P,pid)=>{
+  removePlayer(pid);
+  if(pid===R.host){const next=R.order.find(q=>online.has(q));if(next)R.host=next}
+};
+function abandonRun(){
+  modal=null;
+  if(solo){store(SOLO_K,null);R=null;g=null;screen='title';render();toast('Hai abbandonato il dungeon.');return}
+  const others=R.order.filter(q=>q!==ME&&isOnline(q));
+  if(others.length)send({t:'abandon'});
+  setTimeout(()=>{leaveRoom(true);toast('Hai abbandonato il dungeon.')},others.length?400:0);
+}
+function closeRoomForAll(){
+  modal=null;if(chan)chan.send({type:'broadcast',event:'closed',payload:{}});
+  setTimeout(()=>{leaveRoom(true);toast('Stanza chiusa per tutti.')},300);
+}
+function openMenu(){
+  const host=!solo&&R.host===ME;
+  modal={title:'Menu',html:`<div class="opts" style="max-width:520px;margin:0 auto">
+    <button class="opt" onclick="modal=null;${solo?"R=null;g=null;screen='title';render()":'leaveRoom(false)'}"><b>Torna al menu principale</b><br><span class="muted">La partita resta salvata: potrai riprenderla con il tasto Continua.</span></button>
+    <button class="opt" onclick="openAbandon()"><b>Abbandona il dungeon</b><br><span class="muted">${solo?'La partita viene cancellata.':'Esci per sempre da questa partita. Gli altri possono continuare senza di te.'}</span></button>
+    ${host?'<button class="opt" onclick="openClose()"><b>Chiudi la stanza per tutti</b><br><span class="muted">La partita finisce per tutto il gruppo e la stanza viene cancellata.</span></button>':''}
+  </div>`,cancel:true};render();
+}
+function openAbandon(){modal={title:'Abbandonare il dungeon?',html:`<div class="panel" style="max-width:520px;margin:0 auto"><p>${solo?'La partita in corso verrà cancellata e non potrai riprenderla.':'Il tuo eroe lascia il gruppo e non potrai rientrare in questa partita. Se sei l\'ultimo giocatore, la stanza viene cancellata.'}</p>
+  <div class="row"><button class="btn danger" onclick="abandonRun()">Sì, abbandona</button><button class="btn" onclick="openMenu()">Annulla</button></div></div>`,cancel:true};render()}
+function openClose(){modal={title:'Chiudere la stanza?',html:`<div class="panel" style="max-width:520px;margin:0 auto"><p>La partita finisce per tutti i giocatori e la stanza ${R.code} viene cancellata.</p>
+  <div class="row"><button class="btn danger" onclick="closeRoomForAll()">Sì, chiudi per tutti</button><button class="btn" onclick="openMenu()">Annulla</button></div></div>`,cancel:true};render()}
+// telefono: quando torni sulla pagina, ricollega se la connessione è caduta
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState!=='visible'||solo||!chan)return;
+  const code=(R&&R.code)||UI.joining;if(!code)return;
+  const st=chan.state;
+  if(st!=='joined'){const keep=R;joinRoom(code);if(keep&&!R){R=keep;isHost=false;render()}}
+  else{try{chan.track({name:myName,at:Date.now()})}catch(e){}}
+});
 function saveName(){const el=$('#pname');const n=(el?el.value:myName).trim().slice(0,16);if(!n){toast('Scrivi il tuo nome prima di continuare.');return false}myName=n;store('valdombra-nome',n);return true}
 
 /* ================= SOLO ================= */
@@ -1191,7 +1264,7 @@ function hud(){
     ${solo?'':`<button class="btn" onclick="copyInvite()" title="Copia il link d'invito">Stanza ${R.code}</button>`}
     <button class="btn" onclick="copySeed()" title="Condividi questo seed per giocare la stessa mappa">Seed ${R.seed}</button>
     <button class="btn" onclick="viewDeck()">Mazzo ${run.deck.length}</button>
-    ${chatBtn()}${solo?'':'<button class="btn" onclick="leaveRoom()">Esci</button>'}
+    ${chatBtn()}<button class="btn" onclick="openMenu()">Menu</button>
   </header>${UI.status?`<div class="netwarn">${UI.status}</div>`:''}`;
 }
 function partyHTML(){
@@ -1219,7 +1292,7 @@ function render(fxs){
     }
   }
   if(modal)h+=`<div class="modal" role="dialog" aria-label="${modal.title}"><div class="mhead"><h3 style="flex:1">${modal.title}</h3>${modal.cancel?'<button class="btn" onclick="closeModal()">Chiudi</button>':''}</div>
-    <div class="mbody"><div class="cardgrid">${modal.list.map((it,k)=>cardHTML(it.c,modal.cb?{click:`pickerPick(${k})`}:{})).join('')||'<p class="muted">Nessuna carta.</p>'}</div></div></div>`;
+    <div class="mbody">${modal.html||`<div class="cardgrid">${modal.list.map((it,k)=>cardHTML(it.c,modal.cb?{click:`pickerPick(${k})`}:{})).join('')||'<p class="muted">Nessuna carta.</p>'}</div>`}</div></div>`;
   app.innerHTML=h;
   if(R&&R.phase==='map')scrollMap();
   renderChat();
@@ -1246,6 +1319,7 @@ function titleHTML(){
       <p class="lede muted">La Rocca di Valdombra è caduta nelle mani di un drago. Scegli un eroe, costruisci il tuo mazzo lungo la strada e scala i 15 piani della rocca fino alla tana di Ignivora. Da solo o con fino a ${MAXP} amici.</p>
     </div>
     <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap;border-color:var(--torch)"><div style="flex:1;min-width:200px"><b style="font-size:17px">Gioca con gli amici</b><br><span class="muted">Crea una stanza e manda il codice, oppure entra con il codice di un amico.</span></div><button class="btn primary" onclick="screen='mp';render()">Multigiocatore</button></div>
+    ${mpContinueHTML()}
     ${sp?`<div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:200px"><b>Partita in corso (da solo)</b><br><span class="muted">${sprImg(sp.cls,22,'inl')} ${CLASSES[sp.cls].n} · Piano ${sv.floor}${sv.lvl?' · Assedio '+sv.lvl:''} · Seed ${sv.seed}</span></div><button class="btn primary" onclick="continueSolo()">Continua</button></div>`:''}
     <h3>Da solo: scegli il tuo eroe</h3>
     ${classPicker()}
@@ -1255,10 +1329,19 @@ function titleHTML(){
       <button class="btn primary" onclick="startSolo()" style="padding:10px 22px;font-size:17px">Inizia la scalata</button></div>
   </div></main>`;
 }
+function mpContinueHTML(){
+  const code=load('valdombra-room');if(!code)return '';
+  let r=null;try{r=JSON.parse(load('valdombra-cache-'+code))}catch(e){}
+  const me=r&&r.players&&(r.players[myPid()]||Object.values(r.players).find(P=>String(P.name).toLowerCase()===myName.toLowerCase()));
+  const info=r?(r.phase==='lobby'?'Sala d\'attesa':'Piano '+r.floor+(r.lvl?' · Assedio '+r.lvl:''))+(me?' · '+CLASSES[me.cls].n:''):'';
+  return `<div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap;border-color:var(--torch)"><div style="flex:1;min-width:200px"><b style="font-size:17px">Partita multigiocatore in corso</b><br>
+    <span class="muted">${me?sprImg(me.cls,22,'inl')+' ':''}Stanza ${esc(code)}${info?' · '+info:''}</span></div>
+    <div class="row"><button class="btn primary" onclick="joinRoom('${esc(code)}')">Continua</button><button class="btn" onclick="leaveRoom(true)">Dimentica</button></div></div>`;
+}
 function mpMenuHTML(){
   const joining=UI.joining;
   return `<main><div class="wrap" style="padding-block:12px 24px">
-    <div class="row"><button class="btn" onclick="${joining?'leaveRoom()':"screen='title';render()"}">← Indietro</button></div>
+    <div class="row"><button class="btn" onclick="${joining?'leaveRoom(false)':"screen='title';render()"}">← Indietro</button></div>
     <h2>Multigiocatore</h2>
     ${joining?`<div class="panel"><b>Mi collego alla stanza ${esc(joining)}...</b><span class="muted">Se non succede niente entro qualche secondo, controlla il codice.</span></div>`:`
     <div class="panel"><label for="pname"><b>Il tuo nome</b></label><input id="pname" class="txt" style="width:100%;max-width:360px" maxlength="16" value="${esc(myName)}" placeholder="Per esempio: Manu" autocomplete="off"></div>
@@ -1272,7 +1355,7 @@ function lobbyHTML(){
   const host=R.host===ME;const me=R.players[ME];
   const notReady=active().filter(p=>!R.players[p].ready&&p!==R.host);
   return `<main><div class="wrap" style="padding-block:12px 24px">
-    <div class="row"><button class="btn" onclick="leaveRoom()">← Esci dalla stanza</button>${chatBtn()}</div>
+    <div class="row"><button class="btn" onclick="R.phase==='lobby'?(send({t:'abandon'}),setTimeout(()=>leaveRoom(true),300)):leaveRoom(false)">← Esci dalla stanza</button>${chatBtn()}</div>
     <div class="panel" style="align-items:flex-start"><span class="muted" style="letter-spacing:.15em;text-transform:uppercase;font-size:12px">Codice della stanza</span>
       <span class="code">${R.code}</span><div class="row"><button class="btn primary" onclick="copyInvite()">Copia link d'invito</button><span class="muted" style="font-size:13px">oppure detta il codice ai tuoi amici</span></div></div>
     ${UI.status?`<div class="netwarn">${UI.status}</div>`:''}
@@ -1292,8 +1375,8 @@ function lobbyHTML(){
   </div></main>`;
 }
 function notInRoomHTML(){
-  return `<main><div class="wrap"><h2>Partita già iniziata</h2><p class="lede muted">La stanza ${R.code} sta già giocando. Potrai unirti quando torneranno nella sala d'attesa.</p>
-    <div><button class="btn primary" onclick="leaveRoom()">Torna al menu</button></div></div></main>`;
+  return `<main><div class="wrap"><h2>Partita già iniziata</h2><p class="lede muted">La stanza ${R.code} sta già giocando. Se eri già in questa partita, rientra con lo <b>stesso nome</b> che usavi prima. Altrimenti potrai unirti quando il gruppo tornerà nella sala d'attesa.</p>
+    <div><button class="btn primary" onclick="leaveRoom(true)">Torna al menu</button></div></div></main>`;
 }
 function waitBoxHTML(t,s){return `<main><div class="wrap"><div class="panel"><h3>${t}</h3><p class="muted">${s}</p></div></div></main>`}
 
@@ -1336,13 +1419,13 @@ function combatScreen(){
   const heroes=Object.keys(g.heroes).filter(p=>!g.heroes[p].down&&isOnline(p));const ended=heroes.filter(p=>g.heroes[p].ended).length;
   let status=sel?'Scegli un nemico come bersaglio':'Turno '+g.turn;
   if(g.busy)status='Turno dei nemici...';else if(h.down)status='Sei a terra: ti rialzi a fine combattimento';else if(h.ended&&!solo)status=`In attesa degli altri (${ended}/${heroes.length})`;
-  return `<main class="flush"><div class="combat">
+  return `<main class="flush"><div class="combat"><div class="cscroll" id="cscroll">
     <div class="enemies">${en}</div>
     ${allies?`<div class="allies">${allies}</div>`:''}
     <div class="herorow">
       <div class="energy" title="Energia">${h.energy}</div>
       <div class="ent hero ${h.down?'down':''}" id="ent-h-${ME}"><span class="face">${sprImg(run.cls,60,'idle')}</span><div class="info"><span class="nm">${solo?cl.n:esc(run.name)} ${h.blk?`<span class="blk">🛡 ${h.blk}</span>`:''}</span>${hpBar(run.hp,run.max)}${chips(h,h.pw)}</div></div>
-    </div>
+    </div></div>
     <div class="hand">${hand||`<p class="muted" style="align-self:center">${h.ended?'Hai finito il turno.':'Nessuna carta in mano.'}</p>`}</div>
     <div class="pilebar">
       <button class="btn" onclick="viewPile('draw')">Pesca ${h.draw.length}</button>
@@ -1418,7 +1501,7 @@ function endScreen(){
     ${solo?'':`<div class="plist">${R.order.map(p=>{const P=R.players[p];return `<div class="prow">${sprImg(P.cls,32)}<div style="flex:1"><span class="nm">${esc(P.name)}</span><br><span class="muted">${CLASSES[P.cls].n} · ${P.kills||0} nemici · ${P.deck.length} carte</span></div></div>`}).join('')}</div>`}
     <p class="muted">Seed della partita: <b style="color:var(--fg)">${R.seed}</b>. Condividilo e sfida altri gruppi a fare meglio.</p>
     <div class="row">${solo?`<button class="btn primary" onclick="R=null;g=null;screen='title';render()">Nuova partita</button>`:
-      (R.host===ME?`<button class="btn primary" onclick="send({t:'again'})">Nuova partita con il gruppo</button>`:'<span class="muted">L\'host può avviare una nuova partita.</span>')+'<button class="btn" onclick="leaveRoom()">Esci dalla stanza</button>'}</div></div></main>`;
+      (R.host===ME?`<button class="btn primary" onclick="send({t:'again'})">Nuova partita con il gruppo</button>`:'<span class="muted">L\'host può avviare una nuova partita.</span>')+'<button class="btn" onclick="leaveRoom(true)">Esci dalla stanza</button>'}</div></div></main>`;
 }
 
 
@@ -1442,9 +1525,7 @@ document.getElementById('chatform').addEventListener('submit',e=>{e.preventDefau
 /* ================= AVVIO ================= */
 (function boot(){
   const h=(location.hash||'').replace('#','').toUpperCase();
-  const saved=sload('valdombra-room');
-  if(saved&&typeof supabase!=='undefined'&&myName){render();joinRoom(saved);return}
-  if(/^[A-Z0-9]{4}$/.test(h)){UI.joinCode=h;screen='mp'}
+  if(/^[A-Z0-9]{4}$/.test(h)&&h!==load('valdombra-room')){UI.joinCode=h;screen='mp'}
   render();
 })();
 
