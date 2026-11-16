@@ -27,7 +27,18 @@ body{background:var(--stone);color:var(--fg);font-family:var(--f-body);font-size
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible{outline:2px solid var(--torch2);outline-offset:2px}
 #app{height:100%;display:flex;flex-direction:column}
-#ver{position:fixed;top:calc(env(safe-area-inset-top,0px) + 3px);right:calc(env(safe-area-inset-right,0px) + 8px);z-index:80;font-size:10.5px;line-height:1;letter-spacing:.04em;color:var(--muted);background:var(--stone);border:1px solid var(--line);border-radius:5px;padding:2px 6px;pointer-events:none;font-variant-numeric:tabular-nums}
+#ver{position:fixed;top:calc(env(safe-area-inset-top,0px) + 2px);right:calc(env(safe-area-inset-right,0px) + 8px);z-index:80;font-size:10.5px;line-height:1;letter-spacing:.04em;color:var(--muted);background:var(--stone);border:1px solid var(--line);border-radius:5px;padding:2px 6px 2px 4px;font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:4px}
+#ver:hover{color:var(--fg);border-color:var(--torch)}#ver .spr{width:12px;height:12px}
+.set{display:flex;flex-direction:column;gap:14px;max-width:560px;margin:0 auto;width:100%}
+.set .panel{gap:12px}.set h4{margin:0;font-family:var(--f-disp);font-size:18px;color:var(--torch2);display:flex;align-items:center;gap:8px}
+.srow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.srow .lab{flex:1;min-width:150px}.srow .lab small{display:block;color:var(--muted);font-size:13px}
+@media (max-width:560px){.srow.sl .lab{flex-basis:100%}}
+.srow input[type=range]{flex:1;min-width:140px;max-width:260px;accent-color:var(--torch)}.srow .val{width:42px;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.sw{width:52px;height:28px;border-radius:14px;border:1px solid var(--line);background:var(--stone3);position:relative;flex:none;padding:0}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--muted);transition:left .15s}
+.sw[aria-pressed=true]{background:var(--torch);border-color:var(--torch)}.sw[aria-pressed=true]::after{left:27px;background:#fff}
+body.noanim *{animation:none!important;transition:none!important}body.noanim .float{display:none}
+
 .hud{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding-block:8px;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   background:var(--stone2);border-bottom:1px solid var(--line);font-size:14px;padding-top:20px!important}
@@ -273,7 +284,7 @@ button.card:hover{transform:translateY(-8px)}
 <body>
 
 <div id="app"></div>
-<div id="ver" aria-label="Versione del gioco">v2.6 · 16/11</div>
+<button id="ver" type="button" onclick="openSettings()" aria-label="Impostazioni e versione del gioco"></button>
 <div id="fx"></div>
 <aside id="chat" hidden aria-label="Chat di gioco">
   <div class="chead"><h3 style="flex:1">Chat del gruppo</h3><button class="btn" onclick="toggleChat(false)">Chiudi</button></div>
@@ -620,6 +631,8 @@ i_shield:["............", ".kkkkkkkkkk.", ".kbbbbbbBBk.", ".kbwbbbbBBk.", ".kbbb
 i_buff:[".....kk.....", "....kyyk....", "...kyyyyk...", "..kyyyyyyk..", ".kkkkyykkkk.", "....kyyk....", "....kyyk....", "....kyyk....", "....kyyk....", "....kYYk....", "....kkkk....", "............"],
 i_heal:["............", "....kkkk....", "....klLk....", "....klLk....", ".kkkklLkkkk.", ".klllllllLk.", ".kLLLlLLLLk.", ".kkkklLkkkk.", "....klLk....", "....kLLk....", "....kkkk....", "............"],
 i_skull:["............", "...kkkkkk...", "..kppppppk..", ".kppppppppk.", ".kpkkppkkpk.", ".kpkkppkkpk.", ".kppppppppk.", "..kppkkppk..", "...kpppPk...", "...kpkpkk...", "...kkkkk....", "............"],
+i_gear:["....kkkk....","...kMmmMk...",".kkkmmmmkkk.","kMmmmkkmmmMk","kmmmkMMkmmmk",".kmkM..Mkmk.",".kmkM..Mkmk.","kmmmkMMkmmmk","kMmmmkkmmmMk",".kkkmmmmkkk.","...kMmmMk...","....kkkk...."],
+i_note:["......kkkk..",".....kyyyk..",".....kykyk..",".....kyk.k..",".....kyk....",".....kyk....",".....kyk....","..kkkkyk....",".kyyyyyk....",".kyyyyyk....","..kkkkk.....","............"],
 i_crown:["............","............","k....kk....k","kyk.kyyk.kyk","kyykyyyykyyk","kyyyyyyyyyyk","kyyyrryyyyyk","kyyyyyyyyyyk","kYYYYYYYYYYk","kkkkkkkkkkkk","............","............"],
 i_lock:["............", "....kkkk....", "...kMkkMk...", "...kM..Mk...", "...kM..Mk...", "..kkkkkkkk..", "..kyyyyyYk..", "..kyykkyYk..", "..kyykkyYk..", "..kyyyyyYk..", "..kkkkkkkk..", "............"],
 i_flask:["....kkkk....", ".....kk.....", "....kNNk....", "....kwwk....", "....kwwk....", "...kwxxwk...", "..kxxxxxxk..", "..kxwxxxXk..", "..kxxxxxXk..", "..kXxxxXXk..", "...kkkkkk...", "............"],
@@ -1391,6 +1404,7 @@ function closeRoomForAll(){
 function openMenu(){
   const host=!solo&&R.host===ME;
   modal={title:'Menu',html:`<div class="opts" style="max-width:520px;margin:0 auto">
+    <button class="opt" onclick="openSettings()"><b>Impostazioni</b><br><span class="muted">Musica, effetti sonori, chat, animazioni e versione del gioco.</span></button>
     <button class="opt" onclick="modal=null;${solo?"R=null;g=null;screen='title';render()":'leaveRoom(false)'}"><b>Torna al menu principale</b><br><span class="muted">La partita resta salvata: potrai riprenderla con il tasto Continua.</span></button>
     <button class="opt" onclick="openAbandon()"><b>Abbandona il dungeon</b><br><span class="muted">${solo?'La partita viene cancellata.':'Esci per sempre da questa partita. Gli altri possono continuare senza di te.'}</span></button>
     ${host?'<button class="opt" onclick="openClose()"><b>Chiudi la stanza per tutti</b><br><span class="muted">La partita finisce per tutto il gruppo e la stanza viene cancellata.</span></button>':''}
@@ -1511,6 +1525,7 @@ function stInfo(k){toast(STN[k][0]+': '+STN[k][1])}
 function fx(k,txt,cls){if(k==='hero')k='h-'+CUR;fxq.push({k,txt,cls})}
 function flushFx(list){
   const layer=$('#fx');const counts={};
+  const heard={};(list||[]).forEach(f=>{if(!heard[f.cls]){heard[f.cls]=1;sfx(f.cls)}});
   (list||[]).forEach(f=>{const el=document.getElementById('ent-'+f.k);if(!el)return;const r=el.getBoundingClientRect();counts[f.k]=(counts[f.k]||0)+1;
     const d=document.createElement('div');d.className='float '+f.cls;d.textContent=f.txt;d.style.left=(r.left+r.width/2+(counts[f.k]-1)*18)+'px';d.style.top=(r.top+r.height*.35+(counts[f.k]-1)*14)+'px';
     layer.appendChild(d);setTimeout(()=>d.remove(),1000);
@@ -1601,6 +1616,7 @@ function render(fxs){
   else if(modal&&modal.pend&&!(run&&run.pendPot))modal=null;
   if(modal&&modal.bottega)modal.html=bottegaHTML();
   if(modal&&modal.board)modal.html=boardModalHTML();
+  if(modal&&modal.settings)modal.html=settingsHTML();
   if(modal)h+=`<div class="modal" role="dialog" aria-label="${modal.title}"><div class="mhead"><h3 style="flex:1">${modal.title}</h3>${modal.cancel?'<button class="btn" onclick="closeModal()">Chiudi</button>':''}</div>
     <div class="mbody">${modal.html||pickerGrid()}</div></div>`;
   // mantieni la posizione di scorrimento se la schermata è la stessa
@@ -1618,6 +1634,7 @@ function render(fxs){
   if(R&&!R.voteAnim&&UI.anim)UI.anim=null;
   renderChat();
   flushFx(fxs);
+  musicFollow();
 }
 
 function classPicker(){
@@ -1642,6 +1659,7 @@ function titleHTML(){
     <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap;border-color:var(--torch)"><div style="flex:1;min-width:200px"><b style="font-size:17px">Gioca con gli amici</b><br><span class="muted">Crea una stanza e manda il codice, oppure entra con il codice di un amico.</span></div><button class="btn primary" onclick="screen='mp';render()">Multigiocatore</button></div>
     <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><span style="line-height:0">${ic('i_crown',34)}</span><div style="flex:1;min-width:200px"><b style="font-size:17px">Bottega della Rocca</b><br><span class="muted">${getCrowns()} Corone${zEmpty(getZaino())?'':' · Zaino: '+zText(getZaino())}</span></div><button class="btn" onclick="openBottega()">Apri la bottega</button></div>
     <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><span style="line-height:0">${ic('i_buff',34)}</span><div style="flex:1;min-width:200px"><b style="font-size:17px">Classifiche</b><br><span class="muted">I migliori giocatori in Sopravvivenza, da soli e in gruppo.</span></div><button class="btn" onclick="openBoard('solo')">Guarda le classifiche</button></div>
+    <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><span style="line-height:0">${ic('i_note',34)}</span><div style="flex:1;min-width:200px"><b style="font-size:17px">Impostazioni</b><br><span class="muted">Musica ${SET.mute?'disattivata':Math.round(SET.mus*100)+'%'} · Effetti ${SET.mute?'disattivati':Math.round(SET.sfx*100)+'%'} · Chat ${SET.chat?'attiva':'nascosta'}</span></div><button class="btn" onclick="openSettings()">Apri</button></div>
     ${mpContinueHTML()}
     ${sp?`<div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:200px"><b>Partita in corso (da solo)</b><br><span class="muted">${sprImg(sp.cls,22,'inl')} ${CLASSES[sp.cls].n} · Piano ${sv.floor}${sv.lvl?' · Assedio '+sv.lvl:''} · Seed ${sv.seed}</span></div><button class="btn primary" onclick="continueSolo()">Continua</button></div>`:''}
     <h3>Da solo: scegli il dungeon</h3>
@@ -1978,13 +1996,14 @@ function quickMsg(b){send({t:'chat',text:b.textContent})}
 function renderChat(){
   const list=(R&&R.chat)||[];
   if(!R||solo){$('#chat').hidden=true;chatOpen=false;chatSeen=0;return}
-  if(list.length>chatSeen&&!chatOpen){const m=list[list.length-1];if(m.p!==ME)toast(m.n+': '+m.t)}
+  if(!SET.chat){$('#chat').hidden=true;chatOpen=false;chatSeen=list.length;return}
+  if(list.length>chatSeen&&!chatOpen){const m=list[list.length-1];if(m.p!==ME){if(SET.chatToast)toast(m.n+': '+m.t);sfx('msg')}}
   if(chatOpen)chatSeen=list.length;
   const log=$('#chatlog');const atBottom=log.scrollHeight-log.scrollTop-log.clientHeight<40;
   log.innerHTML=list.length?list.map(m=>`<div class="msg ${m.p===ME?'me':''}"><b>${esc(m.n)}</b>${esc(m.t)}</div>`).join(''):'<p class="muted">Nessun messaggio. Scrivi qualcosa al gruppo!</p>';
   if(atBottom||chatOpen)log.scrollTop=log.scrollHeight;
 }
-function chatBtn(){if(solo||!R)return '';const n=Math.max(0,((R.chat||[]).length)-chatSeen);return `<button class="btn chatbtn" onclick="toggleChat()">Chat${n&&!chatOpen?`<span class="dot">${n}</span>`:''}</button>`}
+function chatBtn(){if(solo||!R||!SET.chat)return '';const n=Math.max(0,((R.chat||[]).length)-chatSeen);return `<button class="btn chatbtn" onclick="toggleChat()">Chat${n&&!chatOpen?`<span class="dot">${n}</span>`:''}</button>`}
 document.getElementById('chatform').addEventListener('submit',e=>{e.preventDefault();const i=$('#chatin');const t=i.value.trim();if(!t)return;send({t:'chat',text:t});i.value=''});
 
 
@@ -2000,6 +2019,174 @@ function startVoteAnim(va){
   setTimeout(()=>{if(!UI.anim||UI.anim.id!==va.id)return;UI.anim.cur=null;UI.anim.done=true;render()},total+120);
 }
 function paintAnim(){document.querySelectorAll('.mapsvg .node').forEach(n=>{n.classList.toggle('spin',!!UI.anim&&n.dataset.k===UI.anim.cur)})}
+/* ================= IMPOSTAZIONI ================= */
+const VERSION='v2.7',VDATE='16/11';
+const SET_K='valdombra-impostazioni';
+const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:true};
+let SET=(()=>{try{return Object.assign({},SET_DEF,JSON.parse(load(SET_K)||'{}'))}catch(e){return Object.assign({},SET_DEF)}})();
+function saveSet(){try{localStorage.setItem(SET_K,JSON.stringify(SET))}catch(e){}applySet()}
+function applySet(){
+  document.body.classList.toggle('noanim',!SET.anim);
+  const v=$('#ver');if(v)v.innerHTML=`${ic('i_gear',12)}${VERSION} · ${VDATE}`;
+  AU.vol();
+}
+function openSettings(){modal={title:'Impostazioni',settings:true,cancel:true,list:[]};render()}
+const swb=(k,lab,sub)=>`<div class="srow"><div class="lab">${lab}${sub?`<small>${sub}</small>`:''}</div><button class="sw" aria-pressed="${!!SET[k]}" aria-label="${lab}" onclick="setTog('${k}')"></button></div>`;
+const sld=(k,lab)=>`<div class="srow sl"><div class="lab">${lab}</div><input type="range" min="0" max="100" step="5" value="${Math.round(SET[k]*100)}" aria-label="${lab}" oninput="setVol('${k}',this.value)" onchange="setVol('${k}',this.value,1)"><span class="val" id="v-${k}">${Math.round(SET[k]*100)}%</span></div>`;
+function settingsHTML(){
+  const inRoom=R&&!solo;
+  return `<div class="set">
+    <div class="panel"><h4>${ic('i_note',18)} Audio</h4>
+      ${sld('mus','Volume della musica')}
+      ${sld('sfx','Volume degli effetti')}
+      ${swb('mute','Silenzia tutto','Spegne musica ed effetti senza perdere i volumi scelti.')}
+      <div class="row"><button class="btn" onclick="AU.unlock();sfx('dmg')">Prova un effetto</button><span class="muted" style="font-size:13px">Brano attuale: ${AU.name()}</span></div>
+    </div>
+    <div class="panel"><h4>Chat</h4>
+      ${swb('chat','Mostra la chat','Se la spegni, il tasto Chat sparisce e non vedi i messaggi del gruppo.')}
+      ${SET.chat?swb('chatToast','Avvisi dei nuovi messaggi','Un riquadro in basso ti mostra il messaggio appena arriva.'):''}
+      ${inRoom?'':'<p class="muted" style="font-size:13px">La chat c\'è solo nelle partite con gli amici.</p>'}
+    </div>
+    <div class="panel"><h4>Grafica</h4>
+      ${swb('anim','Animazioni','Numeri dei danni, scosse dei mostri e animazione del voto. Spegnile se il telefono va a scatti.')}
+    </div>
+    <div class="panel"><h4>${ic('i_gear',18)} Informazioni</h4>
+      <div class="srow"><div class="lab">Versione</div><b>${VERSION} · ${VDATE}</b></div>
+      ${inRoom?`<div class="srow"><div class="lab">Stanza</div><b>${R.code}</b></div><div class="srow"><div class="lab">Connessione</div><b>${isHost?'Sei tu a guidare la stanza':'Collegato'}</b></div>`:''}
+      <p class="muted" style="font-size:13px">Novità di questa versione: musica ed effetti sonori, questo menu delle impostazioni.</p>
+      <p class="muted" style="font-size:13px">Le impostazioni valgono solo per questo dispositivo e restano salvate.</p>
+      <div><button class="btn" onclick="SET=Object.assign({},SET_DEF);saveSet();render()">Ripristina le impostazioni</button></div>
+    </div></div>`;
+}
+function setTog(k){SET[k]=!SET[k];saveSet();if(k==='mute'&&!SET.mute){AU.unlock();sfx('ui')}render()}
+function setVol(k,v,done){SET[k]=v/100;const l=$('#v-'+k);if(l)l.textContent=v+'%';if(SET.mute&&v>0)SET.mute=false;AU.vol();if(done){saveSet();AU.unlock();if(k==='sfx')sfx('blk');render()}}
+
+/* ================= AUDIO =================
+   Musica originale a 8 bit generata dal browser (nessun file esterno). */
+const AU=(()=>{
+  let C=null,master,mus,fxb,echo,noise,timer=null,cur=null,want=null,step=0,next=0,swAt=0,mel={};
+  const mtof=m=>440*Math.pow(2,(m-69)/12);
+  const MIN=[0,2,3,5,7,8,10],HAR=[0,2,3,5,7,8,11],MAJ=[0,2,4,5,7,9,11];
+  const TR={
+    menu:{n:'La rocca addormentata',bpm:72,root:62,sc:MIN,ch:[[0,'m'],[-4,'M'],[3,'M'],[-2,'M']],lead:'triangle',bass:'long',dr:0,arp:1,lv:.26},
+    map:{n:'Sentiero tra le torri',bpm:100,root:57,sc:MIN,ch:[[0,'m'],[5,'m'],[-2,'M'],[3,'M']],lead:'square',bass:'walk',dr:1,arp:0,lv:.15},
+    combat:{n:'Lame incrociate',bpm:138,root:52,sc:HAR,ch:[[0,'m'],[-4,'M'],[-2,'M'],[-5,'M']],lead:'square',bass:'pulse',dr:2,arp:0,lv:.15},
+    boss:{n:'Il respiro del drago',bpm:150,root:48,sc:HAR,ch:[[0,'m'],[-4,'M'],[1,'M'],[-5,'M']],lead:'sawtooth',bass:'pulse',dr:3,arp:0,lv:.12},
+    cmap:{n:'Corridoi di brina',bpm:84,root:54,sc:MIN,ch:[[0,'m'],[-4,'M'],[0,'m'],[1,'M']],lead:'sine',bass:'long',dr:1,arp:1,lv:.24},
+    ccombat:{n:'Ossa nel ghiaccio',bpm:128,root:50,sc:HAR,ch:[[0,'m'],[1,'M'],[0,'m'],[-2,'M']],lead:'triangle',bass:'pulse',dr:2,arp:0,lv:.27},
+    victory:{n:'Gloria a Valdombra',bpm:108,root:60,sc:MAJ,ch:[[0,'M'],[5,'M'],[7,'M'],[0,'M']],lead:'square',bass:'walk',dr:1,arp:1,lv:.11},
+  };
+  const RHY=[[1,0,1,0,1,1,1,0],[1,2,2,0,1,0,1,0],[1,0,0,1,0,0,1,0],[1,2,1,1,1,2,0,0],[1,1,1,2,1,0,1,0],[1,2,2,2,1,2,2,0],[0,0,1,0,1,1,1,0]];
+  function genMel(k){ // melodia fissa per ogni brano: 8 battute con ripresa
+    const t=TR[k];let a=hashStr('mus-'+k)>>>0;const rnd=()=>{a=(a+0x6D2B79F5)|0;let x=Math.imul(a^(a>>>15),1|a);x=(x+Math.imul(x^(x>>>7),61|x))^x;return((x^(x>>>14))>>>0)/4294967296};
+    const N=t.ch.length,bars=[];let d=7;
+    const deg2semi=d=>{const o=Math.floor(d/7),i=((d%7)+7)%7;return o*12+t.sc[i]};
+    const chordDegs=c=>{const r=c[0];const out=[];for(let dd=-3;dd<17;dd++){const s=((deg2semi(dd)-r)%12+12)%12;if(s===0||s===7||s===(c[1]==='m'?3:4))out.push(dd)}return out};
+    for(let b=0;b<N;b++){const r=RHY[Math.floor(rnd()*RHY.length)];const ct=chordDegs(t.ch[b]);const notes=[];
+      for(let i=0;i<8;i++){if(r[i]!==1){notes.push(r[i]===2?-1:null);continue}
+        if(i===0||rnd()<.35){d=ct.reduce((x,y)=>Math.abs(y-d)<Math.abs(x-d)?y:x,ct[0]);if(rnd()<.3)d=ct[Math.min(ct.length-1,ct.indexOf(d)+1)]}
+        else d+=[-2,-1,-1,1,1,2][Math.floor(rnd()*6)];
+        d=Math.max(2,Math.min(13,d));notes.push(deg2semi(d))}
+      bars.push(notes)}
+    const out=bars.concat(bars.map((x,i)=>i<N-1?x.slice():null));
+    out[2*N-1]=[deg2semi(9),null,deg2semi(8),null,deg2semi(7),-1,-1,null];
+    return out;
+  }
+  function init(){
+    if(C)return true;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return false;
+    try{C=new AC()}catch(e){return false}
+    master=C.createGain();master.connect(C.destination);
+    const comp=C.createDynamicsCompressor();comp.threshold.value=-12;comp.connect(master);
+    mus=C.createGain();mus.connect(comp);fxb=C.createGain();fxb.connect(comp);
+    echo=C.createDelay(1);const fb=C.createGain();fb.gain.value=.28;const ew=C.createGain();ew.gain.value=.35;echo.connect(fb);fb.connect(echo);echo.connect(ew);ew.connect(mus);
+    noise=C.createBuffer(1,C.sampleRate*.5,C.sampleRate);const nd=noise.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;
+    vol();timer=setInterval(tick,25);return true;
+  }
+  function vol(){if(!C)return;const t=C.currentTime;master.gain.setTargetAtTime(SET.mute?0:1,t,.05);mus.gain.setTargetAtTime(SET.mus*.55,t,.05);fxb.gain.setTargetAtTime(SET.sfx*.7,t,.02)}
+  function tone(type,f,t,dur,v,dest,o={}){
+    const os=C.createOscillator(),g=C.createGain();os.type=type;os.frequency.setValueAtTime(f,t);
+    if(o.to)os.frequency.exponentialRampToValueAtTime(o.to,t+dur);
+    let node=os;if(o.lp){const fl=C.createBiquadFilter();fl.type='lowpass';fl.frequency.value=o.lp;os.connect(fl);node=fl}
+    node.connect(g);g.connect(dest);if(o.echo)g.connect(echo);
+    const at=o.at||.005;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+at);g.gain.setTargetAtTime(0,t+Math.max(at,dur*(o.hold||.6)),dur*.25+.01);
+    os.start(t);os.stop(t+dur+.4);
+  }
+  function hiss(t,dur,v,hp,dest){const s=C.createBufferSource(),f=C.createBiquadFilter(),g=C.createGain();s.buffer=noise;f.type='highpass';f.frequency.value=hp;s.connect(f);f.connect(g);g.connect(dest);
+    g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);s.start(t,Math.random()*.3);s.stop(t+dur+.02)}
+  function kick(t,v){tone('sine',130,t,.16,v,mus,{to:40,hold:.3})}
+  function play(k,st,t){
+    const T=TR[k],sd=60/T.bpm/2,N=T.ch.length,bar=Math.floor(st/8)%(2*N),i=st%8,ch=T.ch[bar%N],R0=T.root+ch[0];
+    const tri=[0,ch[1]==='m'?3:4,7];
+    // basso
+    if(T.bass==='long'){if(i===0)tone('triangle',mtof(R0-12),t,sd*7.5,.32,mus,{at:.03,hold:.8});if(i===4&&T.arp)tone('sine',mtof(R0-5),t,sd*3.5,.14,mus,{at:.03})}
+    else if(T.bass==='walk'){if(i%2===0)tone('triangle',mtof(R0-12+[0,7,12,7][i/2]),t,sd*1.7,.3,mus)}
+    else tone('sawtooth',mtof(R0-24+(i%2?12:0)),t,sd*.8,.13,mus,{lp:700});
+    // arpeggio
+    if(T.arp){const n=tri[[0,1,2,1][i%4]]+12;tone('sine',mtof(R0+n),t,sd*.9,.07,mus,{echo:1})}
+    else if(i%2===1&&T.dr>=2)tone('square',mtof(R0+tri[(i>>1)%3]),t,sd*.5,.03,mus,{lp:1600});
+    // melodia
+    const m=mel[k]||(mel[k]=genMel(k));const nt=m[bar][i];
+    if(nt!=null&&nt>=0){let len=1;while(i+len<8&&m[bar][i+len]===-1)len++;
+      tone(T.lead,mtof(T.root+nt+(T.lead==='sine'?12:0)),t,sd*len*.95,T.lv,mus,{lp:T.lead==='sawtooth'?1400:T.lead==='square'?2600:0,echo:T.lead!=='sawtooth',at:T.lead==='sine'?.01:.004,hold:.7})}
+    // batteria
+    if(T.dr===1){if(i%2===1)hiss(t,.03,.05,8000,mus);if(k==='cmap'&&i===0)kick(t,.25)}
+    if(T.dr>=2){if(i===0||i===4||(T.dr===3&&(i===3||i===7&&bar%2)))kick(t,.55);if(i===2||i===6)hiss(t,.12,.18,1500,mus);hiss(t,.025,.05,9000,mus)}
+  }
+  function tick(){
+    if(!C||C.state!=='running')return;const now=C.currentTime;
+    if(want!==cur){
+      if(!cur||!want){cur=want;step=0;next=now+.05}
+      else if(!swAt){swAt=now+.45;mus.gain.setTargetAtTime(0,now,.12)}
+      else if(now>=swAt){cur=want;swAt=0;step=0;next=now+.05;vol()}
+    }
+    if(!cur||swAt)return;if(next<now-.3)next=now+.02;
+    const sd=60/TR[cur].bpm/2;
+    while(next<now+.12){if(!SET.mute&&SET.mus>0)try{play(cur,step,next)}catch(e){}step++;next+=sd}
+  }
+  const SFX={
+    dmg:t=>{hiss(t,.12,.4,600,fxb);tone('square',220,t,.12,.18,fxb,{to:70,lp:1800})},
+    blk:t=>{tone('square',880,t,.08,.08,fxb,{lp:4000});tone('square',1320,t+.01,.1,.06,fxb,{lp:4000})},
+    heal:t=>{[72,76,79,84].forEach((m,i)=>tone('sine',mtof(m),t+i*.06,.18,.16,fxb))},
+    psn:t=>{tone('sine',320,t,.18,.16,fxb,{to:180});tone('sine',260,t+.08,.16,.12,fxb,{to:150})},
+    card:t=>{tone('triangle',520,t,.06,.16,fxb,{to:900});hiss(t,.04,.06,3000,fxb)},
+    ui:t=>{tone('triangle',660,t,.04,.1,fxb)},
+    msg:t=>{tone('sine',mtof(81),t,.1,.12,fxb);tone('sine',mtof(88),t+.09,.14,.12,fxb)},
+    win:t=>{[67,72,76,79].forEach((m,i)=>tone('square',mtof(m),t+i*.08,.16,.07,fxb,{lp:3000}));tone('square',mtof(84),t+.32,.4,.08,fxb,{lp:3000})},
+    fanfare:t=>{[[60,0],[64,.12],[67,.24],[72,.36],[67,.6],[72,.72]].forEach(([m,d])=>tone('square',mtof(m),t+d,.22,.08,fxb,{lp:3000}));tone('square',mtof(76),t+.9,.8,.09,fxb,{lp:3000})},
+    lose:t=>{[64,62,60,55].forEach((m,i)=>tone('triangle',mtof(m),t+i*.22,.3,.2,fxb));tone('triangle',mtof(48),t+.9,1.2,.22,fxb)},
+    coin:t=>{tone('square',mtof(88),t,.06,.06,fxb,{lp:5000});tone('square',mtof(95),t+.06,.18,.06,fxb,{lp:5000})},
+  };
+  let lastFx={};
+  return {
+    unlock(){if(!init())return;if(C.state==='suspended')C.resume().catch(()=>{})},
+    vol,
+    set(k){want=k||null},
+    name(){return cur?TR[cur].n:(want?TR[want].n:'nessuno (tocca lo schermo per avviare)')},
+    sfx(k){if(!C||C.state!=='running'||SET.mute||SET.sfx<=0||!SFX[k])return;const now=C.currentTime;if(lastFx[k]&&now-lastFx[k]<.06)return;lastFx[k]=now;try{SFX[k](now+.01)}catch(e){}},
+    suspend(){if(C&&C.state==='running')C.suspend().catch(()=>{})},
+  };
+})();
+function sfx(k){AU.sfx(k)}
+function musicCtx(){
+  if(!R||R.phase==='lobby'||!R.players[ME])return 'menu';
+  const cr=R.dg==='cripte';
+  if(R.phase==='combat'&&R.combat)return R.combat.kind==='boss'?'boss':cr?'ccombat':'combat';
+  if(R.phase==='end')return R.win?'victory':'menu';
+  return cr?'cmap':'map';
+}
+function musicFollow(){
+  AU.set(musicCtx());
+  const ph=R&&R.players[ME]?R.phase:null;
+  if(UI.prevPh==='combat'&&ph&&ph!=='combat'&&ph!=='end')sfx('win');
+  if(ph==='end'&&UI.prevPh&&UI.prevPh!=='end')sfx(R.win?'fanfare':'lose');
+  UI.prevPh=ph;
+}
+['pointerdown','keydown','touchend'].forEach(ev=>document.addEventListener(ev,()=>AU.unlock(),{capture:true,passive:true}));
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button,[role=button]');if(!b||b.disabled)return;
+  if(b.closest('.hand')&&b.classList.contains('card'))sfx('card');else if(!b.classList.contains('sw'))sfx('ui')},true);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')AU.suspend();else AU.unlock()});
+applySet();
+
 /* ================= AVVIO ================= */
 (function boot(){
   const h=(location.hash||'').replace('#','').toUpperCase();
