@@ -290,6 +290,7 @@ body.noanim #gltip{transition:none}
 .bestiary{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.beast{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;background:var(--stone2);border:1px solid var(--line);border-radius:10px;padding:10px}.beast.boss{border-color:var(--blood)}.beast small{color:var(--muted);font-size:11.5px}.beast.unk b{color:var(--muted)}
 .prow.unk{opacity:.6}.favc{display:flex;flex-direction:column;align-items:center;gap:4px}
 .chip.form{background:#2c3a22;color:#bfe7a0}.chip.elem{background:#3a2a1c;color:#ffcf9a}.chip.e-acqua{background:#1c2c3a;color:#a8dcff}.chip.e-terra{background:#33291c;color:#e3c68f}.chip.e-aria{background:#26303a;color:#e2f2ff}.chip.minion{background:#2a2438;color:#e0d8ff;display:inline-flex;align-items:center;gap:3px}.chip.pet{background:#2f2a22;color:#f0d9b0}
+.badge.lockb{background:#4a2326;color:#ffb3ab;display:inline-flex;align-items:center;gap:3px}
 .classcard.locked .ic{filter:brightness(.35) grayscale(.6)}.classcard .price{margin-top:4px}
 .crownbadge{position:fixed;top:calc(env(safe-area-inset-top,0px) + 24px);right:calc(env(safe-area-inset-right,0px) + 8px);z-index:79;display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--stone2);border:1px solid var(--torch);color:var(--torch2);font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,.4)}.crownbadge b{font-size:16px;font-variant-numeric:tabular-nums}.crownbadge span{color:var(--muted);font-size:12px}.crownbadge:hover{background:var(--stone3)}
 .modal~.crownbadge,.modal + .crownbadge{display:none}
@@ -1150,7 +1151,12 @@ function getUnlocked(dg){return Math.min(MAXLVL,lvls()[dg||pickDg]|0)}
 function setUnlocked(n,dg){const o=lvls();o[dg||pickDg]=Math.min(MAXLVL,n);store(LK2,JSON.stringify(o))}
 function beaten(){try{return JSON.parse(load(BK))||[]}catch(e){return[]}}
 function markBeaten(dg){const b=beaten();if(!b.includes(dg)){b.push(dg);store(BK,JSON.stringify(b))}}
-const dgUnlocked=id=>!DUNGEONS[id].req||beaten().includes(DUNGEONS[id].req);
+const BSK='valdombra-vinti-sopravv';
+function beatenS(){try{return JSON.parse(load(BSK))||[]}catch(e){return[]}}
+function markBeatenS(dg){const b=beatenS();if(!b.includes(dg)){b.push(dg);store(BSK,JSON.stringify(b))}}
+// modalità normale: serve aver completato il dungeon precedente; in Sopravvivenza basta anche aver superato un ciclo lì
+const curMode=()=>R&&R.phase==='lobby'&&!solo?(R.lmode||'norm'):pickMode;
+const dgUnlocked=(id,m)=>{const q=DUNGEONS[id].req;if(!q)return true;if(beaten().includes(q))return true;return (m||curMode())==='surv'&&beatenS().includes(q)};
 const dmgBonus=(L,strong)=>Math.floor(L/2)+(strong&&L>=5?1:0);
 const scoreMult=L=>1+.25*L;
 function lvlDesc(L){if(!L)return 'Assedio normale: la difficoltà di base.';
@@ -1214,12 +1220,13 @@ function checkProgress(){
 const ACT={
   cls:(a,P)=>{if((R.phase==='lobby'||R.phase==='end')&&CLASSES[a.cls])P.cls=a.cls},
   ready:(a,P)=>{if(R.phase==='lobby')P.ready=!P.ready},
-  start:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host)startRunRoom(a.lvl|0,a.seed,R.lmode,R.ldg)},
+  start:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host){if(!dgUnlocked(R.ldg||'rocca',R.lmode||'norm'))R.ldg='rocca';const L=R.lmode==='surv'?0:(a.lvl|0);if(blockers(R.ldg||'rocca',R.lmode||'norm',L).length)return;startRunRoom(a.lvl|0,a.seed,R.lmode,R.ldg)}},
   dg:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host&&DUNGEONS[a.d])R.ldg=a.d},
-  mode:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host)R.lmode=a.m==='surv'?'surv':'norm'},
+  lvl:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host)R.llvl=Math.max(0,Math.min(MAXLVL,a.l|0))},
+  mode:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host)R.lmode=a.m==='surv'?'surv':'norm';if(R.ldg&&!dgUnlocked(R.ldg,R.lmode))R.ldg='rocca'},
   kick:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host&&a.p!==R.host){delete R.players[a.p];R.order=R.order.filter(x=>x!==a.p)}},
   again:(a,P,pid)=>{if(R.phase==='end'&&pid===R.host)toLobby()},
-  restart:(a,P,pid)=>{if(R.phase!=='end'||pid!==R.host||R.daily)return;const dg=R.dg||'rocca',mode=R.mode;const lvl=mode==='surv'?0:Math.max(0,Math.min(MAXLVL,a.lvl|0,getUnlocked(dg)));
+  restart:(a,P,pid)=>{if(R.phase!=='end'||pid!==R.host||R.daily)return;const dg=R.dg||'rocca',mode=R.mode;const lvl=mode==='surv'?0:Math.max(0,Math.min(MAXLVL,a.lvl|0,getUnlocked(dg)));if(blockers(dg,mode,lvl).length)return;
     R.voteAnim=null;R.plans={};startRunRoom(lvl,'',mode,dg);R.lbId=null},
   vote:(a,P,pid)=>{if(R.phase==='map'&&!R.voteAnim&&availNodes().some(n=>n.y===a.y&&n.x===a.x)){const v=a.y+','+a.x;if(R.votes[pid]===v)delete R.votes[pid];else R.votes[pid]=v}},
   play:a=>playCard(a.uid,a.j,a.a,a.pk),
@@ -1319,11 +1326,13 @@ function startRunRoom(lvl,seed,mode,dg){
   R.order.forEach(p=>{const P=R.players[p];const tal=P.tal;initPlayer(P);applyLoadout(P);P.tal=tal;applyTalents(P)});
 }
 function soloRestart(lvl){const P=R.players.solo;pickCls=P.cls;pickDg=R.dg||'rocca';pickMode=R.mode==='surv'?'surv':'norm';pickLvl=Math.max(0,Math.min(MAXLVL,lvl|0));UI.lbMsg='';UI.dMsg='';R=null;g=null;startSolo()}
+function mpRestart(l){const dg=R.dg||'rocca',m=R.mode==='surv'?'surv':'norm';const L=m==='surv'?0:l;const bl=blockers(dg,m,L);
+  if(bl.length){toast(blockMsg(bl,dg,m,L)+' Tornate alla stanza e scegliete un livello che avete tutti.');return}UI.lbMsg='';send({t:'restart',lvl:l})}
 function againBtns(){
   if(R.daily)return `<button class="btn primary" onclick="R=null;g=null;screen='title';render()">Torna al menu</button>`;
   const L=R.lvl||0,surv=R.mode==='surv',host=solo||R.host===ME;
   if(!host)return '<span class="muted">L\'host può far ripartire il gruppo.</span><button class="btn" onclick="leaveRoom(true)">Esci dalla stanza</button>';
-  const go=l=>solo?`soloRestart(${l})`:`UI.lbMsg='';send({t:'restart',lvl:${l}})`;
+  const go=l=>solo?`soloRestart(${l})`:`mpRestart(${l})`;
   const back=solo?`<button class="btn" onclick="R=null;g=null;UI.lbMsg='';screen='title';render()">Cambia eroe o dungeon</button>`:`<button class="btn" onclick="UI.lbMsg='';send({t:'again'})">Torna alla stanza</button><button class="btn" onclick="UI.lbMsg='';leaveRoom(true)">Esci dalla stanza</button>`;
   let main='';
   if(surv)main=`<button class="btn primary" onclick="${go(0)}">Ricomincia la Sopravvivenza</button>`;
@@ -1333,7 +1342,7 @@ function againBtns(){
   return main+back;
 }
 function toLobby(){
-  R.order.forEach(p=>{const P=R.players[p];R.players[p]={pid:p,name:P.name,cls:P.cls,ready:p===R.host}});
+  R.order.forEach(p=>{const P=R.players[p];R.players[p]={pid:p,name:P.name,cls:P.cls,ready:p===R.host,loadout:P.loadout,tal:P.tal,prog:P.prog}});
   Object.assign(R,{phase:'lobby',combat:null,map:null,win:null,votes:{}});
 }
 function enterNode(y,x){
@@ -1775,7 +1784,7 @@ function startSolo(){
   R=newLobby('SOLO');R.players.solo.name=CLASSES[pickCls].n;R.players.solo.loadout=getZaino();R.players.solo.tal=getTal();rng=new RNG(1);
   if($('#sname')&&$('#sname').value.trim()){myName=$('#sname').value.trim().slice(0,16);store('valdombra-nome',myName)}
   if(pickMode==='surv'&&myName)R.players.solo.name=myName;
-  if(!dgUnlocked(pickDg))pickDg='rocca';
+  if(!dgUnlocked(pickDg,pickMode))pickDg='rocca';
   startRunRoom(Math.min(pickLvl,getUnlocked(pickDg)),($('#seed')&&$('#seed').value)||'',pickMode,pickDg);commit();
 }
 function continueSolo(){const s=load(SOLO_K);if(!s)return;solo=true;isHost=true;chan=null;ME='solo';online=new Set([ME]);R=JSON.parse(s);rng=new RNG(0);rng.s=R.rs|0;commit()}
@@ -1852,6 +1861,7 @@ function setCls(k){if(!heroOwned(k)){openBuyHero(k);return}pickCls=k;if(R&&R.pha
 function startGame(){
   const notReady=active().filter(p=>!R.players[p].ready&&p!==R.host);
   if(notReady.length){toast('Aspetta che siano tutti pronti: '+notReady.map(pname).join(', '));return}
+  {const dg=R.ldg||'rocca',m=R.lmode||'norm',L=m==='surv'?0:Math.min(pickLvl,getUnlocked(dg));const bl=blockers(dg,m,L);if(bl.length){toast(blockMsg(bl,dg,m,L)+' Scegli un dungeon o un livello che avete tutti.');return}}
   send({t:'start',lvl:Math.min(pickLvl,getUnlocked(R.ldg||'rocca')),seed:UI.seed});
 }
 function copyText(s,ok){try{navigator.clipboard.writeText(s).then(()=>toast(ok),()=>toast(s))}catch(e){toast(s)}}
@@ -2023,7 +2033,8 @@ function render(fxs){
   }
   if(R&&R.players[ME]){
     const P=R.players[ME];
-    if(!solo&&(R.phase==='lobby'||R.phase==='end')){const zj=JSON.stringify(getZaino())+JSON.stringify(getTal());if(UI.sentZ!==R.code+zj){UI.sentZ=R.code+zj;setTimeout(()=>send({t:'loadout',z:getZaino(),tal:getTal()}),0)}}
+    if(!solo&&(R.phase==='lobby'||R.phase==='end')){const me=R.players[ME];const zj=JSON.stringify(getZaino())+JSON.stringify(getTal())+JSON.stringify(myProg())+(me&&me.prog?1:0);if(UI.sentZ!==R.code+zj){UI.sentZ=R.code+zj;setTimeout(()=>send({t:'loadout',z:getZaino(),tal:getTal(),prog:myProg()}),0)}
+      if(R.phase==='lobby'&&R.host===ME){const L=Math.min(pickLvl,getUnlocked(R.ldg||'rocca'));if((R.llvl|0)!==L&&UI.sentL!==R.code+L+':'+R.v){UI.sentL=R.code+L+':'+R.v;setTimeout(()=>send({t:'lvl',l:L}),0)}}}
     else UI.sentZ=null;
     if(P.zApplied&&UI.zClr!==R.code+R.seed){UI.zClr=R.code+R.seed;setZaino({});if(R.phase==='map'&&R.floor===0)toast('Dallo zaino: '+P.zApplied)}
   }
@@ -2097,7 +2108,7 @@ function titleHTML(){
     <h3>Da solo: scegli il tuo eroe</h3>
     ${classPicker()}
     <h3>Modalità</h3>
-    ${modePicker(pickMode,"pickMode='%';render()")}
+    ${modePicker(pickMode,"pickMode='%';if(!dgUnlocked(pickDg,pickMode))pickDg='rocca';render()")}
     <h3>Dungeon</h3>
     ${dungeonPicker(pickDg,"pickDg='%';pickLvl=Math.min(pickLvl,getUnlocked('%'));render()")}
     ${pickMode==='surv'?`<div class="panel"><label for="sname"><b>Il tuo nome per la classifica</b></label><input id="sname" class="txt" style="width:100%;max-width:360px" maxlength="16" value="${esc(myName)}" placeholder="Per esempio: Manu" autocomplete="off"></div>`:''}
@@ -2132,6 +2143,7 @@ function mpMenuHTML(){
 function lobbyHTML(){
   const host=R.host===ME;const me=R.players[ME];
   const notReady=active().filter(p=>!R.players[p].ready&&p!==R.host);
+  const bdg=R.ldg||'rocca',bm=R.lmode||'norm',bL=lobbyLvl(),bl=blockers(bdg,bm,bL);
   return `<main><div class="wrap" style="padding-block:12px 24px">
     <div class="row"><button class="btn" onclick="R.phase==='lobby'?(send({t:'abandon'}),setTimeout(()=>leaveRoom(true),300)):leaveRoom(false)">← Esci dalla stanza</button>${chatBtn()}</div>
     <div class="panel" style="align-items:flex-start"><span class="muted" style="letter-spacing:.15em;text-transform:uppercase;font-size:12px">Codice della stanza</span>
@@ -2141,15 +2153,16 @@ function lobbyHTML(){
     <h3>Giocatori (${R.order.length}/${MAXP})</h3>
     <div class="plist">${R.order.map(p=>{const P=R.players[p];const on=isOnline(p);return `<div class="prow" style="${on?'':'opacity:.45'}">${sprImg(P.cls,36)}
       <div style="flex:1;min-width:0"><span class="nm">${esc(P.name)}${p===ME?' (tu)':''}</span><br><span class="muted">${CLASSES[P.cls].n}${on?'':' · disconnesso'}${P.loadout&&!zEmpty(cleanZ(P.loadout))?' · porta: '+zText(cleanZ(P.loadout)):''}</span></div>
-      ${p===R.host?'<span class="badge on">Host</span>':`<span class="badge ${P.ready?'on':''}">${P.ready?'Pronto':'Non pronto'}</span>`}
+      ${bl.includes(p)?`<span class="badge lockb">${ic('i_lock',12)} Non sbloccato</span>`:''}${p===R.host?'<span class="badge on">Host</span>':`<span class="badge ${P.ready?'on':''}">${P.ready?'Pronto':'Non pronto'}</span>`}
       ${host&&p!==ME?`<button class="btn" onclick="send({t:'kick',p:'${p}'})" aria-label="Rimuovi ${esc(P.name)}">✕</button>`:''}</div>`}).join('')}</div>
     <h3>Scegli il tuo eroe</h3>
     ${classPicker()}
     <h3>Modalità</h3>${host?modePicker(R.lmode||'norm',"send({t:'mode',m:'%'})"):`<p class="muted">L'host ha scelto: <b style="color:var(--fg)">${R.lmode==='surv'?'Sopravvivenza':'Normale'}</b></p>`}
-    <h3>Dungeon</h3>${host?dungeonPicker(R.ldg||'rocca',"send({t:'dg',d:'%'})"):`<p class="muted">L'host ha scelto: <b style="color:var(--fg)">${DUNGEONS[R.ldg||'rocca'].n}</b></p>`}
+    <h3>Dungeon</h3>${host?dungeonPicker(R.ldg||'rocca',"send({t:'dg',d:'%'})"):`<p class="muted">L'host ha scelto: <b style="color:var(--fg)">${DUNGEONS[R.ldg||'rocca'].n}</b>${bm==='surv'?'':` · Assedio ${bL}`}</p>`}
+    ${bl.length?`<div class="netwarn" role="status">${ic('i_lock',14)} ${blockMsg(bl,bdg,bm,bL)} Per giocare insieme, ognuno deve aver sbloccato il dungeon${bm==='surv'?'':' e il Livello di Assedio'} scelto: ${host?'scegline uno che avete tutti.':'chiedi all\'host di sceglierne uno che avete tutti.'}</div>`:''}
     ${host?`${R.lmode==='surv'?'<p class="note">In Sopravvivenza il Livello di Assedio non si usa: la difficoltà cresce da sola a ogni ciclo.</p>':`<h3>Livello di Assedio</h3>${levelPicker()}`}
       <div class="seedrow"><label for="seed" class="muted">Seed (opzionale)</label><input id="seed" maxlength="12" value="${esc(UI.seed)}" oninput="UI.seed=this.value" placeholder="casuale" autocomplete="off">
-      <button class="btn primary" onclick="startGame()" style="padding:10px 22px;font-size:17px" ${notReady.length?'aria-disabled="true"':''}>Avvia la partita</button></div>
+      <button class="btn primary" onclick="startGame()" style="padding:10px 22px;font-size:17px" ${notReady.length||bl.length?'aria-disabled="true"':''}>Avvia la partita</button></div>
       ${notReady.length?`<p class="muted">In attesa di: ${notReady.map(p=>esc(pname(p))).join(', ')}</p>`:''}`
     :`<div class="row"><button class="btn ${me.ready?'':'primary'}" onclick="send({t:'ready'})" style="padding:10px 22px;font-size:17px">${me.ready?'Non sono pronto':'Sono pronto!'}</button>
       <span class="muted">L'host sceglie il livello e avvia la partita.</span></div>`}
@@ -2284,8 +2297,8 @@ function treasureScreen(){
 }
 function endScreen(){
   const L=R.lvl||0;
-  if(R.win&&!R.daily&&R.players[ME]&&UI.unlockSeed!==R.code+R.seed+R.t0){UI.unlockSeed=R.code+R.seed+R.t0;UI.unlocked=null;UI.newDg=null;const dg=R.dg||'rocca';
-    const had=Object.keys(DUNGEONS).filter(dgUnlocked);markBeaten(dg);UI.newDg=Object.keys(DUNGEONS).find(k=>dgUnlocked(k)&&!had.includes(k))||null;
+  if(R.win&&!R.daily&&R.mode!=='surv'&&R.players[ME]&&UI.unlockSeed!==R.code+R.seed+R.t0){UI.unlockSeed=R.code+R.seed+R.t0;UI.unlocked=null;UI.newDg=null;const dg=R.dg||'rocca';
+    const had=Object.keys(DUNGEONS).filter(k=>dgUnlocked(k,'norm'));markBeaten(dg);UI.newDg=Object.keys(DUNGEONS).find(k=>dgUnlocked(k,'norm')&&!had.includes(k))||null;
     if(L<MAXLVL&&getUnlocked(dg)<=L){setUnlocked(L+1,dg);UI.unlocked=L+1;pickLvl=L+1}}
   const kills=R.order.reduce((s,p)=>s+(R.players[p].kills||0),0);
   if(R.mode==='surv')return survEndScreen(L,kills);
@@ -2359,7 +2372,7 @@ function bottegaHTML(){
      <span class="muted">Le guadagni completando un dungeon (${DUNGEONS.rocca.crowns} nella Rocca, ${DUNGEONS.cripte.crowns} nelle Cripte, ${DUNGEONS.abisso.crowns} nell'Abisso, più 20 per ogni Livello di Assedio) e in Sopravvivenza. Ciò che compri qui va nello zaino e lo usi nella prossima partita, da solo o in gruppo.</span></div></div>
    <div class="panel"><h3>Zaino per la prossima partita</h3>${items.length?`<div class="plist">${items.map(([icn,n,on])=>`<div class="prow">${icn}<span style="flex:1">${n}</span><button class="btn" onclick="${on}">Rimuovi e rimborsa</button></div>`).join('')}</div>`:'<p class="muted">Lo zaino è vuoto.</p>'}</div>
    <div class="panel"><h3>Pozioni <span class="muted" style="font-size:14px">(massimo ${ZCAP.potions})</span></h3><div class="shopgrid">${Object.keys(POTIONS).map(k=>box(potIc(k,40),POTIONS[k].n,POTIONS[k].d,META.potion,`buyMeta('potions','${k}')`,z.potions.length>=ZCAP.potions)).join('')}</div></div>
-   <div class="panel"><h3>Reliquie <span class="muted" style="font-size:14px">(massimo ${ZCAP.relics})</span></h3><div class="shopgrid">${[...RELIC_POOL,...(dgUnlocked('cripte')?CRYPT_RELICS:[]),...(dgUnlocked('abisso')?ABYSS_RELICS:[])].map(k=>box(relIc(k,40),RELICS[k].n,RELICS[k].d,META.relic,`buyMeta('relics','${k}')`,z.relics.includes(k)||z.relics.length>=ZCAP.relics)).join('')}</div></div>
+   <div class="panel"><h3>Reliquie <span class="muted" style="font-size:14px">(massimo ${ZCAP.relics})</span></h3><div class="shopgrid">${[...RELIC_POOL,...(dgUnlocked('cripte','surv')?CRYPT_RELICS:[]),...(dgUnlocked('abisso','surv')?ABYSS_RELICS:[])].map(k=>box(relIc(k,40),RELICS[k].n,RELICS[k].d,META.relic,`buyMeta('relics','${k}')`,z.relics.includes(k)||z.relics.length>=ZCAP.relics)).join('')}</div></div>
    <div class="panel"><h3>Altro</h3><div class="shopgrid">
      ${box(ic('i_coin',40),'Borsa del Mercenario','Inizi con 50 oro in più.',META.gold,"buyMeta('gold')",z.gold>=ZCAP.gold)}
      ${box(ic('i_heal',40),'Elisir di Vigore','Inizi con 10 PV massimi in più.',META.hp,"buyMeta('hp')",z.hp>=ZCAP.hp)}
@@ -2370,10 +2383,18 @@ function crownsAward(){
   // corone per la vittoria: una volta sola per partita, su questo dispositivo
   if(!R||!R.players[ME]||!(R.win||(R.mode==='surv'&&totalFloors()>=8)))return null;const key=R.code+':'+R.seed+':'+(R.t0||0);let done=[];try{done=JSON.parse(load(PK))||[]}catch(e){}
   if(done.includes(key))return UI.lastAward&&UI.lastAward.key===key?UI.lastAward.n:null;
-  if(R.mode==='surv'&&R.cycle>1)markBeaten(R.dg||'rocca');
+  if(R.mode==='surv'&&R.cycle>1)markBeatenS(R.dg||'rocca');
   const n=R.mode==='surv'?Math.floor(totalFloors()/16*40*(DG().crowns/60)):DG().crowns+20*(R.lvl||0);setCrowns(getCrowns()+n);done.push(key);store(PK,JSON.stringify(done.slice(-50)));UI.lastAward={key,n};return n;
 }
-ACT.loadout=(a,P)=>{if(R.phase==='lobby'||R.phase==='end'){P.loadout=cleanZ(a.z);P.tal=cleanTal(a.tal)}};
+ACT.loadout=(a,P)=>{if(R.phase==='lobby'||R.phase==='end'){P.loadout=cleanZ(a.z);P.tal=cleanTal(a.tal);if(a.prog)P.prog=cleanProg(a.prog)}};
+// cosa ha sbloccato ogni giocatore: {dungeon:[normale,sopravvivenza,livello max]}
+function myProg(){const o={};Object.keys(DUNGEONS).forEach(k=>o[k]=[dgUnlocked(k,'norm')?1:0,dgUnlocked(k,'surv')?1:0,getUnlocked(k)]);return o}
+function cleanProg(a){const o={};if(!a||typeof a!=='object')return o;Object.keys(DUNGEONS).forEach(k=>{const x=a[k];if(Array.isArray(x))o[k]=[x[0]?1:0,x[1]?1:0,Math.max(0,Math.min(MAXLVL,x[2]|0))]});return o}
+function lackWhat(p,dg,mode,lvl){const pr=p===ME?myProg():R.players[p]&&R.players[p].prog;if(!pr)return null;const x=pr[dg],n=DUNGEONS[dg].n;
+  if(mode==='surv')return x&&x[1]?null:n+' in Sopravvivenza';if(!x||!x[0])return n;if(x[2]<lvl)return 'l\'Assedio '+lvl+' in '+n+' ('+(p===ME?'sei':'è')+' al '+x[2]+')';return null}
+function blockers(dg,mode,lvl){return R.order.filter(p=>R.players[p]&&lackWhat(p,dg,mode,lvl))}
+function blockMsg(bl,dg,mode,lvl){return bl.map(p=>`${p===ME?'Tu non hai':esc(pname(p))+' non ha'} ancora sbloccato ${lackWhat(p,dg,mode,lvl)}`).join('. ')+'.'}
+const lobbyLvl=()=>(R.lmode==='surv')?0:(R.llvl|0);
 
 
 
@@ -2461,8 +2482,8 @@ function crescitaHTML(){
 /* ================= SOPRAVVIVENZA E CLASSIFICHE ================= */
 function dungeonPicker(cur,on,owner){
   return `<div class="dgs">${Object.entries(DUNGEONS).map(([k,d])=>{const ok=dgUnlocked(k);return `<button class="dg ${cur===k?'on':''} dg-${k}" ${ok?`onclick="${on.replace('%',k)}"`:'disabled'} aria-pressed="${cur===k}">
-    <span class="dgart">${sprImg(d.boss,ok?64:48,ok?'':'locked')}</span><span class="dgtx"><b>${d.n}</b><span class="muted">${ok?d.desc:`${ic('i_lock',14)} Sconfiggi ${DUNGEONS[d.req].n} almeno una volta per sbloccarlo.`}</span>
-    ${ok?`<small class="muted">Livello di Assedio sbloccato: ${getUnlocked(k)}/${MAXLVL}</small>`:''}</span></button>`}).join('')}</div>`;
+    <span class="dgart">${sprImg(d.boss,ok?64:48,ok?'':'locked')}</span><span class="dgtx"><b>${d.n}</b><span class="muted">${ok?d.desc:`${ic('i_lock',14)} ${curMode()==='surv'?`Completa ${DUNGEONS[d.req].n} almeno una volta, oppure supera lì un ciclo in Sopravvivenza, per sbloccarlo.`:`Completa ${DUNGEONS[d.req].n} almeno una volta in modalità normale per sbloccarlo.${dgUnlocked(k,'surv')?' In Sopravvivenza è già sbloccato.':''}`}`}</span>
+    ${ok&&curMode()!=='surv'?`<small class="muted">Livello di Assedio sbloccato: ${getUnlocked(k)}/${MAXLVL}</small>`:''}</span></button>`}).join('')}</div>`;
 }
 function modePicker(cur,on){
   const b=(m,t,d)=>`<button class="opt ${cur===m?'on':''}" onclick="${on.replace('%',m)}" aria-pressed="${cur===m}"><b>${t}</b><br><span class="muted">${d}</span></button>`;
@@ -2554,7 +2575,7 @@ function startVoteAnim(va){
 }
 function paintAnim(){document.querySelectorAll('.mapsvg .node').forEach(n=>{n.classList.toggle('spin',!!UI.anim&&n.dataset.k===UI.anim.cur)})}
 /* ================= IMPOSTAZIONI ================= */
-const VERSION='v5.1',VDATE='16/11';
+const VERSION='v5.4',VDATE='16/11';
 const SET_K='valdombra-impostazioni';
 const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:true};
 let SET=(()=>{try{return Object.assign({},SET_DEF,JSON.parse(load(SET_K)||'{}'))}catch(e){return Object.assign({},SET_DEF)}})();
@@ -2593,7 +2614,7 @@ function settingsHTML(){
       <div class="srow"><div class="lab">Codice<small>Hai un codice? Scrivilo qui.</small></div><input id="rcode" class="txt" maxlength="40" style="max-width:200px" autocomplete="off" placeholder="Codice"><button class="btn" onclick="redeem()">Usa</button></div>
       <div class="srow"><div class="lab">Profilo</div><b>${ACC?esc(ACC.nome):'nessuno'}</b><button class="btn" onclick="openProfilo()">${ACC?'Gestisci':'Accedi'}</button></div>
       ${inRoom?`<div class="srow"><div class="lab">Stanza</div><b>${R.code}</b></div><div class="srow"><div class="lab">Connessione</div><b>${isHost?'Sei tu a guidare la stanza':'Collegato'}</b></div>`:''}
-      <p class="muted" style="font-size:13px">Novità di questa versione: sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
+      <p class="muted" style="font-size:13px">Novità di questa versione: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
       <p class="muted" style="font-size:13px">Le impostazioni (audio, chat, grafica) valgono solo per questo dispositivo. I progressi di gioco seguono il tuo profilo.</p>
       <div><button class="btn" onclick="SET=Object.assign({},SET_DEF);saveSet();render()">Ripristina le impostazioni</button></div>
     </div></div>`;
@@ -2856,7 +2877,7 @@ function dailyEndHTML(score,kills){
 
 /* ================= PROFILO ONLINE (stessi progressi su ogni dispositivo) ================= */
 const ACC_K='valdombra-account';
-const SYNC_KEYS=[LK2,BK,CK,ZK,PK,XK,TK,XPK,SOLO_K,DAILY_K,SEEN_K,STAT_K,STATP_K,HEROES_K];
+const SYNC_KEYS=[LK2,BK,CK,ZK,PK,XK,TK,XPK,SOLO_K,DAILY_K,SEEN_K,STAT_K,STATP_K,HEROES_K,BSK];
 let ACC=(()=>{try{const a=JSON.parse(localStorage.getItem(ACC_K));return a&&a.nome&&a.token?a:null}catch(e){return null}})();
 const ACCS={busy:false,state:'',msg:'',gen:0,timer:null,last:0};
 function accKeep(){try{ACC?localStorage.setItem(ACC_K,JSON.stringify(ACC)):localStorage.removeItem(ACC_K)}catch(e){}}
@@ -2868,7 +2889,7 @@ function accMerge(srv,loc){
   const num=k=>{const a=parseInt(o[k]||'0',10)||0,b=parseInt(loc[k]||'0',10)||0;o[k]=String(Math.max(a,b))};
   const uni=k=>{const a=J(o[k])||[],b=J(loc[k])||[];o[k]=JSON.stringify([...new Set([...a,...b])].slice(-80))};
   const mx=k=>{const a=J(o[k])||{},b=J(loc[k])||{};const r={...a};Object.keys(b).forEach(x=>r[x]=Math.max(r[x]|0,b[x]|0));o[k]=JSON.stringify(r)};
-  num(CK);mx(XK);mx(LK2);uni(TK);uni(BK);uni(PK);uni(XPK);uni(STATP_K);uni(HEROES_K);
+  num(CK);mx(XK);mx(LK2);uni(TK);uni(BK);uni(BSK);uni(PK);uni(XPK);uni(STATP_K);uni(HEROES_K);
   {const a=J(o[SEEN_K])||{},b=J(loc[SEEN_K])||{};const r={};['c','e','r','p'].forEach(k=>r[k]=[...new Set([...(a[k]||[]),...(b[k]||[])])]);o[SEEN_K]=JSON.stringify(r)}
   {const deep=(a,b)=>{if(typeof a==='number'||typeof b==='number')return Math.max(+a||0,+b||0);const r={...(a||{})};Object.keys(b||{}).forEach(k=>r[k]=deep(r[k],b[k]));return r};o[STAT_K]=JSON.stringify(deep(J(o[STAT_K])||{},J(loc[STAT_K])||{}))}
   [ZK,SOLO_K].forEach(k=>{if(loc[k]!=null)o[k]=loc[k]});if(typeof SEEN!=='undefined')SEEN=null;
