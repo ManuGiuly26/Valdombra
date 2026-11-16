@@ -136,6 +136,8 @@ input.txt{background:var(--stone);border:1px solid var(--line);border-radius:8px
 .pv.on .pv-up{visibility:visible}.pv.on .pv-base{visibility:hidden}
 @media (hover:hover) and (pointer:fine){.pv:hover .pv-up{visibility:visible}.pv:hover .pv-base{visibility:hidden}}
 .card.upgraded{box-shadow:0 0 0 3px var(--heal),0 0 16px rgba(111,207,142,.5)}
+.why{color:#ffb38a;font-size:13px}
+.opt[disabled] .why{opacity:1}
 .modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
 .opt.on{border-color:var(--torch);box-shadow:0 0 0 1px var(--torch)}
 .board{display:flex;flex-direction:column;gap:6px}
@@ -271,7 +273,7 @@ button.card:hover{transform:translateY(-8px)}
 <body>
 
 <div id="app"></div>
-<div id="ver" aria-label="Versione del gioco">v2.4 · 16/11</div>
+<div id="ver" aria-label="Versione del gioco">v2.6 · 16/11</div>
 <div id="fx"></div>
 <aside id="chat" hidden aria-label="Chat di gioco">
   <div class="chead"><h3 style="flex:1">Chat del gruppo</h3><button class="btn" onclick="toggleChat(false)">Chiudi</button></div>
@@ -943,10 +945,13 @@ const ACT={
   vote:(a,P,pid)=>{if(R.phase==='map'&&!R.voteAnim&&availNodes().some(n=>n.y===a.y&&n.x===a.x))R.votes[pid]=a.y+','+a.x},
   play:a=>playCard(a.uid,a.j,a.a,a.pk),
   potion:a=>usePotion(a.i,a.j),
+  dropPot:(a,P)=>{if(P.potions[a.i])P.potions.splice(a.i,1)},
   drink:(a,P)=>{if(R.phase!=='combat'&&P.potions[a.i]==='cura'){P.potions.splice(a.i,1);H(15)}},
   end:()=>endHeroTurn(),
   takeGold:(a,P)=>{const r=P.reward;if(P.screen==='reward'&&r){P.gold+=r.gold;r.gold=0}},
-  takePotion:(a,P)=>{const r=P.reward;if(P.screen==='reward'&&r&&r.potion&&P.potions.length<3){P.potions.push(r.potion);r.potion=null}},
+  takePotion:(a,P)=>{const r=P.reward;if(P.screen==='reward'&&r&&r.potion){givePotion(P,r.potion);r.potion=null}},
+  potSwap:(a,P)=>{if(P.pendPot&&P.potions[a.i]){P.potions[a.i]=P.pendPot;P.pendPot=null}},
+  potLeave:(a,P)=>{P.pendPot=null},
   takeRelic:(a,P)=>{const r=P.reward;if(P.screen==='reward'&&r&&r.relic){gainRelic(r.relic);r.relic=null}},
   takeCard:(a,P)=>{const r=P.reward;if(P.screen==='reward'&&r&&r.cards&&r.cards[a.k]){addCard(r.cards[a.k]);r.cards=null}},
   skipCards:(a,P)=>{if(P.reward)P.reward.cards=null},
@@ -956,7 +961,11 @@ const ACT={
   restForge:(a,P)=>{if(P.screen!=='rest'||!P.deck[a.i]||!canUp(P.deck[a.i]))return;P.deck[a.i].up=true;P.done=true;P.screen='wait'},
   ev:(a,P)=>{if(P.screen!=='event'||!P.event||P.event.result)return;const ev=EVENTS.find(e=>e.id===P.event.id);const o=ev&&ev.opts[a.k];
     if(!o||(o.req&&!o.req())||(o.solo&&!solo))return;const r=o.f(a.i);if(r!=null)P.event.result=r},
-  done:(a,P)=>{if(R.phase==='room'){P.done=true;P.screen='wait'}},
+  done:(a,P)=>{if(R.phase!=='room')return;
+    // ricompense non raccolte: vanno direttamente nell'inventario
+    const r=P.screen==='reward'&&P.reward;
+    if(r){P.gold+=r.gold||0;r.gold=0;if(r.potion){givePotion(P,r.potion);r.potion=null}if(r.relic){gainRelic(r.relic);r.relic=null}if(a.skip)r.cards=null}
+    P.done=true;P.screen='wait'},
 };
 
 /* ================= MAPPA ================= */
@@ -1218,6 +1227,7 @@ function rollCards(n,elite){
 }
 function randomRelic(){const p=DG().relics.filter(k=>!run.relics.includes(k)&&!(k==='piuma'&&run.piumaUsed));return p.length?rng.pick(p):null}
 function gainRelic(id){run.relics.push(id);if(id==='cuore'){run.max+=8;run.hp+=8}}
+function givePotion(P,id){if(P.potions.length<3)P.potions.push(id);else P.pendPot=id}
 function addCard(id){run.deck.push({id,up:false})}
 function genShop(){
   const pool=Object.keys(CARDS).filter(k=>CARDS[k].cl===run.cls&&CARDS[k].r!=='B');
@@ -1231,9 +1241,8 @@ function genShop(){
 }
 function buy(kind,k){
   const it=run.shop[kind]&&run.shop[kind][k];if(!it||it.sold||run.gold<it.price)return;
-  if(kind==='potions'&&run.potions.length>=3)return;
   run.gold-=it.price;it.sold=true;
-  if(kind==='cards')addCard(it.id);else if(kind==='relics')gainRelic(it.id);else run.potions.push(it.id);
+  if(kind==='cards')addCard(it.id);else if(kind==='relics')gainRelic(it.id);else givePotion(run,it.id);
 }
 function removePrice(){return 75+run.removes*25}
 
@@ -1245,7 +1254,7 @@ const EVENTS=[
   opts:[{t:'Bevi',s:'Recuperi il 30% dei PV massimi.',f:()=>{const h=Math.floor(run.max*.3);H(h);return `Ti senti rinvigorito. Recuperi ${h} PV.`}},
         {t:'Raccogli le monete',s:'+45 oro, perdi 5 PV.',f:()=>{run.gold+=45;run.hp=Math.max(1,run.hp-5);return 'L\'acqua gelida ti morde le mani, ma le tasche sono più pesanti.'}}]},
  {id:'nani',dg:['rocca'],n:'Taverna dei Nani',ic:'',txt:'Tre nani giocano a dadi su un barile. «Ehi, straniero! Una partita? La posta è 30 monete.»',
-  opts:[{t:'Gioca a dadi',s:'Paghi 30 oro. Metà delle volte ne vinci 75.',req:()=>run.gold>=30,f:()=>{run.gold-=30;if(rng.next()<.5){run.gold+=75;return 'Doppio sei! I nani brontolano e pagano: +75 oro.'}return 'Hai perso. I nani ridono e brindano alla tua salute.'}},
+  opts:[{t:'Gioca a dadi',s:'Paghi 30 oro. Metà delle volte ne vinci 75.',req:()=>run.gold>=30,why:()=>'Ti servono 30 oro.',f:()=>{run.gold-=30;if(rng.next()<.5){run.gold+=75;return 'Doppio sei! I nani brontolano e pagano: +75 oro.'}return 'Hai perso. I nani ridono e brindano alla tua salute.'}},
         {t:'Bevi una birra e riposa',s:'Recuperi 8 PV.',f:()=>{H(8);return 'La birra nanica è forte, ma ti scalda le ossa.'}}]},
  {id:'biblioteca',n:'Biblioteca Abbandonata',ic:'',txt:'Scaffali crollati e pergamene ovunque. Alcune tecniche di combattimento sono ancora leggibili.',
   opts:[{t:'Studia le pergamene',s:'Scegli una carta tra 3.',f:()=>{run.reward={title:'Pergamene antiche',gold:0,cards:rollCards(3,false),potion:null,relic:null};run.screen='reward';return null}},
@@ -1255,20 +1264,20 @@ const EVENTS=[
           return idx.length?`Potenziate: ${idx.map(i=>CARDS[run.deck[i].id].n).join(' e ')}.`:'Le visioni svaniscono: non hai nulla da potenziare.'}},
         {t:'Rendi omaggio e prosegui',s:'Non succede niente.',f:()=>'Chini il capo davanti all\'eroe e riprendi il cammino.'}]},
  {id:'goblin',dg:['rocca'],n:'Mercante Goblin',spr:'goblin',txt:'Un goblin con un carretto cigolante ti sbarra la strada. «Pozione? Pozione buona! Solo 25 monete!» Dietro di lui, un altro goblin ti osserva.',
-  opts:[{t:'Compra una pozione',s:'Paghi 25 oro, ottieni una pozione casuale.',req:()=>run.gold>=25&&run.potions.length<3,f:()=>{run.gold-=25;const p=rng.pick(DG().pots);run.potions.push(p);return `Ottieni: ${POTIONS[p].n}. Il goblin morde la moneta, soddisfatto.`}},
+  opts:[{t:'Compra una pozione',s:'Paghi 25 oro, ottieni una pozione casuale.',req:()=>run.gold>=25,why:()=>'Ti servono 25 oro.',f:()=>{run.gold-=25;const p=rng.pick(DG().pots);givePotion(run,p);return `Ottieni: ${POTIONS[p].n}. Il goblin morde la moneta, soddisfatto.`}},
         {t:'Derubali',s:'Combatti contro due goblin.',solo:1,f:()=>{startCombat(['goblin','goblin'],'combat');return null}},
         {t:'Ignorali',s:'Non succede niente.',f:()=>'Li superi senza dire una parola.'}]},
  {id:'sarcofago',dg:['cripte'],n:'Sarcofago Sigillato',spr:'e_sarcofago',txt:'Un sarcofago di pietra nera, chiuso da catene arrugginite. Da una fessura filtra un bagliore dorato... e un odore di morte.',
-  opts:[{t:'Forza il coperchio',s:'Perdi 6 PV. Ottieni 40 oro e una pozione.',f:()=>{run.hp=Math.max(1,run.hp-6);run.gold+=40;let r='Dentro trovi 40 monete d\'oro';if(run.potions.length<3){const p=rng.pick(DG().pots);run.potions.push(p);r+=' e una '+POTIONS[p].n}return r+'. Una mano scheletrica ti graffia mentre ti allontani.'}},
+  opts:[{t:'Forza il coperchio',s:'Perdi 6 PV. Ottieni 40 oro e una pozione.',f:()=>{run.hp=Math.max(1,run.hp-6);run.gold+=40;let r='Dentro trovi 40 monete d\'oro';{const p=rng.pick(DG().pots);givePotion(run,p);r+=' e una '+POTIONS[p].n}return r+'. Una mano scheletrica ti graffia mentre ti allontani.'}},
         {t:'Lascialo chiuso',s:'Non succede niente.',f:()=>'Certe cose è meglio non svegliarle.'}]},
  {id:'spirito',dg:['cripte'],n:'Spirito Inquieto',spr:'e_spirito',txt:'Il fantasma di un vecchio cavaliere fluttua davanti a te. «Ascolta la mia storia, viandante, e ti insegnerò ciò che ho imparato.»',
   opts:[{t:'Ascolta la sua storia',s:'Potenzi una carta casuale.',f:()=>{const ids=run.deck.map((c,i)=>i).filter(i=>canUp(run.deck[i]));if(!ids.length)return 'Lo spirito sorride: non ha più nulla da insegnarti.';const i=rng.pick(ids);run.deck[i].up=true;return `Le sue parole ti guidano: ${CARDS[run.deck[i].id].n} è potenziata.`}},
         {t:'Scaccialo',s:'+30 oro.',f:()=>{run.gold+=30;return 'Lo spirito svanisce lasciando cadere qualche moneta.'}}]},
  {id:'altarnero',dg:['cripte'],n:'Altare d\'Ossa',spr:'e_altarnero',txt:'Un altare costruito con ossa umane. Un sussurro ti offre un patto: «Un ricordo in cambio della vita.»',
-  opts:[{t:'Sacrifica una carta',s:'Rimuovi una carta e recuperi 15 PV.',pick:1,req:()=>run.deck.length>1,f:i=>{if(!run.deck[i])return null;const c=run.deck.splice(i,1)[0];H(15);return `${CARDS[c.id].n} brucia sull'altare. Senti le ferite richiudersi.`}},
+  opts:[{t:'Sacrifica una carta',s:'Rimuovi una carta e recuperi 15 PV.',pick:1,req:()=>run.deck.length>1,why:()=>'Ti serve almeno un\'altra carta nel mazzo.',f:i=>{if(!run.deck[i])return null;const c=run.deck.splice(i,1)[0];H(15);return `${CARDS[c.id].n} brucia sull'altare. Senti le ferite richiudersi.`}},
         {t:'Prosegui',s:'Non succede niente.',f:()=>'Il sussurro si spegne alle tue spalle.'}]},
  {id:'pozzo',n:'Pozzo dei Desideri',ic:'',txt:'Un vecchio pozzo coperto di muschio. Si dice che chi getta una moneta possa dimenticare un brutto ricordo.',
-  opts:[{t:'Getta 20 monete',s:'Rimuovi una carta dal mazzo.',pick:1,req:()=>run.gold>=20&&run.deck.length>1,f:i=>{if(!run.deck[i]||run.gold<20)return null;run.gold-=20;const c=run.deck.splice(i,1)[0];return `${CARDS[c.id].n} svanisce dalla tua memoria.`}},
+  opts:[{t:'Getta 20 monete',s:'Rimuovi una carta dal mazzo.',pick:1,req:()=>run.gold>=20&&run.deck.length>1,why:()=>run.gold<20?'Ti servono 20 oro.':'Ti serve almeno un\'altra carta nel mazzo.',f:i=>{if(!run.deck[i]||run.gold<20)return null;run.gold-=20;const c=run.deck.splice(i,1)[0];return `${CARDS[c.id].n} svanisce dalla tua memoria.`}},
         {t:'Prosegui',s:'Non succede niente.',f:()=>'Il pozzo resta in silenzio alle tue spalle.'}]},
 ];
 
@@ -1437,17 +1446,30 @@ function clickPotion(i){
     if(g.busy)return;const a=alive();
     if(p.tg&&a.length>1){UI.sel=(UI.sel&&UI.sel.k==='p'&&UI.sel.i===i)?null:{k:'p',i};render();if(UI.sel)toast('Scegli un bersaglio');return}
     send({t:'potion',i,j:p.tg&&a[0]?g.enemies.indexOf(a[0]):null});
-  }else if(id==='cura'){send({t:'drink',i});toast('Recuperi 15 PV.')}
-  else toast(p.n+': '+p.d+' (solo in combattimento)');
+  }else potionMenu(i);
+}
+function potionMenu(i){
+  const id=run.potions[i],p=POTIONS[id];
+  modal={title:p.n,cancel:true,list:[],html:`<div class="panel" style="max-width:520px;margin:0 auto;flex-direction:row;align-items:center;gap:14px">${potIc(id,48)}<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+    <p>${p.d}${id==='cura'?'':' Si può usare solo in combattimento.'}</p>
+    <div class="row">${id==='cura'?`<button class="btn primary" onclick="modal=null;send({t:'drink',i:${i}});toast('Recuperi 15 PV.')">Bevi ora</button>`:''}
+    <button class="btn danger" onclick="modal=null;send({t:'dropPot',i:${i}});toast('${p.n.replace(/'/g,"\\'")} gettata via.')">Getta via</button><button class="btn" onclick="closeModal()">Tienila</button></div></div></div>`};render();
 }
 function endTurnBtn(){UI.sel=null;send({t:'end'})}
 function vote(y,x){send({t:'vote',y,x})}
-function proceed(){send({t:'done'})}
+function proceed(force){
+  const r=run&&run.screen==='reward'&&run.reward;
+  if(r&&r.cards&&!force){modal={title:'Non hai scelto una carta',cancel:true,list:[],html:`<div class="panel" style="max-width:520px;margin:0 auto">
+    <p>Tra le ricompense c'è ancora una carta da scegliere. Oro, pozione e reliquia non raccolti finiscono comunque nel tuo inventario.</p>
+    <div class="row"><button class="btn primary" onclick="closeModal()">Torna a scegliere la carta</button><button class="btn" onclick="modal=null;proceed(true)">Salta la carta e prosegui</button></div></div>`};render();return}
+  if(r){const got=[];if(r.gold)got.push(r.gold+' oro');if(r.potion)got.push(POTIONS[r.potion].n);if(r.relic)got.push(RELICS[r.relic].n);if(got.length)toast('Raccolto automaticamente: '+got.join(', '))}
+  send({t:'done',skip:!!force});
+}
 function takeCardUI(k){toast(CARDS[run.reward.cards[k]].n+' aggiunta al mazzo');send({t:'takeCard',k})}
-function takePotionUI(){if(run.potions.length>=3){toast('Hai già 3 pozioni.');return}send({t:'takePotion'})}
+function takePotionUI(){send({t:'takePotion'})}
 function takeRelicUI(){toast('Reliquia ottenuta: '+RELICS[run.reward.relic].n);send({t:'takeRelic'})}
 function buyUI(kind,k){const it=run.shop[kind][k];if(it.sold)return;if(run.gold<it.price){toast('Oro insufficiente');return}
-  if(kind==='potions'&&run.potions.length>=3){toast('Hai già 3 pozioni.');return}send({t:'buy',kind,k})}
+  send({t:'buy',kind,k})}
 function shopRemoveUI(){if(run.shop.removeUsed)return;if(run.gold<removePrice()){toast('Oro insufficiente');return}
   openPicker(run.deck.map((c,i)=>i),'Scegli una carta da rimuovere',i=>{toast(CARDS[run.deck[i].id].n+' rimossa');send({t:'shopRemove',i})})}
 function restHealUI(){toast('Recuperi '+Math.floor(run.max*.3)+' PV.');send({t:'restHeal'})}
@@ -1571,6 +1593,12 @@ function render(fxs){
     else UI.sentZ=null;
     if(P.zApplied&&UI.zClr!==R.code+R.seed){UI.zClr=R.code+R.seed;setZaino({});if(R.phase==='map'&&R.floor===0)toast('Dallo zaino: '+P.zApplied)}
   }
+  if(R&&run&&run.pendPot&&(!modal||modal.pend)){const np=run.pendPot;modal={title:'Hai già 3 pozioni',pend:1,cancel:false,list:[],html:`<div class="panel" style="max-width:560px;margin:0 auto">
+    <div class="row" style="gap:12px">${potIc(np,44)}<div style="flex:1;min-width:0"><b>Nuova: ${POTIONS[np].n}</b><br><span class="muted">${POTIONS[np].d}</span></div></div>
+    <p>Puoi tenerla al posto di una delle tue:</p>
+    <div class="plist">${run.potions.map((id,i)=>`<div class="prow">${potIc(id,32)}<div style="flex:1;min-width:0"><b>${POTIONS[id].n}</b><br><span class="muted">${POTIONS[id].d}</span></div><button class="btn primary" onclick="send({t:'potSwap',i:${i}})">Sostituisci</button></div>`).join('')}</div>
+    <div><button class="btn" onclick="send({t:'potLeave'})">Non la prendo</button></div></div>`}}
+  else if(modal&&modal.pend&&!(run&&run.pendPot))modal=null;
   if(modal&&modal.bottega)modal.html=bottegaHTML();
   if(modal&&modal.board)modal.html=boardModalHTML();
   if(modal)h+=`<div class="modal" role="dialog" aria-label="${modal.title}"><div class="mhead"><h3 style="flex:1">${modal.title}</h3>${modal.cancel?'<button class="btn" onclick="closeModal()">Chiudi</button>':''}</div>
@@ -1785,7 +1813,7 @@ function eventScreen(){
   return `<main><div class="wrap"><div class="evhead"><span class="ic">${sprImg(ev.spr||'e_'+ev.id,60)}</span><h2>${ev.n}</h2></div>
     <div class="panel"><p class="lede">${ev.txt}</p>
     ${run.event.result?`<p style="color:var(--torch2)">${run.event.result}</p><div><button class="btn primary" onclick="proceed()">Prosegui</button></div>`:
-    `<div class="opts">${ev.opts.map((o,k)=>(o.solo&&!solo)?'':`<button class="opt" onclick="chooseEv(${k})" ${o.req&&!o.req()?'disabled':''}><b>${o.t}</b><br><span class="muted">${o.s}</span></button>`).join('')}</div>`}
+    `<div class="opts">${ev.opts.map((o,k)=>(o.solo&&!solo)?'':`<button class="opt" onclick="chooseEv(${k})" ${o.req&&!o.req()?'disabled':''}><b>${o.t}</b><br><span class="muted">${o.s}</span>${o.req&&!o.req()&&o.why?`<br><span class="why">${o.why()}</span>`:''}</button>`).join('')}</div>`}
     </div></div></main>`;
 }
 function treasureScreen(){
