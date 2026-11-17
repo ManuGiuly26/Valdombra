@@ -60,7 +60,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
           startCombat(['orco','goblin'],'combat');R.combat.enemies.forEach(e=>{e.hp=e.max=999});
           ctx('pA');const h=g.hero;h.energy=9;const c={id,up,uid:uid++};h.hand.push(c);
           for(let k=0;k<3;k++)h.disc.push({id:'colpo',up:false,uid:uid++});
-          playCard(c.uid,0,'pA',0);ctx('pA');if(g&&g.hero&&g.hero.hand.some(x=>x.uid===c.uid))playCard(c.uid,0,'pB',1);
+          playCard(c.uid,0,'pA',0,up?1:0);ctx('pA');if(g&&g.hero&&g.hero.hand.some(x=>x.uid===c.uid))playCard(c.uid,0,'pB',1);
           await turnoNemici();carte++}catch(e){errs.push('carta '+id+(up?'+':'')+': '+e.message)}}}}
     // ogni nemico, élite e boss (le élite con ogni tratto)
     nuovaStanza('guardiano');
@@ -97,6 +97,111 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
 
   console.log('6. Schermate');
   ok(await page.evaluate(()=>{R=null;solo=true;ME='solo';screen='title';const t=['openBottega','openSettings','openDiario'];for(const f of t){window[f]();render();closeModal()}return true}),'Bottega, Impostazioni e Diario si aprono');
+
+  console.log('7. Luce e Ombra, Villaggio e Gemme');
+  const lo=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+    localStorage.clear();SET.tut=false;SET.lo=true;SET.vil=true;SET.gem=true;SPEED=0;
+    const nuova=(cls='guerriero')=>{R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);pickCls=cls;pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();ctx(ME)};
+    const carta=id=>{const c={id,up:false,uid:uid++};g.hero.hand.push(c);g.hero.energy=9;return c};
+    nuova();r.attiva=R.lo===true;
+    startCombat(['goblin'],'combat');ctx(ME);let e=g.enemies[0];e.hp=e.max=999;
+    let c=carta('colpo');r.lato=canShadow(c)&&!canShadow({id:'furia',up:false});
+    playCard(c.uid,0,ME,null,1);ctx(ME);r.ombraDanno=999-e.hp;r.ombra1=run.om;
+    e.hp=999;c=carta('colpo');playCard(c.uid,0,ME,null,0);ctx(ME);r.luceDanno=999-e.hp;
+    const b0=g.hero.blk;c=carta('parata');playCard(c.uid,null,ME,null,1);ctx(ME);r.armOmbra=g.hero.blk-b0;
+    // creatura d'ombra
+    startCombat(['scheletro'],'combat');ctx(ME);e=g.enemies[0];e.hp=e.max=999;r.buio=isDark(e);
+    c=carta('colpo');playCard(c.uid,0,ME,null,1);ctx(ME);r.buioOmbra=999-e.hp;e.hp=999;
+    c=carta('colpo');playCard(c.uid,0,ME,null,0);ctx(ME);r.buioLuce=999-e.hp;
+    // con 5 Ombra i nemici colpiscono più forte
+    startCombat(['goblin'],'combat');ctx(ME);e=g.enemies[0];e.intent={d:6,tg:ME};run.om=0;const d0=calcDmg(enemyBase(e,e.intent),e,g.hero);run.om=5;r.piuDanni=calcDmg(enemyBase(e,e.intent),e,g.hero)-d0;
+    // caduta nell'ombra
+    run.om=9;const mx=run.max;e.hp=e.max=999;c=carta('colpo');playCard(c.uid,0,ME,null,1);ctx(ME);r.caduta=run.om===0&&run.max===mx-4&&!!g.hero.st.oscuro;
+    e.hp=999;c=carta('colpo');playCard(c.uid,0,ME,null,0);ctx(ME);r.doppio=999-e.hp;
+    // turno puro
+    run.om=3;g.hero.ended=false;g.hero.shTurn=0;c=carta('colpo');playCard(c.uid,0,ME,null,0);ctx(ME);endHeroTurn();r.puro=run.om===2&&!g.hero.st.oscuro;
+    // falò
+    run.om=6;run.screen='rest';ACT.restHeal({},run);r.falo=run.om===3;
+    // spento
+    SET.lo=false;nuova();r.spento=R.lo===false&&!canShadow({id:'colpo',up:false});SET.lo=true;
+    // assorbire in gruppo
+    solo=false;isHost=true;ME='pA';myName='Luca';chan=null;R=newLobby('OMBR');R.players.pA.cls='guerriero';R.players.pB={pid:'pB',name:'Sara',cls:'mago',ready:true};R.order.push('pB');online=new Set(R.order);
+    startRunRoom(0,'OMBRA');startCombat(['goblin'],'combat');R.players.pB.om=8;ctx('pA');const en=g.hero.energy;dispatch('pA',{t:'absorb',p:'pB'});
+    r.assorbi=R.players.pB.om===5&&R.players.pA.om===3&&R.combat.heroes.pA.energy===en-1;
+    R.players.pA.om=6;R.players.pB.om=6;startCombat(['scheletro'],'combat');r.forzaBuio=(R.combat.enemies[0].st.str|0)===2;
+    // villaggio: richieste e costruzione
+    solo=true;ME='solo';R=null;localStorage.setItem('valdombra-corone','5000');
+    buildVil('locanda');r.bloccato=!getVil().locanda;
+    localStorage.setItem('valdombra-statistiche',JSON.stringify({runs:5,floors:60,elites:9,kills:300,wins:2,bosses:['drago','lich','tiranno']}));
+    const cr0=getCrowns();buildVil('locanda');r.costruito=getVil().locanda===1&&getCrowns()<cr0;
+    VIL.forEach(b=>{for(let i=0;i<4;i++)buildVil(b.id)});r.tutto=vilDone()===vilTot();
+    // gemme e cimeli
+    setGems(100);buyCim('lanterna');buyCim('ancora');r.cimeli=cimSel().join(',');const gm=getGems();
+    const cr1=getCrowns();gemExchange();r.cambio=getCrowns()===cr1+40&&getGems()===gm-5;
+    buySkin('guerriero','cremisi');r.aspetto=getGems()===gm-5-12;
+    nuova('guerriero');const P=R.players.solo;
+    r.bonus={max:P.max,oro:P.gold,pot:P.potions.length,su:P.deck.filter(x=>x.up).length,rel:P.relics.join(',')};
+    startCombat(['goblin'],'combat');ctx(ME);r.tempio=g.hero.blk;
+    SET.vil=false;SET.gem=false;nuova('guerriero');r.senza={max:R.players.solo.max,rel:R.players.solo.relics.join(',')};SET.vil=true;SET.gem=true;
+    R=null;startDaily();r.giorno=JSON.stringify(R.players.solo.vb||{})==='{}';
+    // gemme di fine partita
+    nuova('guerriero');R.players.solo.stx.elites=2;R.players.solo.stx.bk=1;R.win=true;R.phase='end';const g0=getGems();r.premio=gemsAward();r.premioOk=getGems()===g0+7;
+    // schermate
+    R=null;screen='title';render();openVillaggio();render();r.vilModal=!!document.querySelector('.vilsvg');closeModal();
+    openBottega();render();r.bottega=document.body.innerHTML.includes('Cimeli permanenti');closeModal();
+    openGuida('ombra');render();openGuida('vil');render();closeModal();openSettings();render();r.sviluppo=document.body.innerHTML.includes('Luce e Ombra');closeModal();
+    nuova('mago');startCombat(['scheletro','goblin'],'combat');ctx(ME);UI.om=true;render();r.ui=!!document.querySelector('#ombtn')&&!!document.querySelector('.card.shadow')&&!!document.querySelector('.ombar')&&!!document.querySelector('.etrait.dark');UI.om=false;
+    return r});
+  const mondo=await page.evaluate(async()=>{const r={};SET.lo=true;SET.tut=false;
+    const nuova=(cls='guerriero')=>{R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);pickCls=cls;pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();ctx(ME)};
+    nuova();R.phase='room';run.screen='shop';run.done=false;genShop();run.gold=1000;const it=run.shop.cards[0];
+    run.om=0;r.sconto=omPrice(it.price)===Math.round(it.price*.9);run.om=6;r.rincaro=omPrice(it.price)===Math.round(it.price*1.15);
+    const g0=run.gold;dispatch(ME,{t:'buy',kind:'cards',k:0});ctx(ME);r.pagato=g0-run.gold===Math.round(it.price*1.15);
+    render();r.vediOmbra=document.body.innerHTML.includes("Mercante d'Ombra")&&document.body.innerHTML.includes('Incenso purificatore');
+    const nr=run.relics.length;dispatch(ME,{t:'darkBuy'});ctx(ME);r.ombraPaga=run.relics.length===nr+1&&run.om===9;
+    dispatch(ME,{t:'incenso'});ctx(ME);r.incenso=run.om===6&&run.shop.inc;
+    // nemici comuni impauriti, caduta rimandata all'inizio del combattimento
+    run.om=10;R.phase='map';startCombat(['goblin','scheletro'],'combat');ctx(ME);r.paura=(g.enemies[0].st.weak|0)===1&&!g.enemies[1].st.weak;r.cadeSubito=run.om===0&&!!g.hero.st.oscuro;
+    // bottino
+    run.om=6;g.enemies.forEach(e=>hurtEnemy(e,9999));checkEnd();await new Promise(r=>setTimeout(r,700));r.bottino=R.phase==='room'&&run.reward&&run.reward.gold>=12;
+    // eventi
+    for(const id of ['pellegrino','specchio']){const ev=EVENTS.find(e=>e.id===id);ev.opts.forEach((o,k)=>{nuova();run.om=k%2?6:1;run.gold=100;R.phase='room';run.screen='event';run.event={id,result:null};if(o.req&&!o.req())return;dispatch(ME,{t:'ev',k});ctx(ME);r['ev_'+id+k]=!!run.event.result})}
+    nuova('ladro');run.deck.push({id:'pugnalerit',up:false});startCombat(['ratto'],'combat');ctx(ME);{const c=g.hero.draw.concat(g.hero.hand).find(x=>x.id==='pugnalerit');if(g.hero.draw.includes(c)){g.hero.draw.splice(g.hero.draw.indexOf(c),1);g.hero.hand.push(c)}g.hero.energy=3;g.enemies[0].hp=1;playCard(c.uid,0,ME)}
+    R.combat=null;startCombat(['goblin'],'combat');ctx(ME);{const c=g.hero.draw.concat(g.hero.hand).find(x=>x.id==='pugnalerit');r.pugnale=!!c&&vals(c).d===12}
+    r.eventi=Object.keys(r).filter(k=>k.startsWith('ev_')).length;
+    SET.lo=false;nuova();R.phase='map';r.eventiSpenti=!EVENTS.filter(e=>e.lo).some(e=>(!e.dg||e.dg.includes('rocca'))&&(!e.lo||LO()));SET.lo=true;
+    // le creature d'ombra cercano chi ha più Ombra
+    solo=false;isHost=true;ME='pA';myName='Luca';chan=null;R=newLobby('CACC');R.players.pA.cls='guerriero';R.players.pB={pid:'pB',name:'Sara',cls:'mago',ready:true};R.order.push('pB');online=new Set(R.order);
+    startRunRoom(0,'CACCIA');R.players.pB.om=6;let tutti=true;for(let i=0;i<6;i++){startCombat(['spettro','spettro'],'combat');R.combat.enemies.forEach(e=>{if(e.intent&&e.intent.d&&!e.intent.aoe&&e.intent.tg!=='pB')tutti=false})}r.caccia=tutti;
+    // pulsante Gioca
+    R=null;solo=true;ME='solo';screen='title';modal=null;render();r.fab=!!document.querySelector('.playfab');openGioca();render();r.menu=document.querySelectorAll('.gopt').length>=4&&!document.querySelector('.playfab');
+    pickCls='mago';pickDg='rocca';giocaSolo('surv');r.surv=R&&R.mode==='surv'&&R.phase==='map';R=null;screen='title';openGioca();render();giocaSolo('norm');r.norm=R&&R.mode==='norm'&&R.players.solo.cls==='mago';
+    R=null;screen='title';render();return r});
+  ok(mondo.sconto&&mondo.rincaro&&mondo.pagato,'il Mercante fa lo sconto a chi è puro e alza i prezzi a chi è nell\'ombra');
+  ok(mondo.vediOmbra&&mondo.ombraPaga&&mondo.incenso,'Mercante d\'Ombra (reliquia per 3 Ombra) e Incenso purificatore');
+  ok(mondo.paura&&mondo.cadeSubito,'con 7 Ombra i nemici comuni hanno paura; a 10 si cade a inizio combattimento');
+  ok(mondo.pugnale,'il Pugnale Rituale torna nel combattimento dopo con i danni guadagnati');
+  ok(mondo.bottino,'bottino dell\'ombra');
+  ok(mondo.eventi>=6&&mondo.eventiSpenti,`eventi del Pellegrino e dello Specchio (${mondo.eventi} scelte provate), spariscono senza Luce e Ombra`);
+  ok(mondo.caccia,'le creature d\'ombra attaccano chi ha più Ombra');
+  ok(mondo.fab&&mondo.menu&&mondo.surv&&mondo.norm,'il pulsante Gioca è sempre visibile e fa partire le modalità');
+  ok(lo.attiva&&lo.lato,'Luce e Ombra è attiva e solo le carte giuste hanno il lato Ombra');
+  ok(lo.ombraDanno===9&&lo.luceDanno===6&&lo.ombra1===1,`lato Ombra: 9 danni e +1 Ombra, lato Luce 6 danni (${lo.ombraDanno}/${lo.luceDanno})`);
+  ok(lo.armOmbra===8,'lato Ombra: Armatura +50% ('+lo.armOmbra+')');
+  ok(lo.buio&&lo.buioOmbra===6&&lo.buioLuce===7,`creature d'ombra: niente bonus Ombra, +25% con la Luce (${lo.buioOmbra}/${lo.buioLuce})`);
+  ok(lo.piuDanni===2,'con 5 Ombra i nemici fanno 2 danni in più');
+  ok(lo.caduta&&lo.doppio===12,'a 10 Ombra si cade nell\'ombra: danni doppi ('+lo.doppio+') e PV massimi persi');
+  ok(lo.puro&&lo.falo,'l\'Ombra cala con un turno di sola Luce e al Falò');
+  ok(lo.spento,'dall\'interruttore Sviluppo Luce e Ombra si spegne');
+  ok(lo.assorbi,'in gruppo si assorbe l\'Ombra di un compagno');
+  ok(lo.forzaBuio,'le creature d\'ombra si rafforzano con l\'Ombra del gruppo');
+  ok(lo.bloccato&&lo.costruito&&lo.tutto,'villaggio: prima la richiesta, poi le Corone; si ricostruisce tutto');
+  ok(lo.cimeli==='lanterna,ancora'&&lo.cambio&&lo.aspetto,'gemme: cimeli, cambio in Corone e aspetti ('+lo.cimeli+')');
+  ok(lo.bonus.max===92&&lo.bonus.oro===99+75&&lo.bonus.pot===3&&lo.bonus.su===3&&/lanterna/.test(lo.bonus.rel)&&/ancora/.test(lo.bonus.rel)&&lo.tempio>=7,'i bonus del villaggio e i cimeli valgono in partita '+JSON.stringify(lo.bonus)+' armatura '+lo.tempio);
+  ok(lo.senza.max===80&&!/lanterna/.test(lo.senza.rel),'spegnendo Villaggio e Gemme i bonus spariscono');
+  ok(lo.giorno,'nella sfida del giorno il villaggio non vale');
+  ok(lo.premio===7&&lo.premioOk,'gemme di fine partita: 1 per élite, 3 per boss, 2 per la vittoria');
+  ok(lo.vilModal&&lo.bottega&&lo.sviluppo&&lo.ui,'villaggio, bottega, guida, impostazioni e combattimento in Ombra si vedono');
 
   console.log('');
   if(errori.length){console.log('Errori JavaScript nella pagina:');[...new Set(errori)].forEach(e=>console.log('  - '+e));fallite++}
