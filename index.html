@@ -3190,6 +3190,8 @@ function profiloHTML(){
 }
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&ACC&&Date.now()-ACCS.last>20000)accPull();else if(document.visibilityState==='hidden'&&ACC&&ACC.dirty)accPush()});
 setInterval(()=>{if(ACC&&document.visibilityState==='visible'&&(!R||R.phase==='lobby')&&Date.now()-ACCS.last>90000)accPull()},30000);
+// appena si apre il gioco: prendi subito i progressi dal profilo (per esempio la partita iniziata su un altro dispositivo)
+setTimeout(()=>{if(ACC&&!R)accPull()},400);
 
 
 /* ================= APP INSTALLABILE ================= */
