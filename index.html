@@ -293,8 +293,6 @@ body.noanim #gltip{transition:none}
 .pings{display:flex;flex-direction:column;gap:2px;align-items:center;margin-bottom:2px}.pingtag{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--pc);color:#1b1424;animation:pingpop .35s ease-out}
 .enemy.pinged{outline:3px solid var(--pc);outline-offset:2px}
 @keyframes pingpop{0%{transform:scale(.5)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
-body.big .card .cdesc{font-size:14.5px!important;line-height:1.3}body.big .card .cname{font-size:15.5px!important}body.big .chip{font-size:13px}body.big .toast{font-size:16.5px}
-body.big .muted,body.big .lab,body.big .opt,body.big p{font-size:max(15px,1em)}body.big .btn{font-size:16px}body.big .intent{font-size:15px}body.big .nm{font-size:15px}
 body.hc{--muted:#ddd6ea;--line:#8d82a6}body.hc .card .cdesc{color:#15101c}body.hc .chip{outline:1px solid #ffffff55}
 .tutbox{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 62px);z-index:75;width:min(460px,calc(100vw - 24px));background:#211a2c;border:2px solid #ffd27a;border-radius:12px;padding:10px 14px 12px;box-shadow:0 10px 30px #000a}
 .tutbox.low{top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 250px)}
@@ -304,6 +302,8 @@ body.hc{--muted:#ddd6ea;--line:#8d82a6}body.hc .card .cdesc{color:#15101c}body.h
 .achbar{display:block;height:6px;border-radius:3px;background:var(--stone3);overflow:hidden}.achbar i{display:block;height:100%;background:var(--torch)}
 .relicbox.on{border-color:var(--torch);box-shadow:0 0 0 2px var(--torch) inset}
 @media (max-width:480px){.pilebar .grow{flex-basis:100%;order:-1;text-align:center}.pilebar .btn{padding-inline:10px}}
+.gsec{gap:6px}.gsec h4{margin:0;color:var(--torch2)}.glist{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:5px}.gdef{display:flex;flex-direction:column;gap:1px;padding:4px 0;border-bottom:1px solid var(--line)}.gdef:last-child{border-bottom:0}
+.ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}.gtabs{gap:6px}.gtabs .btn{padding:6px 10px}
 .etrait{display:inline-block;margin:2px auto 0;font-size:11px;padding:1px 7px;border-radius:999px;background:#4a2a12;color:#ffc58a;border:1px solid #8a4a1c;cursor:help}
 .badge.lockb{background:#4a2326;color:#ffb3ab;display:inline-flex;align-items:center;gap:3px}
 .classcard.locked .ic{filter:brightness(.35) grayscale(.6)}.classcard .price{margin-top:4px}
@@ -1814,6 +1814,7 @@ function openMenu(){
   const host=!solo&&R.host===ME;
   modal={title:'Menu',html:`<div class="opts" style="max-width:520px;margin:0 auto">
     <button class="opt" onclick="openSettings()"><b>Impostazioni</b><br><span class="muted">Musica, effetti sonori, chat, animazioni e versione del gioco.</span></button>
+    <button class="opt" onclick="openGuida()"><b>Guida del gioco</b><br><span class="muted">Come si gioca: combattimento, parole chiave, eroi, dungeon, modalità e gioco in gruppo.</span></button>
     <button class="opt" onclick="modal=null;${solo?"R=null;g=null;screen='title';render()":'leaveRoom(false)'}"><b>Torna al menu principale</b><br><span class="muted">La partita resta salvata: potrai riprenderla con il tasto Continua.</span></button>
     <button class="opt" onclick="openAbandon()"><b>Abbandona il dungeon</b><br><span class="muted">${solo?'La partita viene cancellata.':'Esci per sempre da questa partita. Gli altri possono continuare senza di te.'}</span></button>
     ${host?'<button class="opt" onclick="openClose()"><b>Chiudi la stanza per tutti</b><br><span class="muted">La partita finisce per tutto il gruppo e la stanza viene cancellata.</span></button>':''}
@@ -1839,31 +1840,73 @@ const TUT_K='valdombra-tutorial';
 const inCombat=()=>R&&R.phase==='combat'&&g&&g.hero&&!g.busy&&!g.hero.down;
 const scr=k=>R&&R.phase==='room'&&R.players[ME]&&R.players[ME].screen===k;
 const TUT=[
- {id:'start',when:()=>!R&&screen!=='mp',sel:'.classes',t:'Benvenuto a Valdombra! Scegli il tuo eroe, poi il dungeon, e premi «Gioca da solo». Per giocare con gli amici usa «Gioca con gli amici».'},
- {id:'mappa',when:()=>R&&R.phase==='map'&&!R.voteAnim,sel:'.mapsvg .node.avail circle',t:'Questa è la mappa del dungeon: tocca un cerchio illuminato per avanzare. Ci sono nemici, Élite più forti, Falò per curarti, Mercanti, Eventi e Tesori. In cima ti aspetta il boss.'},
- {id:'energia',when:inCombat,sel:'.energy',t:'Questa è la tua Energia: all\'inizio di ogni turno torna a 3. Ogni carta costa l\'Energia scritta nel cerchio in alto a sinistra della carta.'},
- {id:'carte',when:inCombat,sel:'.hand',t:'Tocca una carta per giocarla. Per gli Attacchi tocca poi il nemico da colpire. A ogni turno peschi 5 carte nuove, e quelle che non giochi vanno negli scarti.'},
- {id:'intenti',low:1,when:inCombat,sel:'.enemy .intent',t:'Sopra ogni nemico vedi cosa farà nel suo turno: la spada col numero indica i danni che sta per infliggere, e a chi. Tocca un\'icona per leggere i dettagli.'},
- {id:'armatura',when:inCombat,sel:'.hero .nm',t:'Le carte come «Parata» danno Armatura: para i danni dei nemici, ma sparisce all\'inizio del tuo turno successivo. Usala quando un nemico sta per colpire forte.'},
- {id:'fineturno',when:inCombat,sel:'.pilebar .btn.primary',t:'Quando hai finito premi «Fine turno»: agiscono i nemici, poi tocca di nuovo a te. Tieni il dito su una carta (o passaci sopra col mouse) per vedere il significato delle parole chiave.'},
- {id:'segnali',when:()=>inCombat()&&!solo,sel:'.pilebar [aria-pressed]',t:'In gruppo puoi usare «Segnala»: tocchi un nemico per dire «attacco questo!» oppure il tuo eroe per chiedere «proteggimi!». I compagni lo vedono col tuo colore.'},
- {id:'elite',low:1,when:()=>inCombat()&&R.combat.kind==='elite',sel:'.etrait',t:'Questa è un\'Élite: più forte di un nemico normale e con un tratto speciale (tocca l\'etichetta sotto il nome). In cambio dà ricompense migliori.'},
- {id:'boss',low:1,when:()=>inCombat()&&R.combat.kind==='boss',sel:'.enemy.boss',t:'Il boss del dungeon! Ogni dungeon ne ha due possibili. Sconfiggilo per completare il dungeon e sbloccare il successivo e un Livello di Assedio più alto.'},
- {id:'ricompensa',when:()=>scr('reward'),sel:'main .opts, main .cards, main',t:'Hai vinto! Scegli una carta da aggiungere al mazzo, oppure saltala: un mazzo piccolo pesca più spesso le carte migliori. Poi prendi l\'oro e premi «Prosegui».'},
- {id:'falo',when:()=>scr('rest'),sel:'main .opt',t:'Al Falò puoi riposare per recuperare PV, oppure affilare le armi e potenziare una carta del mazzo.'},
- {id:'negozio',when:()=>scr('shop'),sel:'main',t:'Dal Mercante spendi l\'oro in carte, reliquie e pozioni. Puoi anche bruciare una carta debole per alleggerire il mazzo.'},
- {id:'finepartita',when:()=>R&&R.phase==='end',sel:'.crownbadge',t:'Con le Corone che guadagni compri oggetti nella Bottega e sblocchi nuovi eroi. Nel Diario trovi le tue statistiche, le Imprese e l\'enciclopedia.'},
+ {id:'start',g:'base',when:()=>!R&&screen!=='mp',sel:'.classes',t:'Benvenuto a Valdombra! Scegli il tuo eroe, poi il dungeon, e premi «Gioca da solo». Per giocare con gli amici usa «Gioca con gli amici».'},
+ {id:'mappa',g:'base',when:()=>R&&R.phase==='map'&&!R.voteAnim,sel:'.mapsvg .node.avail circle',t:'Questa è la mappa del dungeon: tocca un cerchio illuminato per avanzare. Ci sono nemici, Élite più forti, Falò per curarti, Mercanti, Eventi e Tesori. In cima ti aspetta il boss.'},
+ {id:'energia',g:'comb',when:inCombat,sel:'.energy',t:'Questa è la tua Energia: all\'inizio di ogni turno torna a 3. Ogni carta costa l\'Energia scritta nel cerchio in alto a sinistra della carta.'},
+ {id:'carte',g:'comb',when:inCombat,sel:'.hand',t:'Tocca una carta per giocarla. Per gli Attacchi tocca poi il nemico da colpire. A ogni turno peschi 5 carte nuove, e quelle che non giochi vanno negli scarti.'},
+ {id:'intenti',g:'comb',low:1,when:inCombat,sel:'.enemy .intent',t:'Sopra ogni nemico vedi cosa farà nel suo turno: la spada col numero indica i danni che sta per infliggere, e a chi. Tocca un\'icona per leggere i dettagli.'},
+ {id:'armatura',g:'comb',when:inCombat,sel:'.hero .nm',t:'Le carte come «Parata» danno Armatura: para i danni dei nemici, ma sparisce all\'inizio del tuo turno successivo. Usala quando un nemico sta per colpire forte.'},
+ {id:'fineturno',g:'comb',when:inCombat,sel:'.pilebar .btn.primary',t:'Quando hai finito premi «Fine turno»: agiscono i nemici, poi tocca di nuovo a te. Tieni il dito su una carta (o passaci sopra col mouse) per vedere il significato delle parole chiave.'},
+ {id:'segnali',g:'gruppo',when:()=>inCombat()&&!solo,sel:'.pilebar [aria-pressed]',t:'In gruppo puoi usare «Segnala»: tocchi un nemico per dire «attacco questo!» oppure il tuo eroe per chiedere «proteggimi!». I compagni lo vedono col tuo colore.'},
+ {id:'elite',g:'dungeon',low:1,when:()=>inCombat()&&R.combat.kind==='elite',sel:'.etrait',t:'Questa è un\'Élite: più forte di un nemico normale e con un tratto speciale (tocca l\'etichetta sotto il nome). In cambio dà ricompense migliori.'},
+ {id:'boss',g:'dungeon',low:1,when:()=>inCombat()&&R.combat.kind==='boss',sel:'.enemy.boss',t:'Il boss del dungeon! Ogni dungeon ne ha due possibili. Sconfiggilo per completare il dungeon e sbloccare il successivo e un Livello di Assedio più alto.'},
+ {id:'ricompensa',g:'base',when:()=>scr('reward'),sel:'main .opts, main .cards, main',t:'Hai vinto! Scegli una carta da aggiungere al mazzo, oppure saltala: un mazzo piccolo pesca più spesso le carte migliori. Poi prendi l\'oro e premi «Prosegui».'},
+ {id:'falo',g:'base',when:()=>scr('rest'),sel:'main .opt',t:'Al Falò puoi riposare per recuperare PV, oppure affilare le armi e potenziare una carta del mazzo.'},
+ {id:'negozio',g:'base',when:()=>scr('shop'),sel:'main',t:'Dal Mercante spendi l\'oro in carte, reliquie e pozioni. Puoi anche bruciare una carta debole per alleggerire il mazzo.'},
+ {id:'finepartita',g:'prog',when:()=>R&&R.phase==='end',sel:'.crownbadge',t:'Con le Corone che guadagni compri oggetti nella Bottega e sblocchi nuovi eroi. Nel Diario trovi le tue statistiche, le Imprese e l\'enciclopedia.'},
 ];
 function tutSeen(){try{const a=JSON.parse(load(TUT_K));return Array.isArray(a)?a:[]}catch(e){return[]}}
 function tutDone(id){const a=tutSeen();if(!a.includes(id)){a.push(id);store(TUT_K,JSON.stringify(a))}render()}
-function tutSkip(){SET.tut=false;saveSet();toast('Consigli disattivati. Puoi riattivarli dalle Impostazioni.');render()}
+function tutSkip(){SET.tut=false;saveSet();toast('Consigli disattivati. Puoi riattivarli dalle Impostazioni (ripartono da qui) e trovi tutto nella Guida.');render()}
 function tutReset(){store(TUT_K,'[]')}
 function tutHTML(){if(!SET.tut||modal||(R&&!R.players[ME]))return '';const seen=tutSeen();
   const st=TUT.find(t=>!seen.includes(t.id)&&(()=>{try{return t.when()}catch(e){return false}})());if(!st)return '';
   const n=TUT.filter(t=>!seen.includes(t.id)).length;
   return `<style>${st.sel.split(',')[0]}{outline:3px solid #ffd27a!important;outline-offset:3px;border-radius:10px;animation:tutpulse 1.2s ease-in-out infinite}</style>
   <div class="tutbox ${st.low?'low':''}" role="dialog" aria-label="Consiglio"><div class="tuthead">${ic('i_crown',16)}<b>Consiglio</b></div><p>${st.t}</p>
-  <div class="row"><button class="btn primary" onclick="tutDone('${st.id}')">Ho capito</button><button class="btn" onclick="tutSkip()">Salta i consigli</button></div></div>`}
+  <div class="row"><button class="btn primary" onclick="tutDone('${st.id}')">Ho capito</button><button class="btn" onclick="tutSkip()">Salta i consigli</button><button class="btn" onclick="openGuida('${st.g||'base'}')">Guida</button></div><small class="muted">Consiglio ${TUT.length-n+1} di ${TUT.length}</small></div>`}
+
+
+/* ================= GUIDA ================= */
+const GUIDA=[['base','Come si gioca'],['comb','Combattimento'],['parole','Parole chiave'],['eroi','Eroi'],['dungeon','Dungeon e nemici'],['modi','Modalità'],['gruppo','In gruppo'],['prog','Progressi'],['set','Impostazioni']];
+function openGuida(t){UI.guTab=t||UI.guTab||'base';modal={title:'Guida del gioco',guida:true,cancel:true,list:[]};render()}
+function guidaHTML(){const t=UI.guTab||'base';const sec=(h,b)=>`<div class="panel gsec"><h4>${h}</h4>${b}</div>`;const li=a=>`<ul class="glist">${a.map(x=>`<li>${x}</li>`).join('')}</ul>`;
+  const def=(n,d)=>`<div class="gdef"><b>${n}</b><span>${d}</span></div>`;let b='';
+  if(t==='base')b=sec('Lo scopo','Scegli un eroe e attraversa un dungeon di 15 piani fino al boss. Lungo la strada combatti, raccogli carte, reliquie e pozioni e rendi più forte il tuo mazzo. Se i tuoi PV arrivano a zero la partita finisce: si ricomincia da capo, ma con le Corone guadagnate puoi prepararti meglio.')
+    +sec('La mappa','Ogni piano ha più strade. Tocca un cerchio illuminato per avanzare: puoi andare solo verso i cerchi collegati a quello in cui sei.'+li([`${sprImg('combat',16,'inl')} <b>Nemici</b>: un combattimento normale.`,`${sprImg('elite',16,'inl')} <b>Élite</b>: nemici molto più forti, con un tratto speciale. Danno più oro e carte migliori.`,`${sprImg('event',16,'inl')} <b>Evento</b>: un incontro con delle scelte. Ogni dungeon ha i suoi.`,`${sprImg('rest',16,'inl')} <b>Falò</b>: riposi e recuperi il 30% dei PV massimi, oppure potenzi una carta del mazzo.`,`${sprImg('shop',16,'inl')} <b>Mercante</b>: compri carte, reliquie e pozioni con l'oro, o bruci una carta per toglierla dal mazzo.`,`${sprImg('treasure',16,'inl')} <b>Tesoro</b>: una reliquia e un po' d'oro.`,`${sprImg('boss',16,'inl')} <b>Boss</b>: l'ultimo piano. Toccando il cerchio vedi quale dei due boss del dungeon vi aspetta.`]))
+    +sec('Dopo ogni combattimento','Prendi l\'oro e scegli una delle carte proposte, oppure saltala: un mazzo piccolo pesca più spesso le carte migliori. Le reliquie danno un effetto per tutta la partita. Le pozioni si usano una volta sola e puoi portarne al massimo 3.')
+    +sec('Salvataggio','La partita da solo si salva da sola a ogni passo: dal menu principale la riprendi con «Continua». In gruppo, se esci, rientri con lo stesso nome e lo stesso codice della stanza.');
+  if(t==='comb')b=sec('Il turno','All\'inizio del tuo turno peschi 5 carte e hai 3 Energia. Ogni carta costa l\'Energia scritta nel cerchio in alto a sinistra. Quando hai finito premi «Fine turno»: le carte rimaste in mano vanno negli scarti, poi agiscono i nemici. Quando la pila di pesca finisce, gli scarti vengono rimescolati.')
+    +sec('Tipi di carta',li(['<b>Attacco</b>: infligge danni. Tocca la carta e poi il nemico da colpire.','<b>Abilità</b>: Armatura, cure, pesca e altri effetti.','<b>Potere</b>: si gioca una volta e resta attivo per tutto il combattimento.','<b>Stato</b>: carta negativa messa dai nemici, di solito non si può giocare. Sparisce a fine combattimento.','Ogni carta si può <b>potenziare</b> (al Falò o con alcuni effetti): il nome prende un «+» e diventa più forte.']))
+    +sec('Le intenzioni dei nemici','Sopra ogni nemico c\'è cosa farà nel suo turno: la spada con il numero indica i danni e a chi sono diretti, lo scudo l\'Armatura che prenderà, le altre icone effetti come Forza, maledizioni o evocazioni. Tocca le icone per leggerle. Usale per decidere se attaccare o difenderti.')
+    +sec('Armatura e PV','L\'Armatura para i danni prima dei PV, ma si azzera all\'inizio del tuo turno successivo (alcuni poteri la conservano). I PV invece restano da un combattimento all\'altro: si recuperano al Falò, con pozioni, carte e reliquie.')
+    +sec('Consigli',li(['Tieni il dito su una carta (o passaci sopra col mouse) per leggere il significato delle parole chiave.','Gli stati come Vulnerabile e Debole cambiano molto i danni: guarda i simboli sotto i nomi e toccali per i dettagli.','Non prendere tutte le carte: un mazzo piccolo e mirato è spesso più forte.']));
+  if(t==='parole'){const st=Object.values(STN).map(([n,d])=>def(n,d)).join('');const gl=Object.values(GLOSS).map(([n,d])=>def(n,d)).join('');
+    b=sec('Stati (su eroi e nemici)',st)+sec('Parole delle carte',gl)+sec('Forme del Druido',Object.values(FORMS).map(([n,d])=>def(n,d)).join(''))+sec('Elementi del Monaco',Object.values(ELEMS).map(([n,d])=>def(n,d)).join(''))}
+  if(t==='eroi')b=`<p class="muted">I primi 4 eroi sono disponibili da subito; gli altri si sbloccano con le Corone. Ogni eroe ha il suo mazzo iniziale, una reliquia iniziale e 5 abilità uniche da sbloccare giocando con lui.</p><div class="ggrid">${Object.entries(CLASSES).map(([k,c])=>`<div class="panel gsec"><div class="row" style="gap:10px;flex-wrap:nowrap">${sprImg(k,48)}<div><b style="font-size:17px">${c.n}</b><br><span class="muted">${c.hp} PV · ${relIc(c.relic,14)} ${RELICS[c.relic].n}${c.price?` · ${heroOwned(k)?'sbloccato':c.price+' Corone'}`:' · base'}</span></div></div><span>${c.desc}</span><small class="muted">Reliquia iniziale: ${RELICS[c.relic].d}</small></div>`).join('')}</div>`;
+  if(t==='dungeon')b=Object.entries(DUNGEONS).map(([k,d])=>sec(d.n,`<span>${d.desc}</span><span class="muted">${d.req?`Si sblocca completando ${DUNGEONS[d.req].n} in modalità normale (in Sopravvivenza basta superare lì un ciclo).`:'Disponibile da subito.'} Vittoria: ${d.crowns} Corone, più 20 per ogni Livello di Assedio.</span>`+(BOSSES[k]||[d.boss]).map(id=>`<div class="row" style="gap:10px;flex-wrap:nowrap;margin-top:6px">${sprImg(id,44)}<div><b>${ENEMIES[id].n}</b><br><span class="muted">${BOSSI[id][3]}</span></div></div>`).join(''))).join('')
+    +sec('Tratti delle élite','Ogni élite ha un tratto scelto a caso. Toccando l\'etichetta sotto il nome lo rileggi in combattimento.'+Object.values(ETRAITS).map(([n,d])=>def(n,d)).join(''))
+    +sec('Bestiario','Nel Diario, alla voce «Mostri», trovi tutti i nemici che hai incontrato, con i loro PV e i dungeon in cui vivono.');
+  if(t==='modi')b=sec('Normale',`Attraversi i 15 piani del dungeon e affronti il boss. Se vinci guadagni Corone, il dungeon conta come completato (sblocca il successivo) e sblocchi il Livello di Assedio seguente in quel dungeon.`)
+    +sec('Livelli di Assedio',`Da 0 a ${MAXLVL}. Ogni livello rende i nemici più forti ma dà più oro, carte rare più frequenti e più Corone. Per esempio, Assedio 1: ${lvlDesc(1)} Assedio ${MAXLVL}: ${lvlDesc(MAXLVL)}`)
+    +sec('Sopravvivenza','Il dungeon non finisce mai: dopo il boss ricomincia da capo più difficile (un nuovo «ciclo»), e recuperi un po\' di PV. Si va avanti finché cadete. Il punteggio va nella classifica, le Corone dipendono dai piani superati, il Livello di Assedio non si usa.')
+    +sec('Sfida del giorno','Ogni giorno una partita uguale per tutti: eroe, dungeon, seed e un modificatore speciale sono decisi dal giorno. Vale solo il primo tentativo, senza zaino né abilità uniche, e c\'è una classifica giornaliera. Non sblocca dungeon né livelli.')
+    +sec('Seed','Ogni partita ha un seed (in alto). Inserendolo prima di iniziare giochi la stessa mappa: utile per sfidare gli amici sullo stesso percorso.');
+  if(t==='gruppo')b=sec('Stanza e giocatori',`Da «Gioca con gli amici» crei una stanza e mandi il codice di 4 lettere o il link d'invito. Si gioca fino a ${MAXP} eroi. Chi crea la stanza (l'host) sceglie modalità, dungeon e livello e avvia la partita quando tutti sono pronti. Se l'host esce, un altro prende il suo posto.`)
+    +sec('Sblocchi in gruppo','Per giocare insieme ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelti: chi non li ha viene segnalato nella stanza. Quando il gruppo vince, il livello successivo si sblocca per tutti.')
+    +sec('Sulla mappa','Si vota il prossimo passo: vince la maggioranza, in caso di pareggio decide la sorte. Toccando di nuovo il tuo nodo togli il voto. Con «Traccia un percorso» disegni la strada che proponi: gli altri la vedono nel tuo colore.')
+    +sec('In combattimento',li(['Tutti giocano il proprio turno insieme; i nemici agiscono quando tutti hanno premuto «Fine turno». Se un alleato ti dà altra Energia puoi premere «Riprendi il turno».','Alcune carte aiutano gli alleati: dopo averle scelte tocca l\'eroe da aiutare. Le <b>carte di gruppo</b> diventano più forti se un alleato ha già giocato un certo tipo di carta.','Con <b>Segnala</b> tocchi un nemico («attacco questo!») o il tuo eroe («proteggimi!»).','Chi cade resta a terra fino alla fine del combattimento e si rialza con il 25% dei PV, a meno che un compagno non lo rianimi prima con «Rianimazione», «Ultima Grazia» o la Piuma di Fenice.','Il Guardiano può provocare i nemici e prendere i colpi al posto degli altri.']))
+    +sec('Chat','Nella stanza e a fine partita il pulsante Chat è sempre visibile, con frasi rapide già pronte. Si può spegnere nelle Impostazioni.');
+  if(t==='prog')b=sec('Corone e Bottega','Le Corone si guadagnano completando i dungeon, in Sopravvivenza e con le Imprese. Nella Bottega le spendi in oggetti per lo zaino (pozioni, reliquie, oro, PV, carte potenziate) che porti nella partita successiva, da solo o in gruppo, e negli Aspetti degli eroi.')
+    +sec('Nuovi eroi','Nella schermata principale gli eroi con il lucchetto si sbloccano con le Corone e restano tuoi per sempre.')
+    +sec('Crescita degli eroi','Ogni eroe guadagna esperienza quando lo usi e sale di livello. Ai livelli 2, 3, 5, 7 e 10 puoi comprare con le Corone un\'abilità unica di quell\'eroe, da attivare prima della partita.')
+    +sec('Imprese',`${ACH.length} obiettivi da completare, ognuno con un premio in Corone. Li trovi nel Diario, con l'avanzamento di quelli in corso.`)
+    +sec('Aspetti degli eroi',`Nuovi colori per i tuoi eroi, ${SKIN_PRICE} Corone l'uno, nella Bottega. Li vedono anche i compagni e non cambiano le regole.`)
+    +sec('Diario','Statistiche delle tue partite, Imprese ed enciclopedia di carte, mostri, reliquie e pozioni che hai scoperto.')
+    +sec('Profilo','Con un profilo (nome e password) ritrovi Corone, eroi, livelli e progressi su ogni dispositivo, per esempio sul telefono e sul PC.');
+  if(t==='set')b=sec('Impostazioni','Dall\'ingranaggio in alto a destra: volume di musica ed effetti, chat, animazioni, dimensione del testo, contrasto alto, vibrazione, consigli del tutorial (riprendono da dove eri rimasto) e invio delle statistiche anonime.')
+    +sec('App sul telefono','Il gioco si può installare come app: dal browser scegli «Aggiungi a schermata Home» (o «Installa app»). Così si apre a schermo intero e funziona anche con poca rete, tranne il gioco in gruppo e le classifiche.');
+  return `<div class="wrap" style="gap:12px"><div class="row gtabs">${GUIDA.map(([k,n])=>`<button class="btn ${t===k?'primary':''}" onclick="UI.guTab='${k}';render()">${n}</button>`).join('')}</div>${b}</div>`}
 
 /* ================= SOLO ================= */
 function startSolo(){
@@ -2140,6 +2183,7 @@ function render(fxs){
   if(modal&&modal.profilo)modal.html=profiloHTML();
   if(modal&&modal.dboard)modal.html=dailyBoardHTML();
   if(modal&&modal.diario)modal.html=diarioHTML();
+  if(modal&&modal.guida)modal.html=guidaHTML();
   if(R&&!solo&&SET.chat&&!chatOpen&&R.players[ME]&&(R.phase==='lobby'||R.phase==='end')){const n=Math.max(0,((R.chat||[]).length)-chatSeen);h+=`<button class="btn primary chatfab" onclick="toggleChat(true)" aria-label="Apri la chat">Chat${n?`<span class="dot">${n}</span>`:''}</button>`}
   if(!modal&&(!R||R.phase==='lobby'||R.phase==='end'||!R.players[ME]))h+=`<button class="crownbadge" onclick="openBottega()" title="Le tue Corone: apri la Bottega" aria-label="${getCrowns()} Corone, apri la Bottega">${ic('i_crown',16)}<b>${getCrowns()}</b><span>Corone</span></button>`;
   h+=tutHTML();
@@ -2190,7 +2234,8 @@ function titleHTML(){
     <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap;${ACC?'':'border-color:var(--torch)'}"><span style="line-height:0">${ic('i_gear',34)}</span><div style="flex:1;min-width:200px"><b style="font-size:17px">${ACC?'Profilo: '+esc(ACC.nome):'Profilo'}</b><br><span class="muted">${ACC?(ACCS.state==='err'?esc(ACCS.msg):'Progressi salvati online: li ritrovi su telefono e PC.'):'Crea un profilo o accedi per avere gli stessi progressi su telefono e PC.'}</span></div><button class="btn ${ACC?'':'primary'}" onclick="openProfilo()">${ACC?'Gestisci':'Accedi o crea'}</button></div>
     ${dailyPanel()}
     ${installPanel()}
-    <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><span style="line-height:0">${ic('event',34)}</span><div style="flex:1;min-width:200px"><b style="font-size:17px">Diario dell'eroe</b><br><span class="muted">Statistiche delle tue partite ed enciclopedia di carte, mostri, reliquie e pozioni scoperti.</span></div><div class="row"><button class="btn" onclick="openDiario('stat')">Statistiche</button><button class="btn" onclick="openDiario('c')">Enciclopedia</button></div></div>
+    <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><span style="line-height:0">${ic('i_note',34)}</span><div style="flex:1;min-width:200px"><b style="font-size:17px">Guida del gioco</b><br><span class="muted">Tutto quello che c'è da sapere, da consultare quando vuoi: regole, parole chiave, eroi, dungeon e gioco in gruppo.</span></div><button class="btn" onclick="openGuida()">Apri la guida</button></div>
+    <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><span style="line-height:0">${ic('event',34)}</span><div style="flex:1;min-width:200px"><b style="font-size:17px">Diario dell'eroe</b><br><span class="muted">Imprese da completare per guadagnare Corone, statistiche delle tue partite ed enciclopedia di carte, mostri, reliquie e pozioni scoperti.</span></div><div class="row"><button class="btn primary" onclick="openDiario('ach')">Imprese ${getAch().length}/${ACH.length}</button><button class="btn" onclick="openDiario('stat')">Statistiche</button><button class="btn" onclick="openDiario('c')">Enciclopedia</button></div></div>
     <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><span style="line-height:0">${sprImg(pickCls,34)}</span><div style="flex:1;min-width:200px"><b style="font-size:17px">Crescita degli eroi</b><br><span class="muted">${Object.keys(CLASSES).map(k=>CLASSES[k].n+' liv. '+heroLv(k)).join(' · ')}</span></div><button class="btn" onclick="openCrescita()">Abilità uniche</button></div>
     <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><span style="line-height:0">${ic('i_note',34)}</span><div style="flex:1;min-width:200px"><b style="font-size:17px">Impostazioni</b><br><span class="muted">Musica ${SET.mute?'disattivata':Math.round(SET.mus*100)+'%'} · Effetti ${SET.mute?'disattivati':Math.round(SET.sfx*100)+'%'} · Chat ${SET.chat?'attiva':'nascosta'}</span></div><button class="btn" onclick="openSettings()">Apri</button></div>
     ${mpContinueHTML()}
@@ -2599,7 +2644,7 @@ function dungeonPicker(cur,on,owner){
 }
 function modePicker(cur,on){
   const b=(m,t,d)=>`<button class="opt ${cur===m?'on':''}" onclick="${on.replace('%',m)}" aria-pressed="${cur===m}"><b>${t}</b><br><span class="muted">${d}</span></button>`;
-  return `<div class="modes">${b('norm','Normale','15 piani e il drago. Vinci per guadagnare Corone e sbloccare i Livelli di Assedio.')}${b('surv','Sopravvivenza','La rocca non finisce mai: dopo ogni drago ricomincia, più forte. Si va avanti finché cadete. Punteggio in classifica.')}</div>`;
+  return `<div class="modes">${b('norm','Normale','15 piani e il boss del dungeon. Vinci per guadagnare Corone e sbloccare i Livelli di Assedio.')}${b('surv','Sopravvivenza','Il dungeon non finisce mai: dopo ogni boss ricomincia, più forte. Si va avanti finché cadete. Punteggio in classifica.')}</div>`;
 }
 const survScore=(kills)=>Math.round((totalFloors()*10+kills*3)*scoreMult(R.lvl||0));
 function sbClient(){if(typeof supabase==='undefined')return null;return sbc||(sbc=supabase.createClient(SB_URL,SB_KEY))}
@@ -2688,13 +2733,13 @@ function startVoteAnim(va){
 }
 function paintAnim(){document.querySelectorAll('.mapsvg .node').forEach(n=>{n.classList.toggle('spin',!!UI.anim&&n.dataset.k===UI.anim.cur)})}
 /* ================= IMPOSTAZIONI ================= */
-const VERSION='v6.0',VDATE='17/11';
+const VERSION='v6.1',VDATE='17/11';
 const SET_K='valdombra-impostazioni';
-const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),vib:true,big:false,hc:false,tut:true,stats:true};
+const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),vib:true,ts:1,hc:false,tut:true,stats:true};
 let SET=(()=>{try{return Object.assign({},SET_DEF,JSON.parse(load(SET_K)||'{}'))}catch(e){return Object.assign({},SET_DEF)}})();
 function saveSet(){try{localStorage.setItem(SET_K,JSON.stringify(SET))}catch(e){}applySet()}
 function applySet(){
-  document.body.classList.toggle('noanim',!SET.anim);document.body.classList.toggle('big',!!SET.big);document.body.classList.toggle('hc',!!SET.hc);
+  document.body.classList.toggle('noanim',!SET.anim);document.documentElement.style.setProperty('--ts',String(Math.max(.85,Math.min(1.35,+SET.ts||1))));document.body.classList.toggle('hc',!!SET.hc);
   const v=$('#ver');if(v)v.innerHTML=`${ic('i_gear',12)}${VERSION} · ${VDATE}`;
   AU.vol();
 }
@@ -2723,10 +2768,11 @@ function settingsHTML(){
       ${swb('anim','Animazioni','Numeri dei danni, scosse dei mostri e animazione del voto. Spegnile se il telefono va a scatti o se il movimento ti dà fastidio.')}
     </div>
     <div class="panel"><h4>Accessibilità</h4>
-      ${swb('big','Testo più grande','Ingrandisce il testo delle carte, dei pulsanti e delle descrizioni.')}
+      <div class="srow sl"><div class="lab">Dimensione del testo<small>Vale per carte, pulsanti e descrizioni.</small></div><input type="range" min="85" max="135" step="5" value="${Math.round((+SET.ts||1)*100)}" aria-label="Dimensione del testo" oninput="setTs(this.value)" onchange="setTs(this.value,1)"><span class="v" id="v-ts">${Math.round((+SET.ts||1)*100)}%</span></div>
       ${swb('hc','Contrasto alto','Testi secondari e bordi più chiari, più facili da leggere al sole.')}
       ${'vibrate' in navigator?swb('vib','Vibrazione','Una vibrazione leggera quando subisci danni, vinci o un compagno ti manda un segnale.'):''}
-      ${swb('tut','Consigli del tutorial','Mostra i fumetti che spiegano il gioco. Riattivalo per rivederli da capo.')}
+      ${swb('tut','Consigli del tutorial','Mostra i fumetti che spiegano il gioco. Se lo riattivi riprende da dove eri rimasto.')}
+      <div class="row"><button class="btn" onclick="openGuida()">Apri la guida completa</button><button class="btn" onclick="tutReset();SET.tut=true;saveSet();toast('I consigli ripartiranno dall\'inizio.');render()">Ricomincia i consigli da capo</button></div>
       ${swb('stats','Invia statistiche anonime','A fine partita invia eroe, dungeon, esito, carte e reliquie, senza nomi, per bilanciare il gioco.')}
     </div>
     <div class="panel"><h4>${ic('i_gear',18)} Informazioni</h4>
@@ -2734,12 +2780,18 @@ function settingsHTML(){
       <div class="srow"><div class="lab">Codice<small>Hai un codice? Scrivilo qui.</small></div><input id="rcode" class="txt" maxlength="40" style="max-width:200px" autocomplete="off" placeholder="Codice"><button class="btn" onclick="redeem()">Usa</button></div>
       <div class="srow"><div class="lab">Profilo</div><b>${ACC?esc(ACC.nome):'nessuno'}</b><button class="btn" onclick="openProfilo()">${ACC?'Gestisci':'Accedi'}</button></div>
       ${inRoom?`<div class="srow"><div class="lab">Stanza</div><b>${R.code}</b></div><div class="srow"><div class="lab">Connessione</div><b>${isHost?'Sei tu a guidare la stanza':'Collegato'}</b></div>`:''}
-      <p class="muted" style="font-size:13px">Novità di questa versione: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
+      <p class="muted" style="font-size:13px">Novità di questa versione: barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
       <p class="muted" style="font-size:13px">Le impostazioni (audio, chat, grafica) valgono solo per questo dispositivo. I progressi di gioco seguono il tuo profilo.</p>
       <div><button class="btn" onclick="SET=Object.assign({},SET_DEF);saveSet();render()">Ripristina le impostazioni</button></div>
     </div></div>`;
 }
-function setTog(k){SET[k]=!SET[k];if(k==='tut'&&SET.tut)tutReset();saveSet();if(k==='vib'&&SET.vib)buzz(40);if(k==='mute'&&!SET.mute){AU.unlock();sfx('ui')}render()}
+function setTog(k){SET[k]=!SET[k];saveSet();if(k==='vib'&&SET.vib)buzz(40);if(k==='mute'&&!SET.mute){AU.unlock();sfx('ui')}render()}
+function setTs(v,done){SET.ts=Math.max(.85,Math.min(1.35,v/100));document.documentElement.style.setProperty('--ts',String(SET.ts));const l=$('#v-ts');if(l)l.textContent=Math.round(SET.ts*100)+'%';if(done){saveSet();render()}}
+// rende tutte le dimensioni del testo proporzionali a --ts (la barra «Dimensione del testo»)
+function scaleCSS(){const skip=/\.energy|\.cost|mapsvg|#ver|\.float|\.code\b|\bh1\b|\.vbadge/;
+  const walk=rules=>{for(const r of rules){if(r.cssRules&&!r.style){walk(r.cssRules);continue}const st=r.style;if(!st)continue;const v=st.getPropertyValue('font-size');
+    if(!v||v.includes('--ts')||skip.test(r.selectorText||''))continue;if(/^[\d.]+px$/.test(v.trim())||/^clamp\(/.test(v.trim()))st.setProperty('font-size',`calc(${v.trim()} * var(--ts, 1))`,st.getPropertyPriority('font-size'))}};
+  for(const sh of document.styleSheets){let r;try{r=sh.cssRules}catch(e){continue}if(r)walk(r)}}
 function setVol(k,v,done){SET[k]=v/100;const l=$('#v-'+k);if(l)l.textContent=v+'%';if(SET.mute&&v>0)SET.mute=false;AU.vol();if(done){saveSet();AU.unlock();if(k==='sfx')sfx('blk');render()}}
 
 /* ================= AUDIO =================
@@ -2871,7 +2923,7 @@ function musicFollow(){
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button,[role=button]');if(!b||b.disabled)return;
   if(b.closest('.hand')&&b.classList.contains('card'))sfx('card');else if(!b.classList.contains('sw'))sfx('ui')},true);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')AU.suspend();else AU.unlock()});
-applySet();
+try{if(SET.big&&SET.ts==null)SET.ts=1.15}catch(e){}scaleCSS();applySet();
 
 /* ================= DIARIO: ENCICLOPEDIA E STATISTICHE ================= */
 const SEEN_K='valdombra-visti',STAT_K='valdombra-statistiche',STATP_K='valdombra-stat-premiati';
