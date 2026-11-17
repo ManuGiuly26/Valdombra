@@ -203,6 +203,12 @@ body[data-dg="cripte"] .mapsvg .edge.done{stroke:#8fd3ff}body[data-dg="cripte"] 
 @keyframes bob{50%{transform:translateY(-3px)}}
 @keyframes hit{0%,66%{filter:brightness(3) saturate(0);transform:translateX(-4px)}33%{transform:translateX(4px)}}
 .enemy.dead .spr{animation:none;transform:rotate(90deg) translateX(20%)}
+/* Grafica Pixellab (Sviluppo): figura in una cella quadrata con margini vuoti, che i margini negativi recuperano */
+.pxh{display:block;flex:none;max-width:none;background-repeat:no-repeat;background-position:0 0;background-size:100% 100%;image-rendering:pixelated}
+.hero .face .pxh{width:126px;height:126px;margin:-22px -36px -24px}
+.ally>.pxh{width:63px;height:63px;margin:-11px -18px -12px}
+.pxh.pxan{background-size:calc(var(--n) * 100%) 100%;animation:pxan var(--d) steps(var(--n),jump-none) 1 forwards}
+@keyframes pxan{from{background-position:0 0}to{background-position:100% 0}}
 .ent .nm{font-size:13px;font-weight:700;line-height:1.15}
 .intent .spr,.blk .spr,.chip .spr{width:14px!important;height:14px!important}
 .intent{font-size:14px;font-weight:700;background:var(--stone);border:1px solid var(--line);border-radius:999px;padding:2px 9px;white-space:nowrap}
@@ -324,6 +330,7 @@ body.hc{--muted:#ddd6ea;--line:#8d82a6}body.hc .card .cdesc{color:#15101c}body.h
   .ally{width:calc(33.3% - 3px);min-width:0;padding:3px 5px;gap:4px}
   .ally>.spr{width:24px;height:auto}.ally .nm{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ally small{font-size:10px}.ally .bar{height:14px;min-width:0}.ally .bar span{font-size:10.5px}
   .ally .chips{display:none}
+  .hero .face .pxh{width:92px;height:92px;margin:-15px -26px -17px}.ally>.pxh{width:50px;height:50px;margin:-9px -15px -10px}
   .enemy{min-width:96px}
   .card{width:100px;min-height:150px;padding:5px 5px 7px}
   .card .cname{font-size:13px}.card .cdesc{font-size:11.5px}
@@ -1617,6 +1624,7 @@ function STX(k,n){const P=R&&CUR&&R.players[CUR];if(P&&P.stx)P.stx[k]+=n}
 function L(n){run.hp-=n;fx('hero','-'+n,'dmg');heroDown()}
 function P(k,n){g.hero.pw[k]=(g.hero.pw[k]||0)+n}
 
+const pxBlk=()=>{const c=R&&R.combat;return c?Object.values(c.heroes).reduce((s,x)=>s+(x&&x.blk||0),0):0};
 function playCard(u,j,ap,pk,sh){
   const c=R.combat,h=g&&g.hero;if(!c||c.busy||c.won||!h||h.ended||h.down)return;
   const i=h.hand.findIndex(x=>x.uid===u);if(i<0)return;const card=h.hand[i];const d=CARDS[card.id];const cost=costOf(card);if(cost>h.energy)return;
@@ -1624,7 +1632,10 @@ function playCard(u,j,ap,pk,sh){
   const X=d.xc?h.energy:0;h.hand.splice(i,1);h.energy-=d.xc?X:cost;g.hit=new Set();
   if(d.ally&&!(ap&&c.heroes[ap]&&!c.heroes[ap].down))ap=CUR;
   const shd=!!sh&&canShadow(card);g.side=LO()?(shd?'O':'L'):null;
+  const blk0=pxBlk();
   try{d.f(d.xc?{...vals(card),X}:vals(card),t,d.ally?ap:CUR,pk,card)}finally{g.side=null}
+  // segnale per la Grafica Pixellab: attacco per le carte Attacco, difesa per le carte che danno Armatura
+  if(d.t==='A')fxq.push({k:'h-'+CUR,txt:'',cls:'pxa'});else if(pxBlk()>blk0)fxq.push({k:'h-'+CUR,txt:'',cls:'pxd'});
   if(shd){h.shTurn=(h.shTurn||0)+1;if(run.stx)run.stx.shadow=(run.stx.shadow||0)+1;omAdd(CUR,1)}
   if(d.grow){if(d.perm===2)PERM(card);else if(!d.perm)card.g=(card.g||0)+1}
   if(d.t==='A'&&h.pw.intrise)g.hit.forEach(e=>S(e,'poison',h.pw.intrise));
@@ -2125,12 +2136,43 @@ function stInfo(k){toast(STN[k][0]+': '+STN[k][1])}
 
 /* ================= FX ================= */
 function fx(k,txt,cls){if(k==='hero')k='h-'+CUR;fxq.push({k,txt,cls})}
+/* Grafica Pixellab (Sviluppo, SET.px): figura e animazioni degli eroi in combattimento, dalla cartella pixel/.
+   pixel/<eroe>.png è la figura; pixel/<eroe>-attacco|difesa|colpito.png sono strisce di celle quadrate.
+   Un'immagine che non si carica lascia lo sprite disegnato nel codice (o il lampo bianco per il colpo subito). */
+const PX_AN=['attacco','difesa','colpito'],PX_FD=85;
+const PXI={};let pxReq=false;
+const PXA={};// pid -> {an,t0}: animazione in corso, così sopravvive ai ridisegni della schermata
+function pxLoad(){if(pxReq)return;pxReq=true;let left=0;const done=()=>{if(--left===0&&SET.px&&R&&R.phase==='combat')render()};
+  Object.keys(CLASSES).forEach(c=>['',...PX_AN].forEach(a=>{const k=a?c+'-'+a:c,im=new Image();left++;
+    im.onload=()=>{PXI[k]={n:Math.max(1,Math.round(im.naturalWidth/Math.max(1,im.naturalHeight)))};done()};
+    im.onerror=()=>{PXI[k]=null;done()};im.src='pixel/'+k+'.png'}))}
+// la figura PixelLab si usa solo con l'interruttore acceso, senza aspetto attivo e con l'immagine caricata
+const pxCls=P=>SET.px&&P&&CLASSES[P.cls]&&hsk(P)===P.cls&&PXI[P.cls]?P.cls:null;
+const pxMove=()=>SET.anim&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+function pxStyle(c,an,ago){const inf=an&&PXI[c+'-'+an];if(!inf||inf.n<2)return `background-image:url(pixel/${c}.png)`;
+  return `background-image:url(pixel/${c}-${an}.png);--n:${inf.n};--d:${inf.n*PX_FD}ms;animation-delay:-${Math.max(0,ago|0)}ms`}
+function heroArt(P,pid,px){const c=pxCls(P);if(!c)return sprImg(hsk(P),px,'idle');
+  const a=PXA[pid];let an=null,ago=0;
+  if(a){const inf=PXI[c+'-'+a.an];ago=Date.now()-a.t0;if(inf&&inf.n>=2&&ago<inf.n*PX_FD&&pxMove())an=a.an;else delete PXA[pid]}
+  return `<span class="spr pxh ${an?'pxan':'idle'}" role="img" aria-label="${CLASSES[c].n}" data-px="${c}" style="${pxStyle(c,an,ago)}" onanimationend="pxEnd(event,this)"></span>`}
+function pxEnd(e,sp){if(e.animationName!=='pxan')return;const c=sp.dataset.px;sp.className='spr pxh idle';sp.style.cssText=pxStyle(c)}
+// fa partire un'animazione su un eroe (k = 'h-<pid>'); false se non si può e serve il vecchio effetto
+function pxPlay(k,an){if(!SET.px||!R||!R.players||String(k).slice(0,2)!=='h-')return false;const pid=k.slice(2),c=pxCls(R.players[pid]);
+  const inf=c&&PXI[c+'-'+an];if(!inf||inf.n<2)return false;if(!pxMove())return true;
+  PXA[pid]={an,t0:Date.now()};const el=document.getElementById('ent-'+k),sp=el&&el.querySelector('.pxh');
+  if(sp){sp.className='spr pxh';sp.style.cssText=pxStyle(c);void sp.offsetWidth;sp.className='spr pxh pxan';sp.style.cssText=pxStyle(c,an,0)}return true}
 function flushFx(list){
   const layer=$('#fx');const counts={};
-  const heard={};(list||[]).forEach(f=>{if(!heard[f.cls]){heard[f.cls]=1;sfx(f.cls)}});
-  (list||[]).forEach(f=>{const el=document.getElementById('ent-'+f.k);if(!el)return;const r=el.getBoundingClientRect();counts[f.k]=(counts[f.k]||0)+1;
+  list=list||[];const isPx=f=>f.cls==='pxa'||f.cls==='pxd';
+  const heard={};list.forEach(f=>{if(!isPx(f)&&!heard[f.cls]){heard[f.cls]=1;sfx(f.cls)}});
+  list.forEach(f=>{
+    // segnali delle animazioni Pixellab: non hanno numeri né suoni, e vanno in ordine con i colpi subiti
+    if(isPx(f)){pxPlay(f.k,f.cls==='pxa'?'attacco':'difesa');return}
+    const el=document.getElementById('ent-'+f.k);if(!el)return;const r=el.getBoundingClientRect();counts[f.k]=(counts[f.k]||0)+1;
     const d=document.createElement('div');d.className='float '+f.cls;d.textContent=f.txt;d.style.left=(r.left+r.width/2+(counts[f.k]-1)*18)+'px';d.style.top=(r.top+r.height*.35+(counts[f.k]-1)*14)+'px';
     layer.appendChild(d);setTimeout(()=>d.remove(),1000);
+    // un eroe che perde PV fa l'animazione «colpito» al posto del lampo bianco
+    if((f.cls==='dmg'||(f.cls==='psn'&&/^-\d/.test(f.txt)))&&pxPlay(f.k,'colpito'))return;
     if(f.cls==='dmg'||f.cls==='psn'){const im=el.querySelector('.spr');if(im){im.classList.remove('hit');void im.offsetWidth;im.classList.add('hit')}}});
 }
 
@@ -2481,7 +2523,7 @@ function combatScreen(){
       ${e.hp>0&&pgE(j).length?`<span class="pings">${pgE(j).map(p=>pgTag(p,'attacco questo!')).join('')}</span>`:''}${intentHTML(e)}<span class="face">${sprImg(e.id,e.boss?150:(ENEMIES[e.id].elite?96:80),'idle')}</span><span class="nm">${e.n}</span>${e.trait?`<span class="etrait" role="button" tabindex="0" onclick="event.stopPropagation();trInfo('${e.trait}')">${ETRAITS[e.trait][0]}</span>`:''}${isDark(e)?`<span class="etrait dark" role="button" tabindex="0" onclick="event.stopPropagation();darkInfo()">Creatura d'ombra</span>`:''}${ENEMIES[e.id].spine?`<span class="etrait" role="button" tabindex="0" onclick="event.stopPropagation();toast('Corpo di lava: chi lo colpisce con un Attacco subisce ${ENEMIES[e.id].spine} danni.')">Corpo di lava</span>`:''}${hpBar(e.hp,e.max)}
       ${e.blk?`<span class="blk">${ic('i_shield',12)} ${e.blk}</span>`:''}${chips(e)}</button>`).join('');
   const cl=CLASSES[run.cls];
-  const allies=Object.keys(g.heroes).filter(p=>p!==ME).map(p=>{const a=g.heroes[p],P=R.players[p];return `<div class="ent ally ${a.down?'down':''} ${sel&&sel.ally&&!a.down?'target':''}" id="ent-h-${p}" onclick="clickHero('${p}')">${sprImg(hsk(P),34,'idle')}
+  const allies=Object.keys(g.heroes).filter(p=>p!==ME).map(p=>{const a=g.heroes[p],P=R.players[p];return `<div class="ent ally ${a.down?'down':''} ${sel&&sel.ally&&!a.down?'target':''}" id="ent-h-${p}" onclick="clickHero('${p}')">${heroArt(P,p,34)}
     <div class="info"><span class="nm">${esc(P.name)} ${a.blk?`<span class="blk">${ic('i_shield',12)} ${a.blk}</span>`:''}</span>${pgH.includes(p)?pgTag(p,'proteggimi!'):''}${hpBar(P.hp,P.max)}${chips(a)}${omChip(p,`absorbUI('${p}')`)}<small class="muted">${!isOnline(p)?'disconnesso':a.down?'a terra':a.ended?'<span class="ok">✓ fine turno</span>':'sta giocando'}</small></div></div>`}).join('');
   if(!LO()||h.ended||h.down)UI.om=false;
   const hand=h.hand.map((c,i)=>{const om=UI.om||(sel&&sel.k==='c'&&sel.uid===c.uid&&sel.sh);const cs=om&&canShadow(c);return cardHTML(c,{click:`clickCard(${i})`,sh:cs,cls:(sel&&sel.k==='c'&&sel.uid===c.uid?'sel ':'')+(cs?'shadow ':UI.om?'noshadow ':'')+(costOf(c)>h.energy||h.ended?'cant':'')})}).join('');
@@ -2493,7 +2535,7 @@ function combatScreen(){
     ${allies?`<div class="allies">${allies}</div>`:''}
     <div class="herorow">
       <div class="energy" title="Energia">${h.energy}</div>
-      <div class="ent hero ${h.down?'down':''} ${sel&&sel.ally&&!h.down?'target':''}" id="ent-h-${ME}" onclick="clickHero('${ME}')"><span class="face">${sprImg(hsk(run),60,'idle')}</span><div class="info"><span class="nm">${solo?cl.n:esc(run.name)} ${h.blk?`<span class="blk">${ic('i_shield',12)} ${h.blk}</span>`:''}</span>${pgH.includes(ME)?pgTag(ME,'proteggimi!'):''}${hpBar(run.hp,run.max)}${omBar(ME)}${chips(h,h.pw)}</div></div>
+      <div class="ent hero ${h.down?'down':''} ${sel&&sel.ally&&!h.down?'target':''}" id="ent-h-${ME}" onclick="clickHero('${ME}')"><span class="face">${heroArt(run,ME,60)}</span><div class="info"><span class="nm">${solo?cl.n:esc(run.name)} ${h.blk?`<span class="blk">${ic('i_shield',12)} ${h.blk}</span>`:''}</span>${pgH.includes(ME)?pgTag(ME,'proteggimi!'):''}${hpBar(run.hp,run.max)}${omBar(ME)}${chips(h,h.pw)}</div></div>
     </div></div>
     <div class="hand">${hand||`<p class="muted" style="align-self:center">${h.ended?(solo?'Hai finito il turno.':'Hai finito il turno. Finché gli altri giocano puoi ancora ripensarci con «Riprendi il turno».'):'Nessuna carta in mano.'}</p>`}</div>
     <div class="pilebar">
@@ -2952,14 +2994,15 @@ function startVoteAnim(va){
 }
 function paintAnim(){document.querySelectorAll('.mapsvg .node').forEach(n=>{n.classList.toggle('spin',!!UI.anim&&n.dataset.k===UI.anim.cur)})}
 /* ================= IMPOSTAZIONI ================= */
-const VERSION='v7.0',VDATE='17/11';
+const VERSION='v7.1',VDATE='17/11';
 const SET_K='valdombra-impostazioni';
-const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),vib:true,ts:1,hc:false,tut:true,stats:true,lo:true,vil:true,gem:true};
+const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),vib:true,ts:1,hc:false,tut:true,stats:true,lo:true,vil:true,gem:true,px:false};
 let SET=(()=>{try{return Object.assign({},SET_DEF,JSON.parse(load(SET_K)||'{}'))}catch(e){return Object.assign({},SET_DEF)}})();
 function saveSet(){try{localStorage.setItem(SET_K,JSON.stringify(SET))}catch(e){}applySet()}
 function applySet(){
   document.body.classList.toggle('noanim',!SET.anim);document.documentElement.style.setProperty('--ts',String(Math.max(.85,Math.min(1.35,+SET.ts||1))));document.body.classList.toggle('hc',!!SET.hc);
   const v=$('#ver');if(v)v.innerHTML=`${ic('i_gear',12)}${VERSION} · ${VDATE}`;
+  if(SET.px)pxLoad();
   AU.vol();
 }
 const REDEEM=[3345803154,1602759940];
@@ -2999,6 +3042,7 @@ function settingsHTML(){
       ${swb('lo','Luce e Ombra','Le carte si possono giocare dal lato Ombra, più forte ma rischioso, e ci sono le creature d\'ombra. In gruppo vale la scelta di chi crea la stanza, dalla partita successiva.')}
       ${swb('vil','Villaggio di Valdombra','La missione secondaria: ricostruisci gli edifici per avere vantaggi a inizio partita.')}
       ${swb('gem','Gemme','La seconda moneta per aspetti, cimeli permanenti e cambio in Corone. Spenta, gli aspetti tornano a costare Corone.')}
+      ${swb('px','Grafica Pixellab','In combattimento gli eroi sono disegnati con PixelLab e si muovono quando attaccano, si difendono o vengono colpiti. Vale solo su questo dispositivo. Con un aspetto attivo, o se un\'immagine non si carica, resta lo sprite di sempre.')}
       ${R&&R.phase!=='lobby'?'<p class="muted" style="font-size:13px">Luce e Ombra cambia dalla prossima partita.</p>':''}
     </div>
     <div class="panel"><h4>${ic('i_gear',18)} Informazioni</h4>
@@ -3006,7 +3050,7 @@ function settingsHTML(){
       <div class="srow"><div class="lab">Codice<small>Hai un codice? Scrivilo qui.</small></div><input id="rcode" class="txt" maxlength="40" style="max-width:200px" autocomplete="off" placeholder="Codice"><button class="btn" onclick="redeem()">Usa</button></div>
       <div class="srow"><div class="lab">Profilo</div><b>${ACC?esc(ACC.nome):'nessuno'}</b><button class="btn" onclick="openProfilo()">${ACC?'Gestisci':'Accedi'}</button></div>
       ${inRoom?`<div class="srow"><div class="lab">Stanza</div><b>${R.code}</b></div><div class="srow"><div class="lab">Connessione</div><b>${isHost?'Sei tu a guidare la stanza':'Collegato'}</b></div>`:''}
-      <p class="muted" style="font-size:13px">Novità della 7.0: il pulsante «Gioca» sempre visibile per scegliere la modalità; Luce e Ombra (ogni carta si può giocare dal lato Ombra, più forte ma rischioso; creature d'ombra, mercante, eventi e bottino reagiscono alla tua Ombra), il Villaggio di Valdombra da ricostruire per avere vantaggi in ogni partita, e le Gemme, la seconda moneta per cimeli permanenti e aspetti. Si possono spegnere da Sviluppo. Dalla 6.4: la sfida del giorno usa tutti e 10 gli eroi e non ripete eroe, dungeon o modificatore del giorno prima; dalla 6.3: corretto il blocco quando l'eroe cade per una carta Ustione o Maledizione, tratti delle élite più leggeri (soprattutto da soli); dalla 6.2: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
+      <p class="muted" style="font-size:13px">Novità della 7.1: in Sviluppo c'è «Grafica Pixellab», spenta di base. Accesa, in combattimento gli eroi sono disegnati con PixelLab e hanno le animazioni di attacco, difesa e colpo subito. Novità della 7.0: il pulsante «Gioca» sempre visibile per scegliere la modalità; Luce e Ombra (ogni carta si può giocare dal lato Ombra, più forte ma rischioso; creature d'ombra, mercante, eventi e bottino reagiscono alla tua Ombra), il Villaggio di Valdombra da ricostruire per avere vantaggi in ogni partita, e le Gemme, la seconda moneta per cimeli permanenti e aspetti. Si possono spegnere da Sviluppo. Dalla 6.4: la sfida del giorno usa tutti e 10 gli eroi e non ripete eroe, dungeon o modificatore del giorno prima; dalla 6.3: corretto il blocco quando l'eroe cade per una carta Ustione o Maledizione, tratti delle élite più leggeri (soprattutto da soli); dalla 6.2: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
       <p class="muted" style="font-size:13px">Le impostazioni (audio, chat, grafica) valgono solo per questo dispositivo. I progressi di gioco seguono il tuo profilo.</p>
       <div><button class="btn" onclick="SET=Object.assign({},SET_DEF);saveSet();render()">Ripristina le impostazioni</button></div>
     </div></div>`;
