@@ -215,6 +215,9 @@ body[data-dg="cripte"] .mapsvg .edge.done{stroke:#8fd3ff}body[data-dg="cripte"] 
 .pxe,.ent.enemy .face .spr.pxe{width:calc(var(--t)*var(--k));height:calc(var(--t)*var(--k))}
 .spr.inl.pxe{display:inline-block;vertical-align:middle}
 .spr.pxi{image-rendering:auto}
+.enemy.dead .spr.pxe{transform:none}.enemy.dead .spr.pxe.pxan{animation:pxan var(--d) steps(var(--n),jump-none) 1 forwards}
+.enemy.dead:has(.pxe){opacity:.7;filter:grayscale(.35)}
+.dg .dgart:has(.pxe){border-radius:50%;background:radial-gradient(circle,rgba(255,240,215,.2),rgba(255,240,215,.07) 50%,transparent 72%)}
 .pxvil{display:flex;justify-content:center;align-items:flex-end;flex-wrap:wrap;gap:2px 6px;padding:10px 8px 6px;border-radius:12px;background:linear-gradient(#141020,#24203a 60%,#2a3a24)}
 .pxvil img{width:104px;height:104px;image-rendering:pixelated}
 .vilimg{width:96px;height:96px;image-rendering:pixelated;align-self:center}
@@ -802,8 +805,8 @@ const potIc=(id,px)=>{const p=pxIco('pot_'+id);return `<img class="spr inl${p&&p
 const ic=(name,px=16)=>{const p=pxIco(name);return `<img class="spr inl${p&&px<32?' pxi':''}" src="${p||spr(name)}" width="${px}" height="${px}" alt="">`};
 const relIc=(id,px=20)=>ic('r_'+id,px);
 // Grafica Pixellab (Sviluppo): la figura ferma dell'eroe al posto dello sprite, solo per il nome semplice dell'eroe (con un aspetto, «eroe@aspetto», resta lo sprite)
-const pxFig=name=>{try{return !!(SET.px&&CLASSES[name]&&PXI[name])}catch(e){return false}};
-const sprImg=(name,px,cls='',noPx)=>{if(!noPx&&pxeOk(name))return pxeHTML(name,px,cls);if(!noPx&&pxFig(name))return `<span class="spr pxs ${cls}" role="img" aria-label="${CLASSES[name].n}" style="width:${px}px;background-image:url(pixel/${name}.png)"></span>`;const pi=!noPx&&pxIco(name),src=pi||spr(name);const a=SPR[name]||ICONS[name]||SPR[String(name).split('@')[0]];return `<img class="spr ${cls}${pi&&px<32?' pxi':''}" src="${src}" width="${px}" height="${Math.round(px*a.length/a[0].length)}" alt="">`};
+const pxFig=name=>{try{return pxKey(name)}catch(e){return null}};
+const sprImg=(name,px,cls='',noPx)=>{if(!noPx&&pxeOk(name))return pxeHTML(name,px,cls);const fk=!noPx&&pxFig(name);if(fk)return `<span class="spr pxs ${cls}" role="img" aria-label="${CLASSES[String(name).split('@')[0]].n}" style="width:${px}px;background-image:url(pixel/${fk}.png)"></span>`;const pi=!noPx&&pxIco(name),src=pi||spr(name);const a=SPR[name]||ICONS[name]||SPR[String(name).split('@')[0]];return `<img class="spr ${cls}${pi&&px<32?' pxi':''}" src="${src}" width="${px}" height="${Math.round(px*a.length/a[0].length)}" alt="">`};
 
 /* ================= DATI DI GIOCO ================= */
 const CLASSES={
@@ -2169,29 +2172,38 @@ function pxLoad(){if(pxReq)return;pxReq=true;let left=0;const done=()=>{if(--lef
     im.onload=()=>{PXI[k]={n:Math.max(1,Math.round(im.naturalWidth/Math.max(1,im.naturalHeight)))};done()};
     im.onerror=()=>{PXI[k]=null;done()};im.src='pixel/'+k+'.png'})}
 // la figura PixelLab si usa solo con l'interruttore acceso, senza aspetto attivo e con l'immagine caricata
-const pxCls=P=>SET.px&&P&&CLASSES[P.cls]&&hsk(P)===P.cls&&PXI[P.cls]?P.cls:null;
+// chiave delle immagini dell'eroe: '<eroe>' oppure 'aspetti/<eroe>-<aspetto>' (gli aspetti si caricano solo quando servono)
+function pxKey(name){if(!SET.px)return null;const [c,sk]=String(name).split('@');if(!CLASSES[c])return null;
+  if(!sk)return PXI[c]?c:null;const k='aspetti/'+c+'-'+sk;if(PXI[k])return k;pxNeed(k);return null}
+const pxCls=P=>P&&CLASSES[P.cls]?pxKey(hsk(P)):null;
+const PXN={};function pxNeed(k){if(PXN[k]||PXI[k]!==undefined)return;PXN[k]=1;let left=4;const done=()=>{if(--left===0&&PXI[k]&&SET.px)render()};
+  ['',...PX_AN].forEach(a=>{const kk=a?k+'-'+a:k,im=new Image();im.onload=()=>{PXI[kk]={n:Math.max(1,Math.round(im.naturalWidth/Math.max(1,im.naturalHeight)))};done()};im.onerror=()=>{PXI[kk]=null;done()};im.src='pixel/'+kk+'.png'})}
 const pxMove=()=>SET.anim&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
 function pxStyle(c,an,ago){const inf=an&&PXI[c+'-'+an];if(!inf||inf.n<2)return `background-image:url(pixel/${c}.png)`;
   return `background-image:url(pixel/${c}-${an}.png);--n:${inf.n};--d:${inf.n*PX_FD}ms;animation-delay:-${Math.max(0,ago|0)}ms`}
 function heroArt(P,pid,px){const c=pxCls(P);if(!c)return sprImg(hsk(P),px,'idle');
   const a=PXA[pid];let an=null,ago=0;
   if(a){const inf=PXI[c+'-'+a.an];ago=Date.now()-a.t0;if(inf&&inf.n>=2&&ago<inf.n*PX_FD&&pxMove())an=a.an;else delete PXA[pid]}
-  return `<span class="spr pxh ${an?'pxan':'idle'}" role="img" aria-label="${CLASSES[c].n}" data-px="${c}" style="${pxStyle(c,an,ago)}" onanimationend="pxEnd(event,this)"></span>`}
+  return `<span class="spr pxh ${an?'pxan':'idle'}" role="img" aria-label="${CLASSES[P.cls].n}" data-px="${c}" style="${pxStyle(c,an,ago)}" onanimationend="pxEnd(event,this)"></span>`}
 function pxEnd(e,sp){if(e.animationName!=='pxan')return;
-  if(sp.dataset.pxe){const id=sp.dataset.pxe;sp.className='spr pxe '+(sp.dataset.cls||'');sp.style.cssText=pxeCss(id,sp.style.getPropertyValue('--t'));return}
+  if(sp.dataset.pxe){const id=sp.dataset.pxe,t=sp.style.getPropertyValue('--t'),dc=sp.dataset.dead&&pxeDeadCss(id,t);
+    if(dc){sp.className='spr pxe pxdead';sp.style.cssText=dc;return}sp.className='spr pxe '+(sp.dataset.cls||'');sp.style.cssText=pxeCss(id,t);return}
   const c=sp.dataset.px;sp.className='spr pxh idle';sp.style.cssText=pxStyle(c)}
 /* Nemici, élite e boss (pixel/nemici/). Per ognuno: [lato della cella, riquadro della figura x0,y0,x1,y1, frame dell'attacco, frame del colpito].
    Con un'immagine mancante resta lo sprite disegnato nel codice. */
 const PXE={goblin:[68,25,10,43,55,7,7],ratto:[88,26,27,75,58,7,7],melma:[64,3,4,62,61,7,7],scheletro:[68,24,10,44,58,7,7],coboldo:[68,22,12,44,55,7,7],lupo:[84,24,24,72,58,7,7],bandito:[68,24,10,44,58,7,7],orco:[116,40,30,74,99,7,7],spettro:[64,0,8,64,56,7,7],zombi:[68,24,10,44,58,7,7],ragno:[64,2,3,61,58,7,7],cultista:[68,24,11,44,58,7,7],pipistrello:[64,0,4,64,59,7,7],imp:[68,20,10,48,55,7,7],salamandra:[64,3,3,59,61,7,7],segugio:[84,24,17,72,58,7,7],troll:[116,39,29,74,99,7,7],cavaliere:[96,35,14,62,80,7,7],golem:[96,5,3,92,91,7,7],vampiro:[104,35,15,70,84,7,7],strega:[120,39,18,76,93,7,7],demone:[116,43,19,73,99,7,7],automa:[92,34,15,59,78,7,7],sacerdote:[96,35,17,67,81,7,7],drago:[128,3,3,124,123,7,7],signoreguerra:[172,53,42,110,147,7,7],lich:[160,56,25,106,136,7,7],verme:[128,0,8,128,125,7,7],tiranno:[172,56,25,116,145,7,7],colosso:[172,61,29,112,147,7,7]};
-const PXE_AN=['attacco','colpito'];
+const PXE_AN=['attacco','colpito','morte'];
 function pxeOk(id){try{return !!(SET.px&&PXE[id]&&PXI['nemici/'+id])}catch(e){return false}}
 // la figura (non la cella) riempie un quadrato di lato --t, centrata
 function pxeCss(id,t,an,ago){const [C,x0,y0,x1,y1]=PXE[id],F=Math.max(x1-x0,y1-y0),cx=(x0+x1)/2,cy=(y0+y1)/2,r=v=>+v.toFixed(4);
   const inf=an&&PXI['nemici/'+id+'-'+an],img=inf&&inf.n>=2?`background-image:url(pixel/nemici/${id}-${an}.png);--n:${inf.n};--d:${inf.n*PX_FD}ms;animation-delay:-${Math.max(0,ago|0)}ms`:`background-image:url(pixel/nemici/${id}.png)`;
   return `--t:${t};--k:${r(C/F)};--mt:${r(.5-cy/F)};--mr:${r(.5-(C-cx)/F)};--mb:${r(.5-(C-cy)/F)};--ml:${r(.5-cx/F)};${img}`}
-function pxeHTML(id,px,cls,key){let an=null,ago=0;const a=key&&PXA[key];
+// nemico sconfitto: resta l'ultimo fotogramma della morte (se c'è l'immagine)
+function pxeDeadCss(id,t){const inf=PXI['nemici/'+id+'-morte'];if(!inf||inf.n<2)return null;return pxeCss(id,t).replace(/background-image:[^;]*$/,`background-image:url(pixel/nemici/${id}-morte.png);background-size:${inf.n*100}% 100%;background-position:100% 0`)}
+function pxeHTML(id,px,cls,key,dead){let an=null,ago=0;const a=key&&PXA[key];
   if(a){const inf=PXI['nemici/'+id+'-'+a.an];ago=Date.now()-a.t0;if(inf&&inf.n>=2&&ago<inf.n*PX_FD&&pxMove())an=a.an;else delete PXA[key]}
-  return `<span class="spr pxe ${an?'pxan':cls||''}" role="img" aria-label="${esc(ENEMIES[id].n)}" data-pxe="${id}" data-cls="${cls||''}" style="${pxeCss(id,px+'px',an,ago)}" onanimationend="pxEnd(event,this)"></span>`}
+  const dc=dead&&!an&&pxeDeadCss(id,px+'px');
+  return `<span class="spr pxe ${an?'pxan':dc?'pxdead':cls||''}" role="img" aria-label="${esc(ENEMIES[id].n)}" data-pxe="${id}" data-cls="${cls||''}"${dead?' data-dead="1"':''} style="${dc||pxeCss(id,px+'px',an,ago)}" onanimationend="pxEnd(event,this)"></span>`}
 /* Altre immagini Pixellab (v7.4): villaggio a stadi, icone, luoghi, sfondi e mappe. Ognuna si usa solo se si è caricata. */
 const PXV={locanda:4,mercato:4,fucina:4,erbe:4,tempio:4,sala:2};// stadi: 0 = in macerie, poi un'immagine per livello
 const PXI_UI=['i_coin','i_shield','i_buff','i_heal','i_skull','i_gear','i_note','i_gem','i_house','i_crown','i_lock','i_flask','combat','elite','event','rest','shop','treasure','boss'];
@@ -2221,10 +2233,11 @@ function pxMapNode(n,x1,y1,r,bid){if(n.type==='boss'&&pxeOk(bid)){const [C,x0,y0
   const p=n.type!=='boss'&&pxIco(n.type);return p?`<image href="${p}" x="${x1-r*.78}" y="${y1-r*.78}" width="${r*1.56}" height="${r*1.56}" style="image-rendering:pixelated"/>`:null}
 // fa partire un'animazione su un eroe (k = 'h-<pid>') o su un nemico (k = 'e<indice>'); false se non si può e serve il vecchio effetto
 function pxPlay(k,an){if(!SET.px||!R)return false;k=String(k);
-  if(/^e\d+$/.test(k)){const en=R.combat&&R.combat.enemies[+k.slice(1)];if(!en||en.hp<=0||!pxeOk(en.id))return false;
+  if(/^e\d+$/.test(k)){const en=R.combat&&R.combat.enemies[+k.slice(1)];if(!en||!pxeOk(en.id))return false;
+    if(en.hp<=0){if(an!=='colpito')return false;an='morte'}
     const inf=PXI['nemici/'+en.id+'-'+an];if(!inf||inf.n<2)return false;if(!pxMove())return true;
     PXA[k]={an,t0:Date.now()};const sp=document.querySelector('#ent-'+k+' .pxe');
-    if(sp){const t=sp.style.getPropertyValue('--t');sp.className='spr pxe';sp.style.cssText=pxeCss(en.id,t);void sp.offsetWidth;sp.className='spr pxe pxan';sp.style.cssText=pxeCss(en.id,t,an,0)}return true}
+    if(sp){const t=sp.style.getPropertyValue('--t');if(an==='morte')sp.dataset.dead='1';sp.className='spr pxe';sp.style.cssText=pxeCss(en.id,t);void sp.offsetWidth;sp.className='spr pxe pxan';sp.style.cssText=pxeCss(en.id,t,an,0)}return true}
   if(!R.players||k.slice(0,2)!=='h-')return false;const pid=k.slice(2),c=pxCls(R.players[pid]);
   const inf=c&&PXI[c+'-'+an];if(!inf||inf.n<2)return false;if(!pxMove())return true;
   PXA[pid]={an,t0:Date.now()};const el=document.getElementById('ent-'+k),sp=el&&el.querySelector('.pxh');
@@ -2589,7 +2602,7 @@ function combatScreen(){
   const PG=(g.pings&&!solo)?g.pings:{};const pgE=j=>Object.keys(PG).filter(p=>PG[p].k==='e'&&PG[p].j===j&&R.players[p]),pgH=Object.keys(PG).filter(p=>PG[p].k==='h'&&R.players[p]&&g.heroes[p]&&!g.heroes[p].down);
   const pgTag=(p,t)=>`<span class="pingtag" style="--pc:${pcol(p)}">${p===ME?'Tu':esc(R.players[p].name)}: ${t}</span>`;
   const en=g.enemies.map((e,j)=>`<button class="ent enemy ${e.boss?'boss':''} ${e.hp<=0?'dead':''} ${(sel&&!sel.ally||UI.ping)&&e.hp>0?'target':''} ${pgE(j).length&&e.hp>0?'pinged':''}" style="${pgE(j).length?'--pc:'+pcol(pgE(j)[0]):''}" id="ent-e${j}" onclick="clickEnemy(${j})" ${e.hp<=0?'disabled':''} aria-label="${e.n}, ${e.hp} PV">
-      ${e.hp>0&&pgE(j).length?`<span class="pings">${pgE(j).map(p=>pgTag(p,'attacco questo!')).join('')}</span>`:''}${intentHTML(e)}<span class="face">${pxeOk(e.id)?pxeHTML(e.id,e.boss?150:(ENEMIES[e.id].elite?96:80),'idle','e'+j):sprImg(e.id,e.boss?150:(ENEMIES[e.id].elite?96:80),'idle')}</span><span class="nm">${e.n}</span>${e.trait?`<span class="etrait" role="button" tabindex="0" onclick="event.stopPropagation();trInfo('${e.trait}')">${ETRAITS[e.trait][0]}</span>`:''}${isDark(e)?`<span class="etrait dark" role="button" tabindex="0" onclick="event.stopPropagation();darkInfo()">Creatura d'ombra</span>`:''}${ENEMIES[e.id].spine?`<span class="etrait" role="button" tabindex="0" onclick="event.stopPropagation();toast('Corpo di lava: chi lo colpisce con un Attacco subisce ${ENEMIES[e.id].spine} danni.')">Corpo di lava</span>`:''}${hpBar(e.hp,e.max)}
+      ${e.hp>0&&pgE(j).length?`<span class="pings">${pgE(j).map(p=>pgTag(p,'attacco questo!')).join('')}</span>`:''}${intentHTML(e)}<span class="face">${pxeOk(e.id)?pxeHTML(e.id,e.boss?150:(ENEMIES[e.id].elite?96:80),'idle','e'+j,e.hp<=0):sprImg(e.id,e.boss?150:(ENEMIES[e.id].elite?96:80),'idle')}</span><span class="nm">${e.n}</span>${e.trait?`<span class="etrait" role="button" tabindex="0" onclick="event.stopPropagation();trInfo('${e.trait}')">${ETRAITS[e.trait][0]}</span>`:''}${isDark(e)?`<span class="etrait dark" role="button" tabindex="0" onclick="event.stopPropagation();darkInfo()">Creatura d'ombra</span>`:''}${ENEMIES[e.id].spine?`<span class="etrait" role="button" tabindex="0" onclick="event.stopPropagation();toast('Corpo di lava: chi lo colpisce con un Attacco subisce ${ENEMIES[e.id].spine} danni.')">Corpo di lava</span>`:''}${hpBar(e.hp,e.max)}
       ${e.blk?`<span class="blk">${ic('i_shield',12)} ${e.blk}</span>`:''}${chips(e)}</button>`).join('');
   const cl=CLASSES[run.cls];
   const allies=Object.keys(g.heroes).filter(p=>p!==ME).map(p=>{const a=g.heroes[p],P=R.players[p];return `<div class="ent ally ${a.down?'down':''} ${sel&&sel.ally&&!a.down?'target':''}" id="ent-h-${p}" onclick="clickHero('${p}')">${heroArt(P,p,34)}
@@ -2837,7 +2850,7 @@ function skinsHTML(){const c=UI.skCls&&CLASSES[UI.skCls]?UI.skCls:pickCls,own=sk
   return `<div class="panel"><h3>Aspetti degli eroi</h3><p class="muted">Nuovi colori per i tuoi eroi, ${SKP} ${SKN} l'uno. Li vedono anche i compagni in multigiocatore. Non cambiano le regole del gioco.</p>
    <div class="row" style="gap:4px">${Object.keys(CLASSES).filter(heroOwned).map(k=>`<button class="btn ${k===c?'primary':''}" style="padding:4px 6px" onclick="UI.skCls='${k}';render()" aria-label="${CLASSES[k].n}" title="${CLASSES[k].n}">${sprImg(k,28)}</button>`).join('')}</div>
    <div class="shopgrid">${['',...skinsFor(c)].map(k=>{const id=c+'@'+k,has=!k||own.includes(id),on=cur===k;
-     return `<div class="shopitem"><button class="relicbox ${on?'on':''}" onclick="${has?`setSkin('${c}','${k}')`:`buySkin('${c}','${k}')`}" aria-pressed="${on}"><span class="ic">${sprImg(k?id:c,56,'',true)}</span><b>${k?SKINS[k][0]:'Classico'}</b><span class="muted">${on?'In uso':has?'Tocca per usarlo':'Da sbloccare'}</span></button>${has?'':`<span class="price ${cr<SKP?'no':''}">${ic(SKI,16)} ${SKP}</span>`}</div>`}).join('')}</div></div>`}
+     return `<div class="shopitem"><button class="relicbox ${on?'on':''}" onclick="${has?`setSkin('${c}','${k}')`:`buySkin('${c}','${k}')`}" aria-pressed="${on}"><span class="ic">${sprImg(k?id:c,56)}</span><b>${k?SKINS[k][0]:'Classico'}</b><span class="muted">${on?'In uso':has?'Tocca per usarlo':'Da sbloccare'}</span></button>${has?'':`<span class="price ${cr<SKP?'no':''}">${ic(SKI,16)} ${SKP}</span>`}</div>`}).join('')}</div></div>`}
 
 function bottegaHTML(){
   const z=getZaino(),cr=getCrowns();
@@ -3063,7 +3076,7 @@ function startVoteAnim(va){
 }
 function paintAnim(){document.querySelectorAll('.mapsvg .node').forEach(n=>{n.classList.toggle('spin',!!UI.anim&&n.dataset.k===UI.anim.cur)})}
 /* ================= IMPOSTAZIONI ================= */
-const VERSION='v7.4',VDATE='18/11';
+const VERSION='v7.5',VDATE='18/11';
 const SET_K='valdombra-impostazioni';
 const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),vib:true,ts:1,hc:false,tut:true,stats:true,lo:true,vil:true,gem:true,px:false};
 let SET=(()=>{try{return Object.assign({},SET_DEF,JSON.parse(load(SET_K)||'{}'))}catch(e){return Object.assign({},SET_DEF)}})();
@@ -3111,7 +3124,7 @@ function settingsHTML(){
       ${swb('lo','Luce e Ombra','Le carte si possono giocare dal lato Ombra, più forte ma rischioso, e ci sono le creature d\'ombra. In gruppo vale la scelta di chi crea la stanza, dalla partita successiva.')}
       ${swb('vil','Villaggio di Valdombra','La missione secondaria: ricostruisci gli edifici per avere vantaggi a inizio partita.')}
       ${swb('gem','Gemme','La seconda moneta per aspetti, cimeli permanenti e cambio in Corone. Spenta, gli aspetti tornano a costare Corone.')}
-      ${swb('px','Grafica Pixellab','Eroi, nemici, boss, villaggio, icone, eventi, sfondi e mappe sono disegnati con PixelLab; in combattimento eroi e nemici si muovono quando attaccano, si difendono o vengono colpiti. Vale solo su questo dispositivo. Con un aspetto attivo, o se un\'immagine non si carica, resta lo sprite di sempre.')}
+      ${swb('px','Grafica Pixellab','Eroi, nemici, boss, villaggio, icone, eventi, sfondi e mappe sono disegnati con PixelLab; in combattimento eroi e nemici si muovono quando attaccano, si difendono o vengono colpiti. Anche gli aspetti hanno la loro versione. Vale solo su questo dispositivo. Se un\'immagine non si carica resta lo sprite di sempre.')}
       ${R&&R.phase!=='lobby'?'<p class="muted" style="font-size:13px">Luce e Ombra cambia dalla prossima partita.</p>':''}
     </div>
     <div class="panel"><h4>${ic('i_gear',18)} Informazioni</h4>
@@ -3119,7 +3132,7 @@ function settingsHTML(){
       <div class="srow"><div class="lab">Codice<small>Hai un codice? Scrivilo qui.</small></div><input id="rcode" class="txt" maxlength="40" style="max-width:200px" autocomplete="off" placeholder="Codice"><button class="btn" onclick="redeem()">Usa</button></div>
       <div class="srow"><div class="lab">Profilo</div><b>${ACC?esc(ACC.nome):'nessuno'}</b><button class="btn" onclick="openProfilo()">${ACC?'Gestisci':'Accedi'}</button></div>
       ${inRoom?`<div class="srow"><div class="lab">Stanza</div><b>${R.code}</b></div><div class="srow"><div class="lab">Connessione</div><b>${isHost?'Sei tu a guidare la stanza':'Collegato'}</b></div>`:''}
-      <p class="muted" style="font-size:13px">Novità della 7.4: con «Grafica Pixellab» accesa il villaggio cambia aspetto a ogni ricostruzione, reliquie, pozioni e icone sono nuove, eventi e luoghi hanno la loro illustrazione, i combattimenti hanno lo sfondo del dungeon e la mappa ha sfondo, decorazioni e la figura del tuo eroe. Novità della 7.3: con «Grafica Pixellab» accesa anche nemici, élite e boss sono disegnati con PixelLab, attaccano e reagiscono ai colpi; nuova icona del gioco. Novità della 7.2: con «Grafica Pixellab» accesa gli eroi disegnati con PixelLab compaiono ovunque, anche nella scelta dell'eroe, nei menu e nei riepiloghi. Novità della 7.1: in Sviluppo c'è «Grafica Pixellab», spenta di base. Accesa, in combattimento gli eroi sono disegnati con PixelLab e hanno le animazioni di attacco, difesa e colpo subito. Novità della 7.0: il pulsante «Gioca» sempre visibile per scegliere la modalità; Luce e Ombra (ogni carta si può giocare dal lato Ombra, più forte ma rischioso; creature d'ombra, mercante, eventi e bottino reagiscono alla tua Ombra), il Villaggio di Valdombra da ricostruire per avere vantaggi in ogni partita, e le Gemme, la seconda moneta per cimeli permanenti e aspetti. Si possono spegnere da Sviluppo. Dalla 6.4: la sfida del giorno usa tutti e 10 gli eroi e non ripete eroe, dungeon o modificatore del giorno prima; dalla 6.3: corretto il blocco quando l'eroe cade per una carta Ustione o Maledizione, tratti delle élite più leggeri (soprattutto da soli); dalla 6.2: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
+      <p class="muted" style="font-size:13px">Novità della 7.5: con «Grafica Pixellab» accesa i nemici sconfitti hanno la loro animazione di morte e restano a terra, gli aspetti degli eroi hanno la versione Pixellab e Azhrakel ha nuovi colori. Novità della 7.4: con «Grafica Pixellab» accesa il villaggio cambia aspetto a ogni ricostruzione, reliquie, pozioni e icone sono nuove, eventi e luoghi hanno la loro illustrazione, i combattimenti hanno lo sfondo del dungeon e la mappa ha sfondo, decorazioni e la figura del tuo eroe. Novità della 7.3: con «Grafica Pixellab» accesa anche nemici, élite e boss sono disegnati con PixelLab, attaccano e reagiscono ai colpi; nuova icona del gioco. Novità della 7.2: con «Grafica Pixellab» accesa gli eroi disegnati con PixelLab compaiono ovunque, anche nella scelta dell'eroe, nei menu e nei riepiloghi. Novità della 7.1: in Sviluppo c'è «Grafica Pixellab», spenta di base. Accesa, in combattimento gli eroi sono disegnati con PixelLab e hanno le animazioni di attacco, difesa e colpo subito. Novità della 7.0: il pulsante «Gioca» sempre visibile per scegliere la modalità; Luce e Ombra (ogni carta si può giocare dal lato Ombra, più forte ma rischioso; creature d'ombra, mercante, eventi e bottino reagiscono alla tua Ombra), il Villaggio di Valdombra da ricostruire per avere vantaggi in ogni partita, e le Gemme, la seconda moneta per cimeli permanenti e aspetti. Si possono spegnere da Sviluppo. Dalla 6.4: la sfida del giorno usa tutti e 10 gli eroi e non ripete eroe, dungeon o modificatore del giorno prima; dalla 6.3: corretto il blocco quando l'eroe cade per una carta Ustione o Maledizione, tratti delle élite più leggeri (soprattutto da soli); dalla 6.2: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
       <p class="muted" style="font-size:13px">Le impostazioni (audio, chat, grafica) valgono solo per questo dispositivo. I progressi di gioco seguono il tuo profilo.</p>
       <div><button class="btn" onclick="SET=Object.assign({},SET_DEF);saveSet();render()">Ripristina le impostazioni</button></div>
     </div></div>`;
