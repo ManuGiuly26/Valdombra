@@ -1015,8 +1015,13 @@ const BOSSI={drago:['Ignivora','Ignivora giace sconfitta. I bardi canteranno dei
   colosso:['Magmor','Magmor si spezza e la lava si raffredda in pietra. Valdombra è finalmente in pace: siete leggenda.','Magmor si riforma dalla lava, più grande di prima','Un colosso di roccia fusa: tanta Armatura, colpi enormi, e chi lo colpisce con un Attacco si brucia (2 danni).']};
 function bossId(){if(!R)return 'drago';const L=BOSSES[R.dg||'rocca']||[DG().boss];return L[((R.bossI|0)+(R.cycle||1)-1)%L.length]}
 const bossN=()=>BOSSI[bossId()][0];
-const ETRAITS={corazzato:['Corazzato','All\'inizio di ogni suo turno ottiene 8 Armatura.'],furioso:['Furioso','Inizia il combattimento con 3 Forza.'],vampiro:['Vampiro','Recupera PV pari a metà dei danni che infligge.'],spinoso:['Spinoso','Chi lo colpisce con un Attacco subisce 3 danni.'],rigenerante:['Rigenerante','All\'inizio di ogni suo turno recupera 6 PV.']};
-function trInfo(k){toast(ETRAITS[k][0]+': '+ETRAITS[k][1])}
+// tratti delle élite: [da soli, in gruppo]
+const TRV={corazzato:[5,8],furioso:[2,3],vampiro:[25,33],spinoso:[2,3],rigenerante:[4,6]};
+const trGrp=()=>!!(R&&!solo&&R.order&&R.order.length>1);
+const trv=(k,grp)=>TRV[k][(grp==null?trGrp():grp)?1:0];
+function trDesc(k,grp){const v=trv(k,grp);return {corazzato:`All'inizio di ogni suo turno ottiene ${v} Armatura.`,furioso:`Inizia il combattimento con ${v} Forza.`,vampiro:`Recupera PV pari al ${v}% dei danni che ti infligge.`,spinoso:`Chi lo colpisce con un Attacco subisce ${v} danni.`,rigenerante:`All'inizio di ogni suo turno recupera ${v} PV${grp===false||!trGrp()?'':' (di più con più eroi)'}.`}[k]}
+const ETRAITS={corazzato:['Corazzato'],furioso:['Furioso'],vampiro:['Vampiro'],spinoso:['Spinoso'],rigenerante:['Rigenerante']};
+function trInfo(k){toast(ETRAITS[k][0]+': '+trDesc(k))}
 const EASY=[['goblin'],['ratto','ratto'],['melma'],['scheletro']];
 const HARD=[['scheletro','coboldo'],['lupo','lupo'],['bandito','goblin'],['melma','ratto'],['goblin','goblin','coboldo'],['scheletro','ratto','ratto'],['bandito','lupo']];
 const ELITES=[['orco'],['troll'],['cavaliere']];
@@ -1261,7 +1266,7 @@ function checkProgress(){
   if(!R||!isHost)return;
   if(R.phase==='map'){if(R.voteAnim)return;const act=active();if(act.length&&act.every(p=>R.votes[p]))resolveVote()}
   else if(R.phase==='room'){if(active().every(p=>R.players[p].done)){R.phase='map';R.votes={};R.order.forEach(p=>R.players[p].screen=null)}}
-  else if(R.phase==='combat'){const c=R.combat;if(c&&!c.busy&&!c.won){const hs=Object.keys(c.heroes).filter(p=>!c.heroes[p].down&&isOnline(p));if(hs.length&&hs.every(p=>c.heroes[p].ended))enemyPhase()}}
+  else if(R.phase==='combat'){const c=R.combat;if(c&&!c.busy&&!c.won&&Object.values(c.heroes).every(h=>h.down)){checkEnd();return}if(c&&!c.busy&&!c.won){const hs=Object.keys(c.heroes).filter(p=>!c.heroes[p].down&&isOnline(p));if(hs.length&&hs.every(p=>c.heroes[p].ended))enemyPhase()}}
 }
 
 /* Azioni dei giocatori (eseguite dall'host) */
@@ -1431,7 +1436,7 @@ function startCombat(ids,kind){
   const hpM=1.15*(big?1.1:1)*(1+.7*(n-1))*(1+.5*cy),dM=1.12*(1+.1*(n-1))*(1+.2*cy);
   R.combat={hp0:Object.fromEntries(party.map(p=>[p,R.players[p].hp])),kind,n,turn:0,busy:false,won:false,heroes:{},hpM:hpM*(R.daily&&R.daily.mod==='potenti'?1.25:1),dM,L,enemies:[]};
   ids.forEach(id=>R.combat.enemies.push(mkEnemy(id)));
-  if(kind==='elite')R.combat.enemies.forEach(e=>{if(ENEMIES[e.id].elite){e.trait=rng.pick(Object.keys(ETRAITS));if(e.trait==='furioso')e.st.str=(e.st.str||0)+3}});
+  if(kind==='elite')R.combat.enemies.forEach(e=>{if(ENEMIES[e.id].elite){e.trait=rng.pick(Object.keys(ETRAITS));if(e.trait==='furioso')e.st.str=(e.st.str||0)+trv('furioso')}});
   party.forEach(pid=>{const P=R.players[pid];P.deck.forEach(c=>{if(!c.k)c.k=uid++});const sh=rng.shuffle(P.deck.map(c=>({...c,uid:uid++})));R.combat.heroes[pid]={blk:0,st:{},pw:{},draw:[...sh.filter(c=>!innOf(c)),...sh.filter(innOf)],hand:[],disc:[],exh:[],energy:0,ended:false,down:false}});
   R.phase='combat';R.order.forEach(p=>{R.players[p].screen=null;R.players[p].done=true});
   g=R.combat;rollIntents();startTurn();
@@ -1510,7 +1515,7 @@ function hurtHero(d){
   heroDown();
 }
 /* Effetti usati dalle carte */
-function A(t,n,h=1){for(let i=0;i<h;i++){if(!t||t.hp<=0)break;hurtEnemy(t,calcDmg(n,g.hero,t));g.hit.add(t);const sp=(t.trait==='spinoso'?3:0)+(ENEMIES[t.id].spine||0);if(sp&&!g.hero.down){hurtHero(sp);fx(eid(t),'Spine!','dmg')}}}
+function A(t,n,h=1){for(let i=0;i<h;i++){if(!t||t.hp<=0)break;hurtEnemy(t,calcDmg(n,g.hero,t));g.hit.add(t);const sp=(t.trait==='spinoso'?trv('spinoso'):0)+(ENEMIES[t.id].spine||0);if(sp&&!g.hero.down){hurtHero(sp);fx(eid(t),'Spine!','dmg')}}}
 function AA(n){alive().forEach(e=>{hurtEnemy(e,calcDmg(n,g.hero,e));g.hit.add(e)})}
 function AR(n,h){for(let i=0;i<h;i++){const a=alive();if(!a.length)break;const e=rng.pick(a);hurtEnemy(e,calcDmg(n,g.hero,e));g.hit.add(e)}}
 function B(n){const v=Math.max(0,n+(g.hero.st.dex||0)+(g.hero.form==='orso'?2:0)+(g.hero.pw.bosco||0));g.hero.blk+=v;STX('blk',v);fx('hero','+'+v,'blk')}
@@ -1583,7 +1588,7 @@ async function enemyPhase(){
   if(Object.values(c.heroes).some(h=>!h.down&&((h.min&&h.min.length)||h.pet))){allyAttacks();commit();await wait(350);if(R.combat!==c)return;if(!alive().length){c.busy=false;checkEnd();checkProgress();commit();return}}
   for(const e of c.enemies){
     if(R.combat!==c)return;if(e.hp<=0)continue;e.blk=0;
-    if(e.trait==='corazzato'){const b=Math.round(8*(e.dm||1));e.blk+=b;fx(eid(e),'+'+b,'blk')}if(e.trait==='rigenerante'&&e.hp<e.max){const b=e.hp;e.hp=Math.min(e.max,e.hp+Math.round(6*(1+.5*(c.n-1))));fx(eid(e),'+'+(e.hp-b),'heal')}
+    if(e.trait==='corazzato'){const b=Math.round(trv('corazzato')*(e.dm||1));e.blk+=b;fx(eid(e),'+'+b,'blk')}if(e.trait==='rigenerante'&&e.hp<e.max){const b=e.hp;e.hp=Math.min(e.max,e.hp+Math.round(trv('rigenerante')*(1+.5*(c.n-1))));fx(eid(e),'+'+(e.hp-b),'heal')}
     if(doomCheck(e)){commit();await wait(350);continue}
     if(e.st.poison){ctx(null);const p=e.st.poison;e.hp-=p;fx(eid(e),'-'+p,'psn');e.st.poison--;
       if(e.hp<=0){e.hp=0;e.dead=true;commit();await wait(250);continue}}
@@ -1608,7 +1613,7 @@ function doIntent(e){
   if(it.heal){const b=e.hp;e.hp=Math.min(e.max,e.hp+Math.round(it.heal*(1+.7*(c.n-1))));fx(eid(e),'+'+(e.hp-b),'heal')}
   if(it.d||it.deb||it.curse){
     const fix=p=>{const tt=taunter();if(tt)return tt;if(p&&c.heroes[p]&&!c.heroes[p].down)return p;const t=targetable();return t.length?rng.pick(t):null};
-    const hitOnce=()=>{const hb=run.hp;hurtHero(calcDmg(enemyBase(e,it),e,g.hero));if(e.trait==='vampiro'&&hb>run.hp){const v=Math.ceil((hb-Math.max(0,run.hp))/2);e.hp=Math.min(e.max,e.hp+v);fx(eid(e),'+'+v,'heal')}if(g.hero.st.spine)hurtEnemy(e,g.hero.st.spine);if(has('scaglia')&&!g.hero.down)hurtEnemy(e,3);if(g.hero.pw.rappr&&!g.hero.down)hurtEnemy(e,g.hero.pw.rappr)};
+    const hitOnce=()=>{const hb=run.hp;hurtHero(calcDmg(enemyBase(e,it),e,g.hero));if(e.trait==='vampiro'&&hb>run.hp){const v=Math.floor((hb-Math.max(0,run.hp))*trv('vampiro')/100);if(v>0){e.hp=Math.min(e.max,e.hp+v);fx(eid(e),'+'+v,'heal')}}if(g.hero.st.spine)hurtEnemy(e,g.hero.st.spine);if(has('scaglia')&&!g.hero.down)hurtEnemy(e,3);if(g.hero.pw.rappr&&!g.hero.down)hurtEnemy(e,g.hero.pw.rappr)};
     const debuff=()=>{if(g.hero.down)return;if(it.deb)g.hero.st[it.deb]=(g.hero.st[it.deb]||0)+it.dn;if(it.curse)addCurse(it.curse,it.cn||1)};
     if(it.aoe){for(const p of targetable()){ctx(p);if(it.d)hitOnce();debuff();if(e.hp<=0)break}return}
     if(it.d)for(let k=0;k<(it.x||1);k++){const p=fix(it.tgs?it.tgs[k]:it.tg);if(!p)break;ctx(p);hitOnce();if(e.hp<=0)break}
@@ -1888,7 +1893,7 @@ function guidaHTML(){const t=UI.guTab||'base';const sec=(h,b)=>`<div class="pane
     b=sec('Stati (su eroi e nemici)',st)+sec('Parole delle carte',gl)+sec('Forme del Druido',Object.values(FORMS).map(([n,d])=>def(n,d)).join(''))+sec('Elementi del Monaco',Object.values(ELEMS).map(([n,d])=>def(n,d)).join(''))}
   if(t==='eroi')b=`<p class="muted">I primi 4 eroi sono disponibili da subito; gli altri si sbloccano con le Corone. Ogni eroe ha il suo mazzo iniziale, una reliquia iniziale e 5 abilità uniche da sbloccare giocando con lui.</p><div class="ggrid">${Object.entries(CLASSES).map(([k,c])=>`<div class="panel gsec"><div class="row" style="gap:10px;flex-wrap:nowrap">${sprImg(k,48)}<div><b style="font-size:17px">${c.n}</b><br><span class="muted">${c.hp} PV · ${relIc(c.relic,14)} ${RELICS[c.relic].n}${c.price?` · ${heroOwned(k)?'sbloccato':c.price+' Corone'}`:' · base'}</span></div></div><span>${c.desc}</span><small class="muted">Reliquia iniziale: ${RELICS[c.relic].d}</small></div>`).join('')}</div>`;
   if(t==='dungeon')b=Object.entries(DUNGEONS).map(([k,d])=>sec(d.n,`<span>${d.desc}</span><span class="muted">${d.req?`Si sblocca completando ${DUNGEONS[d.req].n} in modalità normale (in Sopravvivenza basta superare lì un ciclo).`:'Disponibile da subito.'} Vittoria: ${d.crowns} Corone, più 20 per ogni Livello di Assedio.</span>`+(BOSSES[k]||[d.boss]).map(id=>`<div class="row" style="gap:10px;flex-wrap:nowrap;margin-top:6px">${sprImg(id,44)}<div><b>${ENEMIES[id].n}</b><br><span class="muted">${BOSSI[id][3]}</span></div></div>`).join(''))).join('')
-    +sec('Tratti delle élite','Ogni élite ha un tratto scelto a caso. Toccando l\'etichetta sotto il nome lo rileggi in combattimento.'+Object.values(ETRAITS).map(([n,d])=>def(n,d)).join(''))
+    +sec('Tratti delle élite','Ogni élite ha un tratto scelto a caso. Toccando l\'etichetta sotto il nome lo rileggi in combattimento.'+'<span class="muted">Da soli i tratti sono più deboli che in gruppo.</span>'+Object.keys(ETRAITS).map(k=>def(ETRAITS[k][0],`Da soli: ${trDesc(k,false)} In gruppo: ${trDesc(k,true)}`)).join(''))
     +sec('Bestiario','Nel Diario, alla voce «Mostri», trovi tutti i nemici che hai incontrato, con i loro PV e i dungeon in cui vivono.');
   if(t==='modi')b=sec('Normale',`Attraversi i 15 piani del dungeon e affronti il boss. Se vinci guadagni Corone, il dungeon conta come completato (sblocca il successivo) e sblocchi il Livello di Assedio seguente in quel dungeon.`)
     +sec('Livelli di Assedio',`Da 0 a ${MAXLVL}. Ogni livello rende i nemici più forti ma dà più oro, carte rare più frequenti e più Corone. Per esempio, Assedio 1: ${lvlDesc(1)} Assedio ${MAXLVL}: ${lvlDesc(MAXLVL)}`)
@@ -2736,7 +2741,7 @@ function startVoteAnim(va){
 }
 function paintAnim(){document.querySelectorAll('.mapsvg .node').forEach(n=>{n.classList.toggle('spin',!!UI.anim&&n.dataset.k===UI.anim.cur)})}
 /* ================= IMPOSTAZIONI ================= */
-const VERSION='v6.2',VDATE='17/11';
+const VERSION='v6.3',VDATE='17/11';
 const SET_K='valdombra-impostazioni';
 const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),vib:true,ts:1,hc:false,tut:true,stats:true};
 let SET=(()=>{try{return Object.assign({},SET_DEF,JSON.parse(load(SET_K)||'{}'))}catch(e){return Object.assign({},SET_DEF)}})();
@@ -2783,7 +2788,7 @@ function settingsHTML(){
       <div class="srow"><div class="lab">Codice<small>Hai un codice? Scrivilo qui.</small></div><input id="rcode" class="txt" maxlength="40" style="max-width:200px" autocomplete="off" placeholder="Codice"><button class="btn" onclick="redeem()">Usa</button></div>
       <div class="srow"><div class="lab">Profilo</div><b>${ACC?esc(ACC.nome):'nessuno'}</b><button class="btn" onclick="openProfilo()">${ACC?'Gestisci':'Accedi'}</button></div>
       ${inRoom?`<div class="srow"><div class="lab">Stanza</div><b>${R.code}</b></div><div class="srow"><div class="lab">Connessione</div><b>${isHost?'Sei tu a guidare la stanza':'Collegato'}</b></div>`:''}
-      <p class="muted" style="font-size:13px">Novità di questa versione: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
+      <p class="muted" style="font-size:13px">Novità di questa versione: corretto il blocco quando l'eroe cade per una carta Ustione o Maledizione, tratti delle élite più leggeri (soprattutto da soli); dalla 6.2: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
       <p class="muted" style="font-size:13px">Le impostazioni (audio, chat, grafica) valgono solo per questo dispositivo. I progressi di gioco seguono il tuo profilo.</p>
       <div><button class="btn" onclick="SET=Object.assign({},SET_DEF);saveSet();render()">Ripristina le impostazioni</button></div>
     </div></div>`;

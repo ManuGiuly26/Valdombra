@@ -81,6 +81,8 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(await page.evaluate(()=>{R=null;pickCls='guerriero';pickDg='rocca';pickMode='surv';startSolo();render();return R.mode==='surv'&&R.phase==='map'}),'la Sopravvivenza parte');
   ok(await page.evaluate(()=>{R=null;pickMode='norm';try{startDaily()}catch(e){return false}render();return !!(R&&R.daily)}),'la sfida del giorno parte');
 
+  ok(await page.evaluate(async()=>{R=null;solo=true;ME='solo';isHost=true;pickCls='mago';pickDg='rocca';pickMode='norm';startSolo();ctx(ME);startCombat(['drago'],'boss');ctx(ME);run.hp=2;g.hero.blk=0;g.hero.hand.push({id:'ustione',up:false,uid:uid++});send({t:'end'});await new Promise(r=>setTimeout(r,200));return R.phase==='end'&&!R.win}),'se l\'eroe cade per una carta Ustione a fine turno la partita finisce (non resta bloccata)');
+
   console.log('5. Multigiocatore simulato (host con due giocatori)');
   const mp=await page.evaluate(async()=>{
     const sleep=ms=>new Promise(r=>setTimeout(r,ms));
