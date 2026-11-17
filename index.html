@@ -1898,7 +1898,7 @@ function guidaHTML(){const t=UI.guTab||'base';const sec=(h,b)=>`<div class="pane
   if(t==='modi')b=sec('Normale',`Attraversi i 15 piani del dungeon e affronti il boss. Se vinci guadagni Corone, il dungeon conta come completato (sblocca il successivo) e sblocchi il Livello di Assedio seguente in quel dungeon.`)
     +sec('Livelli di Assedio',`Da 0 a ${MAXLVL}. Ogni livello rende i nemici più forti ma dà più oro, carte rare più frequenti e più Corone. Per esempio, Assedio 1: ${lvlDesc(1)} Assedio ${MAXLVL}: ${lvlDesc(MAXLVL)}`)
     +sec('Sopravvivenza','Il dungeon non finisce mai: dopo il boss ricomincia da capo più difficile (un nuovo «ciclo»), e recuperi un po\' di PV. Si va avanti finché cadete. Il punteggio va nella classifica, le Corone dipendono dai piani superati, il Livello di Assedio non si usa.')
-    +sec('Sfida del giorno','Ogni giorno una partita uguale per tutti: eroe, dungeon, seed e un modificatore speciale sono decisi dal giorno. Vale solo il primo tentativo, senza zaino né abilità uniche, e c\'è una classifica giornaliera. Non sblocca dungeon né livelli.')
+    +sec('Sfida del giorno','Ogni giorno una partita uguale per tutti: eroe, dungeon, seed e un modificatore speciale sono decisi dal giorno, e non si ripetono mai uguali al giorno prima. L\'eroe può essere uno qualsiasi dei 10, anche uno che non hai ancora sbloccato: è l\'occasione per provarlo gratis. Vale solo il primo tentativo, senza zaino né abilità uniche, e c\'è una classifica giornaliera. Non sblocca dungeon né livelli.')
     +sec('Seed','Ogni partita ha un seed (in alto). Inserendolo prima di iniziare giochi la stessa mappa: utile per sfidare gli amici sullo stesso percorso.');
   if(t==='gruppo')b=sec('Stanza e giocatori',`Da «Gioca con gli amici» crei una stanza e mandi il codice di 4 lettere o il link d'invito. Si gioca fino a ${MAXP} eroi. Chi crea la stanza (l'host) sceglie modalità, dungeon e livello e avvia la partita quando tutti sono pronti. Se l'host esce, un altro prende il suo posto.`)
     +sec('Sblocchi in gruppo','Per giocare insieme ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelti: chi non li ha viene segnalato nella stanza. Quando il gruppo vince, il livello successivo si sblocca per tutti.')
@@ -2741,7 +2741,7 @@ function startVoteAnim(va){
 }
 function paintAnim(){document.querySelectorAll('.mapsvg .node').forEach(n=>{n.classList.toggle('spin',!!UI.anim&&n.dataset.k===UI.anim.cur)})}
 /* ================= IMPOSTAZIONI ================= */
-const VERSION='v6.3',VDATE='17/11';
+const VERSION='v6.4',VDATE='17/11';
 const SET_K='valdombra-impostazioni';
 const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),vib:true,ts:1,hc:false,tut:true,stats:true};
 let SET=(()=>{try{return Object.assign({},SET_DEF,JSON.parse(load(SET_K)||'{}'))}catch(e){return Object.assign({},SET_DEF)}})();
@@ -2788,7 +2788,7 @@ function settingsHTML(){
       <div class="srow"><div class="lab">Codice<small>Hai un codice? Scrivilo qui.</small></div><input id="rcode" class="txt" maxlength="40" style="max-width:200px" autocomplete="off" placeholder="Codice"><button class="btn" onclick="redeem()">Usa</button></div>
       <div class="srow"><div class="lab">Profilo</div><b>${ACC?esc(ACC.nome):'nessuno'}</b><button class="btn" onclick="openProfilo()">${ACC?'Gestisci':'Accedi'}</button></div>
       ${inRoom?`<div class="srow"><div class="lab">Stanza</div><b>${R.code}</b></div><div class="srow"><div class="lab">Connessione</div><b>${isHost?'Sei tu a guidare la stanza':'Collegato'}</b></div>`:''}
-      <p class="muted" style="font-size:13px">Novità di questa versione: corretto il blocco quando l'eroe cade per una carta Ustione o Maledizione, tratti delle élite più leggeri (soprattutto da soli); dalla 6.2: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
+      <p class="muted" style="font-size:13px">Novità di questa versione: la sfida del giorno usa tutti e 10 gli eroi e non ripete eroe, dungeon o modificatore del giorno prima; dalla 6.3: corretto il blocco quando l'eroe cade per una carta Ustione o Maledizione, tratti delle élite più leggeri (soprattutto da soli); dalla 6.2: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
       <p class="muted" style="font-size:13px">Le impostazioni (audio, chat, grafica) valgono solo per questo dispositivo. I progressi di gioco seguono il tuo profilo.</p>
       <div><button class="btn" onclick="SET=Object.assign({},SET_DEF);saveSet();render()">Ripristina le impostazioni</button></div>
     </div></div>`;
@@ -3048,7 +3048,16 @@ const DAILY_MODS=[
 ];
 function todayKey(){const d=new Date();return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')}
 function dayLabel(k){return k.slice(6,8)+'/'+k.slice(4,6)+'/'+k.slice(0,4)}
-function dailyInfo(day){const h=hashStr('valdombra-sfida-'+day);return {day,cls:Object.keys(CLASSES)[h%4],dg:Object.keys(DUNGEONS)[(h>>>4)%Object.keys(DUNGEONS).length],mod:DAILY_MODS[(h>>>8)%DAILY_MODS.length],seed:'G'+day.slice(2)}}
+// Dal 18/11/2026: tutti e 10 gli eroi, e mai lo stesso eroe, dungeon o modificatore del giorno prima.
+// I giorni precedenti restano com'erano (le classifiche di quei giorni non cambiano).
+const DAILY_V2='20261118',DAILY_MEMO={};
+const dayAdd=(k,n)=>{const d=new Date(+k.slice(0,4),+k.slice(4,6)-1,+k.slice(6,8)+n);return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')};
+function dailyInfo(day){if(day<DAILY_V2)return dailyOld(day);if(DAILY_MEMO[day])return DAILY_MEMO[day];
+  let k=DAILY_V2,prev=dailyOld(dayAdd(DAILY_V2,-1));
+  while(true){if(!DAILY_MEMO[k]){const h=hashStr('valdombra-sfida2-'+k);const cl=Object.keys(CLASSES).filter(c=>c!==prev.cls),dg=Object.keys(DUNGEONS).filter(d=>d!==prev.dg),md=DAILY_MODS.filter(m=>m.id!==prev.mod.id);
+      DAILY_MEMO[k]={day:k,cls:cl[h%cl.length],dg:dg[(h>>>5)%dg.length],mod:md[(h>>>10)%md.length],seed:'G'+k.slice(2)}}
+    prev=DAILY_MEMO[k];if(k>=day)return prev;k=dayAdd(k,1)}}
+function dailyOld(day){const h=hashStr('valdombra-sfida-'+day);return {day,cls:Object.keys(CLASSES)[h%4],dg:Object.keys(DUNGEONS)[(h>>>4)%Object.keys(DUNGEONS).length],mod:DAILY_MODS[(h>>>8)%DAILY_MODS.length],seed:'G'+day.slice(2)}}
 function dailyState(){try{const o=JSON.parse(load(DAILY_K));return o&&typeof o==='object'?o:{}}catch(e){return{}}}
 function dailyName(){return (myName||(ACC&&ACC.nome)||'Eroe senza nome').slice(0,16)}
 function startDaily(){
@@ -3069,7 +3078,7 @@ function startDaily(){
 function dailyPanel(){
   const info=dailyInfo(todayKey()),st=dailyState(),done=st.day===info.day;
   return `<div class="panel daily" style="border-color:#9b7be0"><div class="row" style="gap:12px;align-items:center">${sprImg(info.cls,44)}<div style="flex:1;min-width:200px"><b style="font-size:17px">Sfida del giorno · ${dayLabel(info.day)}</b><br>
-    <span class="muted">Stesso eroe, stessa mappa e stesse regole per tutti: <b style="color:var(--fg)">${CLASSES[info.cls].n}</b> nella <b style="color:var(--fg)">${DUNGEONS[info.dg].n}</b>.</span></div></div>
+    <span class="muted">Stesso eroe, stessa mappa e stesse regole per tutti: <b style="color:var(--fg)">${CLASSES[info.cls].n}</b> nella <b style="color:var(--fg)">${DUNGEONS[info.dg].n}</b>.</span>${heroOwned(info.cls)?'':`<br><span style="color:var(--torch2)">${ic('i_lock',12)} Non hai ancora sbloccato il ${CLASSES[info.cls].n}: oggi puoi provarlo gratis!</span>`}</div></div>
     <div class="dmod"><b>${info.mod.n}</b> ${info.mod.d}</div>
     <p class="muted" style="font-size:13px">Conta solo il primo tentativo del giorno. Niente zaino né abilità uniche, così è uguale per tutti. Domani c'è una sfida nuova.</p>
     ${done?`<p><b>${st.score!=null?'Il tuo punteggio di oggi: '+st.score:'Hai già iniziato la sfida di oggi.'}</b></p>`:`<label class="muted" for="dname" style="font-size:13px">Nome in classifica</label><input id="dname" class="txt" maxlength="16" style="max-width:260px" value="${esc(dailyName()==='Eroe senza nome'?'':dailyName())}" placeholder="Il tuo nome">`}
