@@ -735,10 +735,13 @@ boss:["............","k..........k","kRk......kRk","kRrkkkkkkrRk",".kRrrrrrrrk."
 const sprCache={};
 const SKINS={cremisi:['Cremisi',{b:'r',B:'R',g:'r',G:'R',p:'r',P:'R',t:'r',T:'R',l:'o',L:'O',o:'r',O:'R',w:'r',W:'R'}],smeraldo:['Smeraldo',{b:'g',B:'G',r:'g',R:'G',p:'g',P:'G',o:'l',O:'L',t:'l',T:'L',w:'l',W:'L'}],
   dorato:['Dorato',{m:'y',M:'Y',W:'Y',w:'E',i:'E',I:'y',b:'o',B:'O',g:'y',G:'Y',p:'y',P:'Y',o:'y',O:'Y'}],ombra:['Ombra',{b:'P',B:'k',r:'P',R:'k',g:'P',G:'k',m:'C',M:'c',w:'C',W:'c',n:'c',N:'k',h:'c',H:'k',t:'P',T:'k',o:'P',O:'k',l:'p',L:'P'}],
+  autunno:['Autunno',{g:'o',G:'O',l:'y',L:'Y',t:'o',T:'O'}],
   gelo:['Gelo',{b:'i',B:'I',r:'i',R:'I',g:'t',G:'T',p:'I',P:'B',n:'I',N:'B',o:'i',O:'I',w:'i',W:'I',l:'t',L:'T'}]};
 const SKIN_PRICE=40;
 function skinArt(cls,sk){const m=SKINS[sk]&&SKINS[sk][1];return SPR[cls]&&m?SPR[cls].map(r=>[...r].map(ch=>m[ch]||ch).join('')):null}
-const skinsFor=cls=>Object.keys(SKINS).filter(sk=>{const a=skinArt(cls,sk),b=SPR[cls];if(!a)return false;let d=0;a.forEach((r,y)=>{for(let x=0;x<r.length;x++)if(r[x]!==b[y][x])d++});return d>=12});
+const skinsFor=cls=>{const L=Object.keys(SKINS).filter(sk=>sk!=='autunno').filter(sk=>{const a=skinArt(cls,sk),b=SPR[cls];if(!a)return false;let d=0;a.forEach((r,y)=>{for(let x=0;x<r.length;x++)if(r[x]!==b[y][x])d++});return d>=12});
+  // Autunno è l'alternativa per gli eroi già vestiti di verde, per cui Smeraldo non cambierebbe nulla
+  if(!L.includes('smeraldo'))L.splice(1,0,'autunno');return L};
 function spr(name){if(sprCache[name])return sprCache[name];if(name.includes('@')&&!SPR[name]){const [c,k]=name.split('@');const a=skinArt(c,k);if(a)SPR[name]=a;else return spr(c)}const a=SPR[name]||ICONS[name];if(!a)return '';
   const h=a.length,w=a[0].length;const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
   a.forEach((r,y)=>[...r].forEach((ch,X)=>{const col=PAL[ch];if(col){x.fillStyle=col;x.fillRect(X,y,1,1)}}));
@@ -2733,7 +2736,7 @@ function startVoteAnim(va){
 }
 function paintAnim(){document.querySelectorAll('.mapsvg .node').forEach(n=>{n.classList.toggle('spin',!!UI.anim&&n.dataset.k===UI.anim.cur)})}
 /* ================= IMPOSTAZIONI ================= */
-const VERSION='v6.1',VDATE='17/11';
+const VERSION='v6.2',VDATE='17/11';
 const SET_K='valdombra-impostazioni';
 const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),vib:true,ts:1,hc:false,tut:true,stats:true};
 let SET=(()=>{try{return Object.assign({},SET_DEF,JSON.parse(load(SET_K)||'{}'))}catch(e){return Object.assign({},SET_DEF)}})();
@@ -2780,7 +2783,7 @@ function settingsHTML(){
       <div class="srow"><div class="lab">Codice<small>Hai un codice? Scrivilo qui.</small></div><input id="rcode" class="txt" maxlength="40" style="max-width:200px" autocomplete="off" placeholder="Codice"><button class="btn" onclick="redeem()">Usa</button></div>
       <div class="srow"><div class="lab">Profilo</div><b>${ACC?esc(ACC.nome):'nessuno'}</b><button class="btn" onclick="openProfilo()">${ACC?'Gestisci':'Accedi'}</button></div>
       ${inRoom?`<div class="srow"><div class="lab">Stanza</div><b>${R.code}</b></div><div class="srow"><div class="lab">Connessione</div><b>${isHost?'Sei tu a guidare la stanza':'Collegato'}</b></div>`:''}
-      <p class="muted" style="font-size:13px">Novità di questa versione: barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
+      <p class="muted" style="font-size:13px">Novità di questa versione: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
       <p class="muted" style="font-size:13px">Le impostazioni (audio, chat, grafica) valgono solo per questo dispositivo. I progressi di gioco seguono il tuo profilo.</p>
       <div><button class="btn" onclick="SET=Object.assign({},SET_DEF);saveSet();render()">Ripristina le impostazioni</button></div>
     </div></div>`;
