@@ -232,13 +232,19 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     const kf=PXI.guerriero;PXI.guerriero=null;render();r.sprite=!sp('pA')&&!!document.querySelector('#ent-h-pA img.spr');PXI.guerriero=kf;
     // con un aspetto attivo resta lo sprite dell'aspetto
     setSkin('guerriero','cremisi');r.aspetto=!sp('pA')&&!!document.querySelector('#ent-h-pA img.spr');setSkin('guerriero',null);
-    SET.px=false;saveSet();render();r.rispenta=!document.querySelector('.pxh');
+    // fuori dal combattimento: scelta dell'eroe e negozio degli aspetti
+    R=null;solo=true;ME='solo';screen='title';modal=null;render();
+    const scelta=()=>[...document.querySelectorAll('.classes .pxs')].map(e=>e.style.backgroundImage);
+    r.scelta=scelta();setSkin('guerriero','cremisi');r.sceltaAspetto=scelta();setSkin('guerriero',null);
+    UI.skCls='guerriero';modal={title:'Aspetti',cancel:true,html:skinsHTML()};render();r.negozio=!document.querySelector('.shopgrid .pxs')&&document.querySelectorAll('.shopgrid img.spr').length>0;modal=null;
+    SET.px=false;saveSet();render();r.rispenta=!document.querySelector('.pxh')&&!document.querySelector('.pxs');
     R=null;solo=true;ME='solo';screen='title';modal=null;render();return r});
   ok(px.base&&px.spenta&&px.interruttore,'Grafica Pixellab: spenta di base, con l\'interruttore in Sviluppo, e senza resta lo sprite di sempre');
   ok(px.caricate===40&&!px.senzaFigura.length,`le immagini in pixel/ si caricano (${px.caricate}/40) e ogni eroe ha la sua figura${px.senzaFigura.length?' (mancano: '+px.senzaFigura+')':''}`);
   ok(/pxan/.test(px.attacco)&&/guerriero-attacco/.test(px.attacco)&&/pxan/.test(px.resta)&&/idle/.test(px.fine)&&/pixel\/guerriero\.png/.test(px.fine),'carta Attacco: animazione d\'attacco, che continua se la schermata si ridisegna, poi torna la figura ferma');
   ok(/guerriero-difesa/.test(px.difesa)&&/guerriero-colpito/.test(px.colpito)&&!/\bhit\b/.test(px.colpito)&&/mago-colpito/.test(px.compagno),'carta con Armatura: difesa; danni subiti: colpito al posto del lampo, anche per il compagno');
   ok(px.lampo&&px.sprite&&px.aspetto&&px.rispenta,'se un\'immagine manca o c\'è un aspetto attivo resta la grafica di sempre');
+  ok(px.scelta.length>=4&&px.scelta.some(s=>s.includes('pixel/guerriero.png'))&&!px.sceltaAspetto.some(s=>s.includes('pixel/guerriero.png'))&&px.negozio,`fuori dal combattimento: figure Pixellab nella scelta dell'eroe (${px.scelta.length}), sprite con un aspetto attivo e nel negozio degli aspetti`);
 
   console.log('');
   if(errori.length){console.log('Errori JavaScript nella pagina:');[...new Set(errori)].forEach(e=>console.log('  - '+e));fallite++}

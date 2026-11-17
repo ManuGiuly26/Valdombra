@@ -207,6 +207,8 @@ body[data-dg="cripte"] .mapsvg .edge.done{stroke:#8fd3ff}body[data-dg="cripte"] 
 .pxh{display:block;flex:none;max-width:none;background-repeat:no-repeat;background-position:0 0;background-size:100% 100%;image-rendering:pixelated}
 .hero .face .pxh{width:126px;height:126px;margin:-22px -36px -24px}
 .ally>.pxh{width:63px;height:63px;margin:-11px -18px -12px}
+/* figura ferma fuori dal combattimento: la cella di 84 px è ritagliata sulla parte centrale di 56 px, dove stanno tutti gli eroi */
+.pxs{aspect-ratio:1/1;height:auto;background-repeat:no-repeat;background-size:150% 150%;background-position:50% 43%;image-rendering:pixelated;flex:none}
 .pxh.pxan{background-size:calc(var(--n) * 100%) 100%;animation:pxan var(--d) steps(var(--n),jump-none) 1 forwards}
 @keyframes pxan{from{background-position:0 0}to{background-position:100% 0}}
 .ent .nm{font-size:13px;font-weight:700;line-height:1.15}
@@ -784,7 +786,9 @@ function potSrc(id){const key='pot_'+id;if(sprCache[key])return sprCache[key];co
 const potIc=(id,px)=>`<img class="spr inl" src="${potSrc(id)}" width="${px}" height="${px}" alt="">`;
 const ic=(name,px=16)=>`<img class="spr inl" src="${spr(name)}" width="${px}" height="${px}" alt="">`;
 const relIc=(id,px=20)=>ic('r_'+id,px);
-const sprImg=(name,px,cls='')=>{const src=spr(name);const a=SPR[name]||ICONS[name]||SPR[String(name).split('@')[0]];return `<img class="spr ${cls}" src="${src}" width="${px}" height="${Math.round(px*a.length/a[0].length)}" alt="">`};
+// Grafica Pixellab (Sviluppo): la figura ferma dell'eroe al posto dello sprite, solo per il nome semplice dell'eroe (con un aspetto, «eroe@aspetto», resta lo sprite)
+const pxFig=name=>{try{return !!(SET.px&&CLASSES[name]&&PXI[name])}catch(e){return false}};
+const sprImg=(name,px,cls='',noPx)=>{if(!noPx&&pxFig(name))return `<span class="spr pxs ${cls}" role="img" aria-label="${CLASSES[name].n}" style="width:${px}px;background-image:url(pixel/${name}.png)"></span>`;const src=spr(name);const a=SPR[name]||ICONS[name]||SPR[String(name).split('@')[0]];return `<img class="spr ${cls}" src="${src}" width="${px}" height="${Math.round(px*a.length/a[0].length)}" alt="">`};
 
 /* ================= DATI DI GIOCO ================= */
 const CLASSES={
@@ -2142,7 +2146,7 @@ function fx(k,txt,cls){if(k==='hero')k='h-'+CUR;fxq.push({k,txt,cls})}
 const PX_AN=['attacco','difesa','colpito'],PX_FD=85;
 const PXI={};let pxReq=false;
 const PXA={};// pid -> {an,t0}: animazione in corso, così sopravvive ai ridisegni della schermata
-function pxLoad(){if(pxReq)return;pxReq=true;let left=0;const done=()=>{if(--left===0&&SET.px&&R&&R.phase==='combat')render()};
+function pxLoad(){if(pxReq)return;pxReq=true;let left=0;const done=()=>{if(--left===0&&SET.px)render()};
   Object.keys(CLASSES).forEach(c=>['',...PX_AN].forEach(a=>{const k=a?c+'-'+a:c,im=new Image();left++;
     im.onload=()=>{PXI[k]={n:Math.max(1,Math.round(im.naturalWidth/Math.max(1,im.naturalHeight)))};done()};
     im.onerror=()=>{PXI[k]=null;done()};im.src='pixel/'+k+'.png'}))}
@@ -2768,7 +2772,7 @@ function skinsHTML(){const c=UI.skCls&&CLASSES[UI.skCls]?UI.skCls:pickCls,own=sk
   return `<div class="panel"><h3>Aspetti degli eroi</h3><p class="muted">Nuovi colori per i tuoi eroi, ${SKP} ${SKN} l'uno. Li vedono anche i compagni in multigiocatore. Non cambiano le regole del gioco.</p>
    <div class="row" style="gap:4px">${Object.keys(CLASSES).filter(heroOwned).map(k=>`<button class="btn ${k===c?'primary':''}" style="padding:4px 6px" onclick="UI.skCls='${k}';render()" aria-label="${CLASSES[k].n}" title="${CLASSES[k].n}">${sprImg(k,28)}</button>`).join('')}</div>
    <div class="shopgrid">${['',...skinsFor(c)].map(k=>{const id=c+'@'+k,has=!k||own.includes(id),on=cur===k;
-     return `<div class="shopitem"><button class="relicbox ${on?'on':''}" onclick="${has?`setSkin('${c}','${k}')`:`buySkin('${c}','${k}')`}" aria-pressed="${on}"><span class="ic">${sprImg(k?id:c,56)}</span><b>${k?SKINS[k][0]:'Classico'}</b><span class="muted">${on?'In uso':has?'Tocca per usarlo':'Da sbloccare'}</span></button>${has?'':`<span class="price ${cr<SKP?'no':''}">${ic(SKI,16)} ${SKP}</span>`}</div>`}).join('')}</div></div>`}
+     return `<div class="shopitem"><button class="relicbox ${on?'on':''}" onclick="${has?`setSkin('${c}','${k}')`:`buySkin('${c}','${k}')`}" aria-pressed="${on}"><span class="ic">${sprImg(k?id:c,56,'',true)}</span><b>${k?SKINS[k][0]:'Classico'}</b><span class="muted">${on?'In uso':has?'Tocca per usarlo':'Da sbloccare'}</span></button>${has?'':`<span class="price ${cr<SKP?'no':''}">${ic(SKI,16)} ${SKP}</span>`}</div>`}).join('')}</div></div>`}
 
 function bottegaHTML(){
   const z=getZaino(),cr=getCrowns();
@@ -2994,7 +2998,7 @@ function startVoteAnim(va){
 }
 function paintAnim(){document.querySelectorAll('.mapsvg .node').forEach(n=>{n.classList.toggle('spin',!!UI.anim&&n.dataset.k===UI.anim.cur)})}
 /* ================= IMPOSTAZIONI ================= */
-const VERSION='v7.1',VDATE='17/11';
+const VERSION='v7.2',VDATE='17/11';
 const SET_K='valdombra-impostazioni';
 const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),vib:true,ts:1,hc:false,tut:true,stats:true,lo:true,vil:true,gem:true,px:false};
 let SET=(()=>{try{return Object.assign({},SET_DEF,JSON.parse(load(SET_K)||'{}'))}catch(e){return Object.assign({},SET_DEF)}})();
@@ -3042,7 +3046,7 @@ function settingsHTML(){
       ${swb('lo','Luce e Ombra','Le carte si possono giocare dal lato Ombra, più forte ma rischioso, e ci sono le creature d\'ombra. In gruppo vale la scelta di chi crea la stanza, dalla partita successiva.')}
       ${swb('vil','Villaggio di Valdombra','La missione secondaria: ricostruisci gli edifici per avere vantaggi a inizio partita.')}
       ${swb('gem','Gemme','La seconda moneta per aspetti, cimeli permanenti e cambio in Corone. Spenta, gli aspetti tornano a costare Corone.')}
-      ${swb('px','Grafica Pixellab','In combattimento gli eroi sono disegnati con PixelLab e si muovono quando attaccano, si difendono o vengono colpiti. Vale solo su questo dispositivo. Con un aspetto attivo, o se un\'immagine non si carica, resta lo sprite di sempre.')}
+      ${swb('px','Grafica Pixellab','Gli eroi sono disegnati con PixelLab ovunque compaiano, dalla scelta dell\'eroe ai riepiloghi; in combattimento si muovono quando attaccano, si difendono o vengono colpiti. Vale solo su questo dispositivo. Con un aspetto attivo, o se un\'immagine non si carica, resta lo sprite di sempre.')}
       ${R&&R.phase!=='lobby'?'<p class="muted" style="font-size:13px">Luce e Ombra cambia dalla prossima partita.</p>':''}
     </div>
     <div class="panel"><h4>${ic('i_gear',18)} Informazioni</h4>
@@ -3050,7 +3054,7 @@ function settingsHTML(){
       <div class="srow"><div class="lab">Codice<small>Hai un codice? Scrivilo qui.</small></div><input id="rcode" class="txt" maxlength="40" style="max-width:200px" autocomplete="off" placeholder="Codice"><button class="btn" onclick="redeem()">Usa</button></div>
       <div class="srow"><div class="lab">Profilo</div><b>${ACC?esc(ACC.nome):'nessuno'}</b><button class="btn" onclick="openProfilo()">${ACC?'Gestisci':'Accedi'}</button></div>
       ${inRoom?`<div class="srow"><div class="lab">Stanza</div><b>${R.code}</b></div><div class="srow"><div class="lab">Connessione</div><b>${isHost?'Sei tu a guidare la stanza':'Collegato'}</b></div>`:''}
-      <p class="muted" style="font-size:13px">Novità della 7.1: in Sviluppo c'è «Grafica Pixellab», spenta di base. Accesa, in combattimento gli eroi sono disegnati con PixelLab e hanno le animazioni di attacco, difesa e colpo subito. Novità della 7.0: il pulsante «Gioca» sempre visibile per scegliere la modalità; Luce e Ombra (ogni carta si può giocare dal lato Ombra, più forte ma rischioso; creature d'ombra, mercante, eventi e bottino reagiscono alla tua Ombra), il Villaggio di Valdombra da ricostruire per avere vantaggi in ogni partita, e le Gemme, la seconda moneta per cimeli permanenti e aspetti. Si possono spegnere da Sviluppo. Dalla 6.4: la sfida del giorno usa tutti e 10 gli eroi e non ripete eroe, dungeon o modificatore del giorno prima; dalla 6.3: corretto il blocco quando l'eroe cade per una carta Ustione o Maledizione, tratti delle élite più leggeri (soprattutto da soli); dalla 6.2: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
+      <p class="muted" style="font-size:13px">Novità della 7.2: con «Grafica Pixellab» accesa gli eroi disegnati con PixelLab compaiono ovunque, anche nella scelta dell'eroe, nei menu e nei riepiloghi. Novità della 7.1: in Sviluppo c'è «Grafica Pixellab», spenta di base. Accesa, in combattimento gli eroi sono disegnati con PixelLab e hanno le animazioni di attacco, difesa e colpo subito. Novità della 7.0: il pulsante «Gioca» sempre visibile per scegliere la modalità; Luce e Ombra (ogni carta si può giocare dal lato Ombra, più forte ma rischioso; creature d'ombra, mercante, eventi e bottino reagiscono alla tua Ombra), il Villaggio di Valdombra da ricostruire per avere vantaggi in ogni partita, e le Gemme, la seconda moneta per cimeli permanenti e aspetti. Si possono spegnere da Sviluppo. Dalla 6.4: la sfida del giorno usa tutti e 10 gli eroi e non ripete eroe, dungeon o modificatore del giorno prima; dalla 6.3: corretto il blocco quando l'eroe cade per una carta Ustione o Maledizione, tratti delle élite più leggeri (soprattutto da soli); dalla 6.2: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
       <p class="muted" style="font-size:13px">Le impostazioni (audio, chat, grafica) valgono solo per questo dispositivo. I progressi di gioco seguono il tuo profilo.</p>
       <div><button class="btn" onclick="SET=Object.assign({},SET_DEF);saveSet();render()">Ripristina le impostazioni</button></div>
     </div></div>`;
