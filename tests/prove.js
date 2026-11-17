@@ -215,7 +215,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     SET.px=false;saveSet();nuova('guerriero');r.spenta=!document.querySelector('.pxh')&&!!document.querySelector('#ent-h-pA img.spr');
     openSettings();r.interruttore=document.querySelector('button.sw[aria-label="Grafica Pixellab"]')?.getAttribute('aria-pressed')==='false';closeModal();
     // accesa: le 40 immagini e la figura di ogni eroe
-    SET.px=true;saveSet();let w=0;while(Object.keys(PXI).length<40&&w<300){await sleep(10);w++}
+    SET.px=true;saveSet();let w=0;while(Object.keys(PXI).length<130&&w<600){await sleep(10);w++}
     r.caricate=Object.values(PXI).filter(Boolean).length;
     r.senzaFigura=Object.keys(CLASSES).filter(cls=>{nuova(cls);const s=sp('pA');return !(s&&s.style.backgroundImage.includes('pixel/'+cls+'.png')&&s.classList.contains('idle'))});
     nuova('guerriero');
@@ -232,6 +232,13 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     const kf=PXI.guerriero;PXI.guerriero=null;render();r.sprite=!sp('pA')&&!!document.querySelector('#ent-h-pA img.spr');PXI.guerriero=kf;
     // con un aspetto attivo resta lo sprite dell'aspetto
     setSkin('guerriero','cremisi');r.aspetto=!sp('pA')&&!!document.querySelector('#ent-h-pA img.spr');setSkin('guerriero',null);
+    // nemici: figura, attacco quando agiscono, colpito quando subiscono danni
+    nuova('guerriero');const ne=sel=>{const s=document.querySelector(sel);return s?s.className+'|'+s.style.backgroundImage:''};
+    r.nemFig=ne('#ent-e0 .pxe');ctx(ME);const e0=g.enemies[0];e0.intent={d:3};
+    const gq=R.combat.enemies.map(x=>x.id);r.nemTutti=Object.keys(PXE).filter(id=>!PXI['nemici/'+id]||!PXI['nemici/'+id+'-attacco']||!PXI['nemici/'+id+'-colpito']);
+    doIntent(e0);commit();r.nemAtt=ne('#ent-e0 .pxe');await sleep(900);
+    ctx(ME);hurtEnemy(g.enemies[1],2);fx('e1','-2','dmg');commit();r.nemCol=ne('#ent-e1 .pxe');
+    r.nemFlash=!!document.querySelector('#ent-e1 .spr.hit');r.nemiciIn=gq.join(',');await sleep(900);
     // fuori dal combattimento: scelta dell'eroe e negozio degli aspetti
     R=null;solo=true;ME='solo';screen='title';modal=null;render();
     const scelta=()=>[...document.querySelectorAll('.classes .pxs')].map(e=>e.style.backgroundImage);
@@ -240,7 +247,8 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     SET.px=false;saveSet();render();r.rispenta=!document.querySelector('.pxh')&&!document.querySelector('.pxs');
     R=null;solo=true;ME='solo';screen='title';modal=null;render();return r});
   ok(px.base&&px.spenta&&px.interruttore,'Grafica Pixellab: spenta di base, con l\'interruttore in Sviluppo, e senza resta lo sprite di sempre');
-  ok(px.caricate===40&&!px.senzaFigura.length,`le immagini in pixel/ si caricano (${px.caricate}/40) e ogni eroe ha la sua figura${px.senzaFigura.length?' (mancano: '+px.senzaFigura+')':''}`);
+  ok(px.caricate===130&&!px.senzaFigura.length,`le immagini in pixel/ si caricano (${px.caricate}/130) e ogni eroe ha la sua figura${px.senzaFigura.length?' (mancano: '+px.senzaFigura+')':''}`);
+  ok(!px.nemTutti.length&&/pixel\/nemici\/.+\.png/.test(px.nemFig)&&/pxan/.test(px.nemAtt)&&/-attacco/.test(px.nemAtt)&&/pxan/.test(px.nemCol)&&/-colpito/.test(px.nemCol)&&!px.nemFlash,`nemici (${px.nemiciIn}): figura, attacco quando agiscono, colpito al posto del lampo; tutti i 30 hanno le immagini${px.nemTutti.length?' (mancano: '+px.nemTutti+')':''}`);
   ok(/pxan/.test(px.attacco)&&/guerriero-attacco/.test(px.attacco)&&/pxan/.test(px.resta)&&/idle/.test(px.fine)&&/pixel\/guerriero\.png/.test(px.fine),'carta Attacco: animazione d\'attacco, che continua se la schermata si ridisegna, poi torna la figura ferma');
   ok(/guerriero-difesa/.test(px.difesa)&&/guerriero-colpito/.test(px.colpito)&&!/\bhit\b/.test(px.colpito)&&/mago-colpito/.test(px.compagno),'carta con Armatura: difesa; danni subiti: colpito al posto del lampo, anche per il compagno');
   ok(px.lampo&&px.sprite&&px.aspetto&&px.rispenta,'se un\'immagine manca o c\'è un aspetto attivo resta la grafica di sempre');
