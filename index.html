@@ -267,7 +267,7 @@ button.card:hover{transform:translateY(-8px)}
 .endstats b{display:block;font-family:var(--f-disp);font-size:30px;color:var(--torch2);font-variant-numeric:tabular-nums}
 
 /* Overlay & fx */
-.modal{position:fixed;inset:0;background:rgba(8,6,12,.95);backdrop-filter:blur(3px);z-index:50;display:flex;flex-direction:column;padding-block:max(16px,env(safe-area-inset-top,0px)) 16px;
+.modal{position:fixed;inset:0;background:rgba(8,6,12,.95);backdrop-filter:blur(3px);z-index:50;display:flex;flex-direction:column;padding-block:calc(env(safe-area-inset-top,0px) + 26px) 16px;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .modal .mhead{display:flex;align-items:center;gap:10px;max-width:900px;width:100%;margin:0 auto 8px}
 .modal .mbody{flex:1;overflow:auto}
@@ -290,6 +290,21 @@ body.noanim #gltip{transition:none}
 .bestiary{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.beast{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;background:var(--stone2);border:1px solid var(--line);border-radius:10px;padding:10px}.beast.boss{border-color:var(--blood)}.beast small{color:var(--muted);font-size:11.5px}.beast.unk b{color:var(--muted)}
 .prow.unk{opacity:.6}.favc{display:flex;flex-direction:column;align-items:center;gap:4px}
 .chip.form{background:#2c3a22;color:#bfe7a0}.chip.elem{background:#3a2a1c;color:#ffcf9a}.chip.e-acqua{background:#1c2c3a;color:#a8dcff}.chip.e-terra{background:#33291c;color:#e3c68f}.chip.e-aria{background:#26303a;color:#e2f2ff}.chip.minion{background:#2a2438;color:#e0d8ff;display:inline-flex;align-items:center;gap:3px}.chip.pet{background:#2f2a22;color:#f0d9b0}
+.pings{display:flex;flex-direction:column;gap:2px;align-items:center;margin-bottom:2px}.pingtag{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--pc);color:#1b1424;animation:pingpop .35s ease-out}
+.enemy.pinged{outline:3px solid var(--pc);outline-offset:2px}
+@keyframes pingpop{0%{transform:scale(.5)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+body.big .card .cdesc{font-size:14.5px!important;line-height:1.3}body.big .card .cname{font-size:15.5px!important}body.big .chip{font-size:13px}body.big .toast{font-size:16.5px}
+body.big .muted,body.big .lab,body.big .opt,body.big p{font-size:max(15px,1em)}body.big .btn{font-size:16px}body.big .intent{font-size:15px}body.big .nm{font-size:15px}
+body.hc{--muted:#ddd6ea;--line:#8d82a6}body.hc .card .cdesc{color:#15101c}body.hc .chip{outline:1px solid #ffffff55}
+.tutbox{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 62px);z-index:75;width:min(460px,calc(100vw - 24px));background:#211a2c;border:2px solid #ffd27a;border-radius:12px;padding:10px 14px 12px;box-shadow:0 10px 30px #000a}
+.tutbox.low{top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 250px)}
+.tutbox p{margin:6px 0 10px;line-height:1.4}.tutbox .tuthead{display:flex;align-items:center;gap:6px;color:#ffd27a}
+@keyframes tutpulse{50%{outline-color:#ffd27a33}}
+.achs{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}.ach{display:flex;flex-direction:column;gap:3px;background:var(--stone2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;opacity:.75}.ach.ok{opacity:1;border-color:var(--torch)}.ach.ok b{color:var(--torch2)}
+.achbar{display:block;height:6px;border-radius:3px;background:var(--stone3);overflow:hidden}.achbar i{display:block;height:100%;background:var(--torch)}
+.relicbox.on{border-color:var(--torch);box-shadow:0 0 0 2px var(--torch) inset}
+@media (max-width:480px){.pilebar .grow{flex-basis:100%;order:-1;text-align:center}.pilebar .btn{padding-inline:10px}}
+.etrait{display:inline-block;margin:2px auto 0;font-size:11px;padding:1px 7px;border-radius:999px;background:#4a2a12;color:#ffc58a;border:1px solid #8a4a1c;cursor:help}
 .badge.lockb{background:#4a2326;color:#ffb3ab;display:inline-flex;align-items:center;gap:3px}
 .classcard.locked .ic{filter:brightness(.35) grayscale(.6)}.classcard .price{margin-top:4px}
 .crownbadge{position:fixed;top:calc(env(safe-area-inset-top,0px) + 24px);right:calc(env(safe-area-inset-right,0px) + 8px);z-index:79;display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--stone2);border:1px solid var(--torch);color:var(--torch2);font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,.4)}.crownbadge b{font-size:16px;font-variant-numeric:tabular-nums}.crownbadge span{color:var(--muted);font-size:12px}.crownbadge:hover{background:var(--stone3)}
@@ -344,6 +359,10 @@ class RNG{constructor(s){this.s=s|0}
 /* ================= PIXEL ART ================= */
 const PAL={i:'#cfeeff',I:'#7fb3d5',k:'#1b1424',s:'#f2c48f',S:'#c98d5c',h:'#7a4a24',H:'#4e2d14',m:'#cfd6e0',M:'#7f8a9b',r:'#c8402f',R:'#7d211b',b:'#3f6fc2',B:'#25427a',p:'#8656c4',P:'#4d2c7a',g:'#63a94e',G:'#2f6b2a',y:'#f0bf45',Y:'#a8741c',w:'#f6f2e8',W:'#a3a1ad',n:'#8f5d33',N:'#5a3820',e:'#ff4433',E:'#ffe066',c:'#2f2a3a',C:'#4a4458',o:'#ec7f2c',O:'#a84d16',t:'#5fd6c6',T:'#238a7c',l:'#9be06a',L:'#4c8f2e',f:'#ffd9a0'};
 const SPR={
+signoreguerra:["....kwk.kkkkkkkk.kwk....", ".....kwkmmmmmmmmkwk.kkkk", ".....kwMMMMMMMMMMwkknmmm", "......kMMMMMMMMMMk.knmmm", "......kMMMMMMMMMMk.knmmm", ".......kggggggggk..knmmm", ".......kggeggeggk..knmmm", ".......kggggggggk..knMMm", ".......kgwggggwgk..knMMk", "...kkk.kGwGGGGwGk.kknkk.", "..kgggkGGGGGGGGGGkggnk..", "..kgggkGggggggggGkggnk..", "..kgggGGggggggggGGggnk..", "..kgggkGggggggggGkggnk..", "..kgggRGGnnnnnnGGRggnk..", "..kgggRrGnnnnnnGrRggnk..", "...kGkRrrNNyyNNrrRkGnk..", "....kkRrrnnnnnnrrRkknk..", ".....kRrrnnnnnnrrRkknk..", ".....kRrrNNrrNNrrRkknk..", "......kkkNNkkNNkkk.knk..", "........kNNkkNNk....k...", ".......kccckkccck.......", "........kkk..kkk........"],
+verme:["........................", "........................", "........................", "...........kkkkkkk......", "..........klPpppPlk.....", ".........kwpEpppEpk.....", ".........kPpppppppPk....", ".........kPpppppppPk....", ".........kPpwRwRwRPk....", "........klpPRRRRRRk.....", ".......kppppRwRwRwk.....", ".......kpppppppppk......", "......kwpppppppppk......", ".....klwwpppppppk.......", "....kWwwwwpppppk........", "....kWwwwwwWWWk.........", "....kWWwwwWWWWk.........", "...kplWWWWWWWk..........", "...kpppWWWWWk...........", "kkkpppppppppkkkkkkkkkkkk", "NNNNpppppppNNNNNNNNNNNNN", "NNnNpppppppNNNNnNNNNNNNN", "NNNNNNpppNNNNNNNNNNNnNNN", "NNNNNNNNNNNnNNNNNNNNNNNN"],
+colosso:[".......kOk....kOk.......", "......kOkkkkkkkkOk......", ".......kkcccccckk.......", "........kcCCCCck........", "........kcECCEck........", "........kcCCCCck........", ".kkkkkkkkcCooCckkkkkkkk.", "kcccccccccccccccccccccck", "kccccccCCCCCCCCCCcccccck", "kccocccCoCCCCCCoCcccocck", "kccccccCCoCCCCoCCcccccck", "kcccoccCCCyCCyCCCccoccck", "kccccccCCCCEECCCCcccccck", "kccocccCCCCoCCCCCcccocck", "kccccccCCCCoCCCCCcccccck", "CCCCCCcCCoCCECoCCcCCCCCC", "CCoCCCcCCCCCCCCCCcCCCoCC", "CCCCCCccccccccccccCCCCCC", "CCCCCCkcccckkcccckCCCCCC", "kkkkkkkcocckkcocckkkkkkk", "......kcccckkcccck......", "......kccockkccock......", "......kcccckkcccck......", ".......kkkk..kkkk......."],
+
 necromante:["................", ".....kkkkkk..kk.", "....kPPPPPPk.kwk", "...kPppppppPkwek", "...kPpkkkkpPkkwk", "...kPkWWWWkPk.N.", "...kPkeWWekPk.N.", "....kkWWWWkk..N.", "...kPPPkkPPPk.N.", "..kPpPPPPPpPPkN.", "..kPpPlllPpPPkN.", "..kWkPPPPPPkWkN.", "..kPpPPPPPpPk.N.", "...kPPPPPPPPk.N.", "....kkkkkkkk..k.", "................"],
 ranger:["................", "......kkkk......", ".....kGGGGk.....", "....kGGGGGGk..k.", "....kkssssk..kNk", "....kskssksk.kNk", "....kssssssk.kNk", ".....kGssGk..kNk", "...kkGGggGGkkkNk", "..knkGggggGknkNk", "..knkGgnngGknk.k", "..kskGggggGksk..", "...k.kNNNNk.k...", ".....kNk.kNk....", ".....kkk.kkk....", "................"],
 druido:["................", "...kk......kk...", "..kNnk....kNnk..", "...kNnkkkkNnk...", "....kLLLLLLk....", "...kLsssssLk....", "...kskssksk.....", "...kssssssk...k.", "....kwwwwk...kgk", "...kLwwwwLk..kNk", "..kLLLggLLLk.kNk", "..kLgLggLgLkkkNk", "..kskLggLksk.kNk", "...k.kLLk.k..kNk", "....kNk.kNk...k.", "....kkk.kkk....."],
@@ -714,7 +733,13 @@ boss:["............","k..........k","kRk......kRk","kRrkkkkkkrRk",".kRrrrrrrrk."
 };
 
 const sprCache={};
-function spr(name){if(sprCache[name])return sprCache[name];const a=SPR[name]||ICONS[name];if(!a)return '';
+const SKINS={cremisi:['Cremisi',{b:'r',B:'R',g:'r',G:'R',p:'r',P:'R',t:'r',T:'R',l:'o',L:'O',o:'r',O:'R',w:'r',W:'R'}],smeraldo:['Smeraldo',{b:'g',B:'G',r:'g',R:'G',p:'g',P:'G',o:'l',O:'L',t:'l',T:'L',w:'l',W:'L'}],
+  dorato:['Dorato',{m:'y',M:'Y',W:'Y',w:'E',i:'E',I:'y',b:'o',B:'O',g:'y',G:'Y',p:'y',P:'Y',o:'y',O:'Y'}],ombra:['Ombra',{b:'P',B:'k',r:'P',R:'k',g:'P',G:'k',m:'C',M:'c',w:'C',W:'c',n:'c',N:'k',h:'c',H:'k',t:'P',T:'k',o:'P',O:'k',l:'p',L:'P'}],
+  gelo:['Gelo',{b:'i',B:'I',r:'i',R:'I',g:'t',G:'T',p:'I',P:'B',n:'I',N:'B',o:'i',O:'I',w:'i',W:'I',l:'t',L:'T'}]};
+const SKIN_PRICE=40;
+function skinArt(cls,sk){const m=SKINS[sk]&&SKINS[sk][1];return SPR[cls]&&m?SPR[cls].map(r=>[...r].map(ch=>m[ch]||ch).join('')):null}
+const skinsFor=cls=>Object.keys(SKINS).filter(sk=>{const a=skinArt(cls,sk),b=SPR[cls];if(!a)return false;let d=0;a.forEach((r,y)=>{for(let x=0;x<r.length;x++)if(r[x]!==b[y][x])d++});return d>=12});
+function spr(name){if(sprCache[name])return sprCache[name];if(name.includes('@')&&!SPR[name]){const [c,k]=name.split('@');const a=skinArt(c,k);if(a)SPR[name]=a;else return spr(c)}const a=SPR[name]||ICONS[name];if(!a)return '';
   const h=a.length,w=a[0].length;const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
   a.forEach((r,y)=>[...r].forEach((ch,X)=>{const col=PAL[ch];if(col){x.fillStyle=col;x.fillRect(X,y,1,1)}}));
   return sprCache[name]=c.toDataURL();}
@@ -724,7 +749,7 @@ function potSrc(id){const key='pot_'+id;if(sprCache[key])return sprCache[key];co
 const potIc=(id,px)=>`<img class="spr inl" src="${potSrc(id)}" width="${px}" height="${px}" alt="">`;
 const ic=(name,px=16)=>`<img class="spr inl" src="${spr(name)}" width="${px}" height="${px}" alt="">`;
 const relIc=(id,px=20)=>ic('r_'+id,px);
-const sprImg=(name,px,cls='')=>{const a=SPR[name]||ICONS[name];return `<img class="spr ${cls}" src="${spr(name)}" width="${px}" height="${Math.round(px*a.length/a[0].length)}" alt="">`};
+const sprImg=(name,px,cls='')=>{const src=spr(name);const a=SPR[name]||ICONS[name]||SPR[String(name).split('@')[0]];return `<img class="spr ${cls}" src="${src}" width="${px}" height="${Math.round(px*a.length/a[0].length)}" alt="">`};
 
 /* ================= DATI DI GIOCO ================= */
 const CLASSES={
@@ -865,6 +890,7 @@ tempestacong:{n:'Tempesta Congiunta',cl:'mago',t:'A',r:'U',c:2,grp:'A',v:{d:7},u
 imboscata:{n:'Imboscata',cl:'ladro',t:'A',r:'C',c:1,tg:1,grp:'A',v:{d:6,p:4},u:{d:8,p:6},x:v=>`Infliggi ${v.d} danni. `+W('Se hai già giocato un Attacco in questo turno','Se un alleato ha già giocato un Attacco in questo turno')+`, applica ${v.p} Veleno e pesca 1 carta.`,f:(v,t)=>{A(t,v.d);if(ALLY('A')){S(t,'poison',v.p);D(1)}}},
 diversivo:{n:'Diversivo',cl:'ladro',t:'S',r:'U',c:0,grp:'S',v:{w:1},u:{w:2},x:v=>`Applica ${v.w} Vulnerabile a TUTTI i nemici. `+W('Se hai già giocato un\'Abilità in questo turno','Se un alleato ha già giocato un\'Abilità in questo turno')+`, ottieni 1 Energia.`,f:v=>{SA('vuln',v.w);if(ALLY('S'))E(1)}},
 benecomune:{n:'Benedizione Comune',cl:'chierico',t:'S',r:'C',c:1,ex:1,grp:'S',v:{h:3},u:{h:5},x:v=>W(`Recuperi ${v.h} PV. `,`Tu e tutti gli alleati recuperate ${v.h} PV. `)+W('Se hai già giocato un\'Abilità in questo turno','Se un alleato ha già giocato un\'Abilità in questo turno')+`, il doppio.`,f:v=>{const n=ALLY('S')?2*v.h:v.h;Object.keys(g.heroes).forEach(p=>HA(p,n))}},
+rianima:{n:'Rianimazione',cl:'chierico',t:'S',r:'R',c:2,ex:1,mp:1,v:{p:30,h:6},u:{p:50,h:9},x:v=>`Gli alleati a terra si rialzano con il ${v.p}% dei PV massimi. Se nessuno è a terra, tu e tutti gli alleati recuperate ${v.h} PV.`,f:v=>{if(!REV(v.p/100))Object.keys(g.heroes).forEach(p=>HA(p,v.h))}},
 luceguida:{n:'Luce Guida',cl:'chierico',t:'S',r:'U',c:1,cu:0,grp:'A',v:{b:5},u:{},x:v=>W('Se hai già giocato un Attacco in questo turno','Se un alleato ha già giocato un Attacco in questo turno')+W(', ottieni 1 Forza. Altrimenti ottieni '+v.b+' Armatura.',', tu e tutti gli alleati ottenete 1 Forza. Altrimenti ottenete tutti '+v.b+' Armatura.'),f:v=>{const ok=ALLY('A');Object.keys(g.heroes).forEach(p=>{const h=g.heroes[p];if(h.down)return;if(ok)S(h,'str',1);else BA(p,v.b)})}},
 };
 
@@ -925,6 +951,7 @@ const RELIC_POOL=Object.keys(RELICS).filter(k=>!STARTER_RELICS.includes(k)&&!CRY
 const ALL_RELICS=[...RELIC_POOL,...CRYPT_RELICS,...ABYSS_RELICS];
 
 const POTIONS={
+  fenice:{n:'Piuma di Fenice',col:'#ff9a3c',d:'In gruppo: gli alleati a terra si rialzano con il 30% dei PV massimi. Se nessuno è a terra (o giochi da solo), recuperi 10 PV.',f:()=>{if(!REV(.3))H(10)}},
   cura:{n:'Pozione di Cura',col:'#d9534f',d:'Recuperi 15 PV. Si può bere anche fuori dal combattimento.',f:()=>H(15)},
   fuoco:{n:'Fuoco Liquido',col:'#f08a3e',tg:1,d:'Infliggi 20 danni a un nemico.',f:t=>hurtEnemy(t,20)},
   forza:{n:'Pozione di Forza',col:'#a4322c',d:'Ottieni 2 Forza.',f:()=>S(g.hero,'str',2)},
@@ -937,6 +964,7 @@ const POTIONS={
 };
 
 /* Nemici: ai(e,r) restituisce l'intenzione del turno. d=danno, x=colpi, b=armatura, s=forza, deb=debuff al giocatore */
+Object.assign(CARDS,{ultimagrazia:{n:'Ultima Grazia',cl:'paladino',t:'S',r:'R',c:1,ex:1,mp:1,v:{p:25,b:8},u:{p:40,b:12},x:v=>`Gli alleati a terra si rialzano con il ${v.p}% dei PV massimi. Ottieni ${v.b} Armatura.`,f:v=>{REV(v.p/100);g.hero.blk+=B(v.b)}}});
 const ENEMIES={
   goblin:{n:'Goblin Predone',ic:'',hp:[13,17],ai:(e,r)=>r.next()<.6?{d:6}:{d:3,b:4}},
   ratto:{n:'Ratto delle Fogne',ic:'',hp:[9,12],ai:(e,r)=>r.next()<.5?{d:3,x:2}:{d:5}},
@@ -969,6 +997,23 @@ Object.assign(ENEMIES,{
   tiranno:{n:'Azhrakel, Tiranno dell\'Abisso',hp:[300,300],boss:1,ai:e=>e.hp>e.max/2?[{b:15,s:2},{d:7,x:3},{d:14,aoe:1,curse:'ustione',cn:1},{summon:'imp',d:10}][e.t%4]:[{d:10,x:3},{d:18,aoe:1},{s:4,b:20,curse:'maledizione',cn:1},{d:25,deb:'vuln',dn:2}][e.t%4]},
   lich:{n:'Morvath, il Re Lich',hp:[240,240],boss:1,ai:e=>[{summon:'scheletro',b:12},{d:7,aoe:1,deb:'poison',dn:2,curse:'maledizione',cn:1},{d:18},{d:5,x:3},{s:3,b:15}][e.t%5]},
 });
+Object.assign(ENEMIES,{
+  signoreguerra:{n:'Gorrak, Signore della Guerra',hp:[230,230],boss:1,ai:e=>[{summon:'goblin',b:10},{d:7,x:2},{s:2,b:12,curse:'paura',cn:1},{d:16},{d:10,aoe:1,deb:'weak',dn:1}][e.t%5]},
+  verme:{n:'Vermigrigio, Divoratore di Tombe',hp:[260,260],boss:1,ai:e=>[{d:6,x:2,deb:'poison',dn:3},{b:18,heal:10},{d:20},{d:8,aoe:1,curse:'ferita',cn:1},{d:4,x:3,deb:'poison',dn:1}][e.t%5]},
+  colosso:{n:'Magmor, Colosso di Lava',hp:[310,310],boss:1,blk:15,spine:2,ai:e=>[{b:18,d:8},{d:9,aoe:1,curse:'ustione',cn:1},{d:6,x:4},{s:3,b:10},{d:28}][e.t%5]},
+});
+// secondo boss di ogni dungeon e testi per boss
+const BOSSES={rocca:['drago','signoreguerra'],cripte:['lich','verme'],abisso:['tiranno','colosso']};
+const BOSSI={drago:['Ignivora','Ignivora giace sconfitta. I bardi canteranno dei vostri nomi per generazioni.','Ignivora si risveglia più forte di prima','Un drago antico: alterna grandi difese, raffiche di colpi e soffi di fuoco su tutto il gruppo.'],
+  signoreguerra:['Gorrak','Gorrak cade e la sua orda fugge tra le colline. I bardi canteranno dei vostri nomi per generazioni.','Gorrak raduna una nuova orda, più feroce di prima','Il capo di tutti gli orchi: chiama goblin in aiuto, mette paura e colpisce durissimo. A metà vita chiama rinforzi.'],
+  lich:['Morvath','Morvath torna polvere e il gelo si scioglie. Il vostro nome entra nelle leggende.','Morvath si rialza dalle ceneri, più forte di prima','Il Re Lich: evoca scheletri, avvelena e maledice tutto il gruppo.'],
+  verme:['Vermigrigio','Vermigrigio sprofonda per sempre nella terra delle tombe. Il vostro nome entra nelle leggende.','Vermigrigio riemerge dalla terra, più affamato di prima','Un verme gigante: avvelena, si rintana dietro una montagna di Armatura e a metà vita si scava una tana.'],
+  tiranno:['Azhrakel','Azhrakel precipita nelle fiamme da cui è nato. Valdombra è finalmente in pace: siete leggenda.','Azhrakel risale dalle fiamme, più furioso di prima','Il signore dei demoni: evoca diavoletti e a metà vita entra in furia.'],
+  colosso:['Magmor','Magmor si spezza e la lava si raffredda in pietra. Valdombra è finalmente in pace: siete leggenda.','Magmor si riforma dalla lava, più grande di prima','Un colosso di roccia fusa: tanta Armatura, colpi enormi, e chi lo colpisce con un Attacco si brucia (2 danni).']};
+function bossId(){if(!R)return 'drago';const L=BOSSES[R.dg||'rocca']||[DG().boss];return L[((R.bossI|0)+(R.cycle||1)-1)%L.length]}
+const bossN=()=>BOSSI[bossId()][0];
+const ETRAITS={corazzato:['Corazzato','All\'inizio di ogni suo turno ottiene 8 Armatura.'],furioso:['Furioso','Inizia il combattimento con 3 Forza.'],vampiro:['Vampiro','Recupera PV pari a metà dei danni che infligge.'],spinoso:['Spinoso','Chi lo colpisce con un Attacco subisce 3 danni.'],rigenerante:['Rigenerante','All\'inizio di ogni suo turno recupera 6 PV.']};
+function trInfo(k){toast(ETRAITS[k][0]+': '+ETRAITS[k][1])}
 const EASY=[['goblin'],['ratto','ratto'],['melma'],['scheletro']];
 const HARD=[['scheletro','coboldo'],['lupo','lupo'],['bandito','goblin'],['melma','ratto'],['goblin','goblin','coboldo'],['scheletro','ratto','ratto'],['bandito','lupo']];
 const ELITES=[['orco'],['troll'],['cavaliere']];
@@ -1123,24 +1168,24 @@ const NODEIC={combat:1,elite:1,event:1,rest:1,shop:1,treasure:1,boss:1};
 const NODEN={combat:'Nemici',elite:'Élite',event:'Evento',rest:'Falò',shop:'Mercante',treasure:'Tesoro',boss:'Boss'};
 const ROWS=15, SK='valdombra-run-v1', LK='valdombra-livello-v1', LK2='valdombra-livelli-v2', BK='valdombra-vinti', MAXLVL=5;
 const DUNGEONS={
-  rocca:{n:'Rocca di Valdombra',boss:'drago',bossN:'Ignivora',crowns:60,desc:'Goblin, lupi, orchi e un drago antico. Il primo assedio.',
+  rocca:{n:'Rocca di Valdombra',boss:'drago',bossN:'Ignivora',crowns:60,desc:'Goblin, lupi e orchi. In fondo vi aspetta un drago antico, oppure Gorrak, il signore della guerra. Il primo assedio.',
     easy:[['goblin'],['ratto','ratto'],['melma'],['scheletro']],
     hard:[['scheletro','coboldo'],['lupo','lupo'],['bandito','goblin'],['melma','ratto'],['goblin','goblin','coboldo'],['scheletro','ratto','ratto'],['bandito','lupo']],
     elites:[['orco'],['troll'],['cavaliere']],
-    pots:['cura','fuoco','forza','pelle','rapida','energia','viverna'],
+    pots:['cura','fuoco','forza','pelle','rapida','energia','viverna','fenice'],
     winT:'La Rocca è libera!',winD:'Ignivora giace sconfitta. I bardi canteranno dei vostri nomi per generazioni.',loseD:'Le ombre di Valdombra reclamano altri eroi. La prossima volta il mazzo sarà più forte.',cycleT:'la Rocca si risveglia più forte di prima'},
-  cripte:{n:'Cripte di Gelomorto',boss:'lich',bossN:'Morvath',crowns:80,req:'rocca',desc:'Gallerie ghiacciate piene di non morti, veleni e stregonerie. Il Re Lich evoca i suoi servi.',
+  cripte:{n:'Cripte di Gelomorto',boss:'lich',bossN:'Morvath',crowns:80,req:'rocca',desc:'Gallerie ghiacciate piene di non morti, veleni e stregonerie. In fondo vi aspetta il Re Lich, oppure Vermigrigio, il verme delle tombe.',
     easy:[['ragno','ragno'],['spettro'],['zombi'],['pipistrello','pipistrello']],
     hard:[['zombi','cultista'],['spettro','spettro'],['ragno','ragno','pipistrello'],['cultista','spettro'],['zombi','ragno'],['pipistrello','pipistrello','cultista'],['zombi','zombi']],
     elites:[['golem'],['vampiro'],['strega']],
-    pots:['cura','pelle','rapida','energia','viverna','gelida','sangue'],
+    pots:['cura','pelle','rapida','energia','viverna','gelida','sangue','fenice'],
     winT:'Le Cripte sono purificate!',winD:'Morvath torna polvere e il gelo si scioglie. Il vostro nome entra nelle leggende.',loseD:'Il gelo delle Cripte vi avvolge. Morvath aggiunge altri servi al suo esercito.',cycleT:'Morvath si rialza dalle ceneri, più forte di prima'},
 };
-DUNGEONS.abisso={n:'Abisso di Braceferro',boss:'tiranno',bossN:'Azhrakel',crowns:100,req:'cripte',desc:'Le fornaci sotto la montagna, piene di demoni, automi e nani rinnegati. In fondo attende Azhrakel, che a metà vita entra in furia.',
+DUNGEONS.abisso={n:'Abisso di Braceferro',boss:'tiranno',bossN:'Azhrakel',crowns:100,req:'cripte',desc:'Le fornaci sotto la montagna, piene di demoni, automi e nani rinnegati. In fondo attende Azhrakel, il tiranno dei demoni, oppure Magmor, il colosso di lava.',
     easy:[['imp','imp'],['salamandra'],['segugio'],['nano']],
     hard:[['nano','imp'],['segugio','segugio'],['salamandra','imp','imp'],['nano','salamandra'],['segugio','imp'],['imp','imp','imp'],['nano','nano']],
     elites:[['demone'],['automa'],['sacerdote']],
-    pots:['cura','fuoco','forza','pelle','energia','sangue','gelida'],
+    pots:['cura','fuoco','forza','pelle','energia','sangue','gelida','fenice'],
     winT:'L\'Abisso è sigillato!',winD:'Azhrakel precipita nelle fiamme da cui è nato. Valdombra è finalmente in pace: siete leggenda.',loseD:'Le fornaci dell\'Abisso divorano un altro gruppo di eroi.',cycleT:'Azhrakel risale dalle fiamme, più furioso di prima'};
 DUNGEONS.abisso.relics=[...ABYSS_RELICS,'cuore','dado','piuma','sacchetto','anello','calice'];
 DUNGEONS.rocca.relics=RELIC_POOL;DUNGEONS.cripte.relics=[...CRYPT_RELICS,'cuore','dado','piuma','orbe','sacchetto'];
@@ -1179,7 +1224,7 @@ const vals=c=>{const d=CARDS[c.id];const v=c.up?{...d.v,...d.u}:{...d.v};const n
 const baseCost=c=>{const d=CARDS[c.id];return c.up&&d.cu!=null?d.cu:d.c};
 const costOf=c=>{const d=CARDS[c.id];if(d.unplay)return 99;if(d.xc)return 0;let v=baseCost(c);if(d.disc&&typeof g!=='undefined'&&g&&g.hero&&g.hero.played)v=Math.max(0,v-(g.hero.played[d.disc]||0));return v};
 const canUp=c=>!c.up&&CARDS[c.id].u!==undefined;
-const wait=ms=>new Promise(r=>setTimeout(r,ms));
+let SPEED=1;const wait=ms=>new Promise(r=>setTimeout(r,ms*SPEED));
 const ABC='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 function newSeed(n=6){let s='';for(let i=0;i<n;i++)s+=ABC[Math.floor(Math.random()*ABC.length)];return s}
 function store(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}try{if(typeof accTouched==='function')accTouched(k)}catch(e){}}
@@ -1234,6 +1279,8 @@ const ACT={
   dropPot:(a,P)=>{if(P.potions[a.i])P.potions.splice(a.i,1)},
   drink:(a,P)=>{if(R.phase!=='combat'&&P.potions[a.i]==='cura'){P.potions.splice(a.i,1);H(15)}},
   end:()=>endHeroTurn(),
+  ping:(a,P,pid)=>{const c=R.combat;if(R.phase!=='combat'||!c)return;c.pings=c.pings||{};const cur=c.pings[pid];const nw={k:a.k==='h'?'h':'e',j:a.j|0};
+    if(cur&&cur.k===nw.k&&cur.j===nw.j)delete c.pings[pid];else c.pings[pid]=nw},
   unend:()=>{const c=R.combat,h=g&&g.hero;if(!c||c.busy||c.won||!h||!h.ended||h.down||!h.undo)return;const u=h.undo;
     h.disc.splice(u.discLen);h.hand=u.hand;h.blk=u.blk;h.st=u.st;if(run.hp>0)run.hp=Math.max(run.hp,u.hp);h.ended=false;delete h.undo},
   takeGold:(a,P)=>{const r=P.reward;if(P.screen==='reward'&&r){P.gold+=r.gold;r.gold=0}},
@@ -1321,7 +1368,7 @@ function startRunRoom(lvl,seed,mode,dg){
   if(mode==='surv')lvl=0;
   R.order=R.order.filter(p=>isOnline(p));Object.keys(R.players).forEach(p=>{if(!R.order.includes(p))delete R.players[p]});
   seed=String(seed||'').trim().toUpperCase().slice(0,12)||newSeed();
-  Object.assign(R,{seed,dg,mode:mode==='surv'?'surv':'norm',cycle:1,lbId:null,t0:Date.now(),lvl:Math.max(0,Math.min(MAXLVL,lvl)),map:genMap(new RNG(hashStr(seed+'#map'+(dg==='rocca'?'':dg)))),pos:null,path:[],floor:0,votes:{},seenEv:[],combat:null,win:null,phase:'map'});
+  Object.assign(R,{seed,dg,deathAt:null,mode:mode==='surv'?'surv':'norm',cycle:1,lbId:null,t0:Date.now(),lvl:Math.max(0,Math.min(MAXLVL,lvl)),map:genMap(new RNG(hashStr(seed+'#map'+(dg==='rocca'?'':dg)))),bossI:hashStr(seed+'#boss'+dg)%2,pos:null,path:[],floor:0,votes:{},seenEv:[],combat:null,win:null,phase:'map'});
   rng=new RNG(hashStr(seed+'#'+R.order.map(p=>R.players[p].cls).join('')));
   R.order.forEach(p=>{const P=R.players[p];const tal=P.tal;initPlayer(P);applyLoadout(P);P.tal=tal;applyTalents(P)});
 }
@@ -1342,7 +1389,7 @@ function againBtns(){
   return main+back;
 }
 function toLobby(){
-  R.order.forEach(p=>{const P=R.players[p];R.players[p]={pid:p,name:P.name,cls:P.cls,ready:p===R.host,loadout:P.loadout,tal:P.tal,prog:P.prog}});
+  R.order.forEach(p=>{const P=R.players[p];R.players[p]={pid:p,name:P.name,cls:P.cls,ready:p===R.host,loadout:P.loadout,tal:P.tal,prog:P.prog,skins:P.skins}});
   Object.assign(R,{phase:'lobby',combat:null,map:null,win:null,votes:{}});
 }
 function enterNode(y,x){
@@ -1351,7 +1398,7 @@ function enterNode(y,x){
   const D=DG();
   if(t==='combat')return startCombat(rng.pick(y<3?D.easy:D.hard),'combat');
   if(t==='elite')return startCombat(rng.pick(D.elites),'elite');
-  if(t==='boss')return startCombat([D.boss],'boss');
+  if(t==='boss')return startCombat([bossId()],'boss');
   const ids=active();let evId=null;
   if(t==='event'){const all=EVENTS.filter(e=>!e.dg||e.dg.includes(R.dg||'rocca'));let pool=all.filter(e=>!R.seenEv.includes(e.id));if(!pool.length)pool=all;evId=rng.pick(pool).id;R.seenEv.push(evId)}
   R.phase='room';
@@ -1367,7 +1414,7 @@ function newCycle(){
   R.order.forEach(p=>{const P=R.players[p];P.hp=Math.min(P.max,P.hp+Math.floor(P.max*.3))});
 }
 const totalFloors=()=>((R.cycle||1)-1)*(ROWS+1)+(R.floor||0);
-function endRun(win){R.phase='end';R.win=win;R.combat=null;g=null}
+function endRun(win){if(!win&&R.combat)R.deathAt=R.combat.enemies.map(e=>e.id).join(',').slice(0,80);R.phase='end';R.win=win;R.combat=null;g=null}
 
 /* ================= COMBATTIMENTO ================= */
 function startCombat(ids,kind){
@@ -1379,8 +1426,9 @@ function startCombat(ids,kind){
   if(surv&&cy>=3&&kind==='combat')ids.push(rng.pick(strong));
   const big=kind==='elite'||kind==='boss';
   const hpM=1.15*(big?1.1:1)*(1+.7*(n-1))*(1+.5*cy),dM=1.12*(1+.1*(n-1))*(1+.2*cy);
-  R.combat={kind,n,turn:0,busy:false,won:false,heroes:{},hpM:hpM*(R.daily&&R.daily.mod==='potenti'?1.25:1),dM,L,enemies:[]};
+  R.combat={hp0:Object.fromEntries(party.map(p=>[p,R.players[p].hp])),kind,n,turn:0,busy:false,won:false,heroes:{},hpM:hpM*(R.daily&&R.daily.mod==='potenti'?1.25:1),dM,L,enemies:[]};
   ids.forEach(id=>R.combat.enemies.push(mkEnemy(id)));
+  if(kind==='elite')R.combat.enemies.forEach(e=>{if(ENEMIES[e.id].elite){e.trait=rng.pick(Object.keys(ETRAITS));if(e.trait==='furioso')e.st.str=(e.st.str||0)+3}});
   party.forEach(pid=>{const P=R.players[pid];P.deck.forEach(c=>{if(!c.k)c.k=uid++});const sh=rng.shuffle(P.deck.map(c=>({...c,uid:uid++})));R.combat.heroes[pid]={blk:0,st:{},pw:{},draw:[...sh.filter(c=>!innOf(c)),...sh.filter(innOf)],hand:[],disc:[],exh:[],energy:0,ended:false,down:false}});
   R.phase='combat';R.order.forEach(p=>{R.players[p].screen=null;R.players[p].done=true});
   g=R.combat;rollIntents();startTurn();
@@ -1401,8 +1449,8 @@ function rollIntents(){
   retarget();
 }
 function startTurn(){
-  const c=R.combat;c.turn++;
-  Object.values(c.heroes).forEach(h=>{if(!h.pw.fortezza)h.blk=0;h.played={};delete h.st.spine});
+  const c=R.combat;c.turn++;c.pings={};
+  Object.values(c.heroes).forEach(h=>{if(!h.pw.fortezza)h.blk=0;h.played={};h.nTurn=0;delete h.st.spine});
   Object.keys(c.heroes).forEach(pid=>{const h=c.heroes[pid];if(h.down)return;ctx(pid);heroTurnStart(h,c.turn)});
   checkEnd();
 }
@@ -1442,6 +1490,8 @@ function hurtEnemy(e,d){
   if(e.hp<=0)return;const b=Math.min(e.blk,d);e.blk-=b;const r=d-b;if(r>0&&run&&run.stx){const real=Math.min(r,e.hp);run.stx.dmg+=real;run.stx.top=Math.max(run.stx.top,real)}e.hp-=r;
   fx(eid(e),r>0?'-'+r:'Parato',r>0?'dmg':'blk');
   if(e.id==='tiranno'&&!e.rage&&e.hp>0&&e.hp<=e.max/2){e.rage=1;e.st.str=(e.st.str||0)+3;e.blk=0;fx(eid(e),'FURIA!','dmg')}
+  if(e.id==='signoreguerra'&&!e.rage&&e.hp>0&&e.hp<=e.max/2){e.rage=1;const c=R.combat;['bandito','goblin'].forEach(id=>{if(c.enemies.filter(x=>x.hp>0).length<5)c.enemies.push(mkEnemy(id))});fx(eid(e),'RINFORZI!','dmg')}
+  if(e.id==='verme'&&!e.rage&&e.hp>0&&e.hp<=e.max/2){e.rage=1;e.blk+=Math.round(30*(e.dm||1));fx(eid(e),'Si rintana!','blk')}
   if(e.hp<=0){e.hp=0;if(!e.dead){e.dead=true;if(run){run.kills++;if(has('zanna'))H(3);if(has('anello')&&g&&g.hero)g.hero.energy++}}}
 }
 function heroDown(){
@@ -1457,7 +1507,7 @@ function hurtHero(d){
   heroDown();
 }
 /* Effetti usati dalle carte */
-function A(t,n,h=1){for(let i=0;i<h;i++){if(!t||t.hp<=0)break;hurtEnemy(t,calcDmg(n,g.hero,t));g.hit.add(t)}}
+function A(t,n,h=1){for(let i=0;i<h;i++){if(!t||t.hp<=0)break;hurtEnemy(t,calcDmg(n,g.hero,t));g.hit.add(t);const sp=(t.trait==='spinoso'?3:0)+(ENEMIES[t.id].spine||0);if(sp&&!g.hero.down){hurtHero(sp);fx(eid(t),'Spine!','dmg')}}}
 function AA(n){alive().forEach(e=>{hurtEnemy(e,calcDmg(n,g.hero,e));g.hit.add(e)})}
 function AR(n,h){for(let i=0;i<h;i++){const a=alive();if(!a.length)break;const e=rng.pick(a);hurtEnemy(e,calcDmg(n,g.hero,e));g.hit.add(e)}}
 function B(n){const v=Math.max(0,n+(g.hero.st.dex||0)+(g.hero.form==='orso'?2:0)+(g.hero.pw.bosco||0));g.hero.blk+=v;STX('blk',v);fx('hero','+'+v,'blk')}
@@ -1466,6 +1516,8 @@ function SA(k,n){alive().forEach(e=>S(e,k,n))}
 function D(n){const h=g.hero;for(let i=0;i<n;i++){if(h.hand.length>=10)break;if(!h.draw.length){if(!h.disc.length)break;h.draw=rng.shuffle(h.disc);h.disc=[]}h.hand.push(h.draw.pop())}}
 function E(n){g.hero.energy+=n}
 function ALLYN(tp){const c=R.combat;if(!c||!g.hero)return 0;if(solo)return (g.hero.played&&g.hero.played[tp])?1:0;return Object.keys(c.heroes).filter(p=>p!==CUR&&c.heroes[p].played&&c.heroes[p].played[tp]).length}
+function REV(pct){const c=R.combat;if(!c)return 0;let n=0;Object.keys(c.heroes).forEach(p=>{const a=c.heroes[p],P=R.players[p];if(p===CUR||!a.down||!P)return;
+  a.down=false;a.ended=true;P.hp=Math.max(1,Math.floor(P.max*pct));fxq.push({k:'h-'+p,txt:'Rialzato!',cls:'heal'});n++;if(run&&run.stx)run.stx.rev=(run.stx.rev||0)+1});if(n)sfx('heal');return n}
 function ALLY(tp){return ALLYN(tp)>0}
 function KO(t){return !!t&&t.hp<=0}
 function MAXHP(n){run.max+=n;run.hp+=n;fx('hero','+'+n+' PV max','heal')}
@@ -1502,7 +1554,7 @@ function playCard(u,j,ap,pk){
   if(d.t==='A'){if(h.form==='serpente')g.hit.forEach(e=>S(e,'poison',2));if(h.elem)elemHit(h);if(has('giuramento'))FERV(1)}
   if(d.t==='S'&&h.pw.arcano)alive().forEach(e=>hurtEnemy(e,h.pw.arcano));
   if(d.t==='S'&&h.pw.vigil)B(h.pw.vigil);
-  h.played=h.played||{};h.played[d.t]=(h.played[d.t]||0)+1;if(run.stx&&d.t!=='X')run.stx.cards[card.id]=(run.stx.cards[card.id]||0)+1;
+  h.played=h.played||{};h.played[d.t]=(h.played[d.t]||0)+1;if(d.t!=='X'&&run.stx){h.nTurn=(h.nTurn||0)+1;run.stx.maxTurn=Math.max(run.stx.maxTurn||0,h.nTurn)}if(run.stx&&d.t!=='X')run.stx.cards[card.id]=(run.stx.cards[card.id]||0)+1;
   if(d.t==='A'&&h.played.A===3&&has('ossa'))D(1);
   if(d.t!=='P'){if(exOf(card))h.exh.push(card);else if(d.back)h.draw.push(card);else h.disc.push(card)}
   checkEnd();
@@ -1528,6 +1580,7 @@ async function enemyPhase(){
   if(Object.values(c.heroes).some(h=>!h.down&&((h.min&&h.min.length)||h.pet))){allyAttacks();commit();await wait(350);if(R.combat!==c)return;if(!alive().length){c.busy=false;checkEnd();checkProgress();commit();return}}
   for(const e of c.enemies){
     if(R.combat!==c)return;if(e.hp<=0)continue;e.blk=0;
+    if(e.trait==='corazzato'){const b=Math.round(8*(e.dm||1));e.blk+=b;fx(eid(e),'+'+b,'blk')}if(e.trait==='rigenerante'&&e.hp<e.max){const b=e.hp;e.hp=Math.min(e.max,e.hp+Math.round(6*(1+.5*(c.n-1))));fx(eid(e),'+'+(e.hp-b),'heal')}
     if(doomCheck(e)){commit();await wait(350);continue}
     if(e.st.poison){ctx(null);const p=e.st.poison;e.hp-=p;fx(eid(e),'-'+p,'psn');e.st.poison--;
       if(e.hp<=0){e.hp=0;e.dead=true;commit();await wait(250);continue}}
@@ -1552,7 +1605,7 @@ function doIntent(e){
   if(it.heal){const b=e.hp;e.hp=Math.min(e.max,e.hp+Math.round(it.heal*(1+.7*(c.n-1))));fx(eid(e),'+'+(e.hp-b),'heal')}
   if(it.d||it.deb||it.curse){
     const fix=p=>{const tt=taunter();if(tt)return tt;if(p&&c.heroes[p]&&!c.heroes[p].down)return p;const t=targetable();return t.length?rng.pick(t):null};
-    const hitOnce=()=>{hurtHero(calcDmg(enemyBase(e,it),e,g.hero));if(g.hero.st.spine)hurtEnemy(e,g.hero.st.spine);if(has('scaglia')&&!g.hero.down)hurtEnemy(e,3);if(g.hero.pw.rappr&&!g.hero.down)hurtEnemy(e,g.hero.pw.rappr)};
+    const hitOnce=()=>{const hb=run.hp;hurtHero(calcDmg(enemyBase(e,it),e,g.hero));if(e.trait==='vampiro'&&hb>run.hp){const v=Math.ceil((hb-Math.max(0,run.hp))/2);e.hp=Math.min(e.max,e.hp+v);fx(eid(e),'+'+v,'heal')}if(g.hero.st.spine)hurtEnemy(e,g.hero.st.spine);if(has('scaglia')&&!g.hero.down)hurtEnemy(e,3);if(g.hero.pw.rappr&&!g.hero.down)hurtEnemy(e,g.hero.pw.rappr)};
     const debuff=()=>{if(g.hero.down)return;if(it.deb)g.hero.st[it.deb]=(g.hero.st[it.deb]||0)+it.dn;if(it.curse)addCurse(it.curse,it.cn||1)};
     if(it.aoe){for(const p of targetable()){ctx(p);if(it.d)hitOnce();debuff();if(e.hp<=0)break}return}
     if(it.d)for(let k=0;k<(it.x||1);k++){const p=fix(it.tgs?it.tgs[k]:it.tg);if(!p)break;ctx(p);hitOnce();if(e.hp<=0)break}
@@ -1567,20 +1620,22 @@ function checkEnd(){
 }
 function winCombat(){
   const c=R.combat,kind=c.kind,pids=Object.keys(c.heroes);
+  pids.forEach(pid=>{const P=R.players[pid],x=P&&P.stx;if(!x)return;if(kind==='elite')x.elites=(x.elites||0)+1;
+    if(kind==='boss'){x.bosses=x.bosses||[];c.enemies.forEach(e=>{if(BOSSI[e.id]&&!x.bosses.includes(e.id))x.bosses.push(e.id)});if(!c.heroes[pid].down&&c.hp0&&P.hp>=c.hp0[pid])x.flawless=1}});
   pids.forEach(pid=>{ctx(pid);if(c.heroes[pid].down)run.hp=Math.max(1,Math.floor(run.max*.25));else{if(has('elmo'))H(6);if(TE('heal'))H(TE('heal'));if(has('martellonano')){const ids=run.deck.map((c,i)=>i).filter(i=>canUp(run.deck[i]));if(ids.length)run.deck[rng.pick(ids)].up=true}if(hasT('g5')||hasT('c2'))H(5);if(has('calice')){run.max++;run.hp++}}});
   R.combat=null;g=null;
   if(kind==='boss'){if(R.mode!=='surv'){endRun(true);return}newCycle()}
   R.phase='room';
   R.order.forEach(pid=>{const P=R.players[pid];if(!pids.includes(pid)||!isOnline(pid)){P.done=true;P.screen=null;return}
     ctx(pid);const big=kind==='elite'||kind==='boss';let gold=big?rng.int(25,35):rng.int(10,20);gold=Math.round(gold*(1+.1*(R.lvl||0)));if(has('sacchetto'))gold=Math.round(gold*1.25);
-    P.reward={title:kind==='boss'?DG().bossN+' sconfitto! Inizia il ciclo '+R.cycle:kind==='elite'?'Élite sconfitta!':'Vittoria!',gold,cards:rollCards(3,big),
+    P.reward={title:kind==='boss'?((b=>b?BOSSI[b.id][0]:'Il boss')(R.combat&&R.combat.enemies.find(x=>BOSSI[x.id])))+' sconfitto! Inizia il ciclo '+R.cycle:kind==='elite'?'Élite sconfitta!':'Vittoria!',gold,cards:rollCards(3,big),
       potion:rng.next()<(big?.6:.4)?rng.pick(DG().pots):null,relic:big?randomRelic():null};
     P.screen='reward';P.done=false});
 }
 
 /* ================= RICOMPENSE / NEGOZIO / EVENTI ================= */
 function rollCards(n,elite){
-  const pool=Object.keys(CARDS).filter(k=>CARDS[k].cl===run.cls&&CARDS[k].r!=='B');const out=[];
+  const pool=Object.keys(CARDS).filter(k=>CARDS[k].cl===run.cls&&CARDS[k].r!=='B'&&!(solo&&CARDS[k].mp));const out=[];
   for(let i=0;i<n;i++){const p=rng.next()-.02*(R.lvl||0);const rar=p<(elite?.12:.05)?'R':p<(elite?.5:.37)?'U':'C';
     let opts=pool.filter(k=>CARDS[k].r===rar&&!out.includes(k));if(!opts.length)opts=pool.filter(k=>!out.includes(k));out.push(rng.pick(opts))}
   return out;
@@ -1590,7 +1645,7 @@ function gainRelic(id){run.relics.push(id);if(id==='cuore'){run.max+=8;run.hp+=8
 function givePotion(P,id){if(P.potions.length<3)P.potions.push(id);else P.pendPot=id}
 function addCard(id){run.deck.push({id,up:false})}
 function genShop(){
-  const pool=Object.keys(CARDS).filter(k=>CARDS[k].cl===run.cls&&CARDS[k].r!=='B');
+  const pool=Object.keys(CARDS).filter(k=>CARDS[k].cl===run.cls&&CARDS[k].r!=='B'&&!(solo&&CARDS[k].mp));
   const pickR=(r,n,ex)=>rng.shuffle(pool.filter(k=>CARDS[k].r===r&&!ex.includes(k))).slice(0,n);
   const ids=[];ids.push(...pickR('C',2,ids));ids.push(...pickR('U',2,ids));ids.push(...pickR('R',1,ids));
   const pr={C:[45,55],U:[70,82],R:[140,160]};
@@ -1778,6 +1833,38 @@ document.addEventListener('visibilitychange',()=>{
 });
 function saveName(){const el=$('#pname');const n=(el?el.value:myName).trim().slice(0,16);if(!n){toast('Scrivi il tuo nome prima di continuare.');return false}myName=n;store('valdombra-nome',n);return true}
 
+
+/* ================= TUTORIAL ================= */
+const TUT_K='valdombra-tutorial';
+const inCombat=()=>R&&R.phase==='combat'&&g&&g.hero&&!g.busy&&!g.hero.down;
+const scr=k=>R&&R.phase==='room'&&R.players[ME]&&R.players[ME].screen===k;
+const TUT=[
+ {id:'start',when:()=>!R&&screen!=='mp',sel:'.classes',t:'Benvenuto a Valdombra! Scegli il tuo eroe, poi il dungeon, e premi «Gioca da solo». Per giocare con gli amici usa «Gioca con gli amici».'},
+ {id:'mappa',when:()=>R&&R.phase==='map'&&!R.voteAnim,sel:'.mapsvg .node.avail circle',t:'Questa è la mappa del dungeon: tocca un cerchio illuminato per avanzare. Ci sono nemici, Élite più forti, Falò per curarti, Mercanti, Eventi e Tesori. In cima ti aspetta il boss.'},
+ {id:'energia',when:inCombat,sel:'.energy',t:'Questa è la tua Energia: all\'inizio di ogni turno torna a 3. Ogni carta costa l\'Energia scritta nel cerchio in alto a sinistra della carta.'},
+ {id:'carte',when:inCombat,sel:'.hand',t:'Tocca una carta per giocarla. Per gli Attacchi tocca poi il nemico da colpire. A ogni turno peschi 5 carte nuove, e quelle che non giochi vanno negli scarti.'},
+ {id:'intenti',low:1,when:inCombat,sel:'.enemy .intent',t:'Sopra ogni nemico vedi cosa farà nel suo turno: la spada col numero indica i danni che sta per infliggere, e a chi. Tocca un\'icona per leggere i dettagli.'},
+ {id:'armatura',when:inCombat,sel:'.hero .nm',t:'Le carte come «Parata» danno Armatura: para i danni dei nemici, ma sparisce all\'inizio del tuo turno successivo. Usala quando un nemico sta per colpire forte.'},
+ {id:'fineturno',when:inCombat,sel:'.pilebar .btn.primary',t:'Quando hai finito premi «Fine turno»: agiscono i nemici, poi tocca di nuovo a te. Tieni il dito su una carta (o passaci sopra col mouse) per vedere il significato delle parole chiave.'},
+ {id:'segnali',when:()=>inCombat()&&!solo,sel:'.pilebar [aria-pressed]',t:'In gruppo puoi usare «Segnala»: tocchi un nemico per dire «attacco questo!» oppure il tuo eroe per chiedere «proteggimi!». I compagni lo vedono col tuo colore.'},
+ {id:'elite',low:1,when:()=>inCombat()&&R.combat.kind==='elite',sel:'.etrait',t:'Questa è un\'Élite: più forte di un nemico normale e con un tratto speciale (tocca l\'etichetta sotto il nome). In cambio dà ricompense migliori.'},
+ {id:'boss',low:1,when:()=>inCombat()&&R.combat.kind==='boss',sel:'.enemy.boss',t:'Il boss del dungeon! Ogni dungeon ne ha due possibili. Sconfiggilo per completare il dungeon e sbloccare il successivo e un Livello di Assedio più alto.'},
+ {id:'ricompensa',when:()=>scr('reward'),sel:'main .opts, main .cards, main',t:'Hai vinto! Scegli una carta da aggiungere al mazzo, oppure saltala: un mazzo piccolo pesca più spesso le carte migliori. Poi prendi l\'oro e premi «Prosegui».'},
+ {id:'falo',when:()=>scr('rest'),sel:'main .opt',t:'Al Falò puoi riposare per recuperare PV, oppure affilare le armi e potenziare una carta del mazzo.'},
+ {id:'negozio',when:()=>scr('shop'),sel:'main',t:'Dal Mercante spendi l\'oro in carte, reliquie e pozioni. Puoi anche bruciare una carta debole per alleggerire il mazzo.'},
+ {id:'finepartita',when:()=>R&&R.phase==='end',sel:'.crownbadge',t:'Con le Corone che guadagni compri oggetti nella Bottega e sblocchi nuovi eroi. Nel Diario trovi le tue statistiche, le Imprese e l\'enciclopedia.'},
+];
+function tutSeen(){try{const a=JSON.parse(load(TUT_K));return Array.isArray(a)?a:[]}catch(e){return[]}}
+function tutDone(id){const a=tutSeen();if(!a.includes(id)){a.push(id);store(TUT_K,JSON.stringify(a))}render()}
+function tutSkip(){SET.tut=false;saveSet();toast('Consigli disattivati. Puoi riattivarli dalle Impostazioni.');render()}
+function tutReset(){store(TUT_K,'[]')}
+function tutHTML(){if(!SET.tut||modal||(R&&!R.players[ME]))return '';const seen=tutSeen();
+  const st=TUT.find(t=>!seen.includes(t.id)&&(()=>{try{return t.when()}catch(e){return false}})());if(!st)return '';
+  const n=TUT.filter(t=>!seen.includes(t.id)).length;
+  return `<style>${st.sel.split(',')[0]}{outline:3px solid #ffd27a!important;outline-offset:3px;border-radius:10px;animation:tutpulse 1.2s ease-in-out infinite}</style>
+  <div class="tutbox ${st.low?'low':''}" role="dialog" aria-label="Consiglio"><div class="tuthead">${ic('i_crown',16)}<b>Consiglio</b></div><p>${st.t}</p>
+  <div class="row"><button class="btn primary" onclick="tutDone('${st.id}')">Ho capito</button><button class="btn" onclick="tutSkip()">Salta i consigli</button></div></div>`}
+
 /* ================= SOLO ================= */
 function startSolo(){
   solo=true;isHost=true;chan=null;ME='solo';online=new Set([ME]);
@@ -1804,9 +1891,11 @@ function clickCard(i){
   UI.sel=null;send({t:'play',uid:c.uid,j:d.tg&&a[0]?g.enemies.indexOf(a[0]):null});
 }
 function clickHero(pid){
+  if(UI.ping){UI.ping=false;if(pid===ME)send({t:'ping',k:'h'});else render();return}
   if(!UI.sel||!UI.sel.ally||!g||!g.heroes[pid]||g.heroes[pid].down)return;const s=UI.sel;UI.sel=null;send({t:'play',uid:s.uid,a:pid});
 }
 function clickEnemy(j){
+  if(UI.ping){UI.ping=false;if(g&&g.enemies[j]&&g.enemies[j].hp>0)send({t:'ping',k:'e',j});else render();return}
   if(!UI.sel||UI.sel.ally||!g||!g.enemies[j]||g.enemies[j].hp<=0)return;const s=UI.sel;UI.sel=null;
   if(s.k==='c')send({t:'play',uid:s.uid,j});else send({t:'potion',i:s.i,j});
 }
@@ -1856,7 +1945,7 @@ function openBuyHero(k){const c=CLASSES[k],cr=getCrowns();
     <div class="row" style="justify-content:center"><button class="btn primary" ${cr<c.price?'disabled':''} onclick="buyHero('${k}')">${ic('i_crown',16)} Sblocca per ${c.price} Corone</button><button class="btn" onclick="closeModal()">Non ora</button></div>
     <p class="muted" style="font-size:13px">Hai ${cr} Corone.${cr<c.price?' Ne guadagni vincendo un dungeon o in Sopravvivenza.':''} L'eroe resta sbloccato per sempre${ACC?' sul tuo profilo':''}.</p></div>`};render()}
 function buyHero(k){const c=CLASSES[k];if(!c||heroOwned(k))return;const cr=getCrowns();if(cr<c.price){toast('Corone insufficienti.');return}
-  setCrowns(cr-c.price);const h=getHeroes();h.push(k);store(HEROES_K,JSON.stringify(h));modal=null;sfx('fanfare');toast(c.n+' sbloccato!');setCls(k)}
+  setCrowns(cr-c.price);const h=getHeroes();h.push(k);store(HEROES_K,JSON.stringify(h));modal=null;achCheck();sfx('fanfare');toast(c.n+' sbloccato!');setCls(k)}
 function setCls(k){if(!heroOwned(k)){openBuyHero(k);return}pickCls=k;if(R&&R.phase==='lobby')send({t:'cls',cls:k});else render()}
 function startGame(){
   const notReady=active().filter(p=>!R.players[p].ready&&p!==R.host);
@@ -1994,7 +2083,7 @@ function intentHTML(e){
 function hud(){
   const cl=CLASSES[run.cls];
   return `<header class="hud">
-    <span class="cls">${sprImg(run.cls,26,'inl')} ${solo?cl.n:esc(run.name)}</span>
+    <span class="cls">${sprImg(hsk(run),26,'inl')} ${solo?cl.n:esc(run.name)}</span>
     <span class="stat hp-t"><b>PV</b>${Math.max(0,run.hp)}/${run.max}</span>
     <span class="stat gold-t"><b>Oro</b>${run.gold}</span>
     <span class="stat"><b>Piano</b>${R.floor}/${ROWS+1}</span>${R.mode==='surv'?`<span class="stat" style="color:var(--torch2)"><b>Ciclo</b>${R.cycle}</span>`:''}${R.lvl?`<span class="stat" style="color:#ff9a8f"><b>Assedio</b>${R.lvl}</span>`:''}
@@ -2012,7 +2101,7 @@ function partyHTML(){
   return `<div class="party">${R.order.map(p=>{const P=R.players[p];const on=isOnline(p);let st='';
     if(!on)st='disconnesso';else if(R.phase==='map')st=R.votes[p]?'<span class="ok">✓ ha votato</span>':'sta scegliendo';
     else if(R.phase==='room')st=P.done?'<span class="ok">✓ pronto</span>':'sta scegliendo';
-    return `<div class="pm ${on?'':'off'}">${sprImg(P.cls,30)}<div style="min-width:0;flex:1"><b><span class="pdot" style="background:${pcol(p)}"></span>${esc(P.name)}${p===ME?' (tu)':''}</b>${hpBar(P.hp,P.max)}<small>${st}</small></div></div>`}).join('')}</div>`;
+    return `<div class="pm ${on?'':'off'}">${sprImg(hsk(P),30)}<div style="min-width:0;flex:1"><b><span class="pdot" style="background:${pcol(p)}"></span>${esc(P.name)}${p===ME?' (tu)':''}</b>${hpBar(P.hp,P.max)}<small>${st}</small></div></div>`}).join('')}</div>`;
 }
 
 function render(fxs){
@@ -2033,7 +2122,7 @@ function render(fxs){
   }
   if(R&&R.players[ME]){
     const P=R.players[ME];
-    if(!solo&&(R.phase==='lobby'||R.phase==='end')){const me=R.players[ME];const zj=JSON.stringify(getZaino())+JSON.stringify(getTal())+JSON.stringify(myProg())+(me&&me.prog?1:0);if(UI.sentZ!==R.code+zj){UI.sentZ=R.code+zj;setTimeout(()=>send({t:'loadout',z:getZaino(),tal:getTal(),prog:myProg()}),0)}
+    if(!solo&&(R.phase==='lobby'||R.phase==='end')){const me=R.players[ME];const zj=JSON.stringify(getZaino())+JSON.stringify(getTal())+JSON.stringify(myProg())+JSON.stringify(skSel())+(me&&me.prog?1:0);if(UI.sentZ!==R.code+zj){UI.sentZ=R.code+zj;setTimeout(()=>send({t:'loadout',z:getZaino(),tal:getTal(),prog:myProg(),sk:skSel()}),0)}
       if(R.phase==='lobby'&&R.host===ME){const L=Math.min(pickLvl,getUnlocked(R.ldg||'rocca'));if((R.llvl|0)!==L&&UI.sentL!==R.code+L+':'+R.v){UI.sentL=R.code+L+':'+R.v;setTimeout(()=>send({t:'lvl',l:L}),0)}}}
     else UI.sentZ=null;
     if(P.zApplied&&UI.zClr!==R.code+R.seed){UI.zClr=R.code+R.seed;setZaino({});if(R.phase==='map'&&R.floor===0)toast('Dallo zaino: '+P.zApplied)}
@@ -2052,7 +2141,8 @@ function render(fxs){
   if(modal&&modal.dboard)modal.html=dailyBoardHTML();
   if(modal&&modal.diario)modal.html=diarioHTML();
   if(R&&!solo&&SET.chat&&!chatOpen&&R.players[ME]&&(R.phase==='lobby'||R.phase==='end')){const n=Math.max(0,((R.chat||[]).length)-chatSeen);h+=`<button class="btn primary chatfab" onclick="toggleChat(true)" aria-label="Apri la chat">Chat${n?`<span class="dot">${n}</span>`:''}</button>`}
-  if(!R||R.phase==='lobby'||R.phase==='end'||!R.players[ME])h+=`<button class="crownbadge" onclick="openBottega()" title="Le tue Corone: apri la Bottega" aria-label="${getCrowns()} Corone, apri la Bottega">${ic('i_crown',16)}<b>${getCrowns()}</b><span>Corone</span></button>`;
+  if(!modal&&(!R||R.phase==='lobby'||R.phase==='end'||!R.players[ME]))h+=`<button class="crownbadge" onclick="openBottega()" title="Le tue Corone: apri la Bottega" aria-label="${getCrowns()} Corone, apri la Bottega">${ic('i_crown',16)}<b>${getCrowns()}</b><span>Corone</span></button>`;
+  h+=tutHTML();
   if(modal)h+=`<div class="modal" role="dialog" aria-label="${modal.title}"><div class="mhead"><h3 style="flex:1">${modal.title}</h3>${modal.cancel?'<button class="btn" onclick="closeModal()">Chiudi</button>':''}</div>
     <div class="mbody">${modal.html||pickerGrid()}</div></div>`;
   // mantieni la posizione di scorrimento se la schermata è la stessa
@@ -2077,7 +2167,7 @@ function render(fxs){
 
 function classPicker(){
   return `<div class="classes">${Object.entries(CLASSES).map(([k,c])=>{const own=heroOwned(k);return `<button class="classcard ${pickCls===k?'on':''} ${own?'':'locked'}" onclick="setCls('${k}')" aria-pressed="${pickCls===k}">
-      <span class="ic">${sprImg(k,64)}</span><span class="nm">${own?'':ic('i_lock',14)+' '}${c.n}</span><span>${c.desc}</span>
+      <span class="ic">${sprImg(heroOwned(k)?hsk({pid:ME,cls:k}):k,64)}</span><span class="nm">${own?'':ic('i_lock',14)+' '}${c.n}</span><span>${c.desc}</span>
       <small>${c.hp} PV · Reliquia: ${relIc(c.relic,16)} ${RELICS[c.relic].n}</small>${own?`<small class="clv">Livello ${heroLv(k)} · ${getTal().filter(t=>TALENTS[k].some(x=>x.id===t)).length}/5 abilità</small>`:`<span class="price">${ic('i_crown',14)} ${c.price} Corone per sbloccarlo</span>`}</button>`}).join('')}</div>`;
 }
 function levelPicker(){
@@ -2151,7 +2241,7 @@ function lobbyHTML(){
     ${UI.status?`<div class="netwarn">${UI.status}</div>`:''}
     <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap"><span style="line-height:0">${ic('i_crown',30)}</span><div style="flex:1;min-width:200px"><b>Bottega della Rocca</b><br><span class="muted">${getCrowns()} Corone${zEmpty(getZaino())?' · zaino vuoto':' · Porti: '+zText(getZaino())}</span></div><button class="btn" onclick="openBottega()">Apri la bottega</button><button class="btn" onclick="openCrescita(R.players[ME]&&R.players[ME].cls)">Abilità uniche</button></div>
     <h3>Giocatori (${R.order.length}/${MAXP})</h3>
-    <div class="plist">${R.order.map(p=>{const P=R.players[p];const on=isOnline(p);return `<div class="prow" style="${on?'':'opacity:.45'}">${sprImg(P.cls,36)}
+    <div class="plist">${R.order.map(p=>{const P=R.players[p];const on=isOnline(p);return `<div class="prow" style="${on?'':'opacity:.45'}">${sprImg(hsk(P),36)}
       <div style="flex:1;min-width:0"><span class="nm">${esc(P.name)}${p===ME?' (tu)':''}</span><br><span class="muted">${CLASSES[P.cls].n}${on?'':' · disconnesso'}${P.loadout&&!zEmpty(cleanZ(P.loadout))?' · porta: '+zText(cleanZ(P.loadout)):''}</span></div>
       ${bl.includes(p)?`<span class="badge lockb">${ic('i_lock',12)} Non sbloccato</span>`:''}${p===R.host?'<span class="badge on">Host</span>':`<span class="badge ${P.ready?'on':''}">${P.ready?'Pronto':'Non pronto'}</span>`}
       ${host&&p!==ME?`<button class="btn" onclick="send({t:'kick',p:'${p}'})" aria-label="Rimuovi ${esc(P.name)}">✕</button>`:''}</div>`}).join('')}</div>
@@ -2191,12 +2281,12 @@ function mapScreen(){
     n.next.forEach(nx=>{const m=map[n.y+1][nx];const[x2,y2]=pos(m);lines+=`<line class="edge ${doneE.has(n.y+','+n.x+'>'+m.y+','+m.x)?'done':''}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`});
     const k=n.y+','+n.x;const cur=R.pos&&R.pos.y===n.y&&R.pos.x===n.x;const r=n.type==='boss'?44:24;const tap=drawOk(n);
     nodes+=`<g data-k="${k}" class="node ${UI.anim&&UI.anim.cur===k?'spin':''} ${UI.anim&&UI.anim.done&&UI.anim.win===k?'win':''} ${done.has(k)?'done':''} ${cur?'cur':''} ${av.has(k)&&!UI.draw?'avail':''} ${tap&&UI.draw?'drawable':''} ${myV===k?'voted':''} ${n.type==='boss'?'boss':''}" ${(UI.draw?tap:av.has(k))?`onclick="nodeTap(${n.y},${n.x})" role="button" tabindex="0" aria-label="${NODEN[n.type]}, piano ${n.y+1}" onkeydown="if(event.key==='Enter')nodeTap(${n.y},${n.x})"`:''}>
-      <circle cx="${x1}" cy="${y1}" r="${r}"/><image href="${spr(n.type)}" x="${x1-r*.62}" y="${y1-r*.62}" width="${r*1.24}" height="${r*1.24}" style="image-rendering:pixelated"/><title>${NODEN[n.type]}</title>
+      <circle cx="${x1}" cy="${y1}" r="${r}"/><image href="${spr(n.type==='boss'?bossId():n.type)}" x="${x1-r*.62}" y="${y1-r*.62}" width="${r*1.24}" height="${r*1.24}" style="image-rendering:pixelated"/><title>${n.type==='boss'?'Boss: '+BOSSI[bossId()][0]+'. '+BOSSI[bossId()][3]:NODEN[n.type]}</title>
       ${tally[k]&&!solo?`<circle class="vbadge" cx="${x1+r*.8}" cy="${y1-r*.8}" r="12"/><text class="vbadge-t" x="${x1+r*.8}" y="${y1-r*.8}">${tally[k]}</text>`:''}</g>`;
   }));
   const act=active();const nv=act.filter(p=>R.votes[p]).length;
   const msg=solo?'Tocca un nodo illuminato per avanzare':R.voteAnim?'Voto chiuso: si parte!':`Votate il prossimo passo: ${nv}/${act.length} voti${myV?' · tocca di nuovo il tuo nodo per togliere il voto, o un altro per cambiarlo':''}`;
-  const va=R.voteAnim;let banner=R.mode==='surv'&&R.cycle>1&&!R.pos?`<div class="votebanner" role="status">Ciclo ${R.cycle}: ${DG().cycleT}</div>`:'';
+  const va=R.voteAnim;let banner=R.mode==='surv'&&R.cycle>1&&!R.pos?`<div class="votebanner" role="status">Ciclo ${R.cycle}: ${BOSSI[bossId()][2]}</div>`:'';
   if(va){const wn=R.map[+va.win.split(',')[0]][+va.win.split(',')[1]];const fin=UI.anim&&UI.anim.done;
     banner=`<div class="votebanner ${fin?'fin':''}" role="status">${va.tie?(fin?`La sorte ha scelto: <b>${NODEN[wn.type]}</b>`:`Pareggio! ${va.opts.map(k=>va.tally[k]).join(' a ')} · la sorte decide...`):
       (fin?`Si va: <b>${NODEN[wn.type]}</b> (${va.tally[va.win]} voti contro ${Object.values(va.tally).reduce((a,b)=>a+b,0)-va.tally[va.win]})`:`Vince la maggioranza...`)}</div>`}
@@ -2212,24 +2302,28 @@ function scrollMap(){
   w.scrollTop=Math.max(0,target-w.clientHeight*.7);
 }
 
+function pingNotify(){if(!g||!g.pings||solo)return;const L=Object.entries(g.pings).filter(([p])=>p!==ME).map(([p,v])=>p+v.k+v.j);const k=L.join('|');if(k===UI.pingSeen)return;const was=(UI.pingSeen||'').split('|');UI.pingSeen=k;if(L.some(x=>!was.includes(x))){sfx('ping');buzz([30,40,30])}}
 function combatScreen(){
+  pingNotify();
   const sel=UI.sel,h=g.hero;
-  const en=g.enemies.map((e,j)=>`<button class="ent enemy ${e.boss?'boss':''} ${e.hp<=0?'dead':''} ${sel&&!sel.ally&&e.hp>0?'target':''}" id="ent-e${j}" onclick="clickEnemy(${j})" ${e.hp<=0?'disabled':''} aria-label="${e.n}, ${e.hp} PV">
-      ${intentHTML(e)}<span class="face">${sprImg(e.id,e.boss?150:(ENEMIES[e.id].elite?96:80),'idle')}</span><span class="nm">${e.n}</span>${hpBar(e.hp,e.max)}
+  const PG=(g.pings&&!solo)?g.pings:{};const pgE=j=>Object.keys(PG).filter(p=>PG[p].k==='e'&&PG[p].j===j&&R.players[p]),pgH=Object.keys(PG).filter(p=>PG[p].k==='h'&&R.players[p]&&g.heroes[p]&&!g.heroes[p].down);
+  const pgTag=(p,t)=>`<span class="pingtag" style="--pc:${pcol(p)}">${p===ME?'Tu':esc(R.players[p].name)}: ${t}</span>`;
+  const en=g.enemies.map((e,j)=>`<button class="ent enemy ${e.boss?'boss':''} ${e.hp<=0?'dead':''} ${(sel&&!sel.ally||UI.ping)&&e.hp>0?'target':''} ${pgE(j).length&&e.hp>0?'pinged':''}" style="${pgE(j).length?'--pc:'+pcol(pgE(j)[0]):''}" id="ent-e${j}" onclick="clickEnemy(${j})" ${e.hp<=0?'disabled':''} aria-label="${e.n}, ${e.hp} PV">
+      ${e.hp>0&&pgE(j).length?`<span class="pings">${pgE(j).map(p=>pgTag(p,'attacco questo!')).join('')}</span>`:''}${intentHTML(e)}<span class="face">${sprImg(e.id,e.boss?150:(ENEMIES[e.id].elite?96:80),'idle')}</span><span class="nm">${e.n}</span>${e.trait?`<span class="etrait" role="button" tabindex="0" onclick="event.stopPropagation();trInfo('${e.trait}')">${ETRAITS[e.trait][0]}</span>`:''}${ENEMIES[e.id].spine?`<span class="etrait" role="button" tabindex="0" onclick="event.stopPropagation();toast('Corpo di lava: chi lo colpisce con un Attacco subisce ${ENEMIES[e.id].spine} danni.')">Corpo di lava</span>`:''}${hpBar(e.hp,e.max)}
       ${e.blk?`<span class="blk">${ic('i_shield',12)} ${e.blk}</span>`:''}${chips(e)}</button>`).join('');
   const cl=CLASSES[run.cls];
-  const allies=Object.keys(g.heroes).filter(p=>p!==ME).map(p=>{const a=g.heroes[p],P=R.players[p];return `<div class="ent ally ${a.down?'down':''} ${sel&&sel.ally&&!a.down?'target':''}" id="ent-h-${p}" onclick="clickHero('${p}')">${sprImg(P.cls,34,'idle')}
-    <div class="info"><span class="nm">${esc(P.name)} ${a.blk?`<span class="blk">${ic('i_shield',12)} ${a.blk}</span>`:''}</span>${hpBar(P.hp,P.max)}${chips(a)}<small class="muted">${!isOnline(p)?'disconnesso':a.down?'a terra':a.ended?'<span class="ok">✓ fine turno</span>':'sta giocando'}</small></div></div>`}).join('');
+  const allies=Object.keys(g.heroes).filter(p=>p!==ME).map(p=>{const a=g.heroes[p],P=R.players[p];return `<div class="ent ally ${a.down?'down':''} ${sel&&sel.ally&&!a.down?'target':''}" id="ent-h-${p}" onclick="clickHero('${p}')">${sprImg(hsk(P),34,'idle')}
+    <div class="info"><span class="nm">${esc(P.name)} ${a.blk?`<span class="blk">${ic('i_shield',12)} ${a.blk}</span>`:''}</span>${pgH.includes(p)?pgTag(p,'proteggimi!'):''}${hpBar(P.hp,P.max)}${chips(a)}<small class="muted">${!isOnline(p)?'disconnesso':a.down?'a terra':a.ended?'<span class="ok">✓ fine turno</span>':'sta giocando'}</small></div></div>`}).join('');
   const hand=h.hand.map((c,i)=>cardHTML(c,{click:`clickCard(${i})`,cls:(sel&&sel.k==='c'&&sel.uid===c.uid?'sel ':'')+(costOf(c)>h.energy||h.ended?'cant':'')})).join('');
   const heroes=Object.keys(g.heroes).filter(p=>!g.heroes[p].down&&isOnline(p));const ended=heroes.filter(p=>g.heroes[p].ended).length;
-  let status=sel?(sel.ally?'Scegli l\'eroe da aiutare':'Scegli un nemico come bersaglio'):'Turno '+g.turn;
+  let status=UI.ping?'Segnala: tocca un nemico («attacco questo!») o il tuo eroe («proteggimi!»)':sel?(sel.ally?'Scegli l\'eroe da aiutare':'Scegli un nemico come bersaglio'):'Turno '+g.turn;
   if(g.busy)status='Turno dei nemici...';else if(h.down)status='Sei a terra: ti rialzi a fine combattimento';else if(h.ended&&!solo)status=`In attesa degli altri (${ended}/${heroes.length})`;
   return `<main class="flush"><div class="combat"><div class="cscroll" id="cscroll">
     <div class="enemies">${en}</div>
     ${allies?`<div class="allies">${allies}</div>`:''}
     <div class="herorow">
       <div class="energy" title="Energia">${h.energy}</div>
-      <div class="ent hero ${h.down?'down':''} ${sel&&sel.ally&&!h.down?'target':''}" id="ent-h-${ME}" onclick="clickHero('${ME}')"><span class="face">${sprImg(run.cls,60,'idle')}</span><div class="info"><span class="nm">${solo?cl.n:esc(run.name)} ${h.blk?`<span class="blk">${ic('i_shield',12)} ${h.blk}</span>`:''}</span>${hpBar(run.hp,run.max)}${chips(h,h.pw)}</div></div>
+      <div class="ent hero ${h.down?'down':''} ${sel&&sel.ally&&!h.down?'target':''}" id="ent-h-${ME}" onclick="clickHero('${ME}')"><span class="face">${sprImg(hsk(run),60,'idle')}</span><div class="info"><span class="nm">${solo?cl.n:esc(run.name)} ${h.blk?`<span class="blk">${ic('i_shield',12)} ${h.blk}</span>`:''}</span>${pgH.includes(ME)?pgTag(ME,'proteggimi!'):''}${hpBar(run.hp,run.max)}${chips(h,h.pw)}</div></div>
     </div></div>
     <div class="hand">${hand||`<p class="muted" style="align-self:center">${h.ended?(solo?'Hai finito il turno.':'Hai finito il turno. Finché gli altri giocano puoi ancora ripensarci con «Riprendi il turno».'):'Nessuna carta in mano.'}</p>`}</div>
     <div class="pilebar">
@@ -2237,6 +2331,7 @@ function combatScreen(){
       <button class="btn" onclick="viewPile('disc')">Scarti ${h.disc.length}</button>
       ${h.exh.length?`<button class="btn" onclick="viewPile('exh')">Esaurite ${h.exh.length}</button>`:''}
       <span class="grow muted" style="font-size:13px">${status}</span>
+      ${solo?'':`<button class="btn ${UI.ping?'primary':''}" onclick="UI.ping=!UI.ping;UI.sel=null;render()" aria-pressed="${!!UI.ping}" title="Segnala un nemico da attaccare o chiedi protezione">${UI.ping?'Annulla':'Segnala'}</button>`}
       ${h.ended&&h.undo&&!g.busy&&!h.down&&!solo?`<button class="btn" onclick="send({t:'unend'})" title="Riprendi il turno finché gli altri stanno ancora giocando">Riprendi il turno</button>`:`<button class="btn primary" onclick="endTurnBtn()" ${g.busy||h.ended||h.down?'disabled':''}>Fine turno</button>`}
     </div></div></main>`;
 }
@@ -2304,15 +2399,16 @@ function endScreen(){
   if(R.mode==='surv')return survEndScreen(L,kills);
   const score=Math.round((R.floor*10+kills*3+(R.win?150:0))*scoreMult(L));
   return `<main><div class="wrap"><h1 style="font-size:clamp(40px,8vw,64px)">${R.win?DG().winT:(solo?'Sei caduto':'Il gruppo è caduto')}</h1>
-    <p class="lede muted">${R.win?DG().winD:DG().loseD}</p>
+    <p class="lede muted">${R.win?BOSSI[bossId()][1]:DG().loseD}</p>
     ${summaryHTML()}
+    ${achPanel()}
     ${xpPanel()}
     ${(()=>{const n=crownsAward();return n?`<div class="panel" style="flex-direction:row;align-items:center;gap:12px;border-color:var(--torch)">${ic('i_crown',36)}<div><b style="color:var(--torch2);font-size:18px">+${n} Corone!</b><br><span class="muted">Spendile nella Bottega della Rocca prima della prossima partita. Ora ne hai ${getCrowns()}.</span></div></div>`:''})()}
     ${UI.newDg?`<div class="panel" style="flex-direction:row;align-items:center;gap:12px;border-color:var(--heal)">${sprImg(DUNGEONS[UI.newDg].boss,56)}<div><b style="color:#bff0c9;font-size:18px">Nuovo dungeon sbloccato: ${DUNGEONS[UI.newDg].n}!</b><br><span class="muted">${DUNGEONS[UI.newDg].desc}</span></div></div>`:''}
     ${UI.unlocked?`<div class="panel" style="border-color:var(--torch)"><b style="color:var(--torch2);font-size:18px">Livello di Assedio ${UI.unlocked} sbloccato (${DG().n})!</b><span class="muted">${lvlDesc(UI.unlocked)}</span></div>`:''}
     ${R.daily?dailyEndHTML(score,kills):''}
     <div class="endstats"><div><b>${score}</b>Punteggio${L?` (×${scoreMult(L)})`:''}</div><div><b>${L}</b>Livello di Assedio</div><div><b>${R.floor}</b>Piano raggiunto</div><div><b>${kills}</b>Nemici uccisi</div></div>
-    ${solo?'':`<div class="plist">${R.order.map(p=>{const P=R.players[p];return `<div class="prow">${sprImg(P.cls,32)}<div style="flex:1"><span class="nm">${esc(P.name)}</span><br><span class="muted">${CLASSES[P.cls].n} · ${P.kills||0} nemici · ${P.deck.length} carte</span></div></div>`}).join('')}</div>`}
+    ${solo?'':`<div class="plist">${R.order.map(p=>{const P=R.players[p];return `<div class="prow">${sprImg(hsk(P),32)}<div style="flex:1"><span class="nm">${esc(P.name)}</span><br><span class="muted">${CLASSES[P.cls].n} · ${P.kills||0} nemici · ${P.deck.length} carte</span></div></div>`}).join('')}</div>`}
     <p class="muted">Seed della partita: <b style="color:var(--fg)">${R.seed}</b>. Condividilo e sfida altri gruppi a fare meglio.</p>
     <div class="row">${againBtns()}</div></div></main>`;
 }
@@ -2357,6 +2453,22 @@ function refundMeta(kind,i){
   setZaino(z);setCrowns(getCrowns()+price);render();
 }
 function openBottega(){modal={title:'Bottega della Rocca',bottega:true,cancel:true,list:[]};render()}
+
+/* ================= ASPETTI DEGLI EROI ================= */
+const SKO_K='valdombra-aspetti',SKS_K='valdombra-aspetto';
+function skOwned(){try{const a=JSON.parse(load(SKO_K));return Array.isArray(a)?a:[]}catch(e){return[]}}
+function skSel(){try{const o=JSON.parse(load(SKS_K));return o&&typeof o==='object'?o:{}}catch(e){return{}}}
+function cleanSk(o){const r={};if(o&&typeof o==='object')Object.keys(o).forEach(c=>{if(CLASSES[c]&&SKINS[o[c]])r[c]=o[c]});return r}
+function hsk(P){if(!P)return 'guerriero';const sk=(P.pid===ME||solo)?skSel()[P.cls]:(P.skins||{})[P.cls];return SKINS[sk]?P.cls+'@'+sk:P.cls}
+function buySkin(c,k){const id=c+'@'+k,cr=getCrowns();if(skOwned().includes(id)){setSkin(c,k);return}if(cr<SKIN_PRICE){toast('Corone insufficienti.');return}
+  setCrowns(cr-SKIN_PRICE);store(SKO_K,JSON.stringify([...skOwned(),id]));sfx('fanfare');toast('Aspetto '+SKINS[k][0]+' sbloccato per il '+CLASSES[c].n+'!');setSkin(c,k)}
+function setSkin(c,k){const o=skSel();if(k)o[c]=k;else delete o[c];store(SKS_K,JSON.stringify(o));render()}
+function skinsHTML(){const c=UI.skCls&&CLASSES[UI.skCls]?UI.skCls:pickCls,own=skOwned(),cur=skSel()[c]||'',cr=getCrowns();
+  return `<div class="panel"><h3>Aspetti degli eroi</h3><p class="muted">Nuovi colori per i tuoi eroi, ${SKIN_PRICE} Corone l'uno. Li vedono anche i compagni in multigiocatore. Non cambiano le regole del gioco.</p>
+   <div class="row" style="gap:4px">${Object.keys(CLASSES).filter(heroOwned).map(k=>`<button class="btn ${k===c?'primary':''}" style="padding:4px 6px" onclick="UI.skCls='${k}';render()" aria-label="${CLASSES[k].n}" title="${CLASSES[k].n}">${sprImg(k,28)}</button>`).join('')}</div>
+   <div class="shopgrid">${['',...skinsFor(c)].map(k=>{const id=c+'@'+k,has=!k||own.includes(id),on=cur===k;
+     return `<div class="shopitem"><button class="relicbox ${on?'on':''}" onclick="${has?`setSkin('${c}','${k}')`:`buySkin('${c}','${k}')`}" aria-pressed="${on}"><span class="ic">${sprImg(k?id:c,56)}</span><b>${k?SKINS[k][0]:'Classico'}</b><span class="muted">${on?'In uso':has?'Tocca per usarlo':'Da sbloccare'}</span></button>${has?'':`<span class="price ${cr<SKIN_PRICE?'no':''}">${ic('i_crown',16)} ${SKIN_PRICE}</span>`}</div>`}).join('')}</div></div>`}
+
 function bottegaHTML(){
   const z=getZaino(),cr=getCrowns();
   const price=p=>`<span class="price ${cr<p?'no':''}">${ic('i_crown',16)} ${p}</span>`;
@@ -2377,7 +2489,7 @@ function bottegaHTML(){
      ${box(ic('i_coin',40),'Borsa del Mercenario','Inizi con 50 oro in più.',META.gold,"buyMeta('gold')",z.gold>=ZCAP.gold)}
      ${box(ic('i_heal',40),'Elisir di Vigore','Inizi con 10 PV massimi in più.',META.hp,"buyMeta('hp')",z.hp>=ZCAP.hp)}
      ${box(ic('rest',40),'Addestramento','Inizi con 2 carte del mazzo già potenziate.',META.upg,"buyMeta('upg')",z.upg>=ZCAP.upg)}
-   </div></div></div>`;
+   </div></div>${skinsHTML()}</div>`;
 }
 function crownsAward(){
   // corone per la vittoria: una volta sola per partita, su questo dispositivo
@@ -2386,7 +2498,7 @@ function crownsAward(){
   if(R.mode==='surv'&&R.cycle>1)markBeatenS(R.dg||'rocca');
   const n=R.mode==='surv'?Math.floor(totalFloors()/16*40*(DG().crowns/60)):DG().crowns+20*(R.lvl||0);setCrowns(getCrowns()+n);done.push(key);store(PK,JSON.stringify(done.slice(-50)));UI.lastAward={key,n};return n;
 }
-ACT.loadout=(a,P)=>{if(R.phase==='lobby'||R.phase==='end'){P.loadout=cleanZ(a.z);P.tal=cleanTal(a.tal);if(a.prog)P.prog=cleanProg(a.prog)}};
+ACT.loadout=(a,P)=>{if(R.phase==='lobby'||R.phase==='end'){P.loadout=cleanZ(a.z);P.tal=cleanTal(a.tal);if(a.prog)P.prog=cleanProg(a.prog);if(a.sk)P.skins=cleanSk(a.sk)}};
 // cosa ha sbloccato ogni giocatore: {dungeon:[normale,sopravvivenza,livello max]}
 function myProg(){const o={};Object.keys(DUNGEONS).forEach(k=>o[k]=[dgUnlocked(k,'norm')?1:0,dgUnlocked(k,'surv')?1:0,getUnlocked(k)]);return o}
 function cleanProg(a){const o={};if(!a||typeof a!=='object')return o;Object.keys(DUNGEONS).forEach(k=>{const x=a[k];if(Array.isArray(x))o[k]=[x[0]?1:0,x[1]?1:0,Math.max(0,Math.min(MAXLVL,x[2]|0))]});return o}
@@ -2512,8 +2624,9 @@ function survEndScreen(L,kills){
   if((solo||R.host===ME)&&!R.lbId&&!UI.lbMsg)setTimeout(submitScore,0);
   if(R.lbId&&UI.lbFor!==R.lbId){UI.lbFor=R.lbId;UI.lb=null;UI.lbDg=R.dg||'rocca';fetchBoard(mode).then(r=>{UI.lb=r;render()})}
   return `<main><div class="wrap"><h1 style="font-size:clamp(38px,8vw,60px)">Sopravvivenza terminata</h1>
-    <p class="lede muted">${solo?'Hai resistito':'Il gruppo ha resistito'} per <b style="color:var(--fg)">${totalFloors()} piani</b>${R.cycle>1?` e sconfitto ${DG().bossN} ${R.cycle-1} ${R.cycle>2?'volte':'volta'}`:''}.<br><span style="font-size:15px">${DG().n}</span></p>
+    <p class="lede muted">${solo?'Hai resistito':'Il gruppo ha resistito'} per <b style="color:var(--fg)">${totalFloors()} piani</b>${R.cycle>1?` e sconfitto i boss ${R.cycle-1} ${R.cycle>2?'volte':'volta'}`:''}.<br><span style="font-size:15px">${DG().n}</span></p>
     ${summaryHTML()}
+    ${achPanel()}
     ${xpPanel()}
     ${(()=>{const n=crownsAward();return n?`<div class="panel" style="flex-direction:row;align-items:center;gap:12px;border-color:var(--torch)">${ic('i_crown',36)}<div><b style="color:var(--torch2);font-size:18px">+${n} Corone!</b><br><span class="muted">Ora ne hai ${getCrowns()}.</span></div></div>`:''})()}
     <div class="endstats"><div><b>${score}</b>Punteggio${L?` (×${scoreMult(L)})`:''}</div><div><b>${totalFloors()}</b>Piani superati</div><div><b>${R.cycle}</b>Ciclo raggiunto</div><div><b>${kills}</b>Nemici uccisi</div></div>
@@ -2575,13 +2688,13 @@ function startVoteAnim(va){
 }
 function paintAnim(){document.querySelectorAll('.mapsvg .node').forEach(n=>{n.classList.toggle('spin',!!UI.anim&&n.dataset.k===UI.anim.cur)})}
 /* ================= IMPOSTAZIONI ================= */
-const VERSION='v5.4',VDATE='16/11';
+const VERSION='v6.0',VDATE='17/11';
 const SET_K='valdombra-impostazioni';
-const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:true};
+const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),vib:true,big:false,hc:false,tut:true,stats:true};
 let SET=(()=>{try{return Object.assign({},SET_DEF,JSON.parse(load(SET_K)||'{}'))}catch(e){return Object.assign({},SET_DEF)}})();
 function saveSet(){try{localStorage.setItem(SET_K,JSON.stringify(SET))}catch(e){}applySet()}
 function applySet(){
-  document.body.classList.toggle('noanim',!SET.anim);
+  document.body.classList.toggle('noanim',!SET.anim);document.body.classList.toggle('big',!!SET.big);document.body.classList.toggle('hc',!!SET.hc);
   const v=$('#ver');if(v)v.innerHTML=`${ic('i_gear',12)}${VERSION} · ${VDATE}`;
   AU.vol();
 }
@@ -2607,19 +2720,26 @@ function settingsHTML(){
       ${inRoom?'':'<p class="muted" style="font-size:13px">La chat c\'è solo nelle partite con gli amici.</p>'}
     </div>
     <div class="panel"><h4>Grafica</h4>
-      ${swb('anim','Animazioni','Numeri dei danni, scosse dei mostri e animazione del voto. Spegnile se il telefono va a scatti.')}
+      ${swb('anim','Animazioni','Numeri dei danni, scosse dei mostri e animazione del voto. Spegnile se il telefono va a scatti o se il movimento ti dà fastidio.')}
+    </div>
+    <div class="panel"><h4>Accessibilità</h4>
+      ${swb('big','Testo più grande','Ingrandisce il testo delle carte, dei pulsanti e delle descrizioni.')}
+      ${swb('hc','Contrasto alto','Testi secondari e bordi più chiari, più facili da leggere al sole.')}
+      ${'vibrate' in navigator?swb('vib','Vibrazione','Una vibrazione leggera quando subisci danni, vinci o un compagno ti manda un segnale.'):''}
+      ${swb('tut','Consigli del tutorial','Mostra i fumetti che spiegano il gioco. Riattivalo per rivederli da capo.')}
+      ${swb('stats','Invia statistiche anonime','A fine partita invia eroe, dungeon, esito, carte e reliquie, senza nomi, per bilanciare il gioco.')}
     </div>
     <div class="panel"><h4>${ic('i_gear',18)} Informazioni</h4>
       <div class="srow"><div class="lab">Versione</div><b>${VERSION} · ${VDATE}</b></div>
       <div class="srow"><div class="lab">Codice<small>Hai un codice? Scrivilo qui.</small></div><input id="rcode" class="txt" maxlength="40" style="max-width:200px" autocomplete="off" placeholder="Codice"><button class="btn" onclick="redeem()">Usa</button></div>
       <div class="srow"><div class="lab">Profilo</div><b>${ACC?esc(ACC.nome):'nessuno'}</b><button class="btn" onclick="openProfilo()">${ACC?'Gestisci':'Accedi'}</button></div>
       ${inRoom?`<div class="srow"><div class="lab">Stanza</div><b>${R.code}</b></div><div class="srow"><div class="lab">Connessione</div><b>${isHost?'Sei tu a guidare la stanza':'Collegato'}</b></div>`:''}
-      <p class="muted" style="font-size:13px">Novità di questa versione: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
+      <p class="muted" style="font-size:13px">Novità di questa versione: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
       <p class="muted" style="font-size:13px">Le impostazioni (audio, chat, grafica) valgono solo per questo dispositivo. I progressi di gioco seguono il tuo profilo.</p>
       <div><button class="btn" onclick="SET=Object.assign({},SET_DEF);saveSet();render()">Ripristina le impostazioni</button></div>
     </div></div>`;
 }
-function setTog(k){SET[k]=!SET[k];saveSet();if(k==='mute'&&!SET.mute){AU.unlock();sfx('ui')}render()}
+function setTog(k){SET[k]=!SET[k];if(k==='tut'&&SET.tut)tutReset();saveSet();if(k==='vib'&&SET.vib)buzz(40);if(k==='mute'&&!SET.mute){AU.unlock();sfx('ui')}render()}
 function setVol(k,v,done){SET[k]=v/100;const l=$('#v-'+k);if(l)l.textContent=v+'%';if(SET.mute&&v>0)SET.mute=false;AU.vol();if(done){saveSet();AU.unlock();if(k==='sfx')sfx('blk');render()}}
 
 /* ================= AUDIO =================
@@ -2714,6 +2834,7 @@ const AU=(()=>{
     psn:t=>{tone('sine',320,t,.18,.16,fxb,{to:180});tone('sine',260,t+.08,.16,.12,fxb,{to:150})},
     card:t=>{tone('triangle',520,t,.06,.16,fxb,{to:900});hiss(t,.04,.06,3000,fxb)},
     ui:t=>{tone('triangle',660,t,.04,.1,fxb)},
+    ping:t=>{tone('sine',mtof(84),t,.08,.14,fxb);tone('sine',mtof(91),t+.08,.12,.12,fxb)},
     msg:t=>{tone('sine',mtof(81),t,.1,.12,fxb);tone('sine',mtof(88),t+.09,.14,.12,fxb)},
     win:t=>{[67,72,76,79].forEach((m,i)=>tone('square',mtof(m),t+i*.08,.16,.07,fxb,{lp:3000}));tone('square',mtof(84),t+.32,.4,.08,fxb,{lp:3000})},
     fanfare:t=>{[[60,0],[64,.12],[67,.24],[72,.36],[67,.6],[72,.72]].forEach(([m,d])=>tone('square',mtof(m),t+d,.22,.08,fxb,{lp:3000}));tone('square',mtof(76),t+.9,.8,.09,fxb,{lp:3000})},
@@ -2730,7 +2851,8 @@ const AU=(()=>{
     suspend(){if(C&&C.state==='running')C.suspend().catch(()=>{})},
   };
 })();
-function sfx(k){AU.sfx(k)}
+function sfx(k){AU.sfx(k);const v={dmg:35,win:[60,40,90],fanfare:[50,30,50]}[k];if(v)buzz(v)}
+function buzz(v){try{if(SET.vib!==false&&navigator.vibrate)navigator.vibrate(v)}catch(e){}}
 function musicCtx(){
   if(!R||R.phase==='lobby'||!R.players[ME])return 'menu';
   const cr=R.dg==='cripte',ab=R.dg==='abisso';
@@ -2767,6 +2889,48 @@ function seenTrack(){
   if(ch){clearTimeout(seenT);seenT=setTimeout(()=>{const S=getSeen();store(SEEN_K,JSON.stringify({c:[...S.c],e:[...S.e],r:[...S.r],p:[...S.p]}))},800)}
 }
 function getStats(){try{const o=JSON.parse(load(STAT_K));return o&&typeof o==='object'?o:{}}catch(e){return{}}}
+
+/* ================= IMPRESE ================= */
+const ACH_K='valdombra-imprese';
+const ACH=[
+ {id:'prima',n:'Prima vittoria',d:'Completa un dungeon in modalità normale.',cr:30,ok:(s)=>s.wins>=1},
+ {id:'rocca',n:'Liberatore della Rocca',d:'Completa la Rocca di Valdombra.',cr:40,ok:s=>((s.dg||{}).rocca||{}).wins>=1},
+ {id:'cripte',n:'Purificatore delle Cripte',d:'Completa le Cripte di Gelomorto.',cr:60,ok:s=>((s.dg||{}).cripte||{}).wins>=1},
+ {id:'abisso',n:'Sigillo dell\'Abisso',d:'Completa l\'Abisso di Braceferro.',cr:80,ok:s=>((s.dg||{}).abisso||{}).wins>=1},
+ {id:'bossall',n:'Ammazzaboss',d:'Sconfiggi tutti e 6 i boss.',cr:150,ok:s=>(s.bosses||[]).length>=6,pr:s=>[(s.bosses||[]).length,6]},
+ {id:'assedio5',n:'Assedio senza fine',d:'Completa un dungeon al Livello di Assedio 5.',cr:150,ok:s=>Object.values(s.dg||{}).some(d=>(d.maxLvl|0)>=5)},
+ {id:'eroi3',n:'Versatile',d:'Completa un dungeon con 3 eroi diversi.',cr:50,ok:s=>Object.values(s.cls||{}).filter(c=>c.wins).length>=3,pr:s=>[Object.values(s.cls||{}).filter(c=>c.wins).length,3]},
+ {id:'eroi10',n:'Leggenda di Valdombra',d:'Completa un dungeon con tutti e 10 gli eroi.',cr:250,ok:s=>Object.values(s.cls||{}).filter(c=>c.wins).length>=10,pr:s=>[Object.values(s.cls||{}).filter(c=>c.wins).length,10]},
+ {id:'coop',n:'Compagni d\'arme',d:'Completa un dungeon in gruppo.',cr:40,ok:(s,r)=>s.coopWins>=1},
+ {id:'coop4',n:'Compagnia leggendaria',d:'Completa un dungeon in un gruppo di almeno 4 eroi.',cr:70,ok:(s,r)=>s.big4>=1},
+ {id:'surv2',n:'Superstite',d:'In Sopravvivenza supera 2 cicli (32 piani).',cr:60,ok:s=>(s.survBest|0)>=32,pr:s=>[Math.min(32,s.survBest|0),32]},
+ {id:'daily3',n:'Abitudinario',d:'Gioca 3 sfide del giorno.',cr:40,ok:s=>(s.daily|0)>=3,pr:s=>[Math.min(3,s.daily|0),3]},
+ {id:'flawless',n:'Intoccabile',d:'Sconfiggi un boss senza perdere PV in quel combattimento.',cr:100,ok:s=>s.flawless>=1},
+ {id:'frenesia',n:'Frenesia',d:'Gioca 10 carte in un solo turno.',cr:50,ok:s=>(s.maxTurn|0)>=10,pr:s=>[Math.min(10,s.maxTurn|0),10]},
+ {id:'colpone',n:'Colpo devastante',d:'Infliggi almeno 50 danni con un solo colpo.',cr:40,ok:s=>(s.top|0)>=50,pr:s=>[Math.min(50,s.top|0),50]},
+ {id:'elite30',n:'Cacciatore di élite',d:'Sconfiggi 30 élite.',cr:60,ok:s=>(s.elites|0)>=30,pr:s=>[Math.min(30,s.elites|0),30]},
+ {id:'kill500',n:'Sterminatore',d:'Sconfiggi 500 nemici in totale.',cr:80,ok:s=>(s.kills|0)>=500,pr:s=>[Math.min(500,s.kills|0),500]},
+ {id:'snello',n:'Mazzo snello',d:'Completa un dungeon con 12 carte o meno nel mazzo.',cr:70,ok:s=>s.slim>=1},
+ {id:'angelo',n:'Angelo custode',d:'Rialza un compagno caduto durante un combattimento.',cr:30,ok:s=>(s.rev|0)>=1},
+ {id:'ricco',n:'Tesoriere',d:'Finisci una partita con almeno 300 oro.',cr:40,ok:s=>(s.maxGold|0)>=300,pr:s=>[Math.min(300,s.maxGold|0),300]},
+ {id:'collez',n:'Collezionista',d:'Sblocca tutti gli eroi.',cr:100,ok:()=>Object.keys(CLASSES).every(heroOwned)},
+];
+function getAch(){try{const a=JSON.parse(load(ACH_K));return Array.isArray(a)?a:[]}catch(e){return[]}}
+function achCheck(){const have=getAch(),st=getStats(),nw=[];
+  ACH.forEach(a=>{if(have.includes(a.id))return;let ok=false;try{ok=a.ok(st)}catch(e){}if(ok){have.push(a.id);nw.push(a)}});
+  if(nw.length){store(ACH_K,JSON.stringify(have));const n=nw.reduce((t,a)=>t+a.cr,0);setCrowns(getCrowns()+n);sfx('fanfare');nw.forEach((a,i)=>setTimeout(()=>toast('Impresa completata: '+a.n+' (+'+a.cr+' Corone)'),i*1800))}
+  return nw}
+function achPanel(){const L=UI.newAch;if(!L||!L.length||UI.newAchFor!==(R&&R.code+':'+R.seed+':'+(R.t0||0)))return '';
+  return `<div class="panel" style="border-color:var(--torch)"><b style="color:var(--torch2);font-size:18px">${L.length>1?'Nuove imprese!':'Nuova impresa!'}</b>${L.map(a=>`<div class="row" style="gap:8px">${ic('i_crown',18)}<span><b>${a.n}</b> · ${a.d} <b style="color:var(--torch2)">+${a.cr} Corone</b></span></div>`).join('')}</div>`}
+function achHTML(){const have=getAch(),st=getStats();const tot=ACH.reduce((t,a)=>t+(have.includes(a.id)?a.cr:0),0);
+  return `<p class="muted">Completate ${have.length} su ${ACH.length} · Corone guadagnate con le imprese: ${tot}</p><div class="achs">${ACH.map(a=>{const ok=have.includes(a.id);let pr='';if(!ok&&a.pr){try{const [x,y]=a.pr(st);pr=`<span class="achbar"><i style="width:${Math.round(x/y*100)}%"></i></span><small class="muted">${x}/${y}</small>`}catch(e){}}
+    return `<div class="ach ${ok?'ok':''}"><b>${ok?'✓ ':''}${a.n}</b><span class="muted">${a.d}</span>${pr}<small style="color:var(--torch2)">${ic('i_crown',12)} ${a.cr} Corone</small></div>`}).join('')}</div>`}
+
+// statistiche anonime per il bilanciamento: niente nomi, solo eroe, dungeon, esito, mazzo e reliquie
+function statSend(P,x,fl){if(!SET.stats)return;const c=sbClient();if(!c)return;
+  const row={versione:VERSION,dungeon:R.dg||'rocca',modalita:R.daily?'daily':R.mode==='surv'?'surv':'norm',livello:R.lvl|0,giocatori:Math.min(8,R.order.length),classe:P.cls,vittoria:!!R.win&&R.mode!=='surv',piano:fl|0,
+    boss:(R.mode!=='surv'&&R.floor>=ROWS+1)||R.win?bossId():null,morte:R.win?null:(R.deathAt||null),carte:P.deck.slice(0,80).map(d=>d.id+(d.up?'+':'')),reliquie:(P.relics||[]).slice(0,40),danni:Math.min(1e7,x.dmg|0),uccisioni:P.kills|0};
+  try{c.from('statistiche').insert(row).then(()=>{},()=>{})}catch(e){}}
 function statsAward(){
   if(!R||R.phase!=='end'||!R.players[ME])return;const key=R.code+':'+R.seed+':'+(R.t0||0);let done=[];try{done=JSON.parse(load(STATP_K))||[]}catch(e){}
   if(done.includes(key))return;done.push(key);store(STATP_K,JSON.stringify(done.slice(-50)));
@@ -2778,14 +2942,20 @@ function statsAward(){
   st.cls=st.cls||{};const c=st.cls[P.cls]=st.cls[P.cls]||{};inc(c,'runs');if(win)inc(c,'wins');c.best=Math.max(c.best||0,fl);
   st.dg=st.dg||{};const d=st.dg[R.dg||'rocca']=st.dg[R.dg||'rocca']||{};inc(d,'runs');if(win)inc(d,'wins');if(win)d.maxLvl=Math.max(d.maxLvl||0,R.lvl||0);
   st.cards=st.cards||{};Object.entries(x.cards||{}).forEach(([k,n])=>inc(st.cards,k,n));
+  if(win&&!solo)inc(st,'coopWins');if(win&&R.order.length>=4)inc(st,'big4');if(win&&P.deck.length<=12)inc(st,'slim');
+  inc(st,'elites',x.elites||0);inc(st,'rev',x.rev||0);if(x.flawless)inc(st,'flawless');st.maxTurn=Math.max(st.maxTurn||0,x.maxTurn||0);st.maxGold=Math.max(st.maxGold||0,P.gold||0);
+  st.bosses=st.bosses||[];(x.bosses||[]).forEach(b=>{if(!st.bosses.includes(b))st.bosses.push(b)});
   store(STAT_K,JSON.stringify(st));
+  const nw=achCheck();if(nw.length){UI.newAch=nw;UI.newAchFor=key;setTimeout(render,0)}
+  statSend(P,x,fl);
 }
-function openDiario(tab){UI.diTab=tab||UI.diTab||'stat';modal={title:'Diario dell\'eroe',diario:true,cancel:true,list:[]};render()}
+function openDiario(tab){try{achCheck()}catch(e){}UI.diTab=tab||UI.diTab||'stat';modal={title:'Diario dell\'eroe',diario:true,cancel:true,list:[]};render()}
 function diarioHTML(){
   const t=UI.diTab||'stat',S=getSeen();
   const allC=Object.keys(CARDS).filter(k=>CARDS[k].cl!=='stato'),allE=Object.keys(ENEMIES),allR=Object.keys(RELICS),allP=Object.keys(POTIONS);
-  const tabs=[['stat','Statistiche'],['c',`Carte ${allC.filter(k=>S.c.has(k)).length}/${allC.length}`],['e',`Mostri ${allE.filter(k=>S.e.has(k)).length}/${allE.length}`],['r',`Reliquie ${allR.filter(k=>S.r.has(k)).length}/${allR.length}`],['p',`Pozioni ${allP.filter(k=>S.p.has(k)).length}/${allP.length}`]];
+  const tabs=[['stat','Statistiche'],['ach',`Imprese ${getAch().length}/${ACH.length}`],['c',`Carte ${allC.filter(k=>S.c.has(k)).length}/${allC.length}`],['e',`Mostri ${allE.filter(k=>S.e.has(k)).length}/${allE.length}`],['r',`Reliquie ${allR.filter(k=>S.r.has(k)).length}/${allR.length}`],['p',`Pozioni ${allP.filter(k=>S.p.has(k)).length}/${allP.length}`]];
   let body='';
+  if(t==='ach')body=achHTML();
   if(t==='stat'){const st=getStats(),pct=(a,b)=>b?Math.round(a/b*100)+'%':'—';const fav=Object.entries(st.cards||{}).sort((a,b)=>b[1]-a[1]).slice(0,3).filter(e=>CARDS[e[0]]);
     body=`<div class="endstats"><div><b>${st.runs||0}</b>Partite</div><div><b>${st.wins||0}</b>Vittorie</div><div><b>${pct(st.wins||0,(st.runs||0)-(st.surv||0))}</b>Vittorie su partite normali</div><div><b>${st.best||0}</b>Piano più alto</div></div>
       <div class="endstats"><div><b>${st.kills||0}</b>Nemici uccisi</div><div><b>${st.dmg||0}</b>Danni totali</div><div><b>${st.top||0}</b>Colpo più forte</div><div><b>${st.heal||0}</b>PV curati</div></div>
@@ -2798,7 +2968,7 @@ function diarioHTML(){
     body=`<div class="row">${[['all','Tutte'],...Object.keys(CLASSES).map(k=>[k,CLASSES[k].n])].map(([k,n])=>`<button class="btn ${f===k?'primary':''}" onclick="UI.diCls='${k}';render()">${n}</button>`).join('')}</div>
       <p class="muted" style="font-size:13px">Le carte compaiono qui quando le vedi per la prima volta: nel mazzo, nelle ricompense o dal mercante.${canHover()?' Passa sopra una carta per il glossario.':' Tieni premuta una carta per il glossario.'}</p>
       <div class="cardgrid">${list.map(k=>S.c.has(k)?cardHTML({id:k,up:false}):`<div class="card unknown"><span class="cname">???</span><span class="ctype">${CLASSES[CARDS[k].cl]?CLASSES[CARDS[k].cl].n:''}</span></div>`).join('')}</div>`}
-  if(t==='e'){const where=id=>Object.keys(DUNGEONS).filter(d=>{const D=DUNGEONS[d];return [D.easy,D.hard,D.elites].some(L=>L.some(g=>g.includes(id)))||D.boss===id}).map(d=>DUNGEONS[d].n);
+  if(t==='e'){const where=id=>Object.keys(DUNGEONS).filter(d=>{const D=DUNGEONS[d];return [D.easy,D.hard,D.elites].some(L=>L.some(g=>g.includes(id)))||(BOSSES[d]||[D.boss]).includes(id)}).map(d=>DUNGEONS[d].n);
     body=`<div class="bestiary">${allE.map(k=>{const E=ENEMIES[k],ok=S.e.has(k),w=where(k);return `<div class="beast ${ok?'':'unk'} ${E.boss?'boss':''}">${sprImg(k,E.boss?72:56,ok?'':'locked')}<b>${ok?E.n:'???'}</b>
       <span class="muted">${E.boss?'Boss':E.elite?'Élite':'Nemico'}${ok?` · ${E.hp[0]===E.hp[1]?E.hp[0]:E.hp[0]+'–'+E.hp[1]} PV`:''}</span>${ok&&w.length?`<small>${w.join(', ')}</small>`:''}</div>`}).join('')}</div>`}
   if(t==='r')body=`<div class="plist">${allR.map(k=>S.r.has(k)?`<div class="prow">${relIc(k,32)}<div style="flex:1"><b>${RELICS[k].n}</b><br><span class="muted">${RELICS[k].d}</span></div></div>`:`<div class="prow unk"><span style="filter:brightness(.2)">${relIc(k,32)}</span><div style="flex:1"><b>???</b><br><span class="muted">Non l'hai ancora trovata.</span></div></div>`).join('')}</div>`;
@@ -2877,7 +3047,7 @@ function dailyEndHTML(score,kills){
 
 /* ================= PROFILO ONLINE (stessi progressi su ogni dispositivo) ================= */
 const ACC_K='valdombra-account';
-const SYNC_KEYS=[LK2,BK,CK,ZK,PK,XK,TK,XPK,SOLO_K,DAILY_K,SEEN_K,STAT_K,STATP_K,HEROES_K,BSK];
+const SYNC_KEYS=[LK2,BK,CK,ZK,PK,XK,TK,XPK,SOLO_K,DAILY_K,SEEN_K,STAT_K,STATP_K,HEROES_K,BSK,TUT_K,ACH_K,SKO_K,SKS_K];
 let ACC=(()=>{try{const a=JSON.parse(localStorage.getItem(ACC_K));return a&&a.nome&&a.token?a:null}catch(e){return null}})();
 const ACCS={busy:false,state:'',msg:'',gen:0,timer:null,last:0};
 function accKeep(){try{ACC?localStorage.setItem(ACC_K,JSON.stringify(ACC)):localStorage.removeItem(ACC_K)}catch(e){}}
@@ -2889,10 +3059,10 @@ function accMerge(srv,loc){
   const num=k=>{const a=parseInt(o[k]||'0',10)||0,b=parseInt(loc[k]||'0',10)||0;o[k]=String(Math.max(a,b))};
   const uni=k=>{const a=J(o[k])||[],b=J(loc[k])||[];o[k]=JSON.stringify([...new Set([...a,...b])].slice(-80))};
   const mx=k=>{const a=J(o[k])||{},b=J(loc[k])||{};const r={...a};Object.keys(b).forEach(x=>r[x]=Math.max(r[x]|0,b[x]|0));o[k]=JSON.stringify(r)};
-  num(CK);mx(XK);mx(LK2);uni(TK);uni(BK);uni(BSK);uni(PK);uni(XPK);uni(STATP_K);uni(HEROES_K);
+  num(CK);mx(XK);mx(LK2);uni(TK);uni(BK);uni(BSK);uni(TUT_K);uni(ACH_K);uni(SKO_K);uni(PK);uni(XPK);uni(STATP_K);uni(HEROES_K);
   {const a=J(o[SEEN_K])||{},b=J(loc[SEEN_K])||{};const r={};['c','e','r','p'].forEach(k=>r[k]=[...new Set([...(a[k]||[]),...(b[k]||[])])]);o[SEEN_K]=JSON.stringify(r)}
-  {const deep=(a,b)=>{if(typeof a==='number'||typeof b==='number')return Math.max(+a||0,+b||0);const r={...(a||{})};Object.keys(b||{}).forEach(k=>r[k]=deep(r[k],b[k]));return r};o[STAT_K]=JSON.stringify(deep(J(o[STAT_K])||{},J(loc[STAT_K])||{}))}
-  [ZK,SOLO_K].forEach(k=>{if(loc[k]!=null)o[k]=loc[k]});if(typeof SEEN!=='undefined')SEEN=null;
+  {const deep=(a,b)=>{if(Array.isArray(a)||Array.isArray(b))return [...new Set([...(Array.isArray(a)?a:[]),...(Array.isArray(b)?b:[])])];if(typeof a==='number'||typeof b==='number')return Math.max(+a||0,+b||0);const r={...(a||{})};Object.keys(b||{}).forEach(k=>r[k]=deep(r[k],b[k]));return r};o[STAT_K]=JSON.stringify(deep(J(o[STAT_K])||{},J(loc[STAT_K])||{}))}
+  [ZK,SOLO_K,SKS_K].forEach(k=>{if(loc[k]!=null)o[k]=loc[k]});if(typeof SEEN!=='undefined')SEEN=null;
   {const a=J(o[DAILY_K])||{},b=J(loc[DAILY_K])||{};const pick=(b.day||'')>(a.day||'')||((b.day===a.day)&&(b.sent&&!a.sent))?b:a;if(pick.day)o[DAILY_K]=JSON.stringify(pick)}
   return o;
 }

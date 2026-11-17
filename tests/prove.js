@@ -1,0 +1,104 @@
+// Prove automatiche di Assedio a Valdombra.
+// Apre il gioco in un browser senza finestra e fa giocare dei bot: se compare un errore JavaScript la prova fallisce.
+// Uso: node tests/prove.js   (serve il pacchetto "playwright" con Chromium installato)
+const {chromium}=require('playwright');
+const path=require('path');
+const PAGE='file://'+path.resolve(__dirname,'..','index.html');
+let fallite=0;
+const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fallite++};
+
+(async()=>{
+  const browser=await chromium.launch();
+  const ctx=await browser.newContext({viewport:{width:1280,height:800}});
+  // niente rete: il gioco deve funzionare anche senza Supabase
+  await ctx.route(/^https?:\/\//,r=>r.abort());
+  const page=await ctx.newPage();const errori=[];
+  page.on('pageerror',e=>errori.push(e.message));
+  page.on('dialog',d=>d.dismiss());
+  await page.goto(PAGE);await page.waitForTimeout(500);
+
+  console.log('1. Avvio');
+  ok(await page.evaluate(()=>typeof render==='function'&&!!document.querySelector('.classes')),'la schermata iniziale mostra gli eroi');
+  ok(await page.evaluate(()=>Object.keys(CLASSES).length>=10&&Object.keys(DUNGEONS).length>=3),'ci sono almeno 10 eroi e 3 dungeon');
+
+  console.log('2. Partite complete con i bot (tutti gli eroi, tutti i dungeon)');
+  const esiti=await page.evaluate(async()=>{
+    SET.tut=false;SPEED=0;const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+    localStorage.setItem('valdombra-eroi',JSON.stringify(Object.keys(CLASSES)));markBeaten('rocca');markBeaten('cripte');
+    const out=[];const dgs=Object.keys(DUNGEONS);
+    for(const [i,cls] of Object.keys(CLASSES).entries()){
+      const dg=dgs[i%dgs.length];R=null;solo=true;pickCls=cls;pickDg=dg;pickMode='norm';pickLvl=0;startSolo();ctx(ME);
+      let passi=0;const skip=new Set();
+      while(R.phase!=='end'&&passi<8000){passi++;ctx(ME);
+        // il bot gioca male: lo teniamo in vita per arrivare in fondo, ma non nei combattimenti che durano troppo
+        if(!(R.combat&&R.combat.turn>40))run.hp=Math.max(run.hp,Math.floor(run.max*.7));
+        if(run.pendPot){send({t:'potLeave'});continue}
+        if(R.phase==='map'){const a=availNodes();vote(a[0].y,a[0].x);await sleep(0);continue}
+        if(R.phase==='combat'){if(R.combat.busy||R.combat.won){await sleep(15);continue}const h=g.hero;render();
+          const k=h.hand.findIndex(c=>costOf(c)<=h.energy&&!CARDS[c.id].unplay&&!skip.has(c.uid));
+          if(k>=0){const al=alive(),u=h.hand[k].uid,n=h.hand.length,en=h.energy;modal=null;send({t:'play',uid:u,j:al[0]?g.enemies.indexOf(al[0]):null,a:ME,pk:Math.floor(Math.random()*4)});
+            // carte che chiedono una scelta (per esempio dagli scarti): se non è successo niente il bot le salta
+            ctx(ME);if(g&&g.hero&&g.hero.hand.some(c=>c.uid===u)&&g.hero.energy===en&&g.hero.hand.length===n)skip.add(u);modal=null}
+          else{skip.clear();send({t:'end'});await sleep(10)}continue}
+        if(R.phase==='room'){const P=run;render();if(P.screen==='event'&&!P.event.result){const ev=EVENTS.find(e=>e.id===P.event.id);const o=ev.opts.findIndex(o=>!o.pick&&(!o.req||o.req()));send(o>=0?{t:'ev',k:o}:{t:'done'})}
+          else if(P.screen==='reward'&&P.reward&&P.reward.cards)send({t:'takeCard',k:0});else if(P.screen==='rest')send({t:'restHeal'});else send({t:'done'});await sleep(0);continue}
+        await sleep(5)}
+      render();out.push([cls,dg,R.phase,R.floor,!!R.win,R.phase==='end'?'':' (bloccato: '+JSON.stringify({schermata:run.screen,pozione:run.pendPot||null,mano:g&&g.hero?g.hero.hand.map(c=>c.id):null,energia:g&&g.hero?g.hero.energy:null,evento:run.event&&run.event.id})+')'])}
+    return out});
+  for(const [cls,dg,fase,piano,win,dbg] of esiti)ok(fase==='end'&&piano>0,`${cls} nel dungeon ${dg}: arrivato al piano ${piano}${win?' e vinto':''}${dbg}`);
+
+  console.log('3. Ogni carta, ogni nemico, ogni boss (in gruppo di due)');
+  const cop=await page.evaluate(async()=>{
+    SPEED=0;const sleep=ms=>new Promise(r=>setTimeout(r,ms));const errs=[];let carte=0,nemici=0;
+    const nuovaStanza=cls=>{solo=false;isHost=true;ME='pA';myName='Prova';chan=null;R=newLobby('COPE');R.players.pA.cls=cls;
+      R.players.pB={pid:'pB',name:'Alleato',cls:'chierico',ready:true};R.order.push('pB');online=new Set(R.order);startRunRoom(0,'COPERTURA')};
+    const turnoNemici=async()=>{for(const p of ['pA','pB']){ctx(p);if(g&&g.hero&&!g.hero.down&&!g.hero.ended)dispatch(p,{t:'end'})}let w=0;while(R.combat&&R.combat.busy&&w<400){await sleep(5);w++}};
+    // ogni carta di ogni eroe
+    for(const cls of Object.keys(CLASSES)){nuovaStanza(cls);
+      for(const id of Object.keys(CARDS).filter(k=>CARDS[k].cl===cls)){
+        for(const up of [false,true]){try{
+          startCombat(['orco','goblin'],'combat');R.combat.enemies.forEach(e=>{e.hp=e.max=999});
+          ctx('pA');const h=g.hero;h.energy=9;const c={id,up,uid:uid++};h.hand.push(c);
+          for(let k=0;k<3;k++)h.disc.push({id:'colpo',up:false,uid:uid++});
+          playCard(c.uid,0,'pA',0);ctx('pA');if(g&&g.hero&&g.hero.hand.some(x=>x.uid===c.uid))playCard(c.uid,0,'pB',1);
+          await turnoNemici();carte++}catch(e){errs.push('carta '+id+(up?'+':'')+': '+e.message)}}}}
+    // ogni nemico, élite e boss (le élite con ogni tratto)
+    nuovaStanza('guardiano');
+    for(const id of Object.keys(ENEMIES)){const E=ENEMIES[id];const tratti=E.elite?Object.keys(ETRAITS):[null];
+      for(const tr of tratti){try{
+        startCombat([id],E.boss?'boss':E.elite?'elite':'combat');if(tr)R.combat.enemies[0].trait=tr;
+        for(let t=0;t<6&&R.phase==='combat';t++){Object.keys(R.combat.heroes).forEach(p=>{R.players[p].hp=R.players[p].max});
+          ctx('pA');const h=g.hero;const a=h.hand.find(c=>CARDS[c.id].t==='A'&&costOf(c)<=h.energy);if(a)playCard(a.uid,0,'pA');
+          await turnoNemici()}
+        if(R.combat){R.combat.enemies.forEach(e=>{if(e.hp>0)hurtEnemy(e,99999)});checkEnd();let w=0;while(R.phase==='combat'&&w<200){await sleep(5);w++}}
+        if(R.phase==='room')R.order.forEach(p=>{R.players[p].screen=null;R.players[p].done=true});R.phase='map';nemici++}catch(e){errs.push('nemico '+id+(tr?' ('+tr+')':'')+': '+e.message)}}}
+    render();return {errs,carte,nemici}});
+  ok(cop.carte>100,`giocate ${cop.carte} carte (normali e potenziate)`);
+  ok(cop.nemici>=Object.keys({}).length+20,`affrontati ${cop.nemici} nemici, élite e boss`);
+  cop.errs.slice(0,20).forEach(e=>ok(false,e));
+
+  console.log('4. Sopravvivenza e sfida del giorno');
+  ok(await page.evaluate(()=>{R=null;pickCls='guerriero';pickDg='rocca';pickMode='surv';startSolo();render();return R.mode==='surv'&&R.phase==='map'}),'la Sopravvivenza parte');
+  ok(await page.evaluate(()=>{R=null;pickMode='norm';try{startDaily()}catch(e){return false}render();return !!(R&&R.daily)}),'la sfida del giorno parte');
+
+  console.log('5. Multigiocatore simulato (host con due giocatori)');
+  const mp=await page.evaluate(async()=>{
+    const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+    solo=false;isHost=true;ME='pA';myName='Luca';chan=null;R=newLobby('TEST');R.players.pA.cls='guerriero';
+    R.players.pB={pid:'pB',name:'Sara',cls:'chierico',ready:true};R.order.push('pB');online=new Set(R.order);
+    startRunRoom(0,'PROVA');startCombat(['goblin','lupo'],'combat');commit();
+    dispatch('pA',{t:'ping',k:'e',j:0});const ping=!!R.combat.pings.pA;
+    dispatch('pA',{t:'end'});dispatch('pB',{t:'end'});await sleep(3000);render();
+    return {ping,turno:R.combat?R.combat.turn:-1}});
+  ok(mp.ping,'i segnali arrivano all\'host');
+  ok(mp.turno>=2||mp.turno===-1,'dopo la fine turno di tutti tocca ai nemici e poi di nuovo agli eroi');
+
+  console.log('6. Schermate');
+  ok(await page.evaluate(()=>{R=null;solo=true;ME='solo';screen='title';const t=['openBottega','openSettings','openDiario'];for(const f of t){window[f]();render();closeModal()}return true}),'Bottega, Impostazioni e Diario si aprono');
+
+  console.log('');
+  if(errori.length){console.log('Errori JavaScript nella pagina:');[...new Set(errori)].forEach(e=>console.log('  - '+e));fallite++}
+  await browser.close();
+  console.log(fallite?`PROVE FALLITE: ${fallite}`:'Tutte le prove sono passate.');
+  process.exit(fallite?1:0);
+})().catch(e=>{console.error(e);process.exit(1)});
