@@ -247,12 +247,14 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     r.luogo=pxLuogo('shop',60).includes('pixel/luoghi/shop.png');r.icona=ic('r_elmo',20).includes('pixel/icone/r_elmo.png')&&potIc('cura',20).includes('pixel/icone/pot_cura.png');
     R=null;solo=true;ME='solo';screen='title';modal=null;render();r.titolo=!!document.querySelector('.pxtitle img');
     openVillaggio();r.villaggio=document.querySelectorAll('.pxvil img').length>=5&&document.querySelectorAll('.vilimg').length>=5&&document.querySelector('.pxvil').innerHTML.includes('villaggio/locanda-'+Math.min(getVil().locanda|0,3)+'.png');closeModal();
+    // carta «B»: classe sul body con l'interruttore acceso, runa del costo
+    {const tmp=document.createElement('div');tmp.innerHTML=cardHTML({id:'colpo',uid:9,up:false},{});document.body.appendChild(tmp);r.cartaB=document.body.classList.contains('pxui')&&getComputedStyle(tmp.querySelector('.cost'),'::before').transform!=='none';tmp.remove()}
     // fuori dal combattimento: scelta dell'eroe e negozio degli aspetti
     R=null;solo=true;ME='solo';screen='title';modal=null;render();
     const scelta=()=>[...document.querySelectorAll('.classes .pxs')].map(e=>e.style.backgroundImage);
     r.scelta=scelta();setSkin('guerriero','cremisi');r.sceltaAspetto=scelta();setSkin('guerriero',null);
     UI.skCls='guerriero';modal={title:'Aspetti',cancel:true,html:skinsHTML()};render();{let w=0;while(!PXI['aspetti/guerriero-gelo']&&w<300){await sleep(10);w++}}render();r.negozio=document.querySelectorAll('.shopgrid .pxs').length>=2;modal=null;
-    SET.px=false;saveSet();render();r.rispenta=!document.querySelector('.pxh')&&!document.querySelector('.pxs');
+    SET.px=false;saveSet();render();r.rispenta=!document.querySelector('.pxh')&&!document.querySelector('.pxs');r.carteSpente=!document.body.classList.contains('pxui');
     R=null;solo=true;ME='solo';screen='title';modal=null;render();return r});
   ok(px.base&&px.spenta&&px.interruttore,'Grafica Pixellab: spenta di base, con l\'interruttore in Sviluppo, e senza resta lo sprite di sempre');
   ok(px.caricate===275&&!px.senzaFigura.length,`le immagini in pixel/ si caricano (${px.caricate}/275) e ogni eroe ha la sua figura${px.senzaFigura.length?' (mancano: '+px.senzaFigura+')':''}`);
@@ -263,6 +265,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(px.lampo&&px.sprite&&px.rispenta,'se un\'immagine manca resta la grafica di sempre');
   ok(px.aspetto&&px.negozio,'gli aspetti hanno la loro versione Pixellab, anche nel negozio degli aspetti');
   ok(/combattimento-rocca/.test(px.sfondo)&&px.mappa&&px.mappaEroi&&px.luogo&&px.icona&&px.titolo&&px.villaggio,'sfondi del combattimento, mappa con decorazioni e figura dell\'eroe, luoghi, icone, schermata iniziale e villaggio a stadi '+JSON.stringify({s:!!px.sfondo,m:px.mappa,e:px.mappaEroi,l:px.luogo,i:px.icona,t:px.titolo,v:px.villaggio}));
+  ok(px.cartaB&&px.carteSpente,'carte con cornice del tipo e costo a runa solo con l\'interruttore acceso');
   ok(px.scelta.length>=4&&px.scelta.some(s=>s.includes('pixel/guerriero.png'))&&!px.sceltaAspetto.some(s=>s.includes('pixel/guerriero.png')),`fuori dal combattimento: figure Pixellab nella scelta dell'eroe (${px.scelta.length}), che seguono l'aspetto scelto`);
 
   console.log('');
