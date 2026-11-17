@@ -214,6 +214,15 @@ body[data-dg="cripte"] .mapsvg .edge.done{stroke:#8fd3ff}body[data-dg="cripte"] 
 .pxe{display:block;flex:none;max-width:none;background-repeat:no-repeat;background-position:0 0;background-size:100% 100%;image-rendering:pixelated;margin:calc(var(--t)*var(--mt)) calc(var(--t)*var(--mr)) calc(var(--t)*var(--mb)) calc(var(--t)*var(--ml))}
 .pxe,.ent.enemy .face .spr.pxe{width:calc(var(--t)*var(--k));height:calc(var(--t)*var(--k))}
 .spr.inl.pxe{display:inline-block;vertical-align:middle}
+.spr.pxi{image-rendering:auto}
+.pxvil{display:flex;justify-content:center;align-items:flex-end;flex-wrap:wrap;gap:2px 6px;padding:10px 8px 6px;border-radius:12px;background:linear-gradient(#141020,#24203a 60%,#2a3a24)}
+.pxvil img{width:104px;height:104px;image-rendering:pixelated}
+.vilimg{width:96px;height:96px;image-rendering:pixelated;align-self:center}
+.pxtitle{border-radius:12px;overflow:hidden;line-height:0;border:1px solid var(--line)}.pxtitle img{width:100%;height:auto;max-height:240px;object-fit:cover;image-rendering:pixelated}
+.pxmap .edge{stroke:#9a7646;stroke-width:8;stroke-dasharray:none;opacity:.5}
+.pxmap .edge.done{opacity:.95}
+.pxmap .node circle{fill:rgba(18,14,26,.8)}
+.pxmap .node.done image{opacity:.5}
 @keyframes pxan{from{background-position:0 0}to{background-position:100% 0}}
 .ent .nm{font-size:13px;font-weight:700;line-height:1.15}
 .intent .spr,.blk .spr,.chip .spr{width:14px!important;height:14px!important}
@@ -338,6 +347,7 @@ body.hc{--muted:#ddd6ea;--line:#8d82a6}body.hc .card .cdesc{color:#15101c}body.h
   .ally .chips{display:none}
   .hero .face .pxh{width:92px;height:92px;margin:-15px -26px -17px}.ally>.pxh{width:50px;height:50px;margin:-9px -15px -10px}
   .enemy .face .pxe{--t:58px!important}.enemy.boss .face .pxe{--t:120px!important}
+  .pxvil img{width:64px;height:64px}.vilimg{width:72px;height:72px}
   .enemy{min-width:96px}
   .card{width:100px;min-height:150px;padding:5px 5px 7px}
   .card .cname{font-size:13px}.card .cdesc{font-size:11.5px}
@@ -788,12 +798,12 @@ function spr(name){if(sprCache[name])return sprCache[name];if(name.includes('@')
 function potSrc(id){const key='pot_'+id;if(sprCache[key])return sprCache[key];const col=POTIONS[id].col;const a=ICONS.i_flask;const c=document.createElement('canvas');c.width=12;c.height=12;const x=c.getContext('2d');
   const dark=col.replace(/^#/,'').match(/../g).map(h=>Math.round(parseInt(h,16)*.62).toString(16).padStart(2,'0')).join('');
   a.forEach((r,y)=>[...r].forEach((ch,X)=>{const v=ch==='x'?col:ch==='X'?'#'+dark:PAL[ch];if(v){x.fillStyle=v;x.fillRect(X,y,1,1)}}));return sprCache[key]=c.toDataURL()}
-const potIc=(id,px)=>`<img class="spr inl" src="${potSrc(id)}" width="${px}" height="${px}" alt="">`;
-const ic=(name,px=16)=>`<img class="spr inl" src="${spr(name)}" width="${px}" height="${px}" alt="">`;
+const potIc=(id,px)=>{const p=pxIco('pot_'+id);return `<img class="spr inl${p&&px<32?' pxi':''}" src="${p||potSrc(id)}" width="${px}" height="${px}" alt="">`};
+const ic=(name,px=16)=>{const p=pxIco(name);return `<img class="spr inl${p&&px<32?' pxi':''}" src="${p||spr(name)}" width="${px}" height="${px}" alt="">`};
 const relIc=(id,px=20)=>ic('r_'+id,px);
 // Grafica Pixellab (Sviluppo): la figura ferma dell'eroe al posto dello sprite, solo per il nome semplice dell'eroe (con un aspetto, «eroe@aspetto», resta lo sprite)
 const pxFig=name=>{try{return !!(SET.px&&CLASSES[name]&&PXI[name])}catch(e){return false}};
-const sprImg=(name,px,cls='',noPx)=>{if(!noPx&&pxeOk(name))return pxeHTML(name,px,cls);if(!noPx&&pxFig(name))return `<span class="spr pxs ${cls}" role="img" aria-label="${CLASSES[name].n}" style="width:${px}px;background-image:url(pixel/${name}.png)"></span>`;const src=spr(name);const a=SPR[name]||ICONS[name]||SPR[String(name).split('@')[0]];return `<img class="spr ${cls}" src="${src}" width="${px}" height="${Math.round(px*a.length/a[0].length)}" alt="">`};
+const sprImg=(name,px,cls='',noPx)=>{if(!noPx&&pxeOk(name))return pxeHTML(name,px,cls);if(!noPx&&pxFig(name))return `<span class="spr pxs ${cls}" role="img" aria-label="${CLASSES[name].n}" style="width:${px}px;background-image:url(pixel/${name}.png)"></span>`;const pi=!noPx&&pxIco(name),src=pi||spr(name);const a=SPR[name]||ICONS[name]||SPR[String(name).split('@')[0]];return `<img class="spr ${cls}${pi&&px<32?' pxi':''}" src="${src}" width="${px}" height="${Math.round(px*a.length/a[0].length)}" alt="">`};
 
 /* ================= DATI DI GIOCO ================= */
 const CLASSES={
@@ -2154,7 +2164,7 @@ const PXI={};let pxReq=false;
 const PXA={};// pid -> {an,t0}: animazione in corso, così sopravvive ai ridisegni della schermata
 function pxLoad(){if(pxReq)return;pxReq=true;let left=0;const done=()=>{if(--left===0&&SET.px)render()};
   const keys=[];Object.keys(CLASSES).forEach(c=>['',...PX_AN].forEach(a=>keys.push(a?c+'-'+a:c)));
-  Object.keys(PXE).forEach(id=>['',...PXE_AN].forEach(a=>keys.push('nemici/'+id+(a?'-'+a:''))));
+  Object.keys(PXE).forEach(id=>['',...PXE_AN].forEach(a=>keys.push('nemici/'+id+(a?'-'+a:''))));keys.push(...pxExtraKeys());
   keys.forEach(k=>{const im=new Image();left++;
     im.onload=()=>{PXI[k]={n:Math.max(1,Math.round(im.naturalWidth/Math.max(1,im.naturalHeight)))};done()};
     im.onerror=()=>{PXI[k]=null;done()};im.src='pixel/'+k+'.png'})}
@@ -2182,6 +2192,33 @@ function pxeCss(id,t,an,ago){const [C,x0,y0,x1,y1]=PXE[id],F=Math.max(x1-x0,y1-y
 function pxeHTML(id,px,cls,key){let an=null,ago=0;const a=key&&PXA[key];
   if(a){const inf=PXI['nemici/'+id+'-'+a.an];ago=Date.now()-a.t0;if(inf&&inf.n>=2&&ago<inf.n*PX_FD&&pxMove())an=a.an;else delete PXA[key]}
   return `<span class="spr pxe ${an?'pxan':cls||''}" role="img" aria-label="${esc(ENEMIES[id].n)}" data-pxe="${id}" data-cls="${cls||''}" style="${pxeCss(id,px+'px',an,ago)}" onanimationend="pxEnd(event,this)"></span>`}
+/* Altre immagini Pixellab (v7.4): villaggio a stadi, icone, luoghi, sfondi e mappe. Ognuna si usa solo se si è caricata. */
+const PXV={locanda:4,mercato:4,fucina:4,erbe:4,tempio:4,sala:2};// stadi: 0 = in macerie, poi un'immagine per livello
+const PXI_UI=['i_coin','i_shield','i_buff','i_heal','i_skull','i_gear','i_note','i_gem','i_house','i_crown','i_lock','i_flask','combat','elite','event','rest','shop','treasure','boss'];
+const PXDG=['rocca','cripte','abisso'],PXMAP_H=1344/384;// lo sfondo della mappa è una striscia verticale che si ripete
+function pxExtraKeys(){const k=[];Object.entries(PXV).forEach(([b,n])=>{for(let i=0;i<n;i++)k.push('villaggio/'+b+'-'+i)});
+  Object.keys(RELICS).forEach(r=>k.push('icone/r_'+r));Object.keys(POTIONS).forEach(p=>k.push('icone/pot_'+p));PXI_UI.forEach(i=>k.push('icone/'+i));
+  EVENTS.forEach(e=>{const s=e.spr||'e_'+e.id;if(s.startsWith('e_')&&!k.includes('icone/'+s))k.push('icone/'+s)});
+  ['shop','rest','treasure'].forEach(l=>k.push('luoghi/'+l));k.push('sfondi/titolo');
+  PXDG.forEach(d=>{k.push('sfondi/combattimento-'+d,'sfondi/mappa-'+d);for(let i=1;i<=4;i++)k.push('mappa/'+d+'-'+i)});return k}
+function pxOkK(k){try{return !!(SET.px&&PXI[k])}catch(e){return false}}
+function pxIco(name){return pxOkK('icone/'+name)?'pixel/icone/'+name+'.png':null}
+function pxLuogo(k,px){return pxOkK('luoghi/'+k)?`<img class="spr" src="pixel/luoghi/${k}.png" width="${px}" height="${px}" alt="">`:sprImg(k,px)}
+function pxVil(b,n){const k='villaggio/'+b+'-'+Math.max(0,Math.min(n|0,(PXV[b]||1)-1));return pxOkK(k)?k:null}
+function vilPixHTML(){const v=getVil(),L=vilList();if(!L.every(b=>pxVil(b.id,v[b.id])))return '';
+  return `<div class="pxvil" role="img" aria-label="Il villaggio: ${vilDone()} ricostruzioni su ${vilTot()}">${L.map(b=>`<img src="pixel/${pxVil(b.id,v[b.id])}.png" alt="" title="${b.n}">`).join('')}</div>`}
+function pxCombatBg(){const d=R&&R.dg||'rocca';return pxOkK('sfondi/combattimento-'+d)?`;background:linear-gradient(rgba(14,11,20,.6),rgba(14,11,20,.85)),url(pixel/sfondi/combattimento-${d}.png) center top/cover`:''}
+// mappa: sfondo che si ripete, decorazioni negli spazi vuoti, figure degli eroi sul nodo dove siete
+function pxMapLayer(map,W,H,G,pos){const d=R.dg||'rocca';if(!pxOkK('sfondi/mappa-'+d))return {bg:'',deco:'',heroes:''};const th=Math.round(W*PXMAP_H);
+  const bg=`<defs><pattern id="pxbg" patternUnits="userSpaceOnUse" width="${W}" height="${th}"><image href="pixel/sfondi/mappa-${d}.png" width="${W}" height="${th}" preserveAspectRatio="none" style="image-rendering:pixelated"/></pattern></defs><rect width="${W}" height="${H}" fill="url(#pxbg)"/><rect width="${W}" height="${H}" fill="#120e18" opacity=".52"/>`;
+  let deco='';map.forEach((row,y)=>{for(let x=0;x<7;x++){if(row&&row[x])continue;const h=hashStr(R.seed+'#d'+y+','+x);if(h%100>=45)continue;const i=1+h%4;if(!pxOkK('mappa/'+d+'-'+i))continue;
+    const cx=50+x*100+(h>>3)%30-15,cy=H-50-y*G+(h>>6)%24-12;deco+=`<image href="pixel/mappa/${d}-${i}.png" x="${cx-24}" y="${cy-24}" width="48" height="48" style="image-rendering:pixelated" opacity=".9"/>`}});
+  let heroes='';if(R.pos){const n=map[R.pos.y][R.pos.x];if(n){const[x1,y1]=pos(n),r=n.type==='boss'?44:24;const ids=R.order.filter(p=>R.players[p]);
+    ids.forEach((p,i)=>{const P=R.players[p],c=pxCls(P),off=(i-(ids.length-1)/2)*20;heroes+=c?`<image href="pixel/${c}.png" x="${x1-34+off}" y="${y1-r-58}" width="68" height="68" style="image-rendering:pixelated"/>`:`<image href="${spr(hsk(P))}" x="${x1-14+off}" y="${y1-r-32}" width="28" height="28" style="image-rendering:pixelated"/>`})}}
+  return {bg,deco,heroes}}
+function pxMapNode(n,x1,y1,r,bid){if(n.type==='boss'&&pxeOk(bid)){const [C,x0,y0,xx,yy]=PXE[bid],F=Math.max(xx-x0,yy-y0),s=r*1.7/F,S=C*s;
+    return `<image href="pixel/nemici/${bid}.png" x="${(x1-(x0+xx)/2*s).toFixed(1)}" y="${(y1-(y0+yy)/2*s).toFixed(1)}" width="${S.toFixed(1)}" height="${S.toFixed(1)}" style="image-rendering:pixelated"/>`}
+  const p=n.type!=='boss'&&pxIco(n.type);return p?`<image href="${p}" x="${x1-r*.78}" y="${y1-r*.78}" width="${r*1.56}" height="${r*1.56}" style="image-rendering:pixelated"/>`:null}
 // fa partire un'animazione su un eroe (k = 'h-<pid>') o su un nemico (k = 'e<indice>'); false se non si può e serve il vecchio effetto
 function pxPlay(k,an){if(!SET.px||!R)return false;k=String(k);
   if(/^e\d+$/.test(k)){const en=R.combat&&R.combat.enemies[+k.slice(1)];if(!en||en.hp<=0||!pxeOk(en.id))return false;
@@ -2418,7 +2455,7 @@ function giocaHTML(){
 function titleHTML(){
   let sv=null;try{const s=load(SOLO_K);sv=s?JSON.parse(s):null}catch(e){}
   const sp=sv&&sv.players&&sv.players.solo;
-  return `${modal?'':'<button class="btn primary playfab" onclick="openGioca()" aria-label="Gioca: scegli la modalità">▶ Gioca</button>'}<main class="hasfab"><div class="wrap" style="padding-block:12px 24px">
+  return `${modal?'':'<button class="btn primary playfab" onclick="openGioca()" aria-label="Gioca: scegli la modalità">▶ Gioca</button>'}<main class="hasfab"><div class="wrap" style="padding-block:12px 24px">${pxOkK('sfondi/titolo')?'<div class="pxtitle"><img src="pixel/sfondi/titolo.png" alt="La rocca di Valdombra"></div>':''}
     <div style="display:flex;flex-direction:column;gap:10px">
       <span class="muted" style="letter-spacing:.2em;text-transform:uppercase;font-size:12px">Deckbuilder roguelike</span>
       <h1>Assedio a<br>Valdombra</h1>
@@ -2523,7 +2560,7 @@ function mapScreen(){
     n.next.forEach(nx=>{const m=map[n.y+1][nx];const[x2,y2]=pos(m);lines+=`<line class="edge ${doneE.has(n.y+','+n.x+'>'+m.y+','+m.x)?'done':''}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`});
     const k=n.y+','+n.x;const cur=R.pos&&R.pos.y===n.y&&R.pos.x===n.x;const r=n.type==='boss'?44:24;const tap=drawOk(n);
     nodes+=`<g data-k="${k}" class="node ${UI.anim&&UI.anim.cur===k?'spin':''} ${UI.anim&&UI.anim.done&&UI.anim.win===k?'win':''} ${done.has(k)?'done':''} ${cur?'cur':''} ${av.has(k)&&!UI.draw?'avail':''} ${tap&&UI.draw?'drawable':''} ${myV===k?'voted':''} ${n.type==='boss'?'boss':''}" ${(UI.draw?tap:av.has(k))?`onclick="nodeTap(${n.y},${n.x})" role="button" tabindex="0" aria-label="${NODEN[n.type]}, piano ${n.y+1}" onkeydown="if(event.key==='Enter')nodeTap(${n.y},${n.x})"`:''}>
-      <circle cx="${x1}" cy="${y1}" r="${r}"/><image href="${spr(n.type==='boss'?bossId():n.type)}" x="${x1-r*.62}" y="${y1-r*.62}" width="${r*1.24}" height="${r*1.24}" style="image-rendering:pixelated"/><title>${n.type==='boss'?'Boss: '+BOSSI[bossId()][0]+'. '+BOSSI[bossId()][3]:NODEN[n.type]}</title>
+      <circle cx="${x1}" cy="${y1}" r="${r}"/>${pxMapNode(n,x1,y1,r,bossId())||`<image href="${spr(n.type==='boss'?bossId():n.type)}" x="${x1-r*.62}" y="${y1-r*.62}" width="${r*1.24}" height="${r*1.24}" style="image-rendering:pixelated"/>`}<title>${n.type==='boss'?'Boss: '+BOSSI[bossId()][0]+'. '+BOSSI[bossId()][3]:NODEN[n.type]}</title>
       ${tally[k]&&!solo?`<circle class="vbadge" cx="${x1+r*.8}" cy="${y1-r*.8}" r="12"/><text class="vbadge-t" x="${x1+r*.8}" y="${y1-r*.8}">${tally[k]}</text>`:''}</g>`;
   }));
   const act=active();const nv=act.filter(p=>R.votes[p]).length;
@@ -2534,7 +2571,8 @@ function mapScreen(){
       (fin?`Si va: <b>${NODEN[wn.type]}</b> (${va.tally[va.win]} voti contro ${Object.values(va.tally).reduce((a,b)=>a+b,0)-va.tally[va.win]})`:`Vince la maggioranza...`)}</div>`}
   const tools=solo||R.voteAnim?'':`<div class="plantools">${UI.draw?`<span class="pdot" style="background:${pcol(ME)}"></span><span class="muted" style="flex:1;min-width:180px">Tocca i nodi uno dopo l'altro per disegnare il tuo percorso: gli altri lo vedono col tuo colore. Tocca l'ultimo nodo per toglierlo.</span>`:'<span class="muted" style="flex:1;min-width:180px">Proponi la strada al gruppo disegnando un percorso di prova.</span>'}
     ${mine.length?`<button class="btn" onclick="send({t:'plan',p:[]})">Cancella il mio</button>`:''}<button class="btn ${UI.draw?'primary':''}" onclick="UI.draw=!UI.draw;render()">${UI.draw?'Fine, torna a votare':'Traccia un percorso'}</button></div>`;
-  return `<main class="flush">${banner}${tools}<div class="mapwrap" id="mapwrap"><svg class="mapsvg ${UI.draw?'drawing':''}" id="mapsvg" viewBox="0 0 ${W} ${H}" aria-label="Mappa della Rocca">${lines}${plans}${nodes}</svg></div>
+  const pxl=pxMapLayer(map,W,H,G,pos);
+  return `<main class="flush">${banner}${tools}<div class="mapwrap" id="mapwrap"><svg class="mapsvg ${UI.draw?'drawing':''} ${pxl.bg?'pxmap':''}" id="mapsvg" viewBox="0 0 ${W} ${H}" aria-label="Mappa della Rocca">${pxl.bg}${pxl.deco}${lines}${plans}${nodes}${pxl.heroes}</svg></div>
     <div class="legend">${Object.keys(NODEIC).map(k=>`<span>${sprImg(k,16,'inl')} ${NODEN[k]}</span>`).join('')}<span style="color:var(--torch2)">${msg}</span></div></main>`;
 }
 function scrollMap(){
@@ -2561,7 +2599,7 @@ function combatScreen(){
   const heroes=Object.keys(g.heroes).filter(p=>!g.heroes[p].down&&isOnline(p));const ended=heroes.filter(p=>g.heroes[p].ended).length;
   let status=UI.ping?'Segnala: tocca un nemico («attacco questo!») o il tuo eroe («proteggimi!»)':UI.om&&!sel?'Lato Ombra: scegli la carta da giocare (+50%, +1 Ombra)':sel?(sel.ally?'Scegli l\'eroe da aiutare':'Scegli un nemico come bersaglio'):'Turno '+g.turn;
   if(g.busy)status='Turno dei nemici...';else if(h.down)status='Sei a terra: ti rialzi a fine combattimento';else if(h.ended&&!solo)status=`In attesa degli altri (${ended}/${heroes.length})`;
-  return `<main class="flush"><div class="combat" style="--omb:${LO()?(omOf(ME)/OM_MAX*.75).toFixed(2):0}"><div class="cscroll" id="cscroll">
+  return `<main class="flush"><div class="combat" style="--omb:${LO()?(omOf(ME)/OM_MAX*.75).toFixed(2):0}${pxCombatBg()}"><div class="cscroll" id="cscroll">
     <div class="enemies">${en}</div>
     ${allies?`<div class="allies">${allies}</div>`:''}
     <div class="herorow">
@@ -2606,7 +2644,7 @@ function shopScreen(){
   const dark=lo&&om>=OM_HIGH&&s.dark?`<div class="panel" style="border-color:#7a4cb0;background:linear-gradient(160deg,#21122f,#130b1c)"><h3 class="omtag">Il Mercante d'Ombra</h3><p class="muted">Da dietro il carretto, una figura incappucciata ti fa cenno: «Io accetto un altro tipo di pagamento...»</p>
     <div class="shopgrid"><div class="shopitem ${s.dark.sold?'sold':''}"><button class="relicbox" onclick="send({t:'darkBuy'})"><span class="ic">${relIc(s.dark.id,40)}</span><b>${RELICS[s.dark.id].n}</b><span class="muted">${RELICS[s.dark.id].d}</span></button><span class="price omtag">+3 Ombra</span></div></div></div>`:'';
   const inc=lo&&om>0?`<div class="shopitem ${s.inc?'sold':''}"><button class="relicbox" onclick="${run.gold<35?"toast('Oro insufficiente')":"send({t:'incenso'})"}"><span class="ic">${ic('i_heal',40)}</span><b>Incenso purificatore</b><span class="muted">Perdi 3 Ombra.</span></button><span class="price ${run.gold<35?'no':''}">${ic('i_coin',16)} 35</span></div>`:'';
-  return `<main><div class="wrap"><div class="evhead"><span class="ic">${sprImg('shop',60)}</span><div><h2>Il Mercante Elfo</h2><p class="muted">${voce}</p></div></div>
+  return `<main><div class="wrap"><div class="evhead"><span class="ic">${pxLuogo('shop',60)}</span><div><h2>Il Mercante Elfo</h2><p class="muted">${voce}</p></div></div>
   <div class="panel"><h3>Carte</h3><div class="shopgrid">${s.cards.map((it,k)=>`<div class="shopitem ${it.sold?'sold':''}">${cardHTML({id:it.id,up:false},{click:`buyUI('cards',${k})`})}${pc(it.price)}</div>`).join('')}</div></div>
   <div class="panel"><h3>Reliquie e pozioni</h3><div class="shopgrid">
     ${s.relics.map((it,k)=>`<div class="shopitem ${it.sold?'sold':''}"><button class="relicbox" onclick="buyUI('relics',${k})"><span class="ic">${relIc(it.id,40)}</span><b>${RELICS[it.id].n}</b><span class="muted">${RELICS[it.id].d}</span></button>${pc(it.price)}</div>`).join('')}
@@ -2618,7 +2656,7 @@ function shopScreen(){
 }
 function restScreen(){
   const h=Math.floor(run.max*restPct(run));const up=run.deck.some(canUp);const om=LO()&&run.om?((run.vb&&run.vb.tempio>=3)?run.om:Math.min(3,run.om)):0;
-  return `<main><div class="wrap"><div class="evhead"><span class="ic">${sprImg('rest',60)}</span><div><h2>Falò</h2><p class="muted">Le braci scoppiettano. Per un momento, la Rocca sembra lontana.</p></div></div>
+  return `<main><div class="wrap"><div class="evhead"><span class="ic">${pxLuogo('rest',60)}</span><div><h2>Falò</h2><p class="muted">Le braci scoppiettano. Per un momento, la Rocca sembra lontana.</p></div></div>
     <div class="opts"><button class="opt" onclick="restHealUI()"><b>Riposa</b><br><span class="muted">Recuperi ${h} PV (${Math.round(restPct(run)*100)}% dei PV massimi).${om?` Perdi ${om} Ombra.`:''}</span></button>
     <button class="opt" onclick="restForgeUI()" ${up?'':'disabled'}><b>Affila le armi</b><br><span class="muted">${up?'Potenzia una carta del mazzo.':'Tutte le carte sono già potenziate.'}</span></button></div></div></main>`;
 }
@@ -2632,7 +2670,7 @@ function eventScreen(){
 }
 function treasureScreen(){
   const t=run.treasure;
-  return `<main><div class="wrap"><div class="evhead"><span class="ic">${sprImg('treasure',60)}</span><h2>Forziere</h2></div>
+  return `<main><div class="wrap"><div class="evhead"><span class="ic">${pxLuogo('treasure',60)}</span><h2>Forziere</h2></div>
     <div class="panel"><p class="lede">Il coperchio cigola. Dentro trovi:</p><div class="rewards">
     ${t.gold?`<button class="ritem" onclick="send({t:'tGold'})"><span class="ic">${ic('i_coin',24)}</span><span>${t.gold} monete d'oro</span></button>`:''}
     ${t.relic?`<button class="ritem" onclick="toast('Reliquia ottenuta: '+RELICS['${t.relic}'].n);send({t:'tRelic'})"><span class="ic">${relIc(t.relic,28)}</span><span><b>${RELICS[t.relic].n}</b><br><span class="muted">${RELICS[t.relic].d}</span></span></button>`:''}
@@ -2776,11 +2814,11 @@ function vilSVG(){const v=getVil(),L=vilList();const W=60*L.length+40;let g='';
   const stars=Array.from({length:14},(_,i)=>`<circle cx="${(i*53)%W}" cy="${8+(i*17)%40}" r="1" fill="#fff" opacity=".6"/>`).join('');
   return `<svg class="vilsvg" viewBox="0 0 ${W} 130" role="img" aria-label="Il villaggio: ${vilDone()} ricostruzioni su ${vilTot()}">${stars}<circle cx="${W-30}" cy="22" r="10" fill="#f6f2e8" opacity=".85"/>${g}<rect x="0" y="118" width="${W}" height="12" fill="#2f6b2a"/></svg>`}
 function villaggioHTML(){const v=getVil(),cr=getCrowns();
-  return `<div class="wrap" style="gap:14px">${vilSVG()}
+  return `<div class="wrap" style="gap:14px">${vilPixHTML()||vilSVG()}
    <div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px">${ic('i_house',36)}<div style="flex:1;min-width:200px"><b style="font-size:20px;color:var(--torch2)">Ricostruzioni: ${vilDone()}/${vilTot()}</b><br>
      <span class="muted">Il drago ha ridotto il villaggio in macerie. Esaudisci le richieste degli abitanti, poi spendi le Corone per ricostruire: ogni edificio ti dà un vantaggio all'inizio di ogni partita, da solo e in gruppo (non nella sfida del giorno).</span></div><span class="price">${ic('i_crown',18)} ${cr} Corone</span></div>
    <div class="vilgrid">${vilList().map(b=>{const n=v[b.id]|0,max=b.lv.length,[x,y,ok]=vilQuest(b),nx=b.lv[n];
-     return `<div class="vilb ${n>=max?'max':''}"><b style="font-size:16px">${b.n}</b><div class="lvdots">${b.lv.map((_,k)=>`<i class="${k<n?'on':''}"></i>`).join('')}</div>
+     return `<div class="vilb ${n>=max?'max':''}">${pxVil(b.id,n)?`<img class="vilimg" src="pixel/${pxVil(b.id,n)}.png" alt="">`:''}<b style="font-size:16px">${b.n}</b><div class="lvdots">${b.lv.map((_,k)=>`<i class="${k<n?'on':''}"></i>`).join('')}</div>
        ${n?`<span><b class="ok">Attivo:</b> ${b.lv.slice(0,n).map(l=>l[1]).pop()}</span>`:''}
        ${n>=max?'<span class="ok">Completamente ricostruito!</span>':ok?`<span class="muted">${n?'Prossimo livello':'Ricostruisci'}: ${nx[1]}</span><button class="btn ${cr>=nx[0]?'primary':''}" onclick="buildVil('${b.id}')">${ic('i_crown',14)} ${n?'Migliora':'Ricostruisci'} per ${nx[0]}</button>`
         :`<span><b>${b.who}:</b> <q>${b.q}</q></span><span class="achbar"><i style="width:${Math.round(x/y*100)}%"></i></span><small class="muted">${b.req[0]}: ${x}/${y}</small>`}</div>`}).join('')}</div></div>`}
@@ -3025,7 +3063,7 @@ function startVoteAnim(va){
 }
 function paintAnim(){document.querySelectorAll('.mapsvg .node').forEach(n=>{n.classList.toggle('spin',!!UI.anim&&n.dataset.k===UI.anim.cur)})}
 /* ================= IMPOSTAZIONI ================= */
-const VERSION='v7.3',VDATE='17/11';
+const VERSION='v7.4',VDATE='18/11';
 const SET_K='valdombra-impostazioni';
 const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),vib:true,ts:1,hc:false,tut:true,stats:true,lo:true,vil:true,gem:true,px:false};
 let SET=(()=>{try{return Object.assign({},SET_DEF,JSON.parse(load(SET_K)||'{}'))}catch(e){return Object.assign({},SET_DEF)}})();
@@ -3073,7 +3111,7 @@ function settingsHTML(){
       ${swb('lo','Luce e Ombra','Le carte si possono giocare dal lato Ombra, più forte ma rischioso, e ci sono le creature d\'ombra. In gruppo vale la scelta di chi crea la stanza, dalla partita successiva.')}
       ${swb('vil','Villaggio di Valdombra','La missione secondaria: ricostruisci gli edifici per avere vantaggi a inizio partita.')}
       ${swb('gem','Gemme','La seconda moneta per aspetti, cimeli permanenti e cambio in Corone. Spenta, gli aspetti tornano a costare Corone.')}
-      ${swb('px','Grafica Pixellab','Eroi, nemici e boss sono disegnati con PixelLab ovunque compaiano, dalla scelta dell\'eroe ai riepiloghi; in combattimento si muovono quando attaccano, si difendono o vengono colpiti. Vale solo su questo dispositivo. Con un aspetto attivo, o se un\'immagine non si carica, resta lo sprite di sempre.')}
+      ${swb('px','Grafica Pixellab','Eroi, nemici, boss, villaggio, icone, eventi, sfondi e mappe sono disegnati con PixelLab; in combattimento eroi e nemici si muovono quando attaccano, si difendono o vengono colpiti. Vale solo su questo dispositivo. Con un aspetto attivo, o se un\'immagine non si carica, resta lo sprite di sempre.')}
       ${R&&R.phase!=='lobby'?'<p class="muted" style="font-size:13px">Luce e Ombra cambia dalla prossima partita.</p>':''}
     </div>
     <div class="panel"><h4>${ic('i_gear',18)} Informazioni</h4>
@@ -3081,7 +3119,7 @@ function settingsHTML(){
       <div class="srow"><div class="lab">Codice<small>Hai un codice? Scrivilo qui.</small></div><input id="rcode" class="txt" maxlength="40" style="max-width:200px" autocomplete="off" placeholder="Codice"><button class="btn" onclick="redeem()">Usa</button></div>
       <div class="srow"><div class="lab">Profilo</div><b>${ACC?esc(ACC.nome):'nessuno'}</b><button class="btn" onclick="openProfilo()">${ACC?'Gestisci':'Accedi'}</button></div>
       ${inRoom?`<div class="srow"><div class="lab">Stanza</div><b>${R.code}</b></div><div class="srow"><div class="lab">Connessione</div><b>${isHost?'Sei tu a guidare la stanza':'Collegato'}</b></div>`:''}
-      <p class="muted" style="font-size:13px">Novità della 7.3: con «Grafica Pixellab» accesa anche nemici, élite e boss sono disegnati con PixelLab, attaccano e reagiscono ai colpi; nuova icona del gioco. Novità della 7.2: con «Grafica Pixellab» accesa gli eroi disegnati con PixelLab compaiono ovunque, anche nella scelta dell'eroe, nei menu e nei riepiloghi. Novità della 7.1: in Sviluppo c'è «Grafica Pixellab», spenta di base. Accesa, in combattimento gli eroi sono disegnati con PixelLab e hanno le animazioni di attacco, difesa e colpo subito. Novità della 7.0: il pulsante «Gioca» sempre visibile per scegliere la modalità; Luce e Ombra (ogni carta si può giocare dal lato Ombra, più forte ma rischioso; creature d'ombra, mercante, eventi e bottino reagiscono alla tua Ombra), il Villaggio di Valdombra da ricostruire per avere vantaggi in ogni partita, e le Gemme, la seconda moneta per cimeli permanenti e aspetti. Si possono spegnere da Sviluppo. Dalla 6.4: la sfida del giorno usa tutti e 10 gli eroi e non ripete eroe, dungeon o modificatore del giorno prima; dalla 6.3: corretto il blocco quando l'eroe cade per una carta Ustione o Maledizione, tratti delle élite più leggeri (soprattutto da soli); dalla 6.2: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
+      <p class="muted" style="font-size:13px">Novità della 7.4: con «Grafica Pixellab» accesa il villaggio cambia aspetto a ogni ricostruzione, reliquie, pozioni e icone sono nuove, eventi e luoghi hanno la loro illustrazione, i combattimenti hanno lo sfondo del dungeon e la mappa ha sfondo, decorazioni e la figura del tuo eroe. Novità della 7.3: con «Grafica Pixellab» accesa anche nemici, élite e boss sono disegnati con PixelLab, attaccano e reagiscono ai colpi; nuova icona del gioco. Novità della 7.2: con «Grafica Pixellab» accesa gli eroi disegnati con PixelLab compaiono ovunque, anche nella scelta dell'eroe, nei menu e nei riepiloghi. Novità della 7.1: in Sviluppo c'è «Grafica Pixellab», spenta di base. Accesa, in combattimento gli eroi sono disegnati con PixelLab e hanno le animazioni di attacco, difesa e colpo subito. Novità della 7.0: il pulsante «Gioca» sempre visibile per scegliere la modalità; Luce e Ombra (ogni carta si può giocare dal lato Ombra, più forte ma rischioso; creature d'ombra, mercante, eventi e bottino reagiscono alla tua Ombra), il Villaggio di Valdombra da ricostruire per avere vantaggi in ogni partita, e le Gemme, la seconda moneta per cimeli permanenti e aspetti. Si possono spegnere da Sviluppo. Dalla 6.4: la sfida del giorno usa tutti e 10 gli eroi e non ripete eroe, dungeon o modificatore del giorno prima; dalla 6.3: corretto il blocco quando l'eroe cade per una carta Ustione o Maledizione, tratti delle élite più leggeri (soprattutto da soli); dalla 6.2: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
       <p class="muted" style="font-size:13px">Le impostazioni (audio, chat, grafica) valgono solo per questo dispositivo. I progressi di gioco seguono il tuo profilo.</p>
       <div><button class="btn" onclick="SET=Object.assign({},SET_DEF);saveSet();render()">Ripristina le impostazioni</button></div>
     </div></div>`;
