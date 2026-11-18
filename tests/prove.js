@@ -116,7 +116,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     // con 5 Ombra i nemici colpiscono più forte
     startCombat(['goblin'],'combat');ctx(ME);e=g.enemies[0];e.intent={d:6,tg:ME};run.om=0;const d0=calcDmg(enemyBase(e,e.intent),e,g.hero);run.om=5;r.piuDanni=calcDmg(enemyBase(e,e.intent),e,g.hero)-d0;
     // caduta nell'ombra
-    run.om=9;const mx=run.max;e.hp=e.max=999;c=carta('colpo');playCard(c.uid,0,ME,null,1);ctx(ME);r.caduta=run.om===0&&run.max===mx-4&&!!g.hero.st.oscuro;
+    run.om=9;const mx=run.max;e.hp=e.max=999;c=carta('colpo');playCard(c.uid,0,ME,null,1);ctx(ME);r.caduta=run.om===10&&!!run.caduto&&run.max===mx-4&&!!g.hero.st.oscuro;
     e.hp=999;c=carta('colpo');playCard(c.uid,0,ME,null,0);ctx(ME);r.doppio=999-e.hp;
     // turno puro
     run.om=3;g.hero.ended=false;g.hero.shTurn=0;c=carta('colpo');playCard(c.uid,0,ME,null,0);ctx(ME);endHeroTurn();r.puro=run.om===2&&!g.hero.st.oscuro;
@@ -161,7 +161,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     const nr=run.relics.length;dispatch(ME,{t:'darkBuy'});ctx(ME);r.ombraPaga=run.relics.length===nr+1&&run.om===9;
     dispatch(ME,{t:'incenso'});ctx(ME);r.incenso=run.om===6&&run.shop.inc;
     // nemici comuni impauriti, caduta rimandata all'inizio del combattimento
-    run.om=10;R.phase='map';startCombat(['goblin','scheletro'],'combat');ctx(ME);r.paura=(g.enemies[0].st.weak|0)===1&&!g.enemies[1].st.weak;r.cadeSubito=run.om===0&&!!g.hero.st.oscuro;
+    run.om=10;R.phase='map';startCombat(['goblin','scheletro'],'combat');ctx(ME);r.paura=(g.enemies[0].st.weak|0)===1&&!g.enemies[1].st.weak;r.cadeSubito=run.om===10&&!!run.caduto&&!!g.hero.st.oscuro;
     // bottino
     run.om=6;g.enemies.forEach(e=>hurtEnemy(e,9999));checkEnd();await new Promise(r=>setTimeout(r,700));r.bottino=R.phase==='room'&&run.reward&&run.reward.gold>=12;
     // eventi
@@ -190,15 +190,15 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(lo.armOmbra===8,'lato Ombra: Armatura +50% ('+lo.armOmbra+')');
   ok(lo.buio&&lo.buioOmbra===6&&lo.buioLuce===7,`creature d'ombra: niente bonus Ombra, +25% con la Luce (${lo.buioOmbra}/${lo.buioLuce})`);
   ok(lo.piuDanni===2,'con 5 Ombra i nemici fanno 2 danni in più');
-  ok(lo.caduta&&lo.doppio===12,'a 10 Ombra si cade nell\'ombra: danni doppi ('+lo.doppio+') e PV massimi persi');
+  ok(lo.caduta&&lo.doppio===12,'a 10 Ombra si cade nell\'ombra e ci si resta: danni doppi ('+lo.doppio+') e PV massimi persi');
   ok(lo.puro&&lo.falo,'l\'Ombra cala con un turno di sola Luce e al Falò');
   ok(lo.spento,'dall\'interruttore Sviluppo Luce e Ombra si spegne');
   ok(lo.assorbi,'in gruppo si assorbe l\'Ombra di un compagno');
   ok(lo.forzaBuio,'le creature d\'ombra si rafforzano con l\'Ombra del gruppo');
   ok(lo.bloccato&&lo.costruito&&lo.tutto,'villaggio: prima la richiesta, poi le Corone; si ricostruisce tutto');
   ok(lo.cimeli==='lanterna,ancora'&&lo.cambio&&lo.aspetto,'gemme: cimeli, cambio in Corone e aspetti ('+lo.cimeli+')');
-  ok(lo.bonus.max===92&&lo.bonus.oro===99+75&&lo.bonus.pot===3&&lo.bonus.su===3&&/lanterna/.test(lo.bonus.rel)&&/ancora/.test(lo.bonus.rel)&&lo.tempio>=7,'i bonus del villaggio e i cimeli valgono in partita '+JSON.stringify(lo.bonus)+' armatura '+lo.tempio);
-  ok(lo.senza.max===80&&!/lanterna/.test(lo.senza.rel),'senza Villaggio e Gemme (ora sempre accesi) i bonus non si applicano');
+  ok(lo.bonus.max===98&&lo.bonus.oro===99+75&&lo.bonus.pot===3&&lo.bonus.su===3&&/lanterna/.test(lo.bonus.rel)&&/ancora/.test(lo.bonus.rel)&&lo.tempio>=7,'i bonus del villaggio e i cimeli valgono in partita '+JSON.stringify(lo.bonus)+' armatura '+lo.tempio);
+  ok(lo.senza.max===86&&!/lanterna/.test(lo.senza.rel),'senza Villaggio e Gemme (ora sempre accesi) i bonus non si applicano');
   ok(lo.giorno,'nella sfida del giorno il villaggio non vale');
   ok(lo.premio===3&&lo.premioOk,'gemme di fine partita (più rare dalla v8.3): niente per le élite, 2 per il boss, 1 per la vittoria');
   ok(lo.vilModal&&lo.bottega&&lo.sviluppo&&lo.ui,'villaggio, bottega, guida, impostazioni e combattimento in Ombra si vedono');
@@ -371,9 +371,9 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     r.record=(parseInt(localStorage.getItem('valdombra-porta-record')||'0',10)||0)>=R.porta.salvati;
     R=null;screen='title';modal=null;openGioca();render();r.menu=document.body.innerHTML.includes('Aprite il cancello');closeModal();
     // enciclopedia: lato Ombra
-    SET.lox=false;openDiario('c');UI.diTab='c';UI.diSh=true;render();const om=document.querySelectorAll('.cardgrid .card.shadow').length,no=document.querySelectorAll('.cardgrid .card.noshadow').length;
+    SET.lox=false;openDiario('c');UI.diTab='c';render();const om=document.querySelectorAll('.cardgrid .card.shadow').length,no=[...document.querySelectorAll('.cardgrid > .card')].filter(c=>!c.classList.contains('unknown')).length;
     r.encOmbra=om>0&&no>0;SET.lox=true;render();r.encOmbraTutti=document.querySelectorAll('.cardgrid .card.shadow').length>om;
-    r.encArte=[...document.querySelectorAll('.cardgrid .card.shadow img')].some(im=>/carte-ombra/.test(im.getAttribute('src')));UI.diSh=false;render();r.encLuce=!document.querySelector('.cardgrid .card.shadow');SET.lox=false;closeModal();modal=null;
+    r.encArte=[...document.querySelectorAll('.cardgrid .card.shadow img')].some(im=>/carte-ombra/.test(im.getAttribute('src')));render();r.encLuce=[...document.querySelectorAll('.cardgrid .duo')].every(d=>d.querySelectorAll('.card').length===2&&d.querySelectorAll('.card.shadow').length===1);SET.lox=false;closeModal();modal=null;
     // barre della vita più alte in combattimento
     R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);pickCls='mago';pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();ctx(ME);startCombat(['goblin'],'combat');ctx(ME);render();
     {const b=document.querySelector('.combat .ent.enemy .bar');r.barra=b&&b.getBoundingClientRect().height>=17;const sp=b&&b.querySelector('span');r.numeri=sp&&parseFloat(getComputedStyle(sp).fontSize)>=12}
@@ -385,7 +385,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(ac.inizio&&ac.banner&&ac.cattura&&ac.senzaFerite,'Aprite il cancello: parte alla Rocca con la prima ondata; i nemici catturano abitanti solo se ti feriscono');
   ok(ac.fine&&ac.tutte&&ac.conti&&(ac.falo==='3,6'||!ac.win),`Aprite il cancello: il bot arriva in fondo (${ac.salvati} salvati), Falò dopo la 3ª e la 6ª ondata (${ac.falo}), i conti degli abitanti tornano`);
   ok(ac.schermata&&ac.premio&&ac.unaVolta&&ac.record&&ac.menu,'Aprite il cancello: schermata finale, 4 Corone per abitante una volta sola, record, pulsante nel menu Gioca');
-  ok(ac.encOmbra&&ac.encOmbraTutti&&ac.encArte&&ac.encLuce,'enciclopedia: le carte si vedono anche dal lato Ombra, con la loro illustrazione');
+  ok(ac.encOmbra&&ac.encOmbraTutti&&ac.encArte&&ac.encLuce,'enciclopedia: accanto a ogni carta col lato Ombra c\'è la sua faccia viola, con la sua illustrazione');
   ok(ac.barra&&ac.numeri&&ac.gemme,'combattimento: barre della vita più alte e numeri più grandi; le Gemme si vedono nella barra in alto');
   ok(ac.figura&&ac.sotto,'mappa: la figura dell\'eroe sta sotto i nodi e non prende i tocchi');
 
@@ -434,7 +434,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     run.potions.pop();const g1=run.gold,it2=run.shop.potions[1];buyUI('potions',1);ctx(ME);r.libera=!modal&&it2.sold&&run.potions.length===3&&run.gold===g1-omPrice(it2.price);
     // brucia una carta: si sceglie, si conferma, con Annulla non si paga
     render();const n0=run.deck.length,g2=run.gold,rp=removePrice();shopRemoveUI();
-    r.mazzo=!!modal&&modal.list.length===n0&&document.querySelectorAll('.modal .card').length===n0&&run.gold===g2;
+    r.mazzo=!!modal&&modal.list.length===n0&&document.querySelectorAll('.modal .pk').length===n0&&run.gold===g2;
     pkClick(2);r.scelta=!!document.querySelector('.modal .pk.on')&&[...document.querySelectorAll('.modal .pkbar .btn.primary')].some(b=>b.textContent.includes('Brucia questa carta'))&&document.querySelectorAll('.modal .pk.on').length===1&&run.deck.length===n0&&run.gold===g2;
     r.testa=[...document.querySelectorAll('.modal .mhead button')].some(b=>b.textContent==='Annulla');
     [...document.querySelectorAll('.modal .pkbar button')].find(b=>b.textContent==='Annulla').click();ctx(ME);
@@ -541,7 +541,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     dispatch(ME,{t:'loot',kind:'relics',k:0});dispatch(ME,{t:'loot',kind:'relics',k:1});ctx(ME);r.reliquia=run.relics.length===r0+1;
     dispatch(ME,{t:'buy',kind:'cards',k:2});dispatch(ME,{t:'shopRemove',i:0});ctx(ME);r.chiuso=run.gold===g0&&run.deck.length===d0+1;
     // al prossimo combattimento cade nell'ombra: Ombra a 0, PV massimi −4, Forma oscura
-    const fa=(run.stx&&run.stx.falls)|0;R.phase='combat';startCombat(['goblin'],'combat');ctx(ME);r.caduta=run.om===0&&!!g.hero.st.oscuro&&((run.stx&&run.stx.falls)|0)===fa+1;
+    const fa=(run.stx&&run.stx.falls)|0;R.phase='combat';startCombat(['goblin'],'combat');ctx(ME);r.caduta=run.om===10&&!!run.caduto&&!!g.hero.st.oscuro&&fa>=1&&((run.stx&&run.stx.falls)|0)===fa;
     // un solo mercante per partita
     R.phase='room';run.screen='shop';genShop();run.om=9;render();r.unaVolta=!document.querySelector('main').innerHTML.includes('>Uccidi il mercante<')&&document.querySelector('main').innerHTML.includes('Hai già ucciso un mercante');dispatch(ME,{t:'killShop'});ctx(ME);r.unaVolta=r.unaVolta&&!run.shop.dead&&run.om===9;
     // carta potenziata a caso: si dice quale
@@ -561,6 +561,85 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
       const m=document.getElementById('mapwrap'),dt=document.querySelector('details.mapextra');const h=m.getBoundingClientRect().height;const chiuso=!!dt&&!dt.open;dt.open=true;await new Promise(t=>setTimeout(t,50));
       const vis=dt.querySelector('.mxin').getBoundingClientRect().height>0;return {h:Math.round(h),chiuso,vis,sum:dt.querySelector('summary').textContent}});
     ok(mp.h>=300&&mp.chiuso&&mp.vis,`mappa su telefono piccolo (360x640): la mappa è alta ${mp.h} punti, missioni e climi in un riquadro chiuso che si apre («${mp.sum}»)`);await c3.close()}
+
+  console.log('7j. Tempo di gioco');
+  const tm=await page.evaluate(async()=>{const r={};SET.tut=false;SPEED=0;
+    R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);modal=null;pickCls='guerriero';pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();ctx(ME);render();
+    r.hud=!!document.getElementById('htempo');
+    R.tAcc=0;R.tLast=Date.now()-5000;commit();r.conta=R.tAcc>=4900&&R.tAcc<6000;
+    // una pausa di 10 minuti conta al massimo 2 minuti
+    const a=R.tAcc;R.tLast=Date.now()-600000;commit();r.pausa=R.tAcc-a>=119000&&R.tAcc-a<=120500;
+    r.formato=fmtTempo(65000)==='1:05'&&fmtTempo(3725000)==='1:02:05';
+    // a fine partita il tempo si ferma e si vede nella schermata finale
+    endRun(true);commit();const f=R.tFin;R.tLast=Date.now()-60000;commit();r.ferma=f!=null&&R.tFin===f&&tempoMs()===f;render();r.fine=document.body.innerHTML.includes('Tempo di gioco')&&document.body.innerHTML.includes(fmtTempo(f));
+    R=null;screen='title';render();return r});
+  ok(tm.hud&&tm.conta&&tm.pausa&&tm.formato&&tm.ferma&&tm.fine,'tempo di gioco: nella barra in alto, conta le mosse, le pause lunghe valgono al massimo 2 minuti, a fine partita si ferma e si vede '+JSON.stringify(tm));
+
+  console.log('7k. A 10 Ombra si resta: falò spenti, Malattia, guarigione; corone e gemme senza scritte');
+  const om=await page.evaluate(async()=>{const r={};SET.tut=false;SET.lo=true;SPEED=0;const sleep=ms=>new Promise(t=>setTimeout(t,ms));
+    const nuova=(lvl=0)=>{R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);modal=null;UI.sel=null;UI.om=false;pickCls='guerriero';pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();R.lvl=lvl;ctx(ME)};
+    const spenti=()=>R.map.flat().filter(n=>n&&n.spento).length;
+    // caduta in combattimento: si resta a 10, i turni di sola Luce non fanno calare, un falò si spegne (livello 0)
+    nuova(0);startCombat(['orco'],'combat');ctx(ME);g.enemies[0].hp=g.enemies[0].max=999;run.om=9;const mx=run.max;omAdd(ME,1);ctx(ME);
+    const ls=(run.vb&&run.vb.tempio>=3)?2:4;r.resta=run.om===10&&!!run.caduto&&run.max===mx-ls&&!!g.hero.st.oscuro&&spenti()===1;
+    const c1={id:'colpo',up:false,uid:uid++};g.hero.hand.push(c1);g.hero.energy=3;dispatch(ME,{t:'play',uid:c1.uid,j:0});dispatch(ME,{t:'end'});let w=0;while(R.combat&&R.combat.busy&&w<300){await sleep(5);w++}ctx(ME);
+    r.luce=run.om===10&&!!run.caduto;
+    // col Livello di Assedio si spengono più falò: livello 4 → 3
+    nuova(4);const tot=R.map.flat().filter(n=>n&&n.type==='rest').length;run.om=10;omFall(ME);r.livello=spenti()===Math.min(tot,3)&&!!run.caduto;
+    // falò spento: niente riposo; a 10 Ombra ci si ammala
+    const sp=R.map.flat().find(n=>n&&n.spento);R.pos=null;R.path=[];run.screen=null;nodeContent(sp.y,sp.x);ctx(ME);render();
+    r.spento=run.screen==='spento'&&document.querySelector('main').innerHTML.includes('Falò spento')&&!!run.malato;const hp0=run.hp;dispatch(ME,{t:'restHeal'});ctx(ME);r.noRiposo=run.hp===hp0&&run.screen==='spento';
+    // ogni combattimento una Malattia: a fine turno in mano fa perdere 3 PV
+    R.phase='combat';startCombat(['orco'],'combat');ctx(ME);g.enemies[0].hp=g.enemies[0].max=999;g.enemies[0].intent={d:0};const pile=[...g.hero.hand,...g.hero.draw,...g.hero.disc];r.malattia=pile.filter(c=>c.id==='malattia').length===1;
+    const ma=pile.find(c=>c.id==='malattia');['hand','draw','disc'].forEach(k=>g.hero[k]=g.hero[k].filter(c=>c!==ma));g.hero.hand.push(ma);const hp1=run.hp;dispatch(ME,{t:'end'});w=0;while(R.combat&&R.combat.busy&&w<300){await sleep(5);w++}ctx(ME);r.perde=run.hp===hp1-3;
+    // purificarsi (sotto 10): si esce dalla caduta, la Malattia passa e le sue carte spariscono
+    omAdd(ME,-3);ctx(ME);r.guarisce=run.om===7&&!run.caduto&&!run.malato&&![...g.hero.hand,...g.hero.draw,...g.hero.disc].some(c=>c.id==='malattia');
+    // sotto 10 un falò spento non fa ammalare
+    R.phase='room';run.screen=null;nodeContent(sp.y,sp.x);ctx(ME);r.sanoSotto10=run.screen==='spento'&&!run.malato;
+    // mappa: falò spento grigio e in legenda
+    R.phase='map';run.screen=null;render();r.mappa=!!document.querySelector('.mapsvg .node.spento')&&document.body.innerHTML.includes('Falò spento');
+    // corone e gemme in alto: solo icone e numeri
+    R=null;screen='title';modal=null;render();const cb=document.querySelector('.crownbadge');r.corone=!!cb&&!/Corone|Gemme/.test(cb.textContent)&&/\d/.test(cb.textContent);
+    return r});
+  ok(om.resta&&om.luce&&om.livello,'a 10 Ombra si cade e si resta (i turni di Luce non bastano), si spengono falò: di più col Livello di Assedio '+JSON.stringify(om));
+  ok(om.spento&&om.noRiposo&&om.malattia&&om.perde&&om.guarisce&&om.sanoSotto10,'falò spento: niente riposo; a 10 Ombra Malattia a ogni combattimento (−3 PV a fine turno), passa purificandosi');
+  ok(om.mappa&&om.corone,'falò spento sulla mappa (grigio, in legenda); corone e gemme in alto solo con icone e numeri');
+
+  console.log('7l. Sfida del giorno più dura, bonus di tempo, Luce e Ombra insieme, menu essenziale, eroi ribilanciati');
+  const v9=await page.evaluate(async()=>{const r={};SET.tut=false;SET.lo=true;SPEED=0;
+    // sfida del giorno dal 19/11: solo malus e Livello di Assedio 3 (i giorni prima restano com'erano)
+    const ids3=DAILY_MODS3.map(m=>m.id),bonus=['ricco','veleno','forgia','mercante'];r.soloMalus=!ids3.some(i=>bonus.includes(i))&&ids3.length>=6;
+    let ok3=true;for(let i=0;i<14;i++){const d=dailyInfo(dayAdd('20261119',i));if(!ids3.includes(d.mod.id))ok3=false}r.giorni=ok3;r.oggi=dailyInfo('20261118').mod.id===dailyInfo('20261118').mod.id;
+    const tk=todayKey;todayKey=()=>'20261121';try{localStorage.removeItem(DAILY_K)}catch(e){}modal=null;startDaily();ctx(ME);r.livello3=R.lvl===3&&!!R.daily;todayKey=tk;
+    // i malus fanno quello che dicono
+    const mod=m=>{R.daily.mod=m};mod('furiosi');R.phase='map';startCombat(['goblin'],'combat');ctx(ME);r.furiosi=(g.enemies[0].st.str|0)>=1;
+    mod('umido');r.umido=Math.abs(restPct(run)-(run.vb&&run.vb.erbe>=2?.2:.15))<1e-9;
+    // bonus di tempo solo vincendo: +30% sotto 5 minuti, +15% fino a 10, +5% fino a 20
+    R.win=true;r.tempo=tempoBonus(4*60000)===.3&&tempoBonus(9*60000)===.15&&tempoBonus(19*60000)===.05&&tempoBonus(25*60000)===0;R.win=false;r.tempo=r.tempo&&tempoBonus(60000)===0;
+    R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);modal=null;pickCls='guerriero';pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();ctx(ME);R.tAcc=3*60000;R.tLast=Date.now();endRun(true);commit();render();
+    r.fine=document.body.innerHTML.includes('+30% tempo');
+    // Luce e Ombra insieme: mazzo con le due facce, carta ingrandita con le due facce
+    R=null;startSolo();ctx(ME);render();openView(run.deck,'Il tuo mazzo');render();const duo=document.querySelectorAll('.modal .duo').length,sh=document.querySelectorAll('.modal .duo .card.shadow').length;
+    r.mazzo=duo>=9&&sh===duo;closeModal();
+    startCombat(['orco'],'combat');ctx(ME);g.hero.hand=[{id:'possente',up:false,uid:uid++}];render();const el=document.querySelector('.hand .card');cardZoom(el);r.zoom=document.querySelectorAll('#czoom .card').length===2&&!!document.querySelector('#czoom .card.shadow');cardZoomClose();
+    R=null;screen='title';modal=null;['colpo'].forEach(k=>seenAdd('c',[k]));UI.diCls='all';openDiario('c');render();r.enc=!!document.querySelector('.modal .duo .card.shadow');closeModal();
+    // menu essenziale (in Sviluppo): poche cose, eroe e dungeon in una pagina a parte
+    SET.menu=true;screen='title';render();r.lite=document.querySelectorAll('.mtile').length>=7&&!document.querySelector('.classes');giocaScroll();render();r.pagina=screen==='solo'&&!!document.querySelector('.classes');
+    SET.menu=false;screen='title';render();r.pieno=!!document.querySelector('.classes')&&!document.querySelector('.mtile');
+    // eroi ribilanciati
+    r.eroi=CLASSES.guerriero.hp===86&&CLASSES.mago.hp===70&&CLASSES.ladro.hp===75&&CLASSES.guardiano.hp===88;
+    return r});
+  ok(v9.soloMalus&&v9.giorni&&v9.livello3&&v9.furiosi&&v9.umido,'sfida del giorno dal 19/11: solo malus e Livello di Assedio 3 '+JSON.stringify({m:v9.soloMalus,g:v9.giorni,l:v9.livello3,f:v9.furiosi,u:v9.umido}));
+  ok(v9.tempo&&v9.fine,'bonus di tempo solo vincendo: +30% sotto 5 minuti, +15% fino a 10, +5% fino a 20; si vede a fine partita');
+  ok(v9.mazzo&&v9.zoom&&v9.enc,'Luce e Ombra insieme: nel mazzo, nella carta ingrandita e nell\'enciclopedia '+JSON.stringify({m:v9.mazzo,z:v9.zoom,e:v9.enc}));
+  ok(v9.lite&&v9.pagina&&v9.pieno&&v9.eroi,'menu essenziale in Sviluppo (eroe e dungeon in una pagina a parte), menu completo di base; PV degli eroi ribilanciati '+JSON.stringify({l:v9.lite,p:v9.pagina,c:v9.pieno,e:v9.eroi}));
+
+  {const sd=await page.evaluate(async()=>{const r={};const sb0=window.sbClient,st0=SET.stats;const rows=[];let primo=true;SET.stats=true;
+      window.sbClient=()=>({from:()=>({insert:row=>{rows.push(JSON.parse(JSON.stringify(row)));const err=primo&&('durata' in row)?{code:'PGRST204',message:'colonna durata'}:null;primo=false;return Promise.resolve({error:err})}})});
+      R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);modal=null;pickCls='guerriero';pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();ctx(ME);R.tAcc=600000;R.tLast=Date.now();R.win=true;R.phase='end';
+      statSend(run,run.stx||{},10);await new Promise(t=>setTimeout(t,50));r.prima=rows[0]&&rows[0].durata>=599&&rows[0].durata<=602;r.riprova=rows.length===2&&!('durata' in rows[1]);
+      window.sbClient=sb0;SET.stats=st0;R=null;screen='title';render();return r});
+    ok(sd.prima&&sd.riprova,'statistiche: a fine partita si manda anche la durata in secondi; se il database non ha ancora la colonna si riprova senza');}
 
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
@@ -698,11 +777,16 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
       api:{g7:12,errori7:2,dispositivi7:3,giocatori7:1,ultima:'18/11 11:54',azioni:[['android','visita',6,0,0],['android','partita',4,1,1],['ios','accedi',2,1,0]],errori:[['credenziali',1],['dati_non_validi',1]]}});
     render();const m2=document.querySelector('.admin'),tx=m2?m2.textContent:'';
     r.client=tx.includes('Da dove giocano')&&tx.includes('Android')&&tx.includes('iPhone e iPad')&&tx.includes('Client nativi')&&tx.includes('Fine partita')&&tx.includes('Apertura app')&&tx.includes('Nome, password o token sbagliati')&&tx.includes('1.0.0 (Android)')&&tx.includes('18/11 11:54')&&m2.querySelectorAll('.adtile').length>=15;
+    r.vecchioTempi=!tx.includes('Tempo di gioco');
+    // con database/durata.sql: tempo di gioco delle partite vinte
+    ADM.dati=Object.assign({},ADM.dati,{tempi:{con:5,vinte:3,media:12.4,migliore:4.5,fasce:[1,0,2,0],dungeon:[['rocca',3,12.4,4.5]],eroi:[['ladro',2,9.1],['guerriero',1,18.6]]}});render();
+    const tx3=(document.querySelector('.admin')||{}).textContent||'';r.tempi=tx3.includes('Tempo di gioco')&&tx3.includes('12,4 min')&&tx3.includes('4,5 min')&&tx3.includes('sotto 5 min 1');
     window.accRpc=async()=>{throw new Error('non_autorizzato')};await adminLoad();r.rifiuto=ADM.stato==='err'&&/non è amministratore/.test(ADM.msg);
     modal=null;window.sbClient=sb0;window.accRpc=rpc0;ACC=acc0;ADM.ok=false;ADM.dati=null;SET.stats=st0;
     try{localStorage.removeItem(VIS_K);localStorage.removeItem(VISNO_K);sessionStorage.removeItem(VISS_K)}catch(e){}render();return r});
   ok(adm.locale&&adm.prima&&adm.dati&&adm.stessoCodice,'visite: una sola chiamata con codice casuale, versione, telefono e app (niente nomi); nelle prove in locale non si conta '+JSON.stringify({l:adm.locale,p:adm.prima,d:adm.dati,c:adm.stessoCodice}));
   ok(adm.unaPerScheda&&adm.spenta&&adm.admNonConta,'visite: una per scheda, niente con «Invia statistiche anonime» spento né sui dispositivi dell\'amministratrice');
+  ok(adm.vecchioTempi&&adm.tempi,'amministrazione: tempo di gioco delle partite vinte (medie, migliore, fasce del bonus, per dungeon ed eroe); senza i dati nuovi non compare '+JSON.stringify({v:adm.vecchioTempi,t:adm.tempi}));
   ok(adm.nascosto&&adm.controllo&&adm.visibile&&adm.pannello&&adm.rifiuto,'amministrazione: nascosta agli altri, visibile dopo il controllo sul server, pannello con visite, grafici, eroi, carte e nemici; rifiuto gestito '+JSON.stringify({n:adm.nascosto,c:adm.controllo,v:adm.visibile,p:adm.pannello,r:adm.rifiuto}));
   ok(adm.vecchioServer&&adm.client,'amministrazione: piattaforme e chiamate dei client nativi (app, azioni, errori, versioni delle app); senza questi dati il pannello resta com\'era '+JSON.stringify({v:adm.vecchioServer,c:adm.client}));
 
