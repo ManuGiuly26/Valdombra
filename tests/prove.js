@@ -418,6 +418,33 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(gr.ricompense&&gr.seconda&&gr.riparte,'in gruppo: dopo un\'ondata vinta ognuno prende la ricompensa, poi arriva l\'ondata dopo');
   ok(gr.riga&&gr.lbId&&gr.classifica&&gr.tab&&gr.picker,'classifica del cancello: riga con abitanti salvati e punteggio, scheda nelle classifiche, modalità nella schermata da solo '+JSON.stringify({r:gr.riga,i:gr.lbId,c:gr.classifica,t:gr.tab,p:gr.picker}));
 
+  console.log('7f. Mercante: pozione con le tasche piene e carta da bruciare');
+  const me=await page.evaluate(async()=>{const r={};SET.tut=false;SPEED=0;
+    R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);modal=null;pickCls='guerriero';pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();ctx(ME);
+    R.phase='room';run.screen='shop';run.done=false;genShop();run.gold=1000;run.om=3;const P3=DG().pots.slice(0,3);run.potions=[...P3];render();
+    // pozione con 3 già piene: prima la domanda, l'oro non si tocca finché non scegli
+    const it=run.shop.potions[0],pr=omPrice(it.price);buyUI('potions',0);
+    r.chiede=!!modal&&modal.title==='Hai già 3 pozioni'&&run.gold===1000&&!it.sold&&document.body.innerHTML.includes('Sei sicuro di volerla comprare');
+    r.bottoni=[...document.querySelectorAll('.modal button')].filter(b=>b.textContent==='Annulla').length>=1&&document.querySelectorAll('.modal .prow button').length===3;
+    [...document.querySelectorAll('.modal .pkbar button')].find(b=>b.textContent==='Annulla').click();ctx(ME);
+    r.annulla=!modal&&run.gold===1000&&!it.sold&&run.potions.join()===P3.join()&&!run.pendPot;
+    buyUI('potions',0);document.querySelectorAll('.modal .prow button')[1].click();ctx(ME);
+    r.compra=!modal&&run.gold===1000-pr&&it.sold&&run.potions.length===3&&run.potions[1]===it.id&&run.potions[0]===P3[0]&&!run.pendPot;
+    // con un posto libero si compra subito, senza domande
+    run.potions.pop();const g1=run.gold,it2=run.shop.potions[1];buyUI('potions',1);ctx(ME);r.libera=!modal&&it2.sold&&run.potions.length===3&&run.gold===g1-omPrice(it2.price);
+    // brucia una carta: si sceglie, si conferma, con Annulla non si paga
+    render();const n0=run.deck.length,g2=run.gold,rp=removePrice();shopRemoveUI();
+    r.mazzo=!!modal&&modal.list.length===n0&&document.querySelectorAll('.modal .card').length===n0&&run.gold===g2;
+    pkClick(2);r.scelta=!!document.querySelector('.modal .pk.on')&&[...document.querySelectorAll('.modal .pkbar .btn.primary')].some(b=>b.textContent.includes('Brucia questa carta'))&&document.querySelectorAll('.modal .pk.on').length===1&&run.deck.length===n0&&run.gold===g2;
+    r.testa=[...document.querySelectorAll('.modal .mhead button')].some(b=>b.textContent==='Annulla');
+    [...document.querySelectorAll('.modal .pkbar button')].find(b=>b.textContent==='Annulla').click();ctx(ME);
+    r.annulla2=!modal&&run.deck.length===n0&&run.gold===g2&&!run.shop.removeUsed;
+    shopRemoveUI();const id2=run.deck[2].id;pkClick(2);document.querySelector('.modal .pkbar .btn.primary').click();ctx(ME);
+    r.brucia=!modal&&run.deck.length===n0-1&&run.gold===g2-rp&&run.shop.removeUsed;
+    R=null;modal=null;screen='title';render();return r});
+  ok(me.chiede&&me.bottoni&&me.annulla&&me.compra&&me.libera,'mercante: con 3 pozioni chiede conferma e quale sostituire; con Annulla non paga, con un posto libero si compra subito '+JSON.stringify({c:me.chiede,b:me.bottoni,a:me.annulla,p:me.compra,l:me.libera}));
+  ok(me.mazzo&&me.scelta&&me.testa&&me.annulla2&&me.brucia,'mercante: «Brucia una carta» apre il mazzo, la carta si conferma, con Annulla non si paga '+JSON.stringify({m:me.mazzo,s:me.scelta,t:me.testa,a:me.annulla2,b:me.brucia}));
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;
