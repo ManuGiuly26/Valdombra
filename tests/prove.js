@@ -529,6 +529,39 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
       if(e2.length)male.push(nome+': errore JS '+e2[0]);await c2.close()}
     ok(!male.length&&viste>60&&daMouse>40,`la vita persa si vede sempre sopra la testa del nemico senza coprire il testo delle carte (${viste} situazioni: PC, PC largo, PC basso, tablet, telefono; vista classica e a scena; da 1 a 5 nemici; carta scelta e mouse sulla carta)`+(male.length?' — problemi: '+male.slice(0,6).join(' | '):''));}
 
+  console.log('7i. Mercante da uccidere, carta potenziata col nome, mappa su telefono, percorso disegnato');
+  const mk=await page.evaluate(async()=>{const r={};SET.tut=false;SET.lo=true;SPEED=0;const sleep=ms=>new Promise(t=>setTimeout(t,ms));
+    const nuova=cls=>{R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);modal=null;UI.sel=null;pickCls=cls;pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();ctx(ME)};
+    nuova('ladro');R.phase='room';run.screen='shop';run.done=false;genShop();run.gold=500;
+    run.om=7;render();r.no7=!document.querySelector('main').innerHTML.includes('Uccidi il mercante');dispatch(ME,{t:'killShop'});ctx(ME);r.no7=r.no7&&!run.shop.dead&&run.om===7;
+    run.om=8;render();r.si8=document.querySelector('main').innerHTML.includes('Uccidi il mercante');killShopUI();r.chiede=!!modal&&modal.title==='Uccidere il mercante?';modal=null;
+    const d0=run.deck.length,p0=run.potions.length,r0=run.relics.length,g0=run.gold;dispatch(ME,{t:'killShop'});ctx(ME);r.ombra=run.om===10&&!!run.shop.dead;render();r.schermo=document.querySelector('main').innerHTML.includes('Il mercante giace a terra');
+    dispatch(ME,{t:'loot',kind:'cards',k:0});dispatch(ME,{t:'loot',kind:'cards',k:1});ctx(ME);r.carta=run.deck.length===d0+1;
+    run.potions=run.potions.slice(0,1);const p1=run.potions.length;dispatch(ME,{t:'loot',kind:'potions',k:0});dispatch(ME,{t:'loot',kind:'potions',k:1});ctx(ME);r.pozione=run.potions.length===p1+1;
+    dispatch(ME,{t:'loot',kind:'relics',k:0});dispatch(ME,{t:'loot',kind:'relics',k:1});ctx(ME);r.reliquia=run.relics.length===r0+1;
+    dispatch(ME,{t:'buy',kind:'cards',k:2});dispatch(ME,{t:'shopRemove',i:0});ctx(ME);r.chiuso=run.gold===g0&&run.deck.length===d0+1;
+    // al prossimo combattimento cade nell'ombra: Ombra a 0, PV massimi −4, Forma oscura
+    const fa=(run.stx&&run.stx.falls)|0;R.phase='combat';startCombat(['goblin'],'combat');ctx(ME);r.caduta=run.om===0&&!!g.hero.st.oscuro&&((run.stx&&run.stx.falls)|0)===fa+1;
+    // un solo mercante per partita
+    R.phase='room';run.screen='shop';genShop();run.om=9;render();r.unaVolta=!document.querySelector('main').innerHTML.includes('>Uccidi il mercante<')&&document.querySelector('main').innerHTML.includes('Hai già ucciso un mercante');dispatch(ME,{t:'killShop'});ctx(ME);r.unaVolta=r.unaVolta&&!run.shop.dead&&run.om===9;
+    // carta potenziata a caso: si dice quale
+    nuova('guerriero');R.phase='map';render();const nm=UPRAND(2);render();await sleep(1300);const tt=[...document.querySelectorAll('.toast')].map(x=>x.textContent).join(' ');
+    r.nome=nm.length===2&&tt.includes('Carte potenziate')&&nm.every(n=>tt.includes(n+'+'))&&nm.every(n=>run.deck.some(c=>c.up&&CARDS[c.id].n===n));
+    // percorso disegnato anche da solo: nodo, poi linee; l'ultima linea toccata di nuovo si toglie; da un nodo a metà si cambia strada
+    R.plans={};UI.draw=true;render();r.strumenti=document.body.innerHTML.includes('Fine, torna a giocare');const n0=R.map[0].find(Boolean);nodeTap(n0.y,n0.x);const a=R.map[1][n0.next[0]];
+    render();r.linee=document.querySelectorAll('.mapsvg .ehit').length>0;edgeTap(n0.y,n0.x,a.y,a.x);const b=R.map[2][a.next[0]];edgeTap(a.y,a.x,b.y,b.x);const lun=(R.plans.solo||[]).length;
+    edgeTap(a.y,a.x,b.y,b.x);const tolto=(R.plans.solo||[]).length;render();r.percorso=lun===3&&tolto===2&&!!document.querySelector('.mapsvg .plan polyline');
+    const alt=a.next.find(x=>x!==b.x);if(alt!=null){edgeTap(a.y,a.x,2,alt);r.percorso=r.percorso&&JSON.stringify(R.plans.solo)===JSON.stringify([[n0.y,n0.x],[a.y,a.x],[2,alt]])}
+    UI.draw=false;R=null;modal=null;screen='title';render();return r});
+  ok(mk.no7&&mk.si8&&mk.chiede&&mk.ombra&&mk.schermo&&mk.carta&&mk.pozione&&mk.reliquia&&mk.chiuso&&mk.caduta&&mk.unaVolta,'mercante: con 8 Ombra si può uccidere (con conferma, una sola volta per partita), Ombra a 10, una carta, una pozione e una reliquia gratis, poi il negozio è chiuso e al combattimento si cade nell\'ombra '+JSON.stringify(mk));
+  ok(mk.nome,'carta potenziata a caso: il fumetto dice quale');
+  ok(mk.strumenti&&mk.linee&&mk.percorso,'percorso disegnato anche da solo, toccando nodi e linee (si toglie e si cambia strada)');
+  {const c3=await browser.newContext({viewport:{width:360,height:640},isMobile:true,hasTouch:true});await c3.route(/^https?:\/\//,r=>r.abort());const p3=await c3.newPage();await p3.goto(PAGE);await p3.waitForTimeout(300);
+    const mp=await p3.evaluate(async()=>{SET.tut=false;SET.lo=true;SPEED=0;R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);modal=null;pickCls='guerriero';pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();ctx(ME);render();
+      const m=document.getElementById('mapwrap'),dt=document.querySelector('details.mapextra');const h=m.getBoundingClientRect().height;const chiuso=!!dt&&!dt.open;dt.open=true;await new Promise(t=>setTimeout(t,50));
+      const vis=dt.querySelector('.mxin').getBoundingClientRect().height>0;return {h:Math.round(h),chiuso,vis,sum:dt.querySelector('summary').textContent}});
+    ok(mp.h>=300&&mp.chiuso&&mp.vis,`mappa su telefono piccolo (360x640): la mappa è alta ${mp.h} punti, missioni e climi in un riquadro chiuso che si apre («${mp.sum}»)`);await c3.close()}
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;
