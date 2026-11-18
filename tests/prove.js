@@ -332,12 +332,20 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     await adminCheck();r.controllo=ADM.ok&&localStorage.getItem(VISNO_K)==='1';render();r.visibile=!!document.querySelector('[onclick="openAdmin()"]');
     openAdmin();await sleep(50);const m=document.querySelector('.admin');
     r.pannello=!!m&&m.querySelectorAll('.adtile').length>=11&&m.querySelectorAll('.adchart').length===2&&m.querySelectorAll('.adchart:not(.ore) .adbar').length===30&&m.textContent.includes('2 Goblin Predone')&&m.textContent.includes('Schivata+')&&m.textContent.includes('Ladro');
+    // senza le sezioni nuove del server (piattaforme, api) il pannello non le mostra e non si rompe
+    r.vecchioServer=!m.textContent.includes('Client nativi')&&!m.textContent.includes('Da dove giocano');
+    // con l'endpoint «api»: piattaforme, chiamate delle app, errori e versioni delle app
+    ADM.dati=Object.assign({},ADM.dati,{versioni:[['v8.1',9,'web'],['1.0.0',3,'android']],piattaforme:[['web',20,9,7],['android',4,2,3],['ios',1,1,0]],
+      api:{g7:12,errori7:2,dispositivi7:3,giocatori7:1,ultima:'18/11 11:54',azioni:[['android','visita',6,0,0],['android','partita',4,1,1],['ios','accedi',2,1,0]],errori:[['credenziali',1],['dati_non_validi',1]]}});
+    render();const m2=document.querySelector('.admin'),tx=m2?m2.textContent:'';
+    r.client=tx.includes('Da dove giocano')&&tx.includes('Android')&&tx.includes('iPhone e iPad')&&tx.includes('Client nativi')&&tx.includes('Fine partita')&&tx.includes('Apertura app')&&tx.includes('Nome, password o token sbagliati')&&tx.includes('1.0.0 (Android)')&&tx.includes('18/11 11:54')&&m2.querySelectorAll('.adtile').length>=15;
     window.accRpc=async()=>{throw new Error('non_autorizzato')};await adminLoad();r.rifiuto=ADM.stato==='err'&&/non è amministratore/.test(ADM.msg);
     modal=null;window.sbClient=sb0;window.accRpc=rpc0;ACC=acc0;ADM.ok=false;ADM.dati=null;SET.stats=st0;
     try{localStorage.removeItem(VIS_K);localStorage.removeItem(VISNO_K);sessionStorage.removeItem(VISS_K)}catch(e){}render();return r});
   ok(adm.locale&&adm.prima&&adm.dati&&adm.stessoCodice,'visite: una sola chiamata con codice casuale, versione, telefono e app (niente nomi); nelle prove in locale non si conta '+JSON.stringify({l:adm.locale,p:adm.prima,d:adm.dati,c:adm.stessoCodice}));
   ok(adm.unaPerScheda&&adm.spenta&&adm.admNonConta,'visite: una per scheda, niente con «Invia statistiche anonime» spento né sui dispositivi dell\'amministratrice');
   ok(adm.nascosto&&adm.controllo&&adm.visibile&&adm.pannello&&adm.rifiuto,'amministrazione: nascosta agli altri, visibile dopo il controllo sul server, pannello con visite, grafici, eroi, carte e nemici; rifiuto gestito '+JSON.stringify({n:adm.nascosto,c:adm.controllo,v:adm.visibile,p:adm.pannello,r:adm.rifiuto}));
+  ok(adm.vecchioServer&&adm.client,'amministrazione: piattaforme e chiamate dei client nativi (app, azioni, errori, versioni delle app); senza questi dati il pannello resta com\'era '+JSON.stringify({v:adm.vecchioServer,c:adm.client}));
 
   console.log('');
   if(errori.length){console.log('Errori JavaScript nella pagina:');[...new Set(errori)].forEach(e=>console.log('  - '+e));fallite++}
