@@ -464,9 +464,9 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     g.hero.hand=[{id:'colpo',up:false,uid:uid++},{id:'parata',up:false,uid:uid++}];g.hero.energy=3;render();
     const pc=simHit('c',g.hero.hand[0].uid,0,0);r.colpo=!!pc&&pc.tot===12&&pc.bl===5&&pc.hp===7&&!pc.kill;
     const tl=dmgTipHTML(0);r.elenco=tl.includes('Danni su')&&tl.includes('Colpo')&&tl.includes('12')&&tl.includes('7 alla vita')&&tl.includes('Forza +2')&&tl.includes('Vulnerabile +50%')&&!tl.includes('Parata');
-    UI.sel={k:'c',uid:g.hero.hand[0].uid,sh:0};render();const bd=document.querySelector('#ent-e0 .dmgprev');r.numero=!!bd&&bd.textContent.includes('12');
+    UI.sel={k:'c',uid:g.hero.hand[0].uid,sh:0};render();const bd=document.querySelector('#dmglayer .dmgprev[data-j="0"]');r.numero=!!bd&&bd.textContent.includes('−7 vita')&&bd.textContent.includes("5 all'Armatura")&&document.querySelectorAll('#ent-e0 .bar .loss').length===1;
     const ts=dmgTipHTML(0);r.scelta=ts.includes('Colpo → ')&&ts.includes('12 danni')&&ts.includes("5 all'Armatura, 7 alla vita");
-    g.enemies[1].hp=5;const k=dmgTipHTML(1);r.letale=k.includes('Lo sconfiggi');render();r.letale=r.letale&&document.querySelector('#ent-e1 .dmgprev').textContent.includes('letale');
+    g.enemies[1].hp=5;const k=dmgTipHTML(1);r.letale=k.includes('Lo sconfiggi');render();const bl=document.querySelector('#dmglayer .dmgprev[data-j="1"]');r.letale=r.letale&&!!bl&&bl.textContent.includes('−5 · letale');
     const el=document.getElementById('ent-e0');dmgTip(el);const tip=document.getElementById('dmgtip');r.riquadro=!!tip&&!tip.hidden&&tip.textContent.includes('12 danni');UI.sel=null;dmgTipHide();
     g.hero.ended=true;r.fineTurno=simHit('c',g.hero.hand[0].uid,0,0)===null;g.hero.ended=false;
     // Retrovie al posto del Falò nel cancello; il Falò resta nella partita normale
@@ -485,6 +485,49 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(an.tutte&&an.colpo&&an.elenco&&an.numero&&an.scelta&&an.letale&&an.riquadro&&an.fineTurno,`anteprima dei danni: uguale ai danni veri per ogni carta (${an.n} prove) senza toccare lo stato; elenco col mouse, numero sul bersaglio, letale `+JSON.stringify({t:an.tutte,d:an.diverse,c:an.cambiato,co:an.colpo,e:an.elenco,n:an.numero,s:an.scelta,l:an.letale,q:an.riquadro,f:an.fineTurno}));
   ok(an.retrovie&&an.benda&&an.falo,'Aprite il cancello: Retrovie con bende e armaioli al posto del Falò (che resta nella partita normale) '+JSON.stringify({r:an.retrovie,b:an.benda,f:an.falo}));
   ok(an.soglie&&an.calano&&an.vede&&an.normale,'Aprite il cancello: dietro l\'eroe gli abitanti in salvo, a soglie, e calano quando se ne perdono '+JSON.stringify({s:an.soglie,c:an.calano,v:an.vede,n:an.normale}));
+
+  console.log('7h. La vita persa si vede: numeri sui nemici in tante finestre, viste e numeri di nemici');
+  {const casi=[['PC',{viewport:{width:1280,height:800}},1],['PC largo',{viewport:{width:1920,height:1000}},1],['PC basso',{viewport:{width:1000,height:560}},1],
+      ['tablet',{viewport:{width:768,height:1024},isMobile:true,hasTouch:true},0],['telefono',{viewport:{width:390,height:844},isMobile:true,hasTouch:true},0]];
+    const gruppi=[['goblin'],['orco','goblin'],['orco','goblin','bandito'],['signoreguerra','goblin','bandito','goblin','goblin']];
+    const male=[];let viste=0,daMouse=0;
+    for(const [nome,opt,mouse] of casi)for(const scena of [false,true]){
+      const c2=await browser.newContext(opt);await c2.route(/^https?:\/\//,r=>r.abort());const p2=await c2.newPage();const e2=[];p2.on('pageerror',e=>e2.push(e.message));
+      await p2.goto(PAGE);await p2.waitForTimeout(300);
+      for(const [gi,ids] of gruppi.entries()){
+        await p2.evaluate(([ids,scena])=>{SET.tut=false;SET.scena=scena;SET.px=true;saveSet();applySet();SPEED=0;R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);modal=null;UI.sel=null;UI.om=false;
+          pickCls='guerriero';pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();ctx(ME);startCombat(ids,ids.length>4?'boss':'combat');ctx(ME);const h=g.hero;h.st.str=2;
+          g.enemies.forEach((e,i)=>{e.intent={d:0};if(i%2)e.blk=4});g.enemies[0].st.vuln=2;if(g.enemies[1])g.enemies[1].hp=Math.min(g.enemies[1].hp,9);
+          h.hand=[{id:'colpo',up:false,uid:uid++},{id:'possente',up:false,uid:uid++},{id:'fendente',up:false,uid:uid++},{id:'parata',up:false,uid:uid++},{id:'colpo',up:true,uid:uid++}];h.energy=3;render()},[ids,scena]);
+        await p2.waitForTimeout(150);
+        // controllo: per ogni nemico che perde vita, il numero giusto sta sopra la sua testa, dentro lo schermo, sopra tutto il resto, senza toccare gli altri numeri né l'intenzione
+        const controlla=async(cosa,src)=>p2.evaluate(([cosa,src])=>{const out=[];const W=innerWidth,H=innerHeight,prese=[];
+          const L=document.getElementById('dmglayer'),zL=L?+getComputedStyle(L).zIndex:0;
+          const zMax=Math.max(0,...[...document.querySelectorAll('#cprev,#gltip,#dmgtip,.hand,.hand .card,header.hud,.pilebar')].map(x=>+getComputedStyle(x).zIndex||0));
+          if(!(zL>zMax))out.push(cosa+': i numeri non stanno sopra tutto');
+          // il testo delle carte deve restare leggibile: carta ingrandita, parole chiave e carte in mano
+          const carte=[...document.querySelectorAll('.hand .card,#cprev:not([hidden])>*,#gltip:not([hidden])')].map(x=>x.getBoundingClientRect()).filter(r=>r.width&&r.height);
+          g.enemies.forEach((e,j)=>{if(e.hp<=0)return;const r=src.k==='c'?simHit('c',src.x,j,0):null;if(!r||!(r.hp>0))return;
+            const b=document.querySelector('#dmglayer .dmgprev[data-j="'+j+'"]');if(!b||b.hidden||!b.offsetWidth){out.push(cosa+' nemico '+j+': numero mancante');return}
+            const q=b.getBoundingClientRect(),el=document.getElementById('ent-e'+j),f=el.querySelector('.face').getBoundingClientRect(),it=el.querySelector('.intent'),ir=it&&it.offsetWidth?it.getBoundingClientRect():null;
+            const dentro=q.left>=0&&q.top>=0&&q.right<=W&&q.bottom<=H,sopra=q.bottom<=f.top+4||q.top<=4,centrato=q.left<f.right&&q.right>f.left;
+            const sucarta=carte.some(c=>q.left<c.right&&q.right>c.left&&q.top<c.bottom&&q.bottom>c.top),vicino=['testa','su','lato','cima','sopra la figura'].includes(b.dataset.pos);
+            const tocca=prese.some(o=>q.left<o.right&&q.right>o.left&&q.top<o.bottom&&q.bottom>o.top),intenz=ir&&q.left<ir.right&&q.right>ir.left&&q.top<ir.bottom&&q.bottom>ir.top;prese.push(q);
+            const fs=parseFloat(getComputedStyle(b).fontSize),val=b.textContent.includes('−'+r.hp);
+            const ps=b.dataset.pos,vic=q.right>f.left-80&&q.left<f.right+80;const posto=ps==='testa'?(sopra&&centrato):ps==='su'?centrato:ps==='lato'?true:ps==='cima'?(vic&&q.top<=f.top+f.height*.4):ps==='sopra la figura'?(centrato&&q.top>=f.top-2&&q.bottom<=f.bottom+2):false;
+            if(!(dentro&&posto&&vicino&&!sucarta&&!tocca&&!intenz&&fs>=12&&val))out.push(cosa+' nemico '+j+' ['+b.dataset.pos+']: '+[dentro?'':'fuori schermo',posto?'':'fuori posto',sucarta?'copre il testo di una carta':'',tocca?'sovrapposto a un altro':'',intenz?'copre l\'intenzione':'',fs>=12?'':'troppo piccolo',val?'':'valore sbagliato ('+b.textContent+' invece di −'+r.hp+')'].filter(Boolean).join(', '));
+            if(!document.querySelector('#ent-e'+j+' .bar .loss'))out.push(cosa+' nemico '+j+': barra senza la parte da perdere')});
+          return out},[cosa,src]);
+        // 1) carta scelta (anche su telefono), con più di un nemico
+        if(ids.length>1){const u=await p2.evaluate(()=>{const c=g.hero.hand[1];UI.sel={k:'c',uid:c.uid,sh:0};render();return c.uid});await p2.waitForTimeout(80);
+          male.push(...(await controlla(nome+(scena?' scena':'')+' '+ids.length+' nemici, carta scelta',{k:'c',x:u})));viste++;
+          await p2.evaluate(()=>{UI.sel=null;render()})}
+        // 2) col mouse sopra ogni carta d'attacco in mano (Fendente Ampio colpisce tutti)
+        if(mouse)for(const i of [0,1,2,4]){const u=await p2.evaluate(i=>g.hero.hand[i].uid,i);await p2.hover('.hand .card >> nth='+i);await p2.waitForTimeout(120);
+          male.push(...(await controlla(nome+(scena?' scena':'')+' '+ids.length+' nemici, mouse su carta '+i,{k:'c',x:u})));viste++;daMouse++;await p2.mouse.move(2,2);await p2.waitForTimeout(40)}
+      }
+      if(e2.length)male.push(nome+': errore JS '+e2[0]);await c2.close()}
+    ok(!male.length&&viste>60&&daMouse>40,`la vita persa si vede sempre sopra la testa del nemico senza coprire il testo delle carte (${viste} situazioni: PC, PC largo, PC basso, tablet, telefono; vista classica e a scena; da 1 a 5 nemici; carta scelta e mouse sulla carta)`+(male.length?' — problemi: '+male.slice(0,6).join(' | '):''));}
 
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
