@@ -373,6 +373,10 @@ body.hc{--muted:#ddd6ea;--line:#8d82a6}body.hc .card .cdesc{color:#15101c}body.h
 .card.shadow .cname{color:#e7cbff}.card.shadow .cdesc{color:#efe2ff}.card.shadow .cdesc b{color:#ffcf7a}.card.shadow .cdesc b.omtag{color:#d9b3ff}.card.noshadow{opacity:.45;filter:grayscale(.6)}
 .btn.ombtn{border-color:#7a4cb0}.btn.ombtn.primary{background:#5b2d8a;border-color:#c08bff;color:#fff}
 .omtag{color:#d7b6ff;font-weight:700}
+/* strade segrete (v8.2) */
+.segpanel{border-color:#c9a24a;background:linear-gradient(160deg,rgba(201,162,74,.14),rgba(20,15,28,0) 60%),var(--stone2)}
+.segitem{border-color:#8a6d2e}.segitem:hover{border-color:#e0bd5c}
+.segtag{display:inline-block;font-size:11.5px;font-weight:700;color:#1a1208;background:#e0bd5c;border-radius:6px;padding:0 6px;vertical-align:1px}
 /* Carta «B» (Grafica Pixellab, Sviluppo): cornice e fascia del nome del colore del tipo, costo su una runa a rombo, rarità come gemma in fondo */
 body.pxui .card{--tc:#8a7a62;border:4px solid var(--tc);border-radius:10px;padding:0 0 9px;gap:4px;box-shadow:0 4px 0 rgba(0,0,0,.4)}
 body.pxui .card.t-A{--tc:#8f2f25}body.pxui .card.t-S{--tc:#2f5f8f}body.pxui .card.t-P{--tc:#8a6418}body.pxui .card.t-X{--tc:#5b3a85}
@@ -787,6 +791,7 @@ drago:[
 ],
 };
 const ICONS={
+r_occhiocust:["............","....kkkk....","..kkyyyykk..",".kyywwwwyyk.","kyywwttwwyyk","kywwtkktwwyk","kywwtkktwwyk","kyywwttwwyyk",".kyywwwwyyk.","..kkyyyykk..","....kkkk....","............"],r_coronaspine:["............",".k...kk...k.",".kk.kyyk.kk.",".kykyyyykyk.",".kyyyyyyyyk.",".kyrryyrryk.",".kyrryyrryk.",".kyyyyyyyyk.",".kYYYYYYYYk.",".kkkkkkkkkk.","............","............"],r_calicestelle:["............","..kkkkkkkk..",".kibbEbbbik.",".kibbbbEbik.","..kibbbbik..","...kiiiik...","....kiik....","....kiik....","....kiik....","...kiiiik...","..kkkkkkkk..","............"],r_stendardo:[".kk.........",".kmkkkkkkk..",".kmkppppppk.",".kmkpyyyppk.",".kmkppyyppk.",".kmkpyyyppk.",".kmkppppppk.",".kmkPpPpPpk.",".kmkkPkPkPk.",".kmk.k.k.k..",".kmk........",".kkk........"],r_clessidra:["..kkkkkkkk..","..knnnnnnk..","...kiikik...","...kyyyik...","....kyik....",".....kk.....","....kiyk....","...kiyyyk...","...kyyyyk...","..knnnnnnk..","..kkkkkkkk..","............"],r_borsafondo:["....kkkk....",".....kk.....","....kPPk....","...kppppk...","..kppppppk..",".kppyyyyppk.",".kpyykkyypk.",".kppyyyyppk.",".kpppppppPk.","..kPpppPPk..","...kkkkkk.ky","........kyyk"],segreto:["....kkkk....","..kkMMMMkk..",".kMMkkkkMMk.",".kMkcEpckMk.",".kMkcppckMk.",".kMkpccpkMk.",".kMkccpckMk.",".kMkcccckMk.",".kMkcccckMk.","kkMkcccckMkk","kMMMkkkkMMMk","kkkkkkkkkkkk"],i_segreto:["....kkkk....","..kkMMMMkk..",".kMMkkkkMMk.",".kMkcEpckMk.",".kMkcppckMk.",".kMkpccpkMk.",".kMkccpckMk.",".kMkcccckMk.",".kMkcccckMk.","kkMkcccckMkk","kMMMkkkkMMMk","kkkkkkkkkkkk"],
 r_teschio:["............", "...kkkkkk...", "..kwwwwwwk..", ".kwwwwwwwwk.", ".kwkkwwkkwk.", ".kwkkwwkkwk.", ".kwwwkkwwwk.", "..kwwwwwwk..", "...kwkwkk...", "...kwkwkk...", "....kkkk....", "............"],
 r_fischietto:["............", "............", "........kk..", ".......knk..", "..kkkkkknk..", ".knnnnnnnk..", "kNnknnnnnk..", "kNnknnnnk...", ".kNNNNNNk...", "..kkkkkk....", "............", "............"],
 r_seme:["............", ".....kk.....", "....kgGk....", "...kgGGk....", "....kGk.....", "....kNk.....", "...kNnNk....", "..kNnnnNk...", "..kNnnnNk...", "...kNnNk....", "....kkk.....", "............"],
@@ -1000,7 +1005,7 @@ borseggio:{n:'Borseggio Letale',cl:'ladro',t:'A',r:'U',c:1,tg:1,ex:1,v:{d:8,o:20
 sacrificio:{n:'Sacrificio Sacro',cl:'chierico',t:'A',r:'U',c:1,tg:1,ex:1,v:{d:7,m:2},u:{d:10,m:3},x:v=>`Infliggi ${v.d} danni. Se il nemico muore, ottieni ${v.m} PV massimi <b>per tutta la partita</b>.`,f:(v,t)=>{A(t,v.d);if(KO(t))MAXHP(v.m)}},
 /* --- carte X: spendono tutta l'Energia rimasta --- */
 turbine:{n:"Turbine d'Acciaio",cl:'guerriero',t:'A',r:'U',c:0,xc:1,v:{d:5},u:{d:7},x:v=>`Costa tutta la tua Energia (X). Infliggi ${v.d} danni a TUTTI i nemici X volte.`,f:v=>{for(let k=0;k<v.X;k++)AA(v.d)}},
-pergamene:{n:'Pergamene del Caos',cl:'mago',t:'S',r:'R',c:0,xc:1,ex:1,v:{p:0},u:{p:1},x:v=>`Costa tutta la tua Energia (X). Gioca gratis le prime ${v.p?'X+'+v.p:'X'} carte della tua pila di pesca.`,f:v=>playFree(v.X+v.p)},
+pergamene:{n:'Pergamene del Caos',cl:'mago',t:'S',r:'R',c:0,xc:1,ex:1,nosh:1,v:{p:0},u:{p:1},x:v=>`Costa tutta la tua Energia (X). Gioca gratis le prime ${v.p?'X+'+v.p:'X'} carte della tua pila di pesca.`,f:v=>playFree(v.X+v.p)},
 milletagli:{n:'Mille Tagli',cl:'ladro',t:'A',r:'U',c:0,xc:1,tg:1,v:{d:3,pp:0},u:{d:4,pp:2},x:v=>`Costa tutta la tua Energia (X). Infliggi ${v.d} danni X volte e applica ${v.pp?'X+'+v.pp:'X'} Veleno.`,f:(v,t)=>{A(t,v.d,v.X);if(t&&t.hp>0&&v.X+v.pp)S(t,'poison',v.X+v.pp)}},
 luceabb:{n:'Luce Abbondante',cl:'chierico',t:'S',r:'U',c:0,xc:1,v:{b:4},u:{b:6},x:v=>`Costa tutta la tua Energia (X). `+W(`Ottieni ${v.b} Armatura X volte.`,`Tu e tutti gli alleati ottenete ${v.b} Armatura X volte.`),f:v=>{if(v.X)Object.keys(g.heroes).forEach(p=>BA(p,v.b*v.X))}},
 /* --- carte che scartano dalla mano --- */
@@ -1073,7 +1078,17 @@ Object.assign(RELICS,{
 const STARTER_RELICS=['elmo','grimorio','fiala','simbolo'];
 const CRYPT_RELICS=['amuleto','calice','ossa','lanternasp','anello','mantonero'];
 const ABYSS_RELICS=['braciere','martellonano','cuoreabisso','scaglia'];
-const RELIC_POOL=Object.keys(RELICS).filter(k=>!STARTER_RELICS.includes(k)&&!CRYPT_RELICS.includes(k)&&!ABYSS_RELICS.includes(k));
+// Reliquie segrete (v8.2): più forti delle altre, si trovano solo nelle strade segrete della mappa
+Object.assign(RELICS,{
+  occhiocust:{n:'Occhio del Custode',ic:'',sec:1,d:'Nel primo turno di ogni combattimento peschi 2 carte e ottieni 1 Energia in più.'},
+  coronaspine:{n:'Corona di Spine',ic:'',sec:1,d:'Inizi ogni combattimento con 2 Forza e 2 Destrezza.'},
+  calicestelle:{n:'Calice delle Stelle',ic:'',sec:1,d:'Quando la raccogli: +10 PV massimi. Alla fine di ogni combattimento recuperi 8 PV.'},
+  stendardo:{n:'Stendardo del Re Perduto',ic:'',sec:1,d:'All\'inizio di ogni combattimento applichi 2 Debole e 2 Vulnerabile a tutti i nemici.'},
+  clessidra:{n:'Clessidra Spezzata',ic:'',sec:1,d:'Ogni 2 turni ottieni 1 Energia in più.'},
+  borsafondo:{n:'Borsa senza Fondo',ic:'',sec:1,d:'Quando la raccogli: +100 oro. Ottieni il 50% di oro in più dai combattimenti.'},
+});
+const SECRET_RELICS=['occhiocust','coronaspine','calicestelle','stendardo','clessidra','borsafondo'];
+const RELIC_POOL=Object.keys(RELICS).filter(k=>!STARTER_RELICS.includes(k)&&!CRYPT_RELICS.includes(k)&&!ABYSS_RELICS.includes(k)&&!RELICS[k].sec);
 const ALL_RELICS=[...RELIC_POOL,...CRYPT_RELICS,...ABYSS_RELICS];
 
 const POTIONS={
@@ -1229,7 +1244,7 @@ anime:{n:'Raccolto di Anime',cl:'necromante',t:'S',r:'C',c:0,tg:1,v:{m:4},u:{m:6
 freccia:{n:'Freccia',cl:'ranger',t:'A',r:'B',c:1,tg:1,v:{d:6},u:{d:9},x:v=>`Infliggi ${v.d} danni.`,f:(v,t)=>A(t,v.d)},
 riparo:{n:'Riparo',cl:'ranger',t:'S',r:'B',c:1,v:{b:5},u:{b:8},x:v=>`Ottieni ${v.b} Armatura.`,f:v=>B(v.b)},
 marchiocacc:{n:'Marchio del Cacciatore',cl:'ranger',t:'S',r:'B',c:1,tg:1,v:{m:3},u:{m:5},x:v=>`Applica ${v.m} Marchio. Il tuo Lupo attacca per primo i nemici marchiati.`,f:(v,t)=>S(t,'mark',v.m)},
-azzanna:{n:'Azzanna!',cl:'ranger',t:'A',r:'B',c:1,tg:1,v:{n:1},u:{n:2},x:v=>`Il tuo Lupo attacca subito il nemico${v.n>1?' 2 volte':''}.`,f:(v,t)=>petHit(t,v.n)},
+azzanna:{n:'Azzanna!',cl:'ranger',t:'A',r:'B',c:1,tg:1,v:{n:1},u:{n:2},x:v=>`Il tuo Lupo attacca subito il nemico${v.n>1?' '+v.n+' volte':''}.`,f:(v,t)=>petHit(t,v.n)},
 raffica:{n:'Raffica di Frecce',cl:'ranger',t:'A',r:'C',c:1,v:{d:3,n:3},u:{d:4,n:3},x:v=>`Infliggi ${v.d} danni a nemici casuali ${v.n} volte.`,f:v=>AR(v.d,v.n)},
 perforante:{n:'Freccia Perforante',cl:'ranger',t:'A',r:'C',c:2,tg:1,v:{d:12,s:1},u:{d:16,s:2},x:v=>`Infliggi ${v.d} danni. Applica ${v.s} Vulnerabile.`,f:(v,t)=>{A(t,v.d);S(t,'vuln',v.s)}},
 addestramento:{n:'Addestramento',cl:'ranger',t:'P',r:'U',c:1,v:{},u:{},cu:0,x:()=>`Il tuo Lupo infligge 2 danni in più.`,f:()=>P('addestr',1)},
@@ -1259,14 +1274,14 @@ pugno:{n:'Pugno',cl:'monaco',t:'A',r:'B',c:1,tg:1,v:{d:6},u:{d:9},x:v=>`Infliggi
 paratamani:{n:'Parata a Mani Nude',cl:'monaco',t:'S',r:'B',c:1,v:{b:5},u:{b:8},x:v=>`Ottieni ${v.b} Armatura.`,f:v=>B(v.b)},
 rafficapugni:{n:'Raffica di Pugni',cl:'monaco',t:'A',r:'B',c:1,tg:1,v:{d:3},u:{d:4},x:v=>`Infliggi ${v.d} danni 2 volte. L'elemento si applica a ogni colpo.`,f:(v,t)=>{A(t,v.d);if(g.hero.elem){elemHit(g.hero);g.hit=new Set([t])}A(t,v.d)}},
 calcio:{n:'Calcio Rotante',cl:'monaco',t:'A',r:'C',c:1,v:{d:5},u:{d:8},x:v=>`Infliggi ${v.d} danni a TUTTI i nemici.`,f:v=>AA(v.d)},
-esplosione:{n:'Esplosione degli Elementi',cl:'monaco',t:'A',r:'U',c:1,ex:1,v:{n:1},u:{n:2},x:v=>`Consuma l'elemento attivo per un grande effetto${v.n>1?', due volte':''}: Fuoco 6 Bruciatura a tutti · Acqua recuperi 8 PV · Terra 14 Armatura · Aria 5 danni a tutti 2 volte.`,
+esplosione:{n:'Esplosione degli Elementi',cl:'monaco',t:'A',r:'U',c:1,ex:1,v:{n:1},u:{n:2},x:v=>`Consuma l'elemento attivo per un grande effetto${v.n>2?', '+v.n+' volte':v.n>1?', due volte':''}: Fuoco 6 Bruciatura a tutti · Acqua recuperi 8 PV · Terra 14 Armatura · Aria 5 danni a tutti 2 volte.`,
   f:v=>{const e=g.hero.elem;if(!e)return;for(let k=0;k<v.n;k++){if(e==='fuoco')SA('burn',6);if(e==='acqua')H(8);if(e==='terra')B(14);if(e==='aria'){AA(5);AA(5)}}g.hero.elem=null}},
 armonia:{n:'Armonia',cl:'monaco',t:'P',r:'R',c:2,cu:1,v:{},u:{},x:()=>`L'effetto dell'elemento si applica 2 volte a ogni Attacco.`,f:()=>P('armonia',1)},
 meditazione:{n:'Meditazione',cl:'monaco',t:'S',r:'C',c:1,choose:ELEMK.map(k=>ELEMS[k][0]),v:{dr:2},u:{dr:3},x:v=>`Pesca ${v.dr} carte e scegli un elemento.`,f:(v,t,a,pk)=>{D(v.dr);setElem(ELEMK[pk|0])}},
 colpodrago:{n:'Colpo del Drago',cl:'monaco',t:'A',r:'U',c:2,tg:1,v:{d:12},u:{d:16},x:v=>`Infliggi ${v.d} danni. L'effetto dell'elemento si applica 3 volte.`,f:(v,t)=>{A(t,v.d);const h=g.hero;if(h.elem){elemHit(h);elemHit(h)}}},
 palmo:{n:'Palmo Curativo',cl:'monaco',t:'S',r:'C',c:1,ally:1,v:{h:4},u:{h:6},x:v=>W(`Recuperi ${v.h} PV (il doppio con Acqua).`,`Tu o un alleato recuperate ${v.h} PV (il doppio con Acqua).`),f:(v,t,a)=>HA(a,inElem('acqua')?2*v.h:v.h)},
 roccia:{n:'Pelle di Roccia',cl:'monaco',t:'S',r:'C',c:1,v:{b:7,x:5},u:{b:9,x:7},x:v=>`Ottieni ${v.b} Armatura (${v.x} in più con Terra).`,f:v=>B(inElem('terra')?v.b+v.x:v.b)},
-ventoprof:{n:'Vento Profondo',cl:'monaco',t:'S',r:'U',c:1,v:{e:1,dr:1},u:{e:2,dr:1},x:v=>`Ottieni ${v.e} Energia e pesca ${v.dr} carta. Con Aria, pesca 2 carte in più.`,f:v=>{E(v.e);D(inElem('aria')?v.dr+2:v.dr)}},
+ventoprof:{n:'Vento Profondo',cl:'monaco',t:'S',r:'U',c:1,v:{e:1,dr:1},u:{e:2,dr:1},x:v=>`Ottieni ${v.e} Energia e pesca ${v.dr} ${pl(v.dr,'carta','carte')}. Con Aria, pesca 2 carte in più.`,f:v=>{E(v.e);D(inElem('aria')?v.dr+2:v.dr)}},
 /* Guardiano (tank) */
 fendpesante:{n:'Fendente Pesante',cl:'guardiano',t:'A',r:'B',c:1,tg:1,v:{d:6},u:{d:9},x:v=>`Infliggi ${v.d} danni.`,f:(v,t)=>A(t,v.d)},
 muroacciaio:{n:'Muro d\'Acciaio',cl:'guardiano',t:'S',r:'B',c:1,v:{b:6},u:{b:9},x:v=>`Ottieni ${v.b} Armatura.`,f:v=>B(v.b)},
@@ -1390,7 +1405,7 @@ function dispatch(pid,a){
 function checkProgress(){
   if(!R||!isHost)return;
   if(R.phase==='map'){if(R.voteAnim)return;const act=active();if(act.length&&act.every(p=>R.votes[p]))resolveVote()}
-  else if(R.phase==='room'){if(active().every(p=>R.players[p].done)){R.phase='map';R.votes={};R.order.forEach(p=>R.players[p].screen=null)}}
+  else if(R.phase==='room'){if(active().every(p=>R.players[p].done)){R.order.forEach(p=>{R.players[p].screen=null;R.players[p].secret=null});if(R.segNext){const s=R.segNext;R.segNext=null;nodeContent(s.y,s.x);return}R.phase='map';R.votes={}}}
   else if(R.phase==='combat'){const c=R.combat;if(c&&!c.busy&&!c.won&&Object.values(c.heroes).every(h=>h.down)){checkEnd();return}if(c&&!c.busy&&!c.won){const hs=Object.keys(c.heroes).filter(p=>!c.heroes[p].down&&isOnline(p));if(hs.length&&hs.every(p=>c.heroes[p].ended))enemyPhase()}}
 }
 
@@ -1433,6 +1448,8 @@ const ACT={
   restForge:(a,P)=>{if(P.screen!=='rest'||!P.deck[a.i]||!canUp(P.deck[a.i]))return;P.deck[a.i].up=true;P.done=true;P.screen='wait'},
   ev:(a,P)=>{if(P.screen!=='event'||!P.event||P.event.result)return;const ev=EVENTS.find(e=>e.id===P.event.id);const o=ev&&ev.opts[a.k];
     if(!o||(o.req&&!o.req())||(o.solo&&!solo))return;const r=o.f(a.i);if(r!=null)P.event.result=r},
+  secret:(a,P)=>{const s=P.secret;if(R.phase!=='room'||P.screen!=='secret'||!s||s.taken!=null)return;const o=s.opts[a.i|0];if(!o)return;s.taken=a.i|0;
+    if(o.k==='relic')gainRelic(o.id);else{P.gold+=o.gold;UPRAND();UPRAND()}if(P.stx)P.stx.segrete=(P.stx.segrete||0)+1;P.done=true;P.screen='wait'},
   tGold:(a,P)=>{const t=P.treasure;if(P.screen==='treasure'&&t&&t.gold){P.gold+=t.gold;t.gold=0}},
   tRelic:(a,P)=>{const t=P.treasure;if(P.screen==='treasure'&&t&&t.relic){gainRelic(t.relic);t.relic=null}},
   done:(a,P)=>{if(R.phase!=='room')return;
@@ -1505,7 +1522,7 @@ function startRunRoom(lvl,seed,mode,dg){
   if(mode==='surv')lvl=0;
   R.order=R.order.filter(p=>isOnline(p));Object.keys(R.players).forEach(p=>{if(!R.order.includes(p))delete R.players[p]});
   seed=String(seed||'').trim().toUpperCase().slice(0,12)||newSeed();
-  Object.assign(R,{lo:!!SET.lo,seed,dg,deathAt:null,mode:mode==='surv'?'surv':'norm',cycle:1,lbId:null,t0:Date.now(),lvl:Math.max(0,Math.min(MAXLVL,lvl)),map:genMap(new RNG(hashStr(seed+'#map'+(dg==='rocca'?'':dg)))),bossI:hashStr(seed+'#boss'+dg)%2,pos:null,path:[],floor:0,votes:{},seenEv:[],combat:null,win:null,phase:'map'});
+  Object.assign(R,{lo:!!SET.lo,lox:!!(SET.lo&&SET.lox),seg:true,segN:0,segNext:null,seed,dg,deathAt:null,mode:mode==='surv'?'surv':'norm',cycle:1,lbId:null,t0:Date.now(),lvl:Math.max(0,Math.min(MAXLVL,lvl)),map:genMap(new RNG(hashStr(seed+'#map'+(dg==='rocca'?'':dg)))),bossI:hashStr(seed+'#boss'+dg)%2,pos:null,path:[],floor:0,votes:{},seenEv:[],combat:null,win:null,phase:'map'});
   rng=new RNG(hashStr(seed+'#'+R.order.map(p=>R.players[p].cls).join('')));
   R.order.forEach(p=>{const P=R.players[p];const tal=P.tal;initPlayer(P);applyLoadout(P);P.tal=tal;applyTalents(P);applyVillage(P)});
 }
@@ -1532,6 +1549,20 @@ function toLobby(){
 function enterNode(y,x){
   R.pos={y,x};R.path.push([y,x]);R.floor=y+1;const t=R.map[y][x].type;
   if(R.plans)Object.keys(R.plans).forEach(p=>{const pl=R.plans[p];if(pl&&pl[0]&&pl[0][0]===y&&pl[0][1]===x&&pl.length>1)R.plans[p]=pl.slice(1);else delete R.plans[p]});
+  if(segRoll(y,x,t)){R.segN=(R.segN|0)+1;R.segAt=(R.segAt||[]).concat([[R.cycle||1,y,x]]);R.segNext={y,x};openSecret();return}
+  nodeContent(y,x);
+}
+/* Strade segrete (v8.2): di rado, arrivando su una casella, si apre un passaggio con tesori unici.
+   Al massimo una per giro di mappa, mai al primo piano, prima del boss, su élite, mercante o falò, né nella sfida del giorno.
+   Il tiro usa un generatore a parte (dal seme della partita), così non cambia il resto della partita. */
+const SEG_P=.03,SEG_T=['combat','event','treasure'];// circa una partita su quattro (su un percorso ci sono 8-10 caselle adatte)
+function segRoll(y,x,t){if(!R||!R.seg||R.daily||(R.segN|0)>=1||y<1||y>ROWS-2||!SEG_T.includes(t))return false;
+  return !!R.segForce||new RNG(hashStr(R.seed+'#seg'+(R.dg||'')+':'+(R.cycle||1)+':'+y+':'+x)).next()<SEG_P}
+function secretOpts(){const pool=SECRET_RELICS.filter(k=>!run.relics.includes(k)),o=rng.shuffle(pool.slice()).slice(0,2).map(id=>({k:'relic',id}));
+  while(o.length<2)o.push({k:'tesoro',gold:90+o.length*40});o.push({k:'tesoro',gold:90});return o}
+function openSecret(){const ids=active();R.phase='room';
+  R.order.forEach(pid=>{const P=R.players[pid];P.screen=null;P.done=!ids.includes(pid);if(P.done)return;ctx(pid);P.secret={opts:secretOpts(),taken:null};P.screen='secret'})}
+function nodeContent(y,x){const t=R.map[y][x].type;
   const D=DG();
   if(t==='combat')return startCombat(rng.pick(y<3?D.easy:D.hard),'combat');
   if(t==='elite')return startCombat(rng.pick(D.elites),'elite');
@@ -1547,7 +1578,7 @@ function enterNode(y,x){
   });
 }
 function newCycle(){
-  R.cycle++;R.map=genMap(new RNG(hashStr(R.seed+'#map'+R.cycle)));R.pos=null;R.path=[];R.floor=0;R.votes={};
+  R.cycle++;R.map=genMap(new RNG(hashStr(R.seed+'#map'+R.cycle)));R.pos=null;R.path=[];R.floor=0;R.votes={};R.segN=0;R.segNext=null;
   R.order.forEach(p=>{const P=R.players[p];P.hp=Math.min(P.max,P.hp+Math.floor(P.max*.3))});
 }
 const totalFloors=()=>((R.cycle||1)-1)*(ROWS+1)+(R.floor||0);
@@ -1561,8 +1592,20 @@ const OM_MAX=10,OM_HIGH=5,OM_KEYS=['d','b','p'];
 const LO=()=>!!(R&&R.lo);
 const isDark=e=>!!e&&LO()&&DARK.has(e.id);
 const shUp=n=>Math.ceil(n*1.5);
-function canShadow(c){if(!LO()||!c)return false;const d=CARDS[c.id];if(!d||d.unplay||d.t==='P'||d.t==='X')return false;const v=vals(c);return OM_KEYS.some(k=>v[k]>0)}
+// lato Ombra «di base»: carte con danni, Armatura o Veleno
+function omBase(c){if(!LO()||!c)return false;const d=CARDS[c.id];if(!d||d.unplay||d.nosh||d.t==='P'||d.t==='X')return false;const v=vals(c);return OM_KEYS.some(k=>v[k]>0)}
+// «Ombra per tutti gli eroi» (Sviluppo, v8.2): anche le altre carte hanno un lato Ombra. I loro numeri
+// (cure, Marchio, Condanna, Debole, Vulnerabile, Forza, evocazioni, carte pescate, Fervore...) crescono del 50%;
+// le carte senza numeri ti fanno pescare 1 carta in più. Energia e PV persi non cambiano.
+const OMX_KEYS=['h','m','w','s','v','n','dr','f','de','k'];
+const LOX=()=>!!(R&&R.lo&&R.lox);
+function omExt(c){if(!LOX()||!c||omBase(c))return false;const d=CARDS[c.id];return !!d&&!d.unplay&&!d.nosh&&d.t!=='P'&&d.t!=='X'}
+function omxVals(v){const o={...v};OMX_KEYS.forEach(k=>{if(o[k]>0)o[k]=shUp(o[k])});return o}
+const omxDraw=c=>{const v=vals(c);return !OMX_KEYS.some(k=>v[k]>0)};// senza numeri da far crescere: pesca 1 carta in più
+function canShadow(c){return omBase(c)||omExt(c)}
 function shadowVals(v){const o={...v};OM_KEYS.forEach(k=>{if(o[k]>0)o[k]=shUp(o[k])});return o}
+// i valori mostrati e usati dal lato Ombra
+function omVals(c){return omExt(c)?omxVals(vals(c)):shadowVals(vals(c))}
 const omOf=pid=>{const P=R&&R.players[pid];return P?P.om|0:0};
 function omAdd(pid,n){const P=R&&R.players[pid];if(!P||!LO()||!n)return;const b=P.om|0;P.om=Math.max(0,Math.min(OM_MAX,b+n));
   if(P.om!==b)fxq.push({k:'h-'+pid,txt:(n>0?'+':'')+(P.om-b)+' Ombra',cls:n>0?'psn':'heal'});if(P.om>=OM_MAX)omFall(pid)}
@@ -1628,7 +1671,7 @@ function heroTurnStart(h,turn){
   if(h.st.poison){const pz=h.st.poison;run.hp-=pz;fx('hero','-'+pz,'psn');h.st.poison--;if(!h.st.poison)delete h.st.poison;heroDown();if(h.down)return}
   let en=3,dr=5;const pw=h.pw;
   if(turn===1){
-    if(has('lanterna'))en++;if(has('grimorio'))dr+=2;
+    if(has('lanterna'))en++;if(has('grimorio'))dr+=2;if(has('occhiocust')){en++;dr+=2}if(has('coronaspine')){S(h,'str',2);S(h,'dex',2)}
     if(has('pietra'))S(h,'str',1);if(has('mantello'))S(h,'dex',1);
     if(hasT('g2')||hasT('m2'))h.blk+=5;if(hasT('g3'))S(h,'str',1);if(hasT('l3'))S(h,'dex',1);if(hasT('m1'))dr++;if(hasT('m5')||hasT('l5'))en++;
     if(hasT('m3'))alive().forEach(e=>hurtEnemy(e,4));if(hasT('l2'))SA('poison',2);if(hasT('c3'))Object.keys(g.heroes).forEach(p=>BA(p,4));
@@ -1636,9 +1679,9 @@ function heroTurnStart(h,turn){
     if(run.vb&&run.vb.tempio){const b=run.vb.tempio>=2?7:4;h.blk+=b}
     if(has('teschio'))SUMMON(1);if(has('fischietto'))h.pet={atk:4+TE('pet')};if(has('scudotorre')){h.blk+=10;TAUNT(1)}
     {const b=TE('blk');if(b)h.blk+=b;if(TE('str'))S(h,'str',TE('str'));if(TE('dex'))S(h,'dex',TE('dex'));en+=TE('en1');dr+=TE('dr1');if(TE('summon'))SUMMON(TE('summon'));if(TE('doomAll'))SA('doom',TE('doomAll'));if(TE('markAll'))SA('mark',TE('markAll'));if(TE('fervor'))S(h,'fervor',TE('fervor'))}
-    if(has('ancora'))h.blk+=10;if(has('amuleto'))SA('weak',1);if(has('lanternasp'))SA('burn',3);if(has('mantonero')){h.blk+=8;S(h,'dex',1)}if(has('fiala'))SA('poison',2);if(has('corno'))SA('vuln',1);
+    if(has('ancora'))h.blk+=10;if(has('amuleto'))SA('weak',1);if(has('lanternasp'))SA('burn',3);if(has('mantonero')){h.blk+=8;S(h,'dex',1)}if(has('fiala'))SA('poison',2);if(has('corno'))SA('vuln',1);if(has('stendardo')){SA('weak',2);SA('vuln',2)}
   }
-  if(has('dado')&&turn%3===0)en++;
+  if(has('dado')&&turn%3===0)en++;if(has('clessidra')&&turn%2===0)en++;
   if(has('cuoreabisso')){en++;if(run.hp>1){run.hp--;fx('hero','-1','dmg')}}
   if(has('braciere'))alive().forEach(e=>hurtEnemy(e,2));
   if(has('simbolo'))H(1);
@@ -1722,9 +1765,11 @@ function playCard(u,j,ap,pk,sh){
   let t=null;if(d.tg){t=c.enemies[j];if(!t||t.hp<=0){t=alive()[0];if(!t)return}}
   const X=d.xc?h.energy:0;h.hand.splice(i,1);h.energy-=d.xc?X:cost;g.hit=new Set();
   if(d.ally&&!(ap&&c.heroes[ap]&&!c.heroes[ap].down))ap=CUR;
-  const shd=!!sh&&canShadow(card);g.side=LO()?(shd?'O':'L'):null;
-  const blk0=pxBlk();
-  try{d.f(d.xc?{...vals(card),X}:vals(card),t,d.ally?ap:CUR,pk,card)}finally{g.side=null}
+  const shd=!!sh&&canShadow(card),omx=shd&&omExt(card);
+  // 'O' = lato Ombra di base (+50% su danni, Armatura e Veleno); 'X' = lato Ombra esteso (crescono i numeri della carta)
+  g.side=LO()?(omx?'X':shd?'O':'L'):null;
+  const blk0=pxBlk(),v0=omx?omxVals(vals(card)):vals(card);
+  try{d.f(d.xc?{...v0,X}:v0,t,d.ally?ap:CUR,pk,card);if(omx&&omxDraw(card))D(1)}finally{g.side=null}
   // segnale per la Grafica Pixellab: attacco per le carte Attacco, difesa per le carte che danno Armatura
   if(d.t==='A')fxq.push({k:'h-'+CUR,txt:'',cls:'pxa'});else if(pxBlk()>blk0)fxq.push({k:'h-'+CUR,txt:'',cls:'pxd'});
   if(shd){h.shTurn=(h.shTurn||0)+1;if(run.stx)run.stx.shadow=(run.stx.shadow||0)+1;omAdd(CUR,1)}
@@ -1803,12 +1848,12 @@ function winCombat(){
   const c=R.combat,kind=c.kind,pids=Object.keys(c.heroes);
   pids.forEach(pid=>{const P=R.players[pid],x=P&&P.stx;if(!x)return;if(kind==='elite')x.elites=(x.elites||0)+1;
     if(kind==='boss'){x.bk=(x.bk||0)+1;x.bosses=x.bosses||[];c.enemies.forEach(e=>{if(BOSSI[e.id]&&!x.bosses.includes(e.id))x.bosses.push(e.id)});if(!c.heroes[pid].down&&c.hp0&&P.hp>=c.hp0[pid])x.flawless=1}});
-  pids.forEach(pid=>{ctx(pid);if(c.heroes[pid].down)run.hp=Math.max(1,Math.floor(run.max*.25));else{if(has('elmo'))H(6);if(TE('heal'))H(TE('heal'));if(has('martellonano')){const ids=run.deck.map((c,i)=>i).filter(i=>canUp(run.deck[i]));if(ids.length)run.deck[rng.pick(ids)].up=true}if(hasT('g5')||hasT('c2'))H(5);if(has('calice')){run.max++;run.hp++}}});
+  pids.forEach(pid=>{ctx(pid);if(c.heroes[pid].down)run.hp=Math.max(1,Math.floor(run.max*.25));else{if(has('elmo'))H(6);if(has('calicestelle'))H(8);if(TE('heal'))H(TE('heal'));if(has('martellonano')){const ids=run.deck.map((c,i)=>i).filter(i=>canUp(run.deck[i]));if(ids.length)run.deck[rng.pick(ids)].up=true}if(hasT('g5')||hasT('c2'))H(5);if(has('calice')){run.max++;run.hp++}}});
   R.combat=null;g=null;
   if(kind==='boss'){if(R.mode!=='surv'){endRun(true);return}newCycle()}
   R.phase='room';
   R.order.forEach(pid=>{const P=R.players[pid];if(!pids.includes(pid)||!isOnline(pid)){P.done=true;P.screen=null;return}
-    ctx(pid);const big=kind==='elite'||kind==='boss';let gold=big?rng.int(25,35):rng.int(10,20);gold=Math.round(gold*(1+.1*(R.lvl||0)));if(has('sacchetto'))gold=Math.round(gold*1.25);if(LO()&&(P.om|0)>=OM_HIGH)gold=Math.round(gold*1.25);
+    ctx(pid);const big=kind==='elite'||kind==='boss';let gold=big?rng.int(25,35):rng.int(10,20);gold=Math.round(gold*(1+.1*(R.lvl||0)));if(has('sacchetto'))gold=Math.round(gold*1.25);if(has('borsafondo'))gold=Math.round(gold*1.5);if(LO()&&(P.om|0)>=OM_HIGH)gold=Math.round(gold*1.25);
     P.reward={title:kind==='boss'?((b=>b?BOSSI[b.id][0]:'Il boss')(R.combat&&R.combat.enemies.find(x=>BOSSI[x.id])))+' sconfitto! Inizia il ciclo '+R.cycle:kind==='elite'?'Élite sconfitta!':'Vittoria!',gold,cards:rollCards(3,big),
       potion:rng.next()<(big?.6:.4)?rng.pick(DG().pots):null,relic:big?randomRelic():null};
     P.screen='reward';P.done=false});
@@ -1822,7 +1867,7 @@ function rollCards(n,elite){
   return out;
 }
 function randomRelic(){const p=DG().relics.filter(k=>!run.relics.includes(k)&&!(k==='piuma'&&run.piumaUsed));return p.length?rng.pick(p):null}
-function gainRelic(id){run.relics.push(id);if(id==='cuore'){run.max+=8;run.hp+=8}}
+function gainRelic(id){run.relics.push(id);if(id==='cuore'){run.max+=8;run.hp+=8}if(id==='calicestelle'){run.max+=10;run.hp+=10}if(id==='borsafondo')run.gold+=100}
 function givePotion(P,id){if(P.potions.length<3)P.potions.push(id);else P.pendPot=id}
 function addCard(id){run.deck.push({id,up:false})}
 function genShop(){
@@ -2067,6 +2112,7 @@ function guidaHTML(){const t=UI.guTab||'base';const sec=(h,b)=>`<div class="pane
   const def=(n,d)=>`<div class="gdef"><b>${n}</b><span>${d}</span></div>`;let b='';
   if(t==='base')b=sec('Lo scopo','Scegli un eroe e attraversa un dungeon di 15 piani fino al boss. Lungo la strada combatti, raccogli carte, reliquie e pozioni e rendi più forte il tuo mazzo. Se i tuoi PV arrivano a zero la partita finisce: si ricomincia da capo, ma con le Corone guadagnate puoi prepararti meglio.')
     +sec('La mappa','Ogni piano ha più strade. Tocca un cerchio illuminato per avanzare: puoi andare solo verso i cerchi collegati a quello in cui sei.'+li([`${sprImg('combat',16,'inl')} <b>Nemici</b>: un combattimento normale.`,`${sprImg('elite',16,'inl')} <b>Élite</b>: nemici molto più forti, con un tratto speciale. Danno più oro e carte migliori.`,`${sprImg('event',16,'inl')} <b>Evento</b>: un incontro con delle scelte. Ogni dungeon ha i suoi.`,`${sprImg('rest',16,'inl')} <b>Falò</b>: riposi e recuperi il 30% dei PV massimi, oppure potenzi una carta del mazzo.`,`${sprImg('shop',16,'inl')} <b>Mercante</b>: compri carte, reliquie e pozioni con l'oro, o bruci una carta per toglierla dal mazzo.`,`${sprImg('treasure',16,'inl')} <b>Tesoro</b>: una reliquia e un po' d'oro.`,`${sprImg('boss',16,'inl')} <b>Boss</b>: l'ultimo piano. Toccando il cerchio vedi quale dei due boss del dungeon vi aspetta.`]))
+    +sec('Strade segrete',`${sprImg('segreto',16,'inl')} Di rado, arrivando su un combattimento, un evento o un tesoro, si apre una <b>strada segreta</b>. Scegli uno dei tre tesori: una delle due <b>reliquie segrete</b>, più forti di quelle che si trovano di solito e introvabili altrove, oppure uno scrigno con oro e due carte potenziate. Poi torni sulla tua strada. Capita al massimo una volta per mappa, mai nella sfida del giorno.`)
     +sec('Dopo ogni combattimento','Prendi l\'oro e scegli una delle carte proposte, oppure saltala: un mazzo piccolo pesca più spesso le carte migliori. Le reliquie danno un effetto per tutta la partita. Le pozioni si usano una volta sola e puoi portarne al massimo 3.')
     +sec('Salvataggio','La partita da solo si salva da sola a ogni passo: dal menu principale la riprendi con «Continua». In gruppo, se esci, rientri con lo stesso nome e lo stesso codice della stanza.');
   if(t==='comb')b=sec('Il turno','All\'inizio del tuo turno peschi 5 carte e hai 3 Energia. Ogni carta costa l\'Energia scritta nel cerchio in alto a sinistra. Quando hai finito premi «Fine turno»: le carte rimaste in mano vanno negli scarti, poi agiscono i nemici. Quando la pila di pesca finisce, gli scarti vengono rimescolati.')
@@ -2097,7 +2143,7 @@ function guidaHTML(){const t=UI.guTab||'base';const sec=(h,b)=>`<div class="pane
     +sec('In gruppo','L\'Ombra di uno è un problema di tutti: le creature d\'ombra si rafforzano con l\'Ombra di tutto il gruppo. Toccando l\'etichetta «Ombra» di un compagno puoi <b>assorbire</b> 3 della sua Ombra per 1 Energia, per salvarlo dalla Caduta. Così nascono i ruoli: chi resta nella luce e protegge, chi scende nell\'ombra e colpisce forte. Vale l\'impostazione di chi crea la stanza.');
   if(t==='vil')b=sec('Il Villaggio di Valdombra','Una missione secondaria che dura tra una partita e l\'altra. Ogni edificio ha un abitante con una richiesta (giocare una partita, superare piani, sconfiggere élite o nemici, completare un dungeon). Quando è esaudita, ricostruisci l\'edificio con le Corone e poi lo migliori fino al livello 3.'+li(vilList().map(b=>`<b>${b.n}</b>: ${b.lv.map((l,i)=>'liv. '+(i+1)+' '+l[1]+' ('+l[0]+' Corone)').join('; ')}`))+'<span class="muted">I vantaggi valgono da soli e in gruppo, ma non nella sfida del giorno.</span>')
     +sec('Le Gemme',`La seconda moneta, più rara delle Corone. Ne guadagni 1 per ogni élite, 3 per ogni boss, 2 per ogni vittoria, 3 per la sfida del giorno e ${ACH_GEM} per ogni Impresa. Le Corone servono per eroi, abilità, zaino e Villaggio; le Gemme per:`+li([`<b>Cimeli permanenti</b> (${CIM_GEM} Gemme): reliquie comprate una volta sola che porti in ogni partita. Uno alla volta, due con la Sala dei Cimeli.`,`<b>Aspetti degli eroi</b> (${SKIN_GEM} Gemme l'uno).`,`<b>Cambio</b>: ${EX_GEM} Gemme diventano ${EX_CR} Corone.`]))
-    +sec('Spegnere le novità','Da Impostazioni, Sviluppo puoi spegnere Luce e Ombra, il Villaggio e le Gemme. I progressi restano salvati.');
+    +sec('Spegnere Luce e Ombra','Da Impostazioni, Sviluppo puoi spegnere Luce e Ombra, oppure accendere «Ombra per tutti gli eroi», che dà un lato Ombra anche alle carte che curano, marchiano, evocano o fanno pescare. I progressi restano salvati.');
   if(t==='prog')b=sec('Corone e Bottega','Le Corone si guadagnano completando i dungeon, in Sopravvivenza e con le Imprese. Nella Bottega le spendi in oggetti per lo zaino (pozioni, reliquie, oro, PV, carte potenziate) che porti nella partita successiva, da solo o in gruppo, e negli Aspetti degli eroi.')
     +sec('Nuovi eroi','Nella schermata principale gli eroi con il lucchetto si sbloccano con le Corone e restano tuoi per sempre.')
     +sec('Crescita degli eroi','Ogni eroe guadagna esperienza quando lo usi e sale di livello. Ai livelli 2, 3, 5, 7 e 10 puoi comprare con le Corone un\'abilità unica di quell\'eroe, da attivare prima della partita.')
@@ -2125,7 +2171,7 @@ function clickCard(i){
   const h=g&&g.hero;if(!h||h.ended||h.down||g.busy)return;const c=h.hand[i];if(!c)return;const d=CARDS[c.id];
   if(d.unplay){toast(d.n+': questa carta non si può giocare.');return}
   if(costOf(c)>h.energy){toast('Energia insufficiente');return}
-  if(UI.om&&!canShadow(c)){toast(d.n+' non ha un lato Ombra: solo le carte con danni, Armatura o Veleno ce l\'hanno.');return}
+  if(UI.om&&!canShadow(c)){toast(d.n+(d.t==='P'?' è un Potere: i Poteri non hanno un lato Ombra.':LOX()?' non ha un lato Ombra.':' non ha un lato Ombra: solo le carte con danni, Armatura o Veleno ce l\'hanno.'));return}
   const sh=UI.om?1:0;const a=alive();
   if(d.tg&&a.length>1){UI.sel=(UI.sel&&UI.sel.k==='c'&&UI.sel.uid===c.uid)?null:{k:'c',uid:c.uid,sh};render();return}
   if(d.ally&&!solo&&party().length>1){UI.sel=(UI.sel&&UI.sel.uid===c.uid)?null:{k:'c',uid:c.uid,ally:1,sh};render();if(UI.sel)toast('Tocca l\'eroe da aiutare (anche te stesso)');return}
@@ -2275,12 +2321,12 @@ function pxeHTML(id,px,cls,key,dead){let an=null,ago=0;const a=key&&PXA[key];
   return `<span class="spr pxe ${an?'pxan':dc?'pxdead':cls||''}" role="img" aria-label="${esc(ENEMIES[id].n)}" data-pxe="${id}" data-cls="${cls||''}"${dead?' data-dead="1"':''} style="${dc||pxeCss(id,px+'px',an,ago)}" onanimationend="pxEnd(event,this)"></span>`}
 /* Altre immagini Pixellab (v7.4): villaggio a stadi, icone, luoghi, sfondi e mappe. Ognuna si usa solo se si è caricata. */
 const PXV={locanda:4,mercato:4,fucina:4,erbe:4,tempio:4,sala:2};// stadi: 0 = in macerie, poi un'immagine per livello
-const PXI_UI=['i_coin','i_shield','i_buff','i_heal','i_skull','i_gear','i_note','i_book','i_gem','i_house','i_crown','i_lock','i_flask','combat','elite','event','rest','shop','treasure','boss'];
+const PXI_UI=['i_segreto','i_coin','i_shield','i_buff','i_heal','i_skull','i_gear','i_note','i_book','i_gem','i_house','i_crown','i_lock','i_flask','combat','elite','event','rest','shop','treasure','boss'];
 const PXDG=['rocca','cripte','abisso'],PXMAP_H=1344/384;// lo sfondo della mappa è una striscia verticale che si ripete
 function pxExtraKeys(){const k=[];Object.entries(PXV).forEach(([b,n])=>{for(let i=0;i<n;i++)k.push('villaggio/'+b+'-'+i)});
   Object.keys(RELICS).forEach(r=>k.push('icone/r_'+r));Object.keys(POTIONS).forEach(p=>k.push('icone/pot_'+p));PXI_UI.forEach(i=>k.push('icone/'+i));
   EVENTS.forEach(e=>{const s=e.spr||'e_'+e.id;if(s.startsWith('e_')&&!k.includes('icone/'+s))k.push('icone/'+s)});
-  ['shop','rest','treasure'].forEach(l=>k.push('luoghi/'+l));k.push('sfondi/titolo');
+  ['shop','rest','treasure','segreto'].forEach(l=>k.push('luoghi/'+l));k.push('sfondi/titolo');
   PXDG.forEach(d=>{k.push('sfondi/combattimento-'+d,'sfondi/mappa-'+d);for(let i=1;i<=4;i++)k.push('mappa/'+d+'-'+i)});return k}
 function pxOkK(k){try{return !!(SET.px&&PXI[k])}catch(e){return false}}
 function pxIco(name){return pxOkK('icone/'+name)?'pixel/icone/'+name+'.png':null}
@@ -2432,7 +2478,7 @@ function cardHTML(c,o={}){
   const d=CARDS[c.id];const tag=o.click?'button':'div';
   return `<${tag} class="card t-${d.t} r-${d.r} ${c.up?'up':''} ${o.cls||''}" data-gl="${glKeys(c,d).join(',')}" data-cid="${c.id}"${c.uid!=null?` data-uid="${c.uid}"`:''} ${o.click?`onclick="${o.click}" aria-label="${d.n}"`:''}>
     <span class="cost ${!d.unplay&&!d.xc&&costOf(c)<CARDS[c.id].c?'cheap':''}${d.xc?' xcost':''}">${d.unplay?'–':d.xc?'X':costOf(c)}</span><span class="cname">${SET.px?d.n.split(' ').map(hyIt).join(' '):d.n}${c.up?'+':''}</span>${artStrip(c.id)}<span class="ctype">${TYPEN[d.t]}</span>
-    <span class="cdesc"><span>${innOf(c)?'<b>Innata.</b> ':''}${d.x(o.sh?shadowVals(vals(c)):vals(c)).replace(KW,'<b>$1</b>')}${o.sh?' <b class="omtag">Lato Ombra: +1 Ombra.</b>':''}${d.grow&&((c.g||0)+(c.pg||0))?` <i class="gained">Finora +${vals(c).gi*((c.g||0)+(c.pg||0))}.</i>`:''}${liveNote(c,d)}${d.back?' <b>Ritorna</b> in cima al mazzo.':''}${exOf(c)?' <b>Esaurisci.</b>':''}${d.t==='X'?' <i>Sparisce a fine combattimento.</i>':''}</span></span></${tag}>`;
+    <span class="cdesc"><span>${innOf(c)?'<b>Innata.</b> ':''}${d.x(o.sh?omVals(c):vals(c)).replace(KW,'<b>$1</b>')}${o.sh?` <b class="omtag">Lato Ombra: ${omExt(c)&&omxDraw(c)?'peschi 1 carta in più, ':''}+1 Ombra.</b>`:''}${d.grow&&((c.g||0)+(c.pg||0))?` <i class="gained">Finora +${vals(c).gi*((c.g||0)+(c.pg||0))}.</i>`:''}${liveNote(c,d)}${d.back?' <b>Ritorna</b> in cima al mazzo.':''}${exOf(c)?' <b>Esaurisci.</b>':''}${d.t==='X'?' <i>Sparisce a fine combattimento.</i>':''}</span></span></${tag}>`;
 }
 function liveNote(c,d){const h=typeof g!=='undefined'&&g&&g.hero;if(!h||!h.hand||!h.hand.includes(c))return '';
   if(d.xc)return ` <i class="gained">Ora X = ${h.energy}.</i>`;
@@ -2759,6 +2805,7 @@ function roomScreen(P){
   if(P.screen==='rest')return restScreen();
   if(P.screen==='event')return eventScreen();
   if(P.screen==='treasure')return treasureScreen();
+  if(P.screen==='secret')return secretScreen();
   const wait=active().filter(p=>!R.players[p].done);
   return waitBoxHTML('In attesa degli altri giocatori',wait.length?'Stanno ancora scegliendo: '+wait.map(p=>esc(pname(p))).join(', '):'Si riparte...');
 }
@@ -2803,6 +2850,14 @@ function eventScreen(){
     `<div class="opts">${ev.opts.map((o,k)=>(o.solo&&!solo)?'':`<button class="opt" onclick="chooseEv(${k})" ${o.req&&!o.req()?'disabled':''}><b>${o.t}</b><br><span class="muted">${o.s}</span>${o.req&&!o.req()&&o.why?`<br><span class="why">${o.why()}</span>`:''}</button>`).join('')}</div>`}
     </div></div></main>`;
 }
+const SEG_DOPO={combat:'un combattimento',event:'un evento',treasure:'un forziere'};
+function secretScreen(){const s=run.secret;if(!s)return '';const nx=R.segNext&&R.map[R.segNext.y]&&R.map[R.segNext.y][R.segNext.x];
+  const op=(o,i)=>o.k==='relic'?`<button class="ritem segitem" onclick="toast('Reliquia segreta: '+RELICS['${o.id}'].n);send({t:'secret',i:${i}})"><span class="ic">${relIc(o.id,32)}</span><span><b>${RELICS[o.id].n}</b> <span class="segtag">Reliquia segreta</span><br><span class="muted">${RELICS[o.id].d}</span></span></button>`
+    :`<button class="ritem segitem" onclick="send({t:'secret',i:${i}})"><span class="ic">${ic('i_coin',28)}</span><span><b>Scrigno del passaggio</b><br><span class="muted">${o.gold} monete d'oro e potenzi 2 carte a caso del mazzo.</span></span></button>`;
+  return `<main><div class="wrap"><div class="evhead"><span class="ic">${pxLuogo('segreto',60)}</span><h2>Strada segreta</h2></div>
+    <div class="panel segpanel"><p class="lede">Dietro un muro crollato si apre un passaggio che non compare su nessuna mappa. In fondo trovi tre tesori dimenticati, ma puoi portarne via uno solo.</p>
+    <div class="rewards">${s.opts.map(op).join('')}</div>
+    ${nx&&SEG_DOPO[nx.type]?`<p class="muted" style="font-size:14px">Poi torni sulla tua strada: ti aspetta ${SEG_DOPO[nx.type]}.</p>`:''}</div></div></main>`}
 function treasureScreen(){
   const t=run.treasure;
   return `<main><div class="wrap"><div class="evhead"><span class="ic">${pxLuogo('treasure',60)}</span><h2>Forziere</h2></div>
@@ -3198,10 +3253,11 @@ function startVoteAnim(va){
 }
 function paintAnim(){document.querySelectorAll('.mapsvg .node').forEach(n=>{n.classList.toggle('spin',!!UI.anim&&n.dataset.k===UI.anim.cur)})}
 /* ================= IMPOSTAZIONI ================= */
-const VERSION='v8.1',VDATE='18/11';
+const VERSION='v8.2',VDATE='18/11';
 const SET_K='valdombra-impostazioni';
-const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),vib:true,ts:1,hc:false,tut:true,stats:true,lo:true,vil:true,gem:true,px:false};
-let SET=(()=>{try{return Object.assign({},SET_DEF,JSON.parse(load(SET_K)||'{}'))}catch(e){return Object.assign({},SET_DEF)}})();
+const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),vib:true,ts:1,hc:false,tut:true,stats:true,lo:true,lox:false,vil:true,gem:true,px:true};
+// dalla v8.2 Villaggio, Gemme e Grafica Pixellab sono sempre accesi (in Sviluppo resta solo Luce e Ombra)
+let SET=(()=>{try{return Object.assign({},SET_DEF,JSON.parse(load(SET_K)||'{}'),{vil:true,gem:true,px:true})}catch(e){return Object.assign({},SET_DEF)}})();delete SET.seg;
 function saveSet(){try{localStorage.setItem(SET_K,JSON.stringify(SET))}catch(e){}applySet()}
 function applySet(){
   document.body.classList.toggle('noanim',!SET.anim);document.body.classList.toggle('pxui',!!SET.px);document.documentElement.style.setProperty('--ts',String(Math.max(.85,Math.min(1.35,+SET.ts||1))));document.body.classList.toggle('hc',!!SET.hc);
@@ -3209,9 +3265,12 @@ function applySet(){
   if(SET.px)pxLoad();
   AU.vol();
 }
-const REDEEM=[3345803154,1602759940];
+// codici premio: nel sorgente ci sono solo due hash per codice, mai il codice in chiaro
+const REDEEM=[3345803154,1602759940],REDEEM_G=[3555725443,1197748810];
 function redeem(){const el=$('#rcode');const c=(el&&el.value||'').trim().toUpperCase().replace(/\s+/g,'');if(!c)return;
   if(hashStr('vd1#'+c)===REDEEM[0]&&hashStr('vd2#'+c)===REDEEM[1]){setCrowns(getCrowns()+1000);sfx('fanfare');toast('Codice valido: +1000 Corone! Ora ne hai '+getCrowns()+'.');if(el)el.value='';render()}
+  else if(hashStr('vg1#'+c)===REDEEM_G[0]&&hashStr('vg2#'+c)===REDEEM_G[1]){gemInit();setGems(getGems()+200);sfx('fanfare');
+    toast('Codice valido: +200 Gemme! Ora ne hai '+getGems()+'.');if(el)el.value='';render()}
   else{sfx('dmg');toast('Codice non valido.')}}
 function openSettings(){modal={title:'Impostazioni',settings:true,cancel:true,list:[]};render()}
 const swb=(k,lab,sub)=>`<div class="srow"><div class="lab">${lab}${sub?`<small>${sub}</small>`:''}</div><button class="sw" aria-pressed="${!!SET[k]}" aria-label="${lab}" onclick="setTog('${k}')"></button></div>`;
@@ -3242,12 +3301,10 @@ function settingsHTML(){
       ${swb('stats','Invia statistiche anonime','Conta le visite al gioco con un codice casuale del dispositivo e a fine partita invia eroe, dungeon, esito, carte e reliquie, senza nomi, per migliorare il gioco.')}
     </div>
     <div class="panel"><h4>${ic('i_gear',18)} Sviluppo</h4>
-      <p class="muted" style="font-size:13px">Funzioni nuove in prova. Se qualcosa non ti convince puoi spegnerle qui: i progressi restano salvati e tornano se le riaccendi.</p>
+      <p class="muted" style="font-size:13px">Funzioni in prova. Se qualcosa non ti convince puoi spegnerla qui: i progressi restano salvati.</p>
       ${swb('lo','Luce e Ombra','Le carte si possono giocare dal lato Ombra, più forte ma rischioso, e ci sono le creature d\'ombra. In gruppo vale la scelta di chi crea la stanza, dalla partita successiva.')}
-      ${swb('vil','Villaggio di Valdombra','La missione secondaria: ricostruisci gli edifici per avere vantaggi a inizio partita.')}
-      ${swb('gem','Gemme','La seconda moneta per aspetti, cimeli permanenti e cambio in Corone. Spenta, gli aspetti tornano a costare Corone.')}
-      ${swb('px','Grafica Pixellab','Eroi, nemici, boss, villaggio, icone, eventi, sfondi, mappe e carte sono disegnati con PixelLab; tenendo premuta una carta la vedi in grande con la sua illustrazione. In combattimento eroi e nemici si muovono quando attaccano, si difendono o vengono colpiti. Anche gli aspetti hanno la loro versione. Vale solo su questo dispositivo. Se un\'immagine non si carica resta lo sprite di sempre.')}
-      ${R&&R.phase!=='lobby'?'<p class="muted" style="font-size:13px">Luce e Ombra cambia dalla prossima partita.</p>':''}
+      ${swb('lox','Ombra per tutti gli eroi','Con Luce e Ombra accesa, anche le carte che non fanno danni, Armatura o Veleno hanno un lato Ombra: cure, Marchio, Condanna, Debole, evocazioni, carte pescate e Fervore crescono del 50%; le carte senza numeri ti fanno pescare 1 carta in più. Utile soprattutto a Chierico, Necromante, Ranger, Paladino, Druido e Monaco.')}
+      ${R&&R.phase!=='lobby'?'<p class="muted" style="font-size:13px">Luce e Ombra e Ombra per tutti gli eroi cambiano dalla prossima partita.</p>':''}
     </div>
     <div class="panel"><h4>${ic('i_gear',18)} Informazioni</h4>
       <div class="srow"><div class="lab">Versione</div><b>${VERSION} · ${VDATE}</b></div>
@@ -3255,7 +3312,7 @@ function settingsHTML(){
       <div class="srow"><div class="lab">Profilo</div><b>${ACC?esc(ACC.nome):'nessuno'}</b><button class="btn" onclick="openProfilo()">${ACC?'Gestisci':'Accedi'}</button></div>
       ${ADM.ok?`<div class="srow"><div class="lab">Amministrazione<small>Visite, visitatori unici, partite, eroi, carte e classifica.</small></div><button class="btn primary" onclick="openAdmin()">Apri il pannello</button></div>`:''}
       ${inRoom?`<div class="srow"><div class="lab">Stanza</div><b>${R.code}</b></div><div class="srow"><div class="lab">Connessione</div><b>${isHost?'Sei tu a guidare la stanza':'Collegato'}</b></div>`:''}
-      <p class="muted" style="font-size:13px">Novità della 8.1: le app del gioco per altre piattaforme possono inviare e ricevere le statistiche (visite, partite, le tue statistiche) tramite un unico indirizzo; il pannello di amministrazione mostra da quali piattaforme si gioca e le chiamate delle app. Novità della 8.0:il gioco conta le visite in modo anonimo (un codice casuale per dispositivo, niente nomi: si spegne con «Invia statistiche anonime»); per l'amministratrice c'è un pannello con visite, visitatori unici, partite, eroi, carte e classifica. Novità della 7.9: la mappa del dungeon ha i nodi più al centro, più grandi e più facili da toccare sul telefono; con «Grafica Pixellab» lo sfondo della mappa riempie tutto lo schermo. In combattimento le carte in mano hanno tutte la stessa altezza: l'illustrazione resta intera e il testo lungo sfuma (lo leggi tutto passando col mouse o tenendo premuta la carta). Novità della 7.8: con «Grafica Pixellab» accesa, passando col mouse sopra una carta la vedi ingrandita, con il testo intero e le parole chiave a fianco; le illustrazioni nella striscia sono più alte e inquadrate sul soggetto. Con «Contrasto alto» la descrizione delle carte giocate dal lato Ombra ora si legge. Novità della 7.7: con «Grafica Pixellab» accesa tutte le 191 carte hanno un'illustrazione sotto il nome; tenendo premuta una carta (anche col mouse, o con il tasto destro) la vedi in grande con l'illustrazione e le parole chiave. La Guida del gioco ha la sua icona, un libro. Novità della 7.6: con «Grafica Pixellab» accesa le carte hanno la nuova cornice del colore del tipo, il costo su una runa e la rarità come gemma; anche l'Energia è una runa. Novità della 7.5: con «Grafica Pixellab» accesa i nemici sconfitti hanno la loro animazione di morte e restano a terra, gli aspetti degli eroi hanno la versione Pixellab e Azhrakel ha nuovi colori. Novità della 7.4: con «Grafica Pixellab» accesa il villaggio cambia aspetto a ogni ricostruzione, reliquie, pozioni e icone sono nuove, eventi e luoghi hanno la loro illustrazione, i combattimenti hanno lo sfondo del dungeon e la mappa ha sfondo, decorazioni e la figura del tuo eroe. Novità della 7.3: con «Grafica Pixellab» accesa anche nemici, élite e boss sono disegnati con PixelLab, attaccano e reagiscono ai colpi; nuova icona del gioco. Novità della 7.2: con «Grafica Pixellab» accesa gli eroi disegnati con PixelLab compaiono ovunque, anche nella scelta dell'eroe, nei menu e nei riepiloghi. Novità della 7.1: in Sviluppo c'è «Grafica Pixellab», spenta di base. Accesa, in combattimento gli eroi sono disegnati con PixelLab e hanno le animazioni di attacco, difesa e colpo subito. Novità della 7.0: il pulsante «Gioca» sempre visibile per scegliere la modalità; Luce e Ombra (ogni carta si può giocare dal lato Ombra, più forte ma rischioso; creature d'ombra, mercante, eventi e bottino reagiscono alla tua Ombra), il Villaggio di Valdombra da ricostruire per avere vantaggi in ogni partita, e le Gemme, la seconda moneta per cimeli permanenti e aspetti. Si possono spegnere da Sviluppo. Dalla 6.4: la sfida del giorno usa tutti e 10 gli eroi e non ripete eroe, dungeon o modificatore del giorno prima; dalla 6.3: corretto il blocco quando l'eroe cade per una carta Ustione o Maledizione, tratti delle élite più leggeri (soprattutto da soli); dalla 6.2: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
+      <p class="muted" style="font-size:13px">Novità della 8.2: di rado sulla mappa si apre una strada segreta con tesori unici, tra cui sei reliquie segrete più forti del solito. In Sviluppo c'è «Ombra per tutti gli eroi»: anche cure, Marchio, Condanna, evocazioni e carte pescate hanno un lato Ombra. Villaggio, Gemme e Grafica Pixellab ora sono sempre accesi. C'è un codice premio per le Gemme. Novità della 8.1: le app del gioco per altre piattaforme possono inviare e ricevere le statistiche (visite, partite, le tue statistiche) tramite un unico indirizzo; il pannello di amministrazione mostra da quali piattaforme si gioca e le chiamate delle app. Novità della 8.0:il gioco conta le visite in modo anonimo (un codice casuale per dispositivo, niente nomi: si spegne con «Invia statistiche anonime»); per l'amministratrice c'è un pannello con visite, visitatori unici, partite, eroi, carte e classifica. Novità della 7.9: la mappa del dungeon ha i nodi più al centro, più grandi e più facili da toccare sul telefono; con «Grafica Pixellab» lo sfondo della mappa riempie tutto lo schermo. In combattimento le carte in mano hanno tutte la stessa altezza: l'illustrazione resta intera e il testo lungo sfuma (lo leggi tutto passando col mouse o tenendo premuta la carta). Novità della 7.8: con «Grafica Pixellab» accesa, passando col mouse sopra una carta la vedi ingrandita, con il testo intero e le parole chiave a fianco; le illustrazioni nella striscia sono più alte e inquadrate sul soggetto. Con «Contrasto alto» la descrizione delle carte giocate dal lato Ombra ora si legge. Novità della 7.7: con «Grafica Pixellab» accesa tutte le 191 carte hanno un'illustrazione sotto il nome; tenendo premuta una carta (anche col mouse, o con il tasto destro) la vedi in grande con l'illustrazione e le parole chiave. La Guida del gioco ha la sua icona, un libro. Novità della 7.6: con «Grafica Pixellab» accesa le carte hanno la nuova cornice del colore del tipo, il costo su una runa e la rarità come gemma; anche l'Energia è una runa. Novità della 7.5: con «Grafica Pixellab» accesa i nemici sconfitti hanno la loro animazione di morte e restano a terra, gli aspetti degli eroi hanno la versione Pixellab e Azhrakel ha nuovi colori. Novità della 7.4: con «Grafica Pixellab» accesa il villaggio cambia aspetto a ogni ricostruzione, reliquie, pozioni e icone sono nuove, eventi e luoghi hanno la loro illustrazione, i combattimenti hanno lo sfondo del dungeon e la mappa ha sfondo, decorazioni e la figura del tuo eroe. Novità della 7.3: con «Grafica Pixellab» accesa anche nemici, élite e boss sono disegnati con PixelLab, attaccano e reagiscono ai colpi; nuova icona del gioco. Novità della 7.2: con «Grafica Pixellab» accesa gli eroi disegnati con PixelLab compaiono ovunque, anche nella scelta dell'eroe, nei menu e nei riepiloghi. Novità della 7.1: in Sviluppo c'è «Grafica Pixellab», spenta di base. Accesa, in combattimento gli eroi sono disegnati con PixelLab e hanno le animazioni di attacco, difesa e colpo subito. Novità della 7.0: il pulsante «Gioca» sempre visibile per scegliere la modalità; Luce e Ombra (ogni carta si può giocare dal lato Ombra, più forte ma rischioso; creature d'ombra, mercante, eventi e bottino reagiscono alla tua Ombra), il Villaggio di Valdombra da ricostruire per avere vantaggi in ogni partita, e le Gemme, la seconda moneta per cimeli permanenti e aspetti. Si possono spegnere da Sviluppo. Dalla 6.4: la sfida del giorno usa tutti e 10 gli eroi e non ripete eroe, dungeon o modificatore del giorno prima; dalla 6.3: corretto il blocco quando l'eroe cade per una carta Ustione o Maledizione, tratti delle élite più leggeri (soprattutto da soli); dalla 6.2: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
       <p class="muted" style="font-size:13px">Le impostazioni (audio, chat, grafica) valgono solo per questo dispositivo. I progressi di gioco seguono il tuo profilo.</p>
       <div><button class="btn" onclick="SET=Object.assign({},SET_DEF);saveSet();render()">Ripristina le impostazioni</button></div>
     </div></div>`;
@@ -3412,6 +3469,7 @@ function seenTrack(){
   const rw=P.reward;if(rw){ch=seenAdd('c',rw.cards||[])||ch;ch=seenAdd('r',[rw.relic])||ch;ch=seenAdd('p',[rw.potion])||ch}
   const sh=P.shop;if(sh){ch=seenAdd('c',(sh.cards||[]).map(x=>x.id))||ch;ch=seenAdd('r',(sh.relics||[]).map(x=>x.id))||ch;ch=seenAdd('p',(sh.pots||sh.potions||[]).map(x=>x.id))||ch}
   if(P.treasure)ch=seenAdd('r',[P.treasure.relic])||ch;
+  if(P.secret)ch=seenAdd('r',P.secret.opts.filter(o=>o.k==='relic').map(o=>o.id))||ch;
   if(R.combat){ch=seenAdd('e',R.combat.enemies.map(e=>e.id))||ch;const h=R.combat.heroes[ME];if(h)ch=seenAdd('c',[...h.hand,...h.draw,...h.disc,...h.exh].map(c=>c.id))||ch}
   if(ch){clearTimeout(seenT);seenT=setTimeout(()=>{const S=getSeen();store(SEEN_K,JSON.stringify({c:[...S.c],e:[...S.e],r:[...S.r],p:[...S.p]}))},800)}
 }
@@ -3739,7 +3797,8 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 setInterval(()=>{if(ACC&&document.visibilityState==='visible'&&(!R||R.phase==='lobby')&&Date.now()-ACCS.last>90000)accPull()},30000);
 // appena si apre il gioco: prendi subito i progressi dal profilo (per esempio la partita iniziata su un altro dispositivo)
 setTimeout(()=>{if(ACC&&!R)accPull()},400);
-setTimeout(()=>{if(!visitaConta())setTimeout(()=>visitaConta(),6000)},1500);// conta la visita (se la libreria di Supabase non è ancora pronta riprova una volta)try{gemInit()}catch(e){}
+setTimeout(()=>{if(!visitaConta())setTimeout(()=>visitaConta(),6000)},1500);// conta la visita (se la libreria di Supabase non è ancora pronta riprova una volta)
+try{gemInit()}catch(e){}
 
 
 /* ================= APP INSTALLABILE ================= */
