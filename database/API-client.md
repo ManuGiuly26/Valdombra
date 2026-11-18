@@ -111,6 +111,7 @@ Gli stessi campi delle statistiche del gioco web. Con `giocatore` la partita vie
 | `reliquie` | elenco di testi | facoltativo, al massimo 40 |
 | `danni` | intero | facoltativo, da 0 a 10.000.000 |
 | `uccisioni` | intero | facoltativo, da 0 a 100.000 |
+| `durata` | intero | facoltativo (dalla v9.3; script `database/api-durata.sql`, applicato il 18/11/2026): tempo di gioco in **secondi**, da 0 a 172.800. Conta solo il tempo giocato: come nel gioco web, una pausa lunga (oltre 2 minuti senza mosse) vale al massimo 2 minuti. Se manca o non è valido la partita si registra lo stesso, senza tempo |
 
 ```json
 {
@@ -121,13 +122,16 @@ Gli stessi campi delle statistiche del gioco web. Con `giocatore` la partita vie
     "id_partita": "11111111-1111-4111-8111-111111111111",
     "dungeon": "rocca", "modalita": "norm", "livello": 2, "giocatori": 1,
     "classe": "ladro", "vittoria": true, "piano": 16, "boss": "drago",
-    "carte": ["colpo", "parata+"], "reliquie": ["anello"], "danni": 900, "uccisioni": 30
+    "carte": ["colpo", "parata+"], "reliquie": ["anello"], "danni": 900, "uccisioni": 30,
+    "durata": 1385
   }
 }
 ```
 ```json
-{ "ok": true, "azione": "partita", "chi": { ... }, "dati": { "registrata": true, "collegata_al_profilo": true } }
+{ "ok": true, "azione": "partita", "chi": { ... }, "dati": { "registrata": true, "collegata_al_profilo": true, "durata_salvata": true } }
 ```
+
+`durata_salvata` dice se il tempo è stato registrato (falso se `durata` manca o non è un intero tra 0 e 172.800).
 Se era già arrivata: `"dati": { "registrata": false, "motivo": "gia_ricevuta" }`.
 Se un campo non va bene: `{"ok": false, "errore": "dati_non_validi", "dettaglio": "..."}` con la spiegazione tecnica in `dettaglio`.
 
@@ -157,7 +161,7 @@ Serve `giocatore`. Restituisce due cose:
     "giocatore": "manugiuly",
     "sincronizzate": { "runs": 12, "wins": 5, "cls": { "ladro": { "runs": 4, "wins": 2, "best": 16 } }, "...": "..." },
     "inviate": {
-      "partite": 1, "vittorie": 1, "miglior_piano": 16, "uccisioni": 30,
+      "partite": 1, "vittorie": 1, "miglior_piano": 16, "miglior_tempo": 1385, "uccisioni": 30,
       "prima": "2026-11-18T10:54:52+00:00", "ultima": "2026-11-18T10:54:52+00:00",
       "piattaforme": { "ios": 1 },
       "eroi": [ { "eroe": "ladro", "partite": 1, "vittorie": 1, "miglior_piano": 16 } ],

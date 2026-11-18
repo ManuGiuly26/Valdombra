@@ -624,7 +624,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     startCombat(['orco'],'combat');ctx(ME);g.hero.hand=[{id:'possente',up:false,uid:uid++}];render();const el=document.querySelector('.hand .card');cardZoom(el);r.zoom=document.querySelectorAll('#czoom .card').length===2&&!!document.querySelector('#czoom .card.shadow');cardZoomClose();
     R=null;screen='title';modal=null;['colpo'].forEach(k=>seenAdd('c',[k]));UI.diCls='all';openDiario('c');render();r.enc=!!document.querySelector('.modal .duo .card.shadow');closeModal();
     // menu essenziale (in Sviluppo): poche cose, eroe e dungeon in una pagina a parte
-    SET.menu=true;screen='title';render();r.lite=document.querySelectorAll('.mtile').length>=7&&!document.querySelector('.classes');giocaScroll();render();r.pagina=screen==='solo'&&!!document.querySelector('.classes');
+    SET.menu=true;screen='title';render();r.lite=document.querySelectorAll('.mtile').length===6&&!!document.getElementById('guidabtn')&&![...document.querySelectorAll('.mtile')].some(x=>/Guida/.test(x.textContent))&&!document.querySelector('.classes');giocaScroll();render();r.pagina=screen==='solo'&&!!document.querySelector('.classes');
     SET.menu=false;screen='title';render();r.pieno=!!document.querySelector('.classes')&&!document.querySelector('.mtile');
     // eroi ribilanciati
     r.eroi=CLASSES.guerriero.hp===86&&CLASSES.mago.hp===76&&CLASSES.ladro.hp===75&&CLASSES.guardiano.hp===88&&CARDS.scudoarc.v.b===7&&CARDS.dardo.v.d===7&&CARDS.pallafuoco.v.d===9;
@@ -654,7 +654,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     openNovita();r.messaggi=document.querySelectorAll('.modal .novmsg').length===L.length&&document.querySelectorAll('.modal .novmsg.nuova').length===+d.textContent&&document.body.classList.contains('hasmodal');
     closeModal();render();r.letti=!document.querySelector('#novbtn .novdot')&&novitaNuove()===0;
     openSettings();r.impSenza=!document.querySelector('.modal').textContent.includes('Novità della');closeModal();
-    SET.menu=false;render();openSettings();r.impCon=document.querySelector('.modal').textContent.includes('Novità della');closeModal();r.noBtn=!document.getElementById('novbtn');
+    SET.menu=false;render();openSettings();r.impCon=document.querySelector('.modal').textContent.includes('Novità della');closeModal();r.noBtn=!document.getElementById('novbtn')&&!document.getElementById('guidabtn');
     try{localStorage.removeItem('valdombra-novita-viste')}catch(e){}SET.menu=true;render();r.primaVolta=novitaNuove()===1;SET.menu=m0;render();return r});
   ok(nv.descr&&nv.noImp&&nv.lista&&nv.pallino&&nv.messaggi&&nv.letti&&nv.impSenza&&nv.impCon&&nv.noBtn&&nv.primaVolta,'menu essenziale: descrizione sotto il titolo, Impostazioni solo in alto a destra, Novità come messaggi con pallino rosso per quelle nuove (che sparisce dopo averle lette); col menu completo le Novità restano nelle Impostazioni '+JSON.stringify(nv));
 
