@@ -63,7 +63,7 @@ Se non lo mandi, la chiamata è anonima.
 `chi` ripete quello che il server ha riconosciuto: `giocatore` è `null` se la chiamata era anonima, `admin` è `true` solo per i profili amministratori.
 
 La risposta HTTP è `200` anche quando `ok` è `false`: controlla sempre il campo `ok`.
-Altri codici HTTP vogliono dire un problema di collegamento o di configurazione (es. `401` = chiave `apikey` sbagliata, `404` = script del database non applicato).
+Altri codici HTTP vogliono dire un problema di collegamento o di configurazione: `400` = il corpo non è un oggetto JSON (per esempio un elenco `[...]` o testo non valido), `401` = manca la chiave `apikey` o è sbagliata, `404` = script del database non applicato.
 
 ## Le azioni
 
@@ -176,7 +176,7 @@ Serve `giocatore` con un profilo amministratore (oggi `manugiuly`). Restituisce 
 
 | `errore` | Quando |
 |---|---|
-| `richiesta_non_valida` | il corpo non è un oggetto JSON o è più grande di 200 KB |
+| `richiesta_non_valida` | il corpo è più grande di 200 KB (se non è proprio un oggetto JSON risponde il server con HTTP `400`) |
 | `azione_sconosciuta` | `azione` mancante o diversa da quelle elencate |
 | `client_non_valido` | manca `client` o uno dei suoi campi non va bene |
 | `troppe_richieste` | più di 30 chiamate in un minuto dallo stesso dispositivo: aspetta un minuto |
