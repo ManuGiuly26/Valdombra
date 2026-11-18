@@ -104,17 +104,17 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     const nuova=(cls='guerriero')=>{R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);pickCls=cls;pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();ctx(ME)};
     const carta=id=>{const c={id,up:false,uid:uid++};g.hero.hand.push(c);g.hero.energy=9;return c};
     nuova();r.attiva=R.lo===true;
-    startCombat(['goblin'],'combat');ctx(ME);let e=g.enemies[0];e.hp=e.max=999;
+    startCombat(['goblin'],'combat');ctx(ME);g.hero.st.str=0;let e=g.enemies[0];e.hp=e.max=999;// v9.1: l'Elmo del Guerriero dà 1 Forza: qui si azzera per confrontare i danni
     let c=carta('colpo');r.lato=canShadow(c)&&!canShadow({id:'furia',up:false});
     playCard(c.uid,0,ME,null,1);ctx(ME);r.ombraDanno=999-e.hp;r.ombra1=run.om;
     e.hp=999;c=carta('colpo');playCard(c.uid,0,ME,null,0);ctx(ME);r.luceDanno=999-e.hp;
     const b0=g.hero.blk;c=carta('parata');playCard(c.uid,null,ME,null,1);ctx(ME);r.armOmbra=g.hero.blk-b0;
     // creatura d'ombra
-    startCombat(['scheletro'],'combat');ctx(ME);e=g.enemies[0];e.hp=e.max=999;r.buio=isDark(e);
+    startCombat(['scheletro'],'combat');ctx(ME);g.hero.st.str=0;e=g.enemies[0];e.hp=e.max=999;r.buio=isDark(e);
     c=carta('colpo');playCard(c.uid,0,ME,null,1);ctx(ME);r.buioOmbra=999-e.hp;e.hp=999;
     c=carta('colpo');playCard(c.uid,0,ME,null,0);ctx(ME);r.buioLuce=999-e.hp;
     // con 5 Ombra i nemici colpiscono più forte
-    startCombat(['goblin'],'combat');ctx(ME);e=g.enemies[0];e.intent={d:6,tg:ME};run.om=0;const d0=calcDmg(enemyBase(e,e.intent),e,g.hero);run.om=5;r.piuDanni=calcDmg(enemyBase(e,e.intent),e,g.hero)-d0;
+    startCombat(['goblin'],'combat');ctx(ME);g.hero.st.str=0;e=g.enemies[0];e.intent={d:6,tg:ME};run.om=0;const d0=calcDmg(enemyBase(e,e.intent),e,g.hero);run.om=5;r.piuDanni=calcDmg(enemyBase(e,e.intent),e,g.hero)-d0;
     // caduta nell'ombra
     run.om=9;const mx=run.max;e.hp=e.max=999;c=carta('colpo');playCard(c.uid,0,ME,null,1);ctx(ME);r.caduta=run.om===10&&!!run.caduto&&run.max===mx-4&&!!g.hero.st.oscuro;
     e.hp=999;c=carta('colpo');playCard(c.uid,0,ME,null,0);ctx(ME);r.doppio=999-e.hp;
@@ -627,11 +627,14 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     SET.menu=true;screen='title';render();r.lite=document.querySelectorAll('.mtile').length>=7&&!document.querySelector('.classes');giocaScroll();render();r.pagina=screen==='solo'&&!!document.querySelector('.classes');
     SET.menu=false;screen='title';render();r.pieno=!!document.querySelector('.classes')&&!document.querySelector('.mtile');
     // eroi ribilanciati
-    r.eroi=CLASSES.guerriero.hp===86&&CLASSES.mago.hp===70&&CLASSES.ladro.hp===75&&CLASSES.guardiano.hp===88;
+    r.eroi=CLASSES.guerriero.hp===86&&CLASSES.mago.hp===76&&CLASSES.ladro.hp===75&&CLASSES.guardiano.hp===88&&CARDS.scudoarc.v.b===7&&CARDS.dardo.v.d===7&&CARDS.pallafuoco.v.d===9;
+    R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);modal=null;pickCls='guerriero';pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();ctx(ME);startCombat(['goblin'],'combat');ctx(ME);r.elmo=(g.hero.st.str|0)>=1;
+    R=null;pickCls='mago';startSolo();ctx(ME);startCombat(['goblin'],'combat');ctx(ME);r.grimorio=g.hero.energy>=4;R=null;screen='title';render();
     return r});
   ok(v9.soloMalus&&v9.giorni&&v9.livello3&&v9.furiosi&&v9.umido,'sfida del giorno dal 19/11: solo malus e Livello di Assedio 3 '+JSON.stringify({m:v9.soloMalus,g:v9.giorni,l:v9.livello3,f:v9.furiosi,u:v9.umido}));
   ok(v9.tempo&&v9.fine,'bonus di tempo solo vincendo: +30% sotto 5 minuti, +15% fino a 10, +5% fino a 20; si vede a fine partita');
   ok(v9.mazzo&&v9.zoom&&v9.enc,'Luce e Ombra insieme: nel mazzo, nella carta ingrandita e nell\'enciclopedia '+JSON.stringify({m:v9.mazzo,z:v9.zoom,e:v9.enc}));
+  ok(v9.elmo&&v9.grimorio,'Guerriero: l\'Elmo dà 1 Forza a inizio combattimento; Mago: il Grimorio dà anche 1 Energia nel primo turno');
   ok(v9.lite&&v9.pagina&&v9.pieno&&v9.eroi,'menu essenziale in Sviluppo (eroe e dungeon in una pagina a parte), menu completo di base; PV degli eroi ribilanciati '+JSON.stringify({l:v9.lite,p:v9.pagina,c:v9.pieno,e:v9.eroi}));
 
   {const sd=await page.evaluate(async()=>{const r={};const sb0=window.sbClient,st0=SET.stats;const rows=[];let primo=true;SET.stats=true;
