@@ -311,6 +311,34 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(px.mappaCentro&&px.mappaTocco&&px.mappaPiena,'mappa: nodi lontani dai bordi, area da toccare più grande sui nodi da scegliere, sfondo su tutto lo schermo '+JSON.stringify({c:px.mappaCentro,t:px.mappaTocco,p:px.mappaPiena}));
   ok(px.scelta.length>=4&&px.scelta.some(s=>s.includes('pixel/guerriero.png'))&&!px.sceltaAspetto.some(s=>s.includes('pixel/guerriero.png')),`fuori dal combattimento: figure Pixellab nella scelta dell'eroe (${px.scelta.length}), che seguono l'aspetto scelto`);
 
+  console.log('9. Visite e amministrazione');
+  const adm=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
+    const sb0=window.sbClient,rpc0=window.accRpc,acc0=ACC,st0=SET.stats;let chiamate=[];
+    try{localStorage.removeItem(VIS_K);localStorage.removeItem(VISNO_K);sessionStorage.removeItem(VISS_K)}catch(e){}
+    // nelle prove (file://) non si conta niente
+    r.locale=visitaConta()===false&&chiamate.length===0;
+    window.sbClient=()=>({rpc:(fn,a)=>{chiamate.push([fn,a]);return Promise.resolve({data:null,error:null})}});
+    SET.stats=true;r.prima=visitaConta(true)===true;const a=chiamate[0]&&chiamate[0][1];
+    r.dati=!!a&&chiamate[0][0]==='visita_registra'&&/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(a.p_visitatore)&&a.p_versione===VERSION&&typeof a.p_mobile==='boolean'&&typeof a.p_app==='boolean'&&Object.keys(a).length===4;
+    r.stessoCodice=a&&localStorage.getItem(VIS_K)===a.p_visitatore;
+    r.unaPerScheda=visitaConta(true)===false&&chiamate.length===1;
+    sessionStorage.removeItem(VISS_K);SET.stats=false;r.spenta=visitaConta(true)===false&&chiamate.length===1;SET.stats=true;
+    localStorage.setItem(VISNO_K,'1');r.admNonConta=visitaConta(true)===false&&chiamate.length===1;localStorage.removeItem(VISNO_K);
+    // pannello: solo per l'amministratrice, dati riassunti dal server
+    ACC={nome:'prova',token:'00000000-0000-4000-8000-000000000000',rev:1};ADM.ok=false;openSettings();r.nascosto=!document.querySelector('[onclick="openAdmin()"]');
+    window.accRpc=async fn=>{if(fn==='admin_e')return true;if(fn==='admin_statistiche')return {oggi:'18/11/2026',visite:{oggi:3,g7:10,g30:20,tot:25},uniche:{oggi:2,g7:6,g30:9,tot:11},nuovi7:4,mobile30:50,app30:10,
+      giorni:Array.from({length:30},(_,i)=>['0'+(i%9+1)+'/11',i,Math.floor(i/2)]),ore:Array.from({length:24},(_,i)=>i%5),versioni:[['v8.0',9]],profili:{tot:3,nuovi7:1,attivi7:2},
+      partite:{tot:7,g7:2,vitt:60,gruppo:10},eroi:[['ladro',2,50]],dungeon:[['rocca',3,67,16]],morti:[['goblin,goblin,bandito',2]],carte:[['pugnalata',10],['schivata+',4]],classifica:{tot:4,solo:211,coop:null}};throw new Error('offline')};
+    await adminCheck();r.controllo=ADM.ok&&localStorage.getItem(VISNO_K)==='1';render();r.visibile=!!document.querySelector('[onclick="openAdmin()"]');
+    openAdmin();await sleep(50);const m=document.querySelector('.admin');
+    r.pannello=!!m&&m.querySelectorAll('.adtile').length>=11&&m.querySelectorAll('.adchart').length===2&&m.querySelectorAll('.adchart:not(.ore) .adbar').length===30&&m.textContent.includes('2 Goblin Predone')&&m.textContent.includes('Schivata+')&&m.textContent.includes('Ladro');
+    window.accRpc=async()=>{throw new Error('non_autorizzato')};await adminLoad();r.rifiuto=ADM.stato==='err'&&/non è amministratore/.test(ADM.msg);
+    modal=null;window.sbClient=sb0;window.accRpc=rpc0;ACC=acc0;ADM.ok=false;ADM.dati=null;SET.stats=st0;
+    try{localStorage.removeItem(VIS_K);localStorage.removeItem(VISNO_K);sessionStorage.removeItem(VISS_K)}catch(e){}render();return r});
+  ok(adm.locale&&adm.prima&&adm.dati&&adm.stessoCodice,'visite: una sola chiamata con codice casuale, versione, telefono e app (niente nomi); nelle prove in locale non si conta '+JSON.stringify({l:adm.locale,p:adm.prima,d:adm.dati,c:adm.stessoCodice}));
+  ok(adm.unaPerScheda&&adm.spenta&&adm.admNonConta,'visite: una per scheda, niente con «Invia statistiche anonime» spento né sui dispositivi dell\'amministratrice');
+  ok(adm.nascosto&&adm.controllo&&adm.visibile&&adm.pannello&&adm.rifiuto,'amministrazione: nascosta agli altri, visibile dopo il controllo sul server, pannello con visite, grafici, eroi, carte e nemici; rifiuto gestito '+JSON.stringify({n:adm.nascosto,c:adm.controllo,v:adm.visibile,p:adm.pannello,r:adm.rifiuto}));
+
   console.log('');
   if(errori.length){console.log('Errori JavaScript nella pagina:');[...new Set(errori)].forEach(e=>console.log('  - '+e));fallite++}
   await browser.close();

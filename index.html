@@ -419,6 +419,20 @@ body.pxui .hand .card .cdesc.trunc{align-items:flex-start;-webkit-mask-image:lin
 .mapwrap.pxfill{background:linear-gradient(rgba(14,11,20,.74),rgba(14,11,20,.74)),var(--mapbg) center top/560px auto repeat;background-attachment:local}
 .mapwrap.pxfill .mapsvg{box-shadow:0 0 0 2px rgba(0,0,0,.35),0 0 48px 10px rgba(0,0,0,.55)}
 .mapsvg .node .hit{fill:transparent!important;stroke:none!important}
+/* pannello di amministrazione (v8.0) */
+.admin{display:flex;flex-direction:column;gap:10px;text-align:left}.admin h4{margin:10px 0 0;color:var(--torch2)}.admin h5{margin:8px 0 0;font-size:15px}
+.adtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.adtile{background:var(--stone3);border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:2px}
+.adtile small{color:var(--muted);font-size:12px}.adtile b{font-size:26px;color:var(--fg);line-height:1.1}.adtile span{color:var(--muted);font-size:12.5px}
+.adchart{display:flex;align-items:flex-end;gap:2px;height:120px;padding:6px 4px 18px;background:var(--stone3);border:1px solid var(--line);border-radius:10px}
+.adchart.ore{height:90px}
+.adbar{flex:1;height:100%;position:relative;display:flex;align-items:flex-end;justify-content:center}
+.adbar i,.adbar em{position:absolute;bottom:0;left:8%;right:8%;border-radius:3px 3px 0 0}
+.adbar i{background:var(--torch);opacity:.85}.adbar em{background:var(--arcane);left:30%;right:30%}
+.adbar small{position:absolute;bottom:-17px;font-size:10px;color:var(--muted);white-space:nowrap}
+.adleg{display:flex;gap:14px;font-size:12.5px;color:var(--muted)}.adleg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}.adleg i.v{background:var(--torch)}.adleg i.u{background:var(--arcane)}
+.adtab{width:100%;border-collapse:collapse;font-size:14px}.adtab th{text-align:left;color:var(--muted);font-weight:600;font-size:12.5px;border-bottom:1px solid var(--line);padding:4px 6px}
+.adtab td{padding:5px 6px;border-bottom:1px solid rgba(255,255,255,.05)}.adtab td:not(:first-child),.adtab th:not(:first-child){text-align:right;white-space:nowrap}
 #cprev{position:fixed;z-index:205;display:flex;gap:12px;align-items:flex-start;pointer-events:none;animation:cpin .12s ease-out}
 #cprev[hidden]{display:none}#cprev.rev{flex-direction:row-reverse}#cprev .zgl{width:250px}
 @keyframes cpin{from{opacity:0;transform:translateY(6px)}}
@@ -2515,6 +2529,7 @@ function render(fxs){
   if(modal&&modal.dboard)modal.html=dailyBoardHTML();
   if(modal&&modal.diario)modal.html=diarioHTML();
   if(modal&&modal.guida)modal.html=guidaHTML();
+  if(modal&&modal.admin)modal.html=adminHTML();
   if(R&&!solo&&SET.chat&&!chatOpen&&R.players[ME]&&(R.phase==='lobby'||R.phase==='end')){const n=Math.max(0,((R.chat||[]).length)-chatSeen);h+=`<button class="btn primary chatfab" onclick="toggleChat(true)" aria-label="Apri la chat">Chat${n?`<span class="dot">${n}</span>`:''}</button>`}
   if(!modal&&(!R||R.phase==='lobby'||R.phase==='end'||!R.players[ME]))h+=`<button class="crownbadge" onclick="openBottega()" title="Le tue Corone: apri la Bottega" aria-label="${getCrowns()} Corone, apri la Bottega">${ic('i_crown',16)}<b>${getCrowns()}</b><span>Corone</span>${GEMON()?`${ic('i_gem',16)}<b class="gemc">${getGems()}</b>`:''}</button>`;
   h+=tutHTML();
@@ -3183,7 +3198,7 @@ function startVoteAnim(va){
 }
 function paintAnim(){document.querySelectorAll('.mapsvg .node').forEach(n=>{n.classList.toggle('spin',!!UI.anim&&n.dataset.k===UI.anim.cur)})}
 /* ================= IMPOSTAZIONI ================= */
-const VERSION='v7.9',VDATE='18/11';
+const VERSION='v8.0',VDATE='18/11';
 const SET_K='valdombra-impostazioni';
 const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),vib:true,ts:1,hc:false,tut:true,stats:true,lo:true,vil:true,gem:true,px:false};
 let SET=(()=>{try{return Object.assign({},SET_DEF,JSON.parse(load(SET_K)||'{}'))}catch(e){return Object.assign({},SET_DEF)}})();
@@ -3224,7 +3239,7 @@ function settingsHTML(){
       ${'vibrate' in navigator?swb('vib','Vibrazione','Una vibrazione leggera quando subisci danni, vinci o un compagno ti manda un segnale.'):''}
       ${swb('tut','Consigli del tutorial','Mostra i fumetti che spiegano il gioco. Se lo riattivi riprende da dove eri rimasto.')}
       <div class="row"><button class="btn" onclick="openGuida()">Apri la guida completa</button><button class="btn" onclick="tutReset();SET.tut=true;saveSet();toast('I consigli ripartiranno dall\'inizio.');render()">Ricomincia i consigli da capo</button></div>
-      ${swb('stats','Invia statistiche anonime','A fine partita invia eroe, dungeon, esito, carte e reliquie, senza nomi, per bilanciare il gioco.')}
+      ${swb('stats','Invia statistiche anonime','Conta le visite al gioco con un codice casuale del dispositivo e a fine partita invia eroe, dungeon, esito, carte e reliquie, senza nomi, per migliorare il gioco.')}
     </div>
     <div class="panel"><h4>${ic('i_gear',18)} Sviluppo</h4>
       <p class="muted" style="font-size:13px">Funzioni nuove in prova. Se qualcosa non ti convince puoi spegnerle qui: i progressi restano salvati e tornano se le riaccendi.</p>
@@ -3238,8 +3253,9 @@ function settingsHTML(){
       <div class="srow"><div class="lab">Versione</div><b>${VERSION} · ${VDATE}</b></div>
       <div class="srow"><div class="lab">Codice<small>Hai un codice? Scrivilo qui.</small></div><input id="rcode" class="txt" maxlength="40" style="max-width:200px" autocomplete="off" placeholder="Codice"><button class="btn" onclick="redeem()">Usa</button></div>
       <div class="srow"><div class="lab">Profilo</div><b>${ACC?esc(ACC.nome):'nessuno'}</b><button class="btn" onclick="openProfilo()">${ACC?'Gestisci':'Accedi'}</button></div>
+      ${ADM.ok?`<div class="srow"><div class="lab">Amministrazione<small>Visite, visitatori unici, partite, eroi, carte e classifica.</small></div><button class="btn primary" onclick="openAdmin()">Apri il pannello</button></div>`:''}
       ${inRoom?`<div class="srow"><div class="lab">Stanza</div><b>${R.code}</b></div><div class="srow"><div class="lab">Connessione</div><b>${isHost?'Sei tu a guidare la stanza':'Collegato'}</b></div>`:''}
-      <p class="muted" style="font-size:13px">Novità della 7.9: la mappa del dungeon ha i nodi più al centro, più grandi e più facili da toccare sul telefono; con «Grafica Pixellab» lo sfondo della mappa riempie tutto lo schermo. In combattimento le carte in mano hanno tutte la stessa altezza: l'illustrazione resta intera e il testo lungo sfuma (lo leggi tutto passando col mouse o tenendo premuta la carta). Novità della 7.8: con «Grafica Pixellab» accesa, passando col mouse sopra una carta la vedi ingrandita, con il testo intero e le parole chiave a fianco; le illustrazioni nella striscia sono più alte e inquadrate sul soggetto. Con «Contrasto alto» la descrizione delle carte giocate dal lato Ombra ora si legge. Novità della 7.7: con «Grafica Pixellab» accesa tutte le 191 carte hanno un'illustrazione sotto il nome; tenendo premuta una carta (anche col mouse, o con il tasto destro) la vedi in grande con l'illustrazione e le parole chiave. La Guida del gioco ha la sua icona, un libro. Novità della 7.6: con «Grafica Pixellab» accesa le carte hanno la nuova cornice del colore del tipo, il costo su una runa e la rarità come gemma; anche l'Energia è una runa. Novità della 7.5: con «Grafica Pixellab» accesa i nemici sconfitti hanno la loro animazione di morte e restano a terra, gli aspetti degli eroi hanno la versione Pixellab e Azhrakel ha nuovi colori. Novità della 7.4: con «Grafica Pixellab» accesa il villaggio cambia aspetto a ogni ricostruzione, reliquie, pozioni e icone sono nuove, eventi e luoghi hanno la loro illustrazione, i combattimenti hanno lo sfondo del dungeon e la mappa ha sfondo, decorazioni e la figura del tuo eroe. Novità della 7.3: con «Grafica Pixellab» accesa anche nemici, élite e boss sono disegnati con PixelLab, attaccano e reagiscono ai colpi; nuova icona del gioco. Novità della 7.2: con «Grafica Pixellab» accesa gli eroi disegnati con PixelLab compaiono ovunque, anche nella scelta dell'eroe, nei menu e nei riepiloghi. Novità della 7.1: in Sviluppo c'è «Grafica Pixellab», spenta di base. Accesa, in combattimento gli eroi sono disegnati con PixelLab e hanno le animazioni di attacco, difesa e colpo subito. Novità della 7.0: il pulsante «Gioca» sempre visibile per scegliere la modalità; Luce e Ombra (ogni carta si può giocare dal lato Ombra, più forte ma rischioso; creature d'ombra, mercante, eventi e bottino reagiscono alla tua Ombra), il Villaggio di Valdombra da ricostruire per avere vantaggi in ogni partita, e le Gemme, la seconda moneta per cimeli permanenti e aspetti. Si possono spegnere da Sviluppo. Dalla 6.4: la sfida del giorno usa tutti e 10 gli eroi e non ripete eroe, dungeon o modificatore del giorno prima; dalla 6.3: corretto il blocco quando l'eroe cade per una carta Ustione o Maledizione, tratti delle élite più leggeri (soprattutto da soli); dalla 6.2: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
+      <p class="muted" style="font-size:13px">Novità della 8.0: il gioco conta le visite in modo anonimo (un codice casuale per dispositivo, niente nomi: si spegne con «Invia statistiche anonime»); per l'amministratrice c'è un pannello con visite, visitatori unici, partite, eroi, carte e classifica. Novità della 7.9: la mappa del dungeon ha i nodi più al centro, più grandi e più facili da toccare sul telefono; con «Grafica Pixellab» lo sfondo della mappa riempie tutto lo schermo. In combattimento le carte in mano hanno tutte la stessa altezza: l'illustrazione resta intera e il testo lungo sfuma (lo leggi tutto passando col mouse o tenendo premuta la carta). Novità della 7.8: con «Grafica Pixellab» accesa, passando col mouse sopra una carta la vedi ingrandita, con il testo intero e le parole chiave a fianco; le illustrazioni nella striscia sono più alte e inquadrate sul soggetto. Con «Contrasto alto» la descrizione delle carte giocate dal lato Ombra ora si legge. Novità della 7.7: con «Grafica Pixellab» accesa tutte le 191 carte hanno un'illustrazione sotto il nome; tenendo premuta una carta (anche col mouse, o con il tasto destro) la vedi in grande con l'illustrazione e le parole chiave. La Guida del gioco ha la sua icona, un libro. Novità della 7.6: con «Grafica Pixellab» accesa le carte hanno la nuova cornice del colore del tipo, il costo su una runa e la rarità come gemma; anche l'Energia è una runa. Novità della 7.5: con «Grafica Pixellab» accesa i nemici sconfitti hanno la loro animazione di morte e restano a terra, gli aspetti degli eroi hanno la versione Pixellab e Azhrakel ha nuovi colori. Novità della 7.4: con «Grafica Pixellab» accesa il villaggio cambia aspetto a ogni ricostruzione, reliquie, pozioni e icone sono nuove, eventi e luoghi hanno la loro illustrazione, i combattimenti hanno lo sfondo del dungeon e la mappa ha sfondo, decorazioni e la figura del tuo eroe. Novità della 7.3: con «Grafica Pixellab» accesa anche nemici, élite e boss sono disegnati con PixelLab, attaccano e reagiscono ai colpi; nuova icona del gioco. Novità della 7.2: con «Grafica Pixellab» accesa gli eroi disegnati con PixelLab compaiono ovunque, anche nella scelta dell'eroe, nei menu e nei riepiloghi. Novità della 7.1: in Sviluppo c'è «Grafica Pixellab», spenta di base. Accesa, in combattimento gli eroi sono disegnati con PixelLab e hanno le animazioni di attacco, difesa e colpo subito. Novità della 7.0: il pulsante «Gioca» sempre visibile per scegliere la modalità; Luce e Ombra (ogni carta si può giocare dal lato Ombra, più forte ma rischioso; creature d'ombra, mercante, eventi e bottino reagiscono alla tua Ombra), il Villaggio di Valdombra da ricostruire per avere vantaggi in ogni partita, e le Gemme, la seconda moneta per cimeli permanenti e aspetti. Si possono spegnere da Sviluppo. Dalla 6.4: la sfida del giorno usa tutti e 10 gli eroi e non ripete eroe, dungeon o modificatore del giorno prima; dalla 6.3: corretto il blocco quando l'eroe cade per una carta Ustione o Maledizione, tratti delle élite più leggeri (soprattutto da soli); dalla 6.2: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
       <p class="muted" style="font-size:13px">Le impostazioni (audio, chat, grafica) valgono solo per questo dispositivo. I progressi di gioco seguono il tuo profilo.</p>
       <div><button class="btn" onclick="SET=Object.assign({},SET_DEF);saveSet();render()">Ripristina le impostazioni</button></div>
     </div></div>`;
@@ -3598,12 +3614,70 @@ function accErr(e){const m=String(e&&(e.message||e.details)||e||'');
   return 'Connessione non riuscita. Riprova tra poco.';
 }
 async function accRpc(fn,args){const sb=sbClient();if(!sb)throw new Error('offline');const {data,error}=await sb.rpc(fn,args);if(error)throw error;return data}
+
+/* ================= VISITE E AMMINISTRAZIONE (v8.0) ================= */
+// Una visita ogni volta che si apre il gioco (una per scheda; il server ne tiene al massimo una ogni 30 minuti per dispositivo).
+// Si manda solo un codice casuale del browser, la versione e se è un telefono o l'app installata: niente nomi né indirizzi.
+// Vale l'interruttore «Invia statistiche anonime»; i dispositivi dell'amministratrice non vengono contati.
+const VIS_K='valdombra-visitatore',VISNO_K='valdombra-noconta',VISS_K='valdombra-visita';
+const ADM={ok:false,chk:false,dati:null,stato:'',msg:'',quando:null};
+function uuid4(){try{if(crypto.randomUUID)return crypto.randomUUID()}catch(e){}const b=crypto.getRandomValues(new Uint8Array(16));b[6]=b[6]&15|64;b[8]=b[8]&63|128;
+  const h=[...b].map(x=>x.toString(16).padStart(2,'0')).join('');return `${h.slice(0,8)}-${h.slice(8,12)}-${h.slice(12,16)}-${h.slice(16,20)}-${h.slice(20)}`}
+function visitaConta(prova){try{
+  if(!SET.stats||localStorage.getItem(VISNO_K))return false;
+  if(!prova&&(location.protocol!=='https:'||/^(localhost|127\.|\[::1\])/.test(location.hostname)))return false;// solo sul sito vero, non nelle prove
+  if(sessionStorage.getItem(VISS_K))return false;
+  let id=localStorage.getItem(VIS_K);if(!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(id||'')){id=uuid4();localStorage.setItem(VIS_K,id)}
+  const c=sbClient();if(!c)return false;sessionStorage.setItem(VISS_K,'1');
+  const mm=q=>{try{return matchMedia(q).matches}catch(e){return false}};
+  c.rpc('visita_registra',{p_visitatore:id,p_versione:VERSION,p_mobile:mm('(pointer:coarse)'),p_app:mm('(display-mode: standalone)')||navigator.standalone===true}).then(()=>{},()=>{});return true}catch(e){return false}}
+async function adminCheck(){if(!ACC){ADM.ok=false;return}ADM.chk=true;
+  try{const ok=!!(await accRpc('admin_e',{p_nome:ACC.nome,p_token:ACC.token}));const prima=ADM.ok;ADM.ok=ok;
+    if(ok)try{localStorage.setItem(VISNO_K,'1')}catch(e){}
+    if(prima!==ok&&modal&&modal.settings)render()}catch(e){ADM.chk=false}}
+function openAdmin(){if(!ADM.ok)return;modal={title:'Amministrazione',admin:true,cancel:true,list:[]};adminLoad();render()}
+async function adminLoad(){if(!ACC)return;ADM.stato='carica';if(modal&&modal.admin)render();
+  try{ADM.dati=await accRpc('admin_statistiche',{p_nome:ACC.nome,p_token:ACC.token});ADM.stato='ok';ADM.quando=new Date()}
+  catch(e){ADM.stato='err';ADM.msg=/non_autorizzato/.test(String(e&&e.message))?'Questo profilo non è amministratore.':accErr(e)}
+  if(modal&&modal.admin)render()}
+// «goblin,goblin,bandito» → «2 Goblin Predone, Bandito»
+function adminNemici(s){const c={};String(s||'').split(',').filter(Boolean).forEach(id=>c[id]=(c[id]||0)+1);
+  return Object.entries(c).map(([id,k])=>(k>1?k+' ':'')+esc(ENEMIES[id]?ENEMIES[id].n:id)).join(', ')}
+function adminHTML(){const d=ADM.dati;
+  if(!d)return ADM.stato==='err'?`<p class="muted">${esc(ADM.msg)}</p><button class="btn" onclick="adminLoad()">Riprova</button>`:'<p class="muted">Carico le statistiche...</p>';
+  const n=x=>Number(x||0).toLocaleString('it-IT'),pc=x=>Math.round(+x||0)+'%',V=d.visite||{},U=d.uniche||{};
+  const tile=(t,a,b)=>`<div class="adtile"><small>${t}</small><b>${n(a)}</b><span>${n(b)} ${+b===1?'visitatore':'visitatori'}</span></div>`;
+  const tab=(rows,head)=>rows&&rows.length?`<table class="adtab"><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</table>`:'<p class="muted">Ancora nessun dato.</p>';
+  const gg=d.giorni||[],mx=Math.max(1,...gg.map(g=>+g[1]||0)),ore=d.ore||[],mo=Math.max(1,...ore.map(Number));
+  const barre=gg.map(([g,v,u],i)=>`<div class="adbar" title="${esc(g)}: ${n(v)} visite, ${n(u)} visitatori"><i style="height:${(+v||0)/mx*100}%"></i><em style="height:${(+u||0)/mx*100}%"></em>${i%5===4||i===gg.length-1?`<small>${esc(g)}</small>`:''}</div>`).join('');
+  const nomeCarta=id=>{const up=/\+$/.test(id),k=String(id).replace(/\+$/,'');return esc(CARDS[k]?CARDS[k].n:k)+(up?'+':'')};
+  const P=d.profili||{},G=d.partite||{},C=d.classifica||{};
+  return `<div class="admin">
+    <div class="row" style="justify-content:space-between;align-items:center"><span class="muted">Oggi è il ${esc(d.oggi||'')}${ADM.quando?' · aggiornato alle '+ADM.quando.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}):''}</span><button class="btn" onclick="adminLoad()" ${ADM.stato==='carica'?'disabled':''}>${ADM.stato==='carica'?'Aggiorno...':'Aggiorna'}</button></div>
+    <h4>Visite</h4>
+    <div class="adtiles">${tile('Oggi',V.oggi,U.oggi)}${tile('Ultimi 7 giorni',V.g7,U.g7)}${tile('Ultimi 30 giorni',V.g30,U.g30)}${tile('Da sempre',V.tot,U.tot)}</div>
+    <p class="muted">Nuovi visitatori negli ultimi 7 giorni: <b>${n(d.nuovi7)}</b> · Negli ultimi 30 giorni da telefono: <b>${pc(d.mobile30)}</b>, con il gioco installato come app: <b>${pc(d.app30)}</b></p>
+    <h5>Ultimi 30 giorni</h5><div class="adchart">${barre}</div><div class="adleg"><span><i class="v"></i>visite</span><span><i class="u"></i>visitatori unici</span></div>
+    <h5>A che ora giocano (ultimi 30 giorni, ora italiana)</h5><div class="adchart ore">${ore.map((v,h)=>`<div class="adbar" title="dalle ${h} alle ${h+1}: ${n(v)} visite"><i style="height:${(+v||0)/mo*100}%"></i>${h%6===0?`<small>${h}</small>`:''}</div>`).join('')}</div>
+    <h4>Giocatori e partite</h4>
+    <div class="adtiles"><div class="adtile"><small>Profili online</small><b>${n(P.tot)}</b><span>${n(P.attivi7)} attivi in 7 giorni</span></div><div class="adtile"><small>Profili nuovi</small><b>${n(P.nuovi7)}</b><span>negli ultimi 7 giorni</span></div>
+      <div class="adtile"><small>Partite finite</small><b>${n(G.tot)}</b><span>${n(G.g7)} in 7 giorni</span></div><div class="adtile"><small>Vittorie</small><b>${pc(G.vitt)}</b><span>${pc(G.gruppo)} giocate in gruppo</span></div></div>
+    <p class="muted">Le partite contano solo chi tiene accese le statistiche anonime.</p>
+    <h5>Eroi più giocati</h5>${tab((d.eroi||[]).map(([c,k,w])=>[sprImg(c,22,'inl')+' '+esc(CLASSES[c]?CLASSES[c].n:c),n(k),pc(w)]),['Eroe','Partite','Vittorie'])}
+    <h5>Dungeon</h5>${tab((d.dungeon||[]).map(([g,k,w,p])=>[esc(DUNGEONS[g]?DUNGEONS[g].n:g),n(k),pc(w),String(p).replace('.',',')]),['Dungeon','Partite','Vittorie','Piano medio'])}
+    <h5>Cosa li sconfigge più spesso</h5>${tab((d.morti||[]).map(([m,k])=>[adminNemici(m),n(k)]),['Nemici','Sconfitte'])}
+    <h5>Carte più presenti nei mazzi (30 giorni)</h5>${tab((d.carte||[]).map(([c,k])=>[nomeCarta(c),n(k)]),['Carta','Mazzi'])}
+    <h4>Altro</h4>
+    <div class="adtiles"><div class="adtile"><small>Classifica Sopravvivenza</small><b>${n(C.tot)}</b><span>punteggi registrati</span></div><div class="adtile"><small>Record da solo</small><b>${C.solo==null?'–':n(C.solo)}</b><span>punti</span></div><div class="adtile"><small>Record in gruppo</small><b>${C.coop==null?'–':n(C.coop)}</b><span>punti</span></div></div>
+    <h5>Versioni del gioco in uso (7 giorni)</h5>${tab((d.versioni||[]).map(([v,k])=>[esc(v)+(v===VERSION?' <span class="muted">(l\'ultima)</span>':''),n(k)]),['Versione','Visite'])}
+    <p class="muted" style="font-size:13px">Le visite si contano senza dati personali: solo un codice casuale per dispositivo, al massimo una visita ogni 30 minuti. Non vengono contati i dispositivi con «Invia statistiche anonime» spento e i tuoi, da quando ci hai aperto il profilo di amministratrice. Se nelle versioni compare una versione vecchia, qualcuno ha ancora il gioco in memoria e lo aggiornerà alla prossima apertura.</p>
+  </div>`}
 async function accPull(){
   if(!ACC||ACCS.busy)return;ACCS.busy=true;ACCS.state='sync';
   try{const rows=await accRpc('profilo_leggi',{p_nome:ACC.nome,p_token:ACC.token});const row=rows&&rows[0];if(!row)throw new Error('credenziali');
     if(row.rev!==ACC.rev){accApply(ACC.dirty?accMerge(row.dati,accCollect()):row.dati);ACC.rev=row.rev;accKeep();gemInit();if(!R)render()}
-    ACCS.state='ok';ACCS.msg='';ACCS.last=Date.now();
-  }catch(e){ACCS.state='err';ACCS.msg=accErr(e);if(/credenziali/.test(String(e&&e.message))){ACC=null;accKeep();toast('Il profilo non è più valido: accedi di nuovo.')}}
+    ACCS.state='ok';ACCS.msg='';ACCS.last=Date.now();if(!ADM.chk)adminCheck();
+  }catch(e){ACCS.state='err';ACCS.msg=accErr(e);if(/credenziali/.test(String(e&&e.message))){ACC=null;accKeep();ADM.ok=false;toast('Il profilo non è più valido: accedi di nuovo.')}}
   ACCS.busy=false;if(ACC&&ACC.dirty&&ACCS.state==='ok')accPush();else if(modal&&modal.profilo)render();
 }
 async function accPush(tries=0){
@@ -3627,7 +3701,7 @@ async function accLogin(create){
       if(JSON.stringify(merged)!==JSON.stringify(r.dati||{})){ACC.dirty=true;ACCS.gen++;accKeep();accPush()}
       toast('Bentornato, '+n+'! Progressi caricati.')}
     if(!myName){myName=n.slice(0,16);store('valdombra-nome',myName)}
-    UI.accP='';UI.accMsg='';ACCS.state='ok';ACCS.last=Date.now();
+    UI.accP='';UI.accMsg='';ACCS.state='ok';ACCS.last=Date.now();adminCheck();
   }catch(e){UI.accMsg=accErr(e)}
   UI.accBusy=false;render();
 }
@@ -3653,7 +3727,8 @@ function profiloHTML(){
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&ACC&&Date.now()-ACCS.last>20000)accPull();else if(document.visibilityState==='hidden'&&ACC&&ACC.dirty)accPush()});
 setInterval(()=>{if(ACC&&document.visibilityState==='visible'&&(!R||R.phase==='lobby')&&Date.now()-ACCS.last>90000)accPull()},30000);
 // appena si apre il gioco: prendi subito i progressi dal profilo (per esempio la partita iniziata su un altro dispositivo)
-setTimeout(()=>{if(ACC&&!R)accPull()},400);try{gemInit()}catch(e){}
+setTimeout(()=>{if(ACC&&!R)accPull()},400);
+setTimeout(()=>{if(!visitaConta())setTimeout(()=>visitaConta(),6000)},1500);// conta la visita (se la libreria di Supabase non è ancora pronta riprova una volta)try{gemInit()}catch(e){}
 
 
 /* ================= APP INSTALLABILE ================= */
