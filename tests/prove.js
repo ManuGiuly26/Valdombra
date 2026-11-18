@@ -694,6 +694,20 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     ok(sel.sel&&sel.sel.sh===1&&bers.om===1&&bers.hp[1]===188&&bers.hp[0]===200,'con più nemici la faccia Ombra prepara la carta e poi si sceglie il bersaglio '+JSON.stringify({s:sel.sel,b:bers.hp}));
     ok(tel.om===1&&tel.hp===188&&tel.chiusa&&!e5.length,'sul telefono, tenendo premuta la carta, si tocca la faccia Ombra per giocarla '+JSON.stringify(tel));}
 
+  console.log('7p. In gruppo nella vista a scena i compagni stanno accanto al mio eroe');
+  {const c6=await browser.newContext({viewport:{width:1280,height:860}});await c6.route(/^https?:\/\//,r=>r.abort());const p6=await c6.newPage();const e6=[];p6.on('pageerror',e=>e6.push(e.message));await p6.goto(PAGE);await p6.waitForTimeout(300);
+    const al=await p6.evaluate(async()=>{const out={};SET.tut=false;SET.lo=true;const sc0=SET.scena;
+      for(const [scena,n] of [[true,2],[true,4],[true,8],[false,2]]){SET.scena=scena;saveSet();applySet();SPEED=0;solo=false;isHost=true;ME='pA';myName='Prova';chan=null;modal=null;
+        R=newLobby('ALLE');rng=new RNG(hashStr('ALLE'));R.players.pA.cls='necromante';
+        [['pB','Pan','monaco'],['pC','Sara','chierico'],['pD','Luca','guerriero'],['pE','Giada','mago'],['pF','Marco','ladro'],['pG','Elena','druido'],['pH','Paolo','paladino']].slice(0,n-1).forEach(([id,nm,cl])=>{R.players[id]={pid:id,name:nm,cls:cl,ready:true};R.order.push(id)});
+        online=new Set(R.order);startRunRoom(0,'ALLEATI');startCombat(['goblin'],'combat');ctx('pA');render();
+        const me=document.getElementById('ent-h-pA').getBoundingClientRect(),hand=document.querySelector('.hand').getBoundingClientRect(),info=document.querySelector('#ent-h-pA .info').getBoundingClientRect();
+        const al=[...document.querySelectorAll('.ent.ally')];const vicini=al.every(a=>{const q=a.getBoundingClientRect();return q.bottom<=me.top+4&&q.right>me.left-140&&q.left<me.right+140});
+        out[(scena?'scena':'classica')+n]={nella:al.every(a=>!!a.closest('.herorow')),vicini,visibile:info.bottom<=hand.top+2,quanti:al.length}}
+      SET.scena=sc0;saveSet();applySet();R=null;screen='title';render();return out});
+    await c6.close();
+    ok(['scena2','scena4','scena8'].every(k=>al[k].nella&&al[k].vicini&&al[k].visibile&&al[k].quanti===+k.slice(5)-1)&&!al.classica2.nella&&!e6.length,'vista a scena: i compagni (2, 4, 8 giocatori) stanno sopra il mio eroe nella sua colonna e il mio riquadro resta sopra le carte; nella vista classica restano dove erano '+JSON.stringify(al));}
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;
