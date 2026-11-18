@@ -243,6 +243,10 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     // sfondo del combattimento, mappa, luoghi, villaggio e icone
     r.sfondo=(document.querySelector('.combat')||{style:{}}).style.background||'';
     R.phase='map';render();r.mappa=!!document.querySelector('#mapsvg.pxmap pattern image')&&document.querySelectorAll('#mapsvg image[href^="pixel/mappa/"]').length>0;
+    // v7.9: nodi raccolti verso il centro, area da toccare più grande solo sui nodi da scegliere, sfondo su tutto lo schermo
+    {const cx=[...document.querySelectorAll('.mapsvg .node circle:first-child')].map(c=>+c.getAttribute('cx'));r.mappaCentro=cx.length>10&&cx.every(x=>x>=80&&x<=620);
+      const av=document.querySelectorAll('.mapsvg .node.avail').length;r.mappaTocco=av>0&&document.querySelectorAll('.mapsvg .node .hit').length===av&&document.querySelectorAll('.mapsvg .node.avail .hit').length===av;
+      r.mappaPiena=!!document.querySelector('#mapwrap.pxfill')}
     ctx(ME);R.pos={y:0,x:R.map[0].findIndex(Boolean)};render();r.mappaEroi=document.querySelectorAll('#mapsvg image[href="pixel/guerriero.png"]').length>0;
     r.luogo=pxLuogo('shop',60).includes('pixel/luoghi/shop.png');r.icona=ic('r_elmo',20).includes('pixel/icone/r_elmo.png')&&potIc('cura',20).includes('pixel/icone/pot_cura.png');
     R=null;solo=true;ME='solo';screen='title';modal=null;render();r.titolo=!!document.querySelector('.pxtitle img');
@@ -253,6 +257,11 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     // illustrazioni delle carte (v7.7): striscia in mano, ogni carta ha il suo disegno, carta grande tenendo premuto
     nuova('guerriero');
     r.strisce=g.hero.hand.length>0&&document.querySelectorAll('.hand .card .artstrip img').length===g.hero.hand.length;
+    // v7.9: in mano tutte della stessa altezza; il testo lungo sfuma
+    ctx(ME);g.hero.hand.push({id:'esplosione',uid:9e6+79,up:true});render();
+    {const hs=[...document.querySelectorAll('.hand .card')].map(c=>Math.round(c.getBoundingClientRect().height));r.stessaAltezza=hs.length>1&&hs.every(h=>h===hs[0]);r.altezze=hs.join(',')}
+    r.sfuma=!!document.querySelector('.hand .card[data-cid="esplosione"] .cdesc.trunc')&&!!document.querySelector('.hand .card[data-cid="esplosione"] .artstrip img');
+    ctx(ME);g.hero.hand=g.hero.hand.filter(c=>c.uid!==9e6+79);render();
     r.senzaArte=(await Promise.all(Object.keys(CARDS).map(id=>new Promise(fine=>{const im=new Image();im.onload=()=>fine(null);im.onerror=()=>fine(id);im.src='pixel/carte/'+id+'.png'})))).filter(Boolean);
     r.nCarte=Object.keys(CARDS).length;
     ctx(ME);g.hero.hand.push({id:'parata',uid:9e6+77,up:false});render();
@@ -298,6 +307,8 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(px.guidaLibro,'la Guida del gioco ha la sua icona (libro), diversa dalle Impostazioni');
   ok(px.anteprima&&px.anteprimaVia&&px.inquadra,'col mouse, passando sopra una carta si vede ingrandita con le parole chiave a fianco (e sparisce uscendo); ogni illustrazione ha la sua inquadratura '+JSON.stringify({a:px.anteprima,v:px.anteprimaVia,i:px.inquadra}));
   ok(px.ombraLeggibile,'lato Ombra con Contrasto alto: la descrizione resta leggibile');
+  ok(px.stessaAltezza&&px.sfuma,`in mano le carte hanno la stessa altezza (${px.altezze}), l'illustrazione resta intera e il testo lungo sfuma`);
+  ok(px.mappaCentro&&px.mappaTocco&&px.mappaPiena,'mappa: nodi lontani dai bordi, area da toccare più grande sui nodi da scegliere, sfondo su tutto lo schermo '+JSON.stringify({c:px.mappaCentro,t:px.mappaTocco,p:px.mappaPiena}));
   ok(px.scelta.length>=4&&px.scelta.some(s=>s.includes('pixel/guerriero.png'))&&!px.sceltaAspetto.some(s=>s.includes('pixel/guerriero.png')),`fuori dal combattimento: figure Pixellab nella scelta dell'eroe (${px.scelta.length}), che seguono l'aspetto scelto`);
 
   console.log('');
