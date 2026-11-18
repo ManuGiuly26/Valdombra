@@ -644,6 +644,20 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
       window.sbClient=sb0;SET.stats=st0;R=null;screen='title';render();return r});
     ok(sd.prima&&sd.riprova,'statistiche: a fine partita si manda anche la durata in secondi; se il database non ha ancora la colonna si riprova senza');}
 
+  console.log('7m. Menu essenziale: descrizione, niente Impostazioni doppie, pulsante Novità con pallino rosso');
+  const nv=await page.evaluate(async()=>{const r={};SET.tut=false;const m0=SET.menu;SET.menu=true;R=null;screen='title';modal=null;
+    try{localStorage.setItem('valdombra-novita-viste','8.9')}catch(e){}render();
+    r.descr=document.querySelector('.tlite .lede')&&document.querySelector('.tlite .lede').textContent.includes('Ignivora');
+    r.noImp=![...document.querySelectorAll('.mtile')].some(x=>/Impostazioni/.test(x.textContent))&&document.body.classList.contains('mlite');
+    const L=novitaList();r.lista=L.length>=20&&L[0].v===VERSION.replace(/^v/,'')&&L.every(x=>x.t&&x.t[0]===x.t[0].toUpperCase());
+    const d=document.querySelector('#novbtn .novdot');r.pallino=!!d&&+d.textContent===L.filter(x=>vNum(x.v)>vNum('8.9')).length;
+    openNovita();r.messaggi=document.querySelectorAll('.modal .novmsg').length===L.length&&document.querySelectorAll('.modal .novmsg.nuova').length===+d.textContent&&document.body.classList.contains('hasmodal');
+    closeModal();render();r.letti=!document.querySelector('#novbtn .novdot')&&novitaNuove()===0;
+    openSettings();r.impSenza=!document.querySelector('.modal').textContent.includes('Novità della');closeModal();
+    SET.menu=false;render();openSettings();r.impCon=document.querySelector('.modal').textContent.includes('Novità della');closeModal();r.noBtn=!document.getElementById('novbtn');
+    try{localStorage.removeItem('valdombra-novita-viste')}catch(e){}SET.menu=true;render();r.primaVolta=novitaNuove()===1;SET.menu=m0;render();return r});
+  ok(nv.descr&&nv.noImp&&nv.lista&&nv.pallino&&nv.messaggi&&nv.letti&&nv.impSenza&&nv.impCon&&nv.noBtn&&nv.primaVolta,'menu essenziale: descrizione sotto il titolo, Impostazioni solo in alto a destra, Novità come messaggi con pallino rosso per quelle nuove (che sparisce dopo averle lette); col menu completo le Novità restano nelle Impostazioni '+JSON.stringify(nv));
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;
