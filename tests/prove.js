@@ -673,6 +673,27 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     ok(!spenti.length,'nel codice nessun commento // spegne il resto della riga'+(spenti.length?' — '+spenti.join(' | '):''));}
   ok(fo.gufo&&fo.orso,'forme del Druido a inizio turno: il Gufo fa pescare 2 carte in più, l\'Orso dà 2 Armatura '+JSON.stringify(fo.dett));
 
+  console.log('7o. Giocare una carta dalla carta ingrandita (faccia Luce o Ombra)');
+  {const prep=async(p,ids)=>p.evaluate(async ids=>{SET.tut=false;SET.lo=true;SET.scena=false;SET.px=true;saveSet();applySet();SPEED=0;R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);modal=null;UI.sel=null;UI.om=false;
+      pickCls='guerriero';pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();ctx(ME);startCombat(ids,'combat');ctx(ME);g.enemies.forEach(e=>{e.hp=e.max=200;e.intent={d:0}});g.hero.st.str=0;run.om=0;
+      g.hero.hand=[{id:'colpo',up:false,uid:9001},{id:'possente',up:false,uid:9002},{id:'parata',up:false,uid:9003}];g.hero.energy=3;render();await new Promise(r=>setTimeout(r,250))},ids);
+    const clicca=async(p,sel)=>{const el=await p.$(sel);if(!el)return false;const q=await el.boundingBox();await p.mouse.move(q.x+q.width/2,q.y+q.height+30);await p.mouse.move(q.x+q.width/2,q.y+q.height/2,{steps:8});await p.waitForTimeout(120);await p.mouse.click(q.x+q.width/2,q.y+q.height/2);await p.waitForTimeout(350);return true};
+    const st=p=>p.evaluate(()=>{ctx(ME);return {om:run.om,hp:g.enemies.map(e=>e.hp),mano:g.hero.hand.map(c=>c.id).join(','),aperta:!document.getElementById('cprev').hidden,sel:UI.sel}});
+    const c4=await browser.newContext({viewport:{width:1280,height:800}});await c4.route(/^https?:\/\//,r=>r.abort());const p4=await c4.newPage();const e4=[];p4.on('pageerror',e=>e4.push(e.message));await p4.goto(PAGE);await p4.waitForTimeout(300);
+    await prep(p4,['orco']);await p4.hover('.hand .card >> nth=1');await p4.waitForTimeout(350);const facce=await p4.evaluate(()=>[...document.querySelectorAll('#cprev .playable')].map(k=>k.dataset.sh).join(','));
+    await clicca(p4,'#cprev .playable[data-sh="1"]');const om1=await st(p4);
+    await p4.hover('.hand .card >> nth=0');await p4.waitForTimeout(350);await clicca(p4,'#cprev .playable[data-sh="0"]');const lu1=await st(p4);
+    await p4.evaluate(()=>{g.hero.energy=0;render()});await p4.hover('.hand .card >> nth=0');await p4.waitForTimeout(350);const nEn=await p4.evaluate(()=>document.querySelectorAll('#cprev .playable').length);
+    await prep(p4,['orco','goblin']);await p4.hover('.hand .card >> nth=1');await p4.waitForTimeout(350);await clicca(p4,'#cprev .playable[data-sh="1"]');const sel=await st(p4);await p4.click('#ent-e1');await p4.waitForTimeout(350);const bers=await st(p4);
+    await c4.close();
+    const c5=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});await c5.route(/^https?:\/\//,r=>r.abort());const p5=await c5.newPage();const e5=[];p5.on('pageerror',e=>e5.push(e.message));await p5.goto(PAGE);await p5.waitForTimeout(300);
+    await prep(p5,['orco']);await p5.evaluate(()=>cardZoom(document.querySelectorAll('.hand .card')[1]));await p5.waitForTimeout(250);await p5.tap('#czoom .playable[data-sh="1"]');await p5.waitForTimeout(350);
+    const tel=await p5.evaluate(()=>{ctx(ME);return {om:run.om,hp:g.enemies[0].hp,chiusa:document.getElementById('czoom').hidden}});await c5.close();
+    ok(facce==='0,1'&&om1.om===1&&om1.hp[0]===188&&om1.mano==='colpo,parata'&&!om1.aperta&&lu1.om===1&&lu1.hp[0]===179&&lu1.mano==='parata'&&nEn===0&&!e4.length,
+      'col mouse sulla carta ingrandita: la faccia Ombra la gioca dal lato Ombra (12 danni, +1 Ombra), l\'altra dal lato Luce; senza Energia non si gioca '+JSON.stringify({f:facce,o:om1,l:lu1,n:nEn,err:e4.slice(0,2)}));
+    ok(sel.sel&&sel.sel.sh===1&&bers.om===1&&bers.hp[1]===188&&bers.hp[0]===200,'con più nemici la faccia Ombra prepara la carta e poi si sceglie il bersaglio '+JSON.stringify({s:sel.sel,b:bers.hp}));
+    ok(tel.om===1&&tel.hp===188&&tel.chiusa&&!e5.length,'sul telefono, tenendo premuta la carta, si tocca la faccia Ombra per giocarla '+JSON.stringify(tel));}
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;
@@ -745,7 +766,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     // v7.8: col mouse la carta si vede ingrandita passandoci sopra, con le parole chiave a fianco; inquadratura per carta
     ctx(ME);render();{const c=document.querySelector('.hand .card[data-cid="parata"]');c.dispatchEvent(new PointerEvent('pointerover',{bubbles:true,pointerType:'mouse'}));
       const p=document.querySelector('#cprev'),t=document.querySelector('#gltip');r.anteprima=!!p&&!p.hidden&&!!p.querySelector('.card.zoom .zart img')&&!!p.querySelector('.zgl b')&&(!t||t.hidden)&&getComputedStyle(p).pointerEvents==='none';
-      document.body.dispatchEvent(new PointerEvent('pointerover',{bubbles:true,pointerType:'mouse'}));r.anteprimaVia=p.hidden}
+      document.body.dispatchEvent(new PointerEvent('pointerover',{bubbles:true,pointerType:'mouse'}));await sleep(400);r.anteprimaVia=p.hidden}// v9.6: se la carta si può giocare, la carta grande aspetta 0,3 secondi prima di sparire
     r.inquadra=/object-position:center (\d+)%/.test(cardHTML({id:'possente',uid:1,up:false},{}))&&Object.keys(PXFY).length===Object.keys(CARDS).length;
     // lato Ombra con «Contrasto alto»: il testo resta chiaro sulla carta viola
     {SET.hc=true;applySet();const tmp=document.createElement('div');tmp.innerHTML=cardHTML({id:'colpo',uid:9,up:false},{cls:'shadow'});document.body.appendChild(tmp);
