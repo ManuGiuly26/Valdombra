@@ -659,6 +659,20 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     try{localStorage.removeItem('valdombra-novita-viste')}catch(e){}SET.menu=true;render();r.primaVolta=novitaNuove()===1;SET.menu=m0;render();return r});
   ok(nv.descr&&nv.noImp&&nv.lista&&nv.pallino&&nv.messaggi&&nv.letti&&nv.impSenza&&nv.impCon&&nv.noBtn&&nv.primaVolta,'menu essenziale: descrizione sotto il titolo, Impostazioni solo in alto a destra, Novità come messaggi con pallino rosso per quelle nuove (che sparisce dopo averle lette); col menu completo le Novità restano nelle Impostazioni '+JSON.stringify(nv));
 
+  console.log('7n. Forme del Druido a inizio turno (Gufo: 2 carte in più; Orso: 2 Armatura)');
+  const fo=await page.evaluate(async()=>{const r={};SET.tut=false;SPEED=0;const sleep=ms=>new Promise(t=>setTimeout(t,ms));
+    const turno=async form=>{R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);modal=null;pickCls='druido';pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();ctx(ME);
+      startCombat(['orco'],'combat');ctx(ME);g.enemies[0].hp=g.enemies[0].max=999;g.enemies[0].intent={d:0};const h=g.hero;
+      for(let i=0;i<10;i++)h.draw.push({id:'artiglio',up:false,uid:uid++});h.form=form;h.formed=1;h.hand=[];
+      dispatch(ME,{t:'end'});let w=0;while(R.combat&&R.combat.busy&&w<400){await sleep(5);w++}ctx(ME);return {mano:g.hero.hand.length,blk:g.hero.blk}};
+    const base=await turno(null),gufo=await turno('gufo'),orso=await turno('orso');
+    r.gufo=gufo.mano===base.mano+2;r.orso=orso.blk>=base.blk+2;r.dett=[base,gufo,orso];R=null;screen='title';render();return r});
+  {// controllo del codice: un commento // messo dopo del codice non deve lasciare altro codice sulla stessa riga (non verrebbe eseguito: è successo al Gufo nella 9.0)
+    const src=require('fs').readFileSync(path.resolve(__dirname,'..','index.html'),'utf8');const a0=src.indexOf('<script>'),b0=src.lastIndexOf('</script>');const off=src.slice(0,a0).split('\n').length-1;
+    const spenti=[];src.slice(a0,b0).split('\n').forEach((l,i)=>{const m=l.match(/[;})\]]\s*\/\/(?!\/)(.*)$/);if(m&&/if\(|\)\{|=>\{|;\s*[A-Za-z_$][\w$.]*\(|\bconst |\blet |\breturn /.test(m[1]))spenti.push('riga '+(i+off+1)+': '+l.trim().slice(0,90))});
+    ok(!spenti.length,'nel codice nessun commento // spegne il resto della riga'+(spenti.length?' — '+spenti.join(' | '):''));}
+  ok(fo.gufo&&fo.orso,'forme del Druido a inizio turno: il Gufo fa pescare 2 carte in più, l\'Orso dà 2 Armatura '+JSON.stringify(fo.dett));
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;
