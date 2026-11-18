@@ -41,7 +41,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
             ctx(ME);if(g&&g.hero&&g.hero.hand.some(c=>c.uid===u)&&g.hero.energy===en&&g.hero.hand.length===n)skip.add(u);modal=null}
           else{skip.clear();send({t:'end'});await sleep(10)}continue}
         if(R.phase==='room'){const P=run;render();if(P.screen==='event'&&!P.event.result){const ev=EVENTS.find(e=>e.id===P.event.id);const o=ev.opts.findIndex(o=>!o.pick&&(!o.req||o.req()));send(o>=0?{t:'ev',k:o}:{t:'done'})}
-          else if(P.screen==='reward'&&P.reward&&P.reward.cards)send({t:'takeCard',k:0});else if(P.screen==='rest')send({t:'restHeal'});else if(P.screen==='secret'&&P.secret)send({t:'secret',i:0});else send({t:'done'});await sleep(0);continue}
+          else if(P.screen==='reward'&&P.reward&&P.reward.cards)send({t:'takeCard',k:0});else if(P.screen==='rest')send(has('coronanera')?{t:'done'}:{t:'restHeal'});else if(P.screen==='secret'&&P.secret)send({t:'secret',i:0});else send({t:'done'});await sleep(0);continue}
         await sleep(5)}
       render();out.push([cls,dg,R.phase,R.floor,!!R.win,R.phase==='end'?'':' (bloccato: '+JSON.stringify({schermata:run.screen,pozione:run.pendPot||null,mano:g&&g.hero?g.hero.hand.map(c=>c.id):null,energia:g&&g.hero?g.hero.energy:null,evento:run.event&&run.event.id})+')'])}
     return out});
@@ -145,7 +145,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     SET.vil=false;SET.gem=false;nuova('guerriero');r.senza={max:R.players.solo.max,rel:R.players.solo.relics.join(',')};SET.vil=true;SET.gem=true;
     R=null;startDaily();r.giorno=JSON.stringify(R.players.solo.vb||{})==='{}';
     // gemme di fine partita
-    nuova('guerriero');R.players.solo.stx.elites=2;R.players.solo.stx.bk=1;R.win=true;R.phase='end';const g0=getGems();r.premio=gemsAward();r.premioOk=getGems()===g0+7;
+    nuova('guerriero');R.players.solo.stx.elites=2;R.players.solo.stx.bk=1;R.win=true;R.phase='end';const g0=getGems();r.premio=gemsAward();r.premioOk=getGems()===g0+3;
     // schermate
     R=null;screen='title';render();openVillaggio();render();r.vilModal=!!document.querySelector('.vilsvg,.pxvil');closeModal();
     openBottega();render();r.bottega=document.body.innerHTML.includes('Cimeli permanenti');closeModal();
@@ -200,7 +200,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(lo.bonus.max===92&&lo.bonus.oro===99+75&&lo.bonus.pot===3&&lo.bonus.su===3&&/lanterna/.test(lo.bonus.rel)&&/ancora/.test(lo.bonus.rel)&&lo.tempio>=7,'i bonus del villaggio e i cimeli valgono in partita '+JSON.stringify(lo.bonus)+' armatura '+lo.tempio);
   ok(lo.senza.max===80&&!/lanterna/.test(lo.senza.rel),'senza Villaggio e Gemme (ora sempre accesi) i bonus non si applicano');
   ok(lo.giorno,'nella sfida del giorno il villaggio non vale');
-  ok(lo.premio===7&&lo.premioOk,'gemme di fine partita: 1 per élite, 3 per boss, 2 per la vittoria');
+  ok(lo.premio===3&&lo.premioOk,'gemme di fine partita (più rare dalla v8.3): niente per le élite, 2 per il boss, 1 per la vittoria');
   ok(lo.vilModal&&lo.bottega&&lo.sviluppo&&lo.ui,'villaggio, bottega, guida, impostazioni e combattimento in Ombra si vedono');
 
   console.log('7b. Ombra per tutti gli eroi, strade segrete e codice Gemme');
@@ -262,7 +262,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     r.sviluppo=sw.includes('Luce e Ombra')&&sw.includes('Ombra per tutti gli eroi')&&!['Villaggio di Valdombra','Gemme','Grafica Pixellab','Strade segrete'].some(k=>sw.includes(k));
     r.sempre=SET_DEF.vil&&SET_DEF.gem&&SET_DEF.px&&SET.vil&&SET.gem;closeModal();modal=null;R=null;screen='title';render();return r});
   ok(nov.spentaBase&&nov.accesa&&!nov.senzaLato.length&&nov.potere,'Ombra per tutti gli eroi: spenta di base; accesa, ogni carta giocabile ha un lato Ombra (non i Poteri)'+(nov.senzaLato.length?' senza: '+nov.senzaLato:''));
-  ok(nov.cura===6&&nov.om===1&&nov.scheletri===2&&nov.condanna===12&&nov.condannaLuce===8,`lato Ombra esteso: cura 6, 2 Scheletri, 12 Condanna (Luce 8), +1 Ombra (${nov.cura}/${nov.scheletri}/${nov.condanna})`);
+  ok(nov.cura===8&&nov.om===1&&nov.scheletri===2&&nov.condanna===12&&nov.condannaLuce===8,`lato Ombra esteso: cura 6 (+25% nella Luce = 8), 2 Scheletri, 12 Condanna (Luce 8), +1 Ombra (${nov.cura}/${nov.scheletri}/${nov.condanna})`);
   ok(nov.pescaOmbra===0&&nov.pescaLuce===-1&&nov.colpo===9&&nov.testo,`carte senza numeri: 1 carta in più; le carte di base restano uguali (${nov.colpo} danni); il testo mostra i numeri del lato Ombra`);
   ok(!nov.errori.length,'ogni carta si gioca dal lato Ombra esteso senza errori'+(nov.errori.length?': '+nov.errori.slice(0,5).join(' | '):''));
   ok(nov.quota>.12&&nov.quota<.42&&nov.maiElite&&nov.maiGiorno&&nov.unaSola,`strade segrete: rare (in ${Math.round(nov.quota*100)}% delle mappe), mai su élite, mercante, falò, primo piano o prima del boss, mai nella sfida del giorno, una per mappa`);
@@ -270,6 +270,77 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(nov.fuoriPool&&Object.values(nov.reliquie).every(Boolean),'reliquie segrete: non si trovano altrove e funzionano '+JSON.stringify(nov.reliquie));
   ok(nov.hashGemme&&nov.gemme&&nov.sbagliato,'codice Gemme: nel sorgente solo gli hash, dà 200 Gemme, un codice sbagliato no');
   ok(nov.sviluppo&&nov.sempre,'in Sviluppo restano solo Luce e Ombra e Ombra per tutti gli eroi; Villaggio, Gemme e Grafica Pixellab sempre accesi');
+
+  console.log('7c. Equilibrio Luce e Ombra, missioni, reliquie maledette, climi, aiuti, scena');
+  const eq=await page.evaluate(async()=>{const r={};SET.lo=true;SET.lox=false;SET.tut=false;SPEED=0;
+    const nuova=(cls='guerriero',dg='rocca')=>{R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);pickCls=cls;pickDg=dg;pickMode='norm';pickLvl=0;startSolo();ctx(ME)};
+    const lotta=(ids=['orco'])=>{R.phase='map';R.pos=null;startCombat(ids,'combat');ctx(ME);g.enemies.forEach(e=>{e.hp=e.max=999});return g.hero};
+    // poteri: nella Luce (0-2) e nell'Ombra (5+), niente in mezzo
+    nuova('guerriero');run.relics=[];run.vb={};run.om=0;let h=lotta();r.luceArm=h.blk;run.om=3;h=lotta();r.mezzoArm=h.blk;r.mezzoStr=h.st.str|0;run.om=5;h=lotta();r.ombraStr=h.st.str|0;
+    r.poteri=Object.keys(CLASSES).every(c=>OMPOW[c]&&OMPOW[c].L&&OMPOW[c].O);
+    // cure: +25% nella Luce, metà da 7 Ombra
+    run.om=0;h=lotta();run.max=200;run.hp=50;H(8);r.curaLuce=run.hp-50;run.om=4;run.hp=50;H(8);r.cura=run.hp-50;run.om=8;run.hp=50;H(8);r.curaBuio=run.hp-50;
+    // Scudo di Luce: turno di sole carte Luce con 0-2 Ombra
+    run.om=1;h=lotta();h.blk=0;let c={id:'colpo',up:false,uid:uid++};h.hand.push(c);h.energy=9;playCard(c.uid,0,ME,null,0);ctx(ME);const b0=h.blk;endHeroTurn();r.scudo=h.blk-b0;
+    run.om=4;h=lotta();h.ended=false;h.blk=0;c={id:'colpo',up:false,uid:uid++};h.hand.push(c);h.energy=9;playCard(c.uid,0,ME,null,0);ctx(ME);endHeroTurn();r.scudoNo=h.blk;
+    // senza Luce e Ombra niente di tutto questo
+    SET.lo=false;nuova('guerriero');run.relics=[];run.vb={};h=lotta();r.spentoArm=h.blk;run.max=200;run.hp=50;H(8);r.spentoCura=run.hp-50;SET.lo=true;
+    // reliquie maledette
+    nuova('ladro');run.relics=[];run.vb={};run.om=4;h=lotta();const en0=h.energy,ma0=h.hand.length;
+    run.relics=['coronanera','occhiovuoto','lamasete'];run.hp=50;h=lotta();r.maledette={energia:h.energy-en0,mano:h.hand.length-ma0,forza:h.st.str|0,cursed:R.combat.cursed===true};
+    const hp1=run.hp;heroTurnStart(h,2);r.maledette.sanguina=hp1-run.hp;
+    R.phase='room';run.screen='rest';run.done=false;const hpR=run.hp;dispatch(ME,{t:'restHeal'});ctx(ME);r.maledette.niente=run.hp===hpR&&!run.done;render();r.maledette.prosegui=document.body.innerHTML.includes('non ti lascia riposare');dispatch(ME,{t:'done'});ctx(ME);
+    nuova('ladro');const mx=run.max;gainRelic('cuorecavo');r.maledette.cuore=run.max===mx+25;run.om=4;run.hp=10;H(8);r.maledette.meta=run.hp-10;
+    r.maledette.fuori=!CURSED_RELICS.some(k=>ALL_RELICS.includes(k)||RELIC_POOL.includes(k));
+    nuova('ladro');run.om=6;R.phase='room';run.screen='shop';genShop();r.maledette.mercante=!!run.shop.dark&&CURSED_RELICS.includes(run.shop.dark.id);
+    // missioni
+    nuova('guerriero');r.tre=run.miss.length===3&&run.miss.every(m=>MISS[m.id]);run.miss=Object.keys(MISS).map(id=>({id,ok:false}));
+    h=lotta(['ratto']);g.enemies.forEach(e=>hurtEnemy(e,99999));checkEnd();await new Promise(t=>setTimeout(t,700));ctx(ME);
+    const ok=id=>run.miss.find(m=>m.id===id).ok;r.lampo=ok('lampo');
+    run.deck=run.deck.slice(0,10);run.gold=200;run.om=0;R.phase='map';startCombat([bossId()],'boss');ctx(ME);r.alBoss=ok('snello')&&ok('ricco')&&ok('sobrio')&&ok('riposo')&&ok('luce')&&!ok('elite');
+    missDone(run,'segreto');R.phase='end';const cr0=getCrowns(),gm0=getGems();const n=missAward();r.premio=n===7&&getCrowns()===cr0+25*7&&getGems()===gm0+1*7;missAward();r.unaVolta=getCrowns()===cr0+25*7;render();r.panelFine=document.body.innerHTML.includes('Missioni: 7 su 8');
+    R=null;startDaily();r.maiGiorno=!missOn()&&!climaOf(3)&&!aiutiDisp(R.players.solo).length;
+    // climi
+    nuova('mago');r.dueClimi=Object.keys(R.clima).length===2;
+    const conClima=(cl)=>{R.clima={3:cl};R.phase='map';R.pos={y:3,x:R.map[3].findIndex(q=>q)};run.om=0;startCombat(['goblin'],'combat');ctx(ME);return R.combat};
+    let cc=conClima('gelo');r.gelo=(cc.enemies[0].st.weak|0)>=1&&(g.hero.st.weak|0)>=1;
+    cc=conClima('nebbia');render();r.nebbia=intentHTML(cc.enemies[0]).includes('Nebbia')&&!!document.querySelector('.climabar');
+    cc=conClima('luna');r.luna=run.om===1&&cc.enemies[0].max<=Math.round(17*1.15*.8)+1;
+    R.clima={};R.pos=null;lotta(['goblin']);const m0=g.hero.hand.length;R.clima={3:'vento'};cc=conClima('vento');r.vento=g.hero.hand.length===m0+1;
+    R.phase='map';R.clima={4:'nebbia'};render();r.mappa=document.querySelectorAll('.clima-r').length===1&&!!document.querySelector('.mapextra');
+    // aiuti del villaggio
+    nuova('guerriero');run.vb={locanda:1,fucina:1,mercato:1};R.phase='map';r.aiutiLista=aiutiDisp(run).join(',');run.max=100;run.hp=40;run.om=4;
+    dispatch(ME,{t:'aiuto',k:'locanda'});ctx(ME);r.aiutoCura=run.hp===65&&run.aiuto==='locanda';const go=run.gold;dispatch(ME,{t:'aiuto',k:'mercato'});ctx(ME);r.aiutoUno=run.gold===go&&!aiutiDisp(run).length;
+    // più Ombra, meno aiuto dal villaggio
+    nuova('guerriero');run.vb={locanda:1,tempio:1};R.phase='map';run.max=100;run.hp=40;run.om=6;dispatch(ME,{t:'aiuto',k:'locanda'});ctx(ME);r.fidMeta=run.hp===52;
+    nuova('guerriero');run.vb={locanda:1,tempio:1};R.phase='map';run.max=100;run.hp=40;run.om=8;dispatch(ME,{t:'aiuto',k:'locanda'});ctx(ME);r.fidNo=run.hp===40&&!run.aiuto;dispatch(ME,{t:'aiuto',k:'tempio'});ctx(ME);r.fidTempio=run.om===4&&run.aiuto==='tempio';
+    run.relics=[];run.om=8;h=lotta();const t8=h.blk;run.om=3;h=lotta();r.fidArm=h.blk-t8;
+    // limite alle maledizioni in un combattimento (prima il Troll poteva riempire il mazzo di Ferite all'infinito)
+    nuova('chierico');h=lotta(['troll']);for(let i=0;i<20;i++)addCurse('ferita',2);r.maledizioni=[...h.draw,...h.hand,...h.disc].filter(x=>x.id==='ferita').length;
+    // purificazione pagata in Gemme
+    nuova('guerriero');R.phase='room';run.screen='shop';genShop();run.om=5;setGems(1);render();const bi=[...document.querySelectorAll('.relicbox')].find(x=>x.textContent.includes('Incenso'));bi.click();ctx(ME);r.gemNo=run.om===5&&getGems()===1;
+    setGems(5);render();[...document.querySelectorAll('.relicbox')].find(x=>x.textContent.includes('Incenso')).click();ctx(ME);r.gemSi=run.om===2&&getGems()===3;
+    nuova('guerriero');run.om=6;R.phase='room';run.screen='event';run.event={id:'pellegrino',result:null};setGems(2);render();r.pelBlocco=!!document.querySelector('.opt[disabled]');chooseEv(0);ctx(ME);r.pelNo=run.om===6&&getGems()===2;
+    setGems(10);render();chooseEv(0);ctx(ME);r.pelSi=run.om===0&&getGems()===6;
+    // illustrazioni Ombra delle carte
+    r.artOmbra=artStrip('colpo',true).includes('pixel/carte-ombra/colpo.png')&&artStrip('colpo',false).includes('pixel/carte/colpo.png')&&!artStrip('colpo').includes('carte-ombra');
+    {const im=document.createElement('img');const sp=document.createElement('span');sp.className='artstrip';sp.appendChild(im);document.body.appendChild(sp);pxShOk(im,'colpo',0);r.ricaduta=/pixel\/carte\/colpo\.png/.test(im.src);sp.remove();delete PXCO.colpo}
+    // combattimento a scena (Sviluppo)
+    R=null;screen='title';openSettings();render();r.interruttore=!!document.querySelector('button.sw[aria-label="Combattimento a scena"]')&&SET_DEF.scena===false;closeModal();
+    SET.scena=true;applySet();r.scena=document.body.classList.contains('scena');SET.scena=false;applySet();r.scenaVia=!document.body.classList.contains('scena');
+    modal=null;R=null;screen='title';render();return r});
+  ok(eq.luceArm===eq.mezzoArm+5&&eq.mezzoStr===0&&eq.ombraStr===2&&eq.poteri,`poteri: Guerriero +5 Armatura nella Luce, +2 Forza nell'Ombra, niente tra 3 e 4 Ombra; ogni eroe ne ha due (${eq.luceArm}/${eq.mezzoArm}/${eq.ombraStr})`);
+  ok(eq.curaLuce===10&&eq.cura===8&&eq.curaBuio===4&&eq.scudo===3&&eq.scudoNo===0,`Luce: cure +25% (${eq.curaLuce}) e Scudo di Luce +3 (${eq.scudo}); da 7 Ombra le cure sono a metà (${eq.curaBuio})`);
+  ok(eq.spentoArm===0&&eq.spentoCura===8,'senza Luce e Ombra niente poteri né cure cambiate');
+  ok(eq.maledette.energia===1&&eq.maledette.mano===1&&eq.maledette.forza===3&&eq.maledette.cursed&&eq.maledette.sanguina===2&&eq.maledette.niente&&eq.maledette.prosegui&&eq.maledette.cuore&&eq.maledette.meta===4&&eq.maledette.fuori&&eq.maledette.mercante,'reliquie maledette: forti e con il loro difetto; le vende il Mercante d\'Ombra '+JSON.stringify(eq.maledette));
+  ok(eq.tre&&eq.lampo&&eq.alBoss&&eq.premio&&eq.unaVolta&&eq.panelFine&&eq.maiGiorno,'missioni: tre a partita, si completano, premio di Corone e Gemme una volta sola, niente nella sfida del giorno '+JSON.stringify({t:eq.tre,l:eq.lampo,b:eq.alBoss,p:eq.premio,u:eq.unaVolta,f:eq.panelFine,g:eq.maiGiorno}));
+  ok(eq.dueClimi&&eq.gelo&&eq.nebbia&&eq.luna&&eq.vento&&eq.mappa,'climi: due piani per mappa; Gelo, Nebbia, Luna nera e Vento funzionano e si vedono sulla mappa '+JSON.stringify({d:eq.dueClimi,g:eq.gelo,n:eq.nebbia,l:eq.luna,v:eq.vento,m:eq.mappa}));
+  ok(eq.aiutiLista==='locanda,mercato,fucina'&&eq.aiutoCura&&eq.aiutoUno,'aiuti del villaggio: uno per partita, dagli edifici ricostruiti ('+eq.aiutiLista+')');
+  ok(eq.fidMeta&&eq.fidNo&&eq.fidTempio&&eq.fidArm===4,'più Ombra, meno aiuto: da 5 a metà, da 7 solo la sacerdotessa; l\'Armatura del Tempio sparisce nell\'Ombra '+JSON.stringify({m:eq.fidMeta,n:eq.fidNo,t:eq.fidTempio,a:eq.fidArm}));
+  ok(eq.maledizioni===10,'al massimo 10 maledizioni per combattimento: niente più combattimenti senza fine ('+eq.maledizioni+')');
+  ok(eq.gemNo&&eq.gemSi&&eq.pelBlocco&&eq.pelNo&&eq.pelSi,'purificazione pagata in Gemme: Incenso 2, Pellegrino 4; senza Gemme non si può '+JSON.stringify({a:eq.gemNo,b:eq.gemSi,c:eq.pelBlocco,d:eq.pelNo,e:eq.pelSi}));
+  ok(eq.artOmbra&&eq.ricaduta,'carte dal lato Ombra con la loro illustrazione; se manca resta quella normale');
+  ok(eq.interruttore&&eq.scena&&eq.scenaVia,'Combattimento a scena: interruttore in Sviluppo, spento di base');
 
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
@@ -283,7 +354,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     SET.px=false;saveSet();nuova('guerriero');r.spenta=!document.querySelector('.pxh')&&!!document.querySelector('#ent-h-pA img.spr');
     openSettings();r.interruttore=!document.querySelector('button.sw[aria-label="Grafica Pixellab"]');closeModal();
     // accesa: le 40 immagini e la figura di ogni eroe
-    SET.px=true;saveSet();let w=0;while(Object.keys(PXI).length<284&&w<900){await sleep(10);w++}
+    SET.px=true;saveSet();let w=0;while(Object.keys(PXI).length<288&&w<900){await sleep(10);w++}
     r.caricate=Object.values(PXI).filter(Boolean).length;r.mancanti=pxExtraKeys().filter(k=>!PXI[k]);
     r.senzaFigura=Object.keys(CLASSES).filter(cls=>{nuova(cls);const s=sp('pA');return !(s&&s.style.backgroundImage.includes('pixel/'+cls+'.png')&&s.classList.contains('idle'))});
     nuova('guerriero');
@@ -361,7 +432,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
       const z=document.querySelector('#czoom'),t=document.querySelector('#gltip');r.fumetto=(!z||z.hidden)&&!!t&&!t.hidden;document.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerType:'touch'}));c.click();glHide()}
     R=null;solo=true;ME='solo';screen='title';modal=null;render();return r});
   ok(px.base&&px.spenta&&px.interruttore,'Grafica Pixellab: sempre accesa, senza interruttore; se le immagini mancano resta lo sprite di sempre');
-  ok(px.caricate>=284&&!px.mancanti.length&&!px.senzaFigura.length,`le immagini in pixel/ si caricano (${px.caricate}, tutte le ${284} di base${px.mancanti.length?'; mancano: '+px.mancanti.slice(0,8):''}) e ogni eroe ha la sua figura${px.senzaFigura.length?' (mancano: '+px.senzaFigura+')':''}`);
+  ok(px.caricate>=288&&!px.mancanti.length&&!px.senzaFigura.length,`le immagini in pixel/ si caricano (${px.caricate}, tutte le ${288} di base${px.mancanti.length?'; mancano: '+px.mancanti.slice(0,8):''}) e ogni eroe ha la sua figura${px.senzaFigura.length?' (mancano: '+px.senzaFigura+')':''}`);
   ok(!px.nemTutti.length&&/pixel\/nemici\/.+\.png/.test(px.nemFig)&&/pxan/.test(px.nemAtt)&&/-attacco/.test(px.nemAtt)&&/pxan/.test(px.nemCol)&&/-colpito/.test(px.nemCol)&&!px.nemFlash,`nemici (${px.nemiciIn}): figura, attacco quando agiscono, colpito al posto del lampo; tutti i 30 hanno le immagini${px.nemTutti.length?' (mancano: '+px.nemTutti+')':''}`);
   ok(/pxan/.test(px.nemMorte)&&/-morte/.test(px.nemMorte)&&/pxdead/.test(px.nemMorto)&&/-morte/.test(px.nemMorto),'nemico sconfitto: animazione di morte, poi resta a terra');
   ok(/pxan/.test(px.attacco)&&/guerriero-attacco/.test(px.attacco)&&/pxan/.test(px.resta)&&/idle/.test(px.fine)&&/pixel\/guerriero\.png/.test(px.fine),'carta Attacco: animazione d\'attacco, che continua se la schermata si ridisegna, poi torna la figura ferma');
