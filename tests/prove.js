@@ -263,6 +263,14 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
       r.nonGiocata=g.hero.hand.length===n&&!document.querySelector('.hand .card.sel');
       await sleep(400);if(z)z.click();r.chiusa=!!z&&z.hidden}
     PXC.colpo=0;r.mancante=!cardHTML({id:'colpo',uid:1,up:false},{}).includes('artstrip');delete PXC.colpo;
+    // v7.8: col mouse la carta si vede ingrandita passandoci sopra, con le parole chiave a fianco; inquadratura per carta
+    ctx(ME);render();{const c=document.querySelector('.hand .card[data-cid="parata"]');c.dispatchEvent(new PointerEvent('pointerover',{bubbles:true,pointerType:'mouse'}));
+      const p=document.querySelector('#cprev'),t=document.querySelector('#gltip');r.anteprima=!!p&&!p.hidden&&!!p.querySelector('.card.zoom .zart img')&&!!p.querySelector('.zgl b')&&(!t||t.hidden)&&getComputedStyle(p).pointerEvents==='none';
+      document.body.dispatchEvent(new PointerEvent('pointerover',{bubbles:true,pointerType:'mouse'}));r.anteprimaVia=p.hidden}
+    r.inquadra=/object-position:center (\d+)%/.test(cardHTML({id:'possente',uid:1,up:false},{}))&&Object.keys(PXFY).length===Object.keys(CARDS).length;
+    // lato Ombra con «Contrasto alto»: il testo resta chiaro sulla carta viola
+    {SET.hc=true;applySet();const tmp=document.createElement('div');tmp.innerHTML=cardHTML({id:'colpo',uid:9,up:false},{cls:'shadow'});document.body.appendChild(tmp);
+      const m=getComputedStyle(tmp.querySelector('.cdesc')).color.match(/\d+/g).map(Number);r.ombraLeggibile=m[0]+m[1]+m[2]>600;tmp.remove();SET.hc=false;applySet()}
     R=null;solo=true;ME='solo';screen='title';modal=null;render();
     // fuori dal combattimento: scelta dell'eroe e negozio degli aspetti
     R=null;solo=true;ME='solo';screen='title';modal=null;render();
@@ -288,6 +296,8 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(px.strisce&&!px.senzaArte.length&&px.mancante&&px.senzaStriscia,`illustrazioni: striscia sotto il nome in mano, tutte le ${px.nCarte} carte hanno il disegno${px.senzaArte.length?' (mancano: '+px.senzaArte+')':''}, niente striscia se l'immagine manca o l'interruttore è spento`);
   ok(px.grande&&px.nonGiocata&&px.chiusa&&px.fumetto,'tenendo premuta una carta si apre la carta grande con illustrazione e parole chiave (senza giocarla) e si chiude toccando; spento resta il fumetto '+JSON.stringify({g:px.grande,n:px.nonGiocata,c:px.chiusa,f:px.fumetto}));
   ok(px.guidaLibro,'la Guida del gioco ha la sua icona (libro), diversa dalle Impostazioni');
+  ok(px.anteprima&&px.anteprimaVia&&px.inquadra,'col mouse, passando sopra una carta si vede ingrandita con le parole chiave a fianco (e sparisce uscendo); ogni illustrazione ha la sua inquadratura '+JSON.stringify({a:px.anteprima,v:px.anteprimaVia,i:px.inquadra}));
+  ok(px.ombraLeggibile,'lato Ombra con Contrasto alto: la descrizione resta leggibile');
   ok(px.scelta.length>=4&&px.scelta.some(s=>s.includes('pixel/guerriero.png'))&&!px.sceltaAspetto.some(s=>s.includes('pixel/guerriero.png')),`fuori dal combattimento: figure Pixellab nella scelta dell'eroe (${px.scelta.length}), che seguono l'aspetto scelto`);
 
   console.log('');

@@ -354,7 +354,7 @@ body.hc{--muted:#ddd6ea;--line:#8d82a6}body.hc .card .cdesc{color:#15101c}body.h
   .enemy{min-width:96px}
   .card{width:100px;min-height:150px;padding:5px 5px 7px}
   .card .cname{font-size:13px}.card .cdesc{font-size:11.5px}
-  .card .artstrip{height:26px}
+  .card .artstrip{height:32px}
   .hand{min-height:160px;gap:4px}
   .hud{gap:4px 10px;font-size:13px}
 }
@@ -391,8 +391,9 @@ body.pxui .card.sel{box-shadow:0 0 0 3px var(--torch2),0 8px 18px rgba(0,0,0,.5)
 body.pxui .card.upgraded{box-shadow:0 0 0 3px var(--heal),0 0 16px rgba(111,207,142,.5)}
 body.pxui .card.shadow{box-shadow:0 0 12px rgba(163,92,232,.55)}
 body.pxui .card.shadow .cname{color:#f1e2ff}
+body.hc .card.shadow .cdesc{color:#fff}/* con «Contrasto alto» il testo scuro spariva sulla carta viola del lato Ombra */
 /* illustrazioni delle carte (v7.7): striscia sotto il nome e carta grande tenendo premuto */
-.artstrip{display:block;flex:none;width:calc(100% - 8px);height:34px;margin:-4px 4px 0;border-radius:0 0 5px 5px;overflow:hidden;line-height:0;background:#120e18;border:1px solid color-mix(in srgb,var(--tc,#8a7a62) 70%,#000);border-top:0}
+.artstrip{display:block;flex:none;width:calc(100% - 8px);height:44px;margin:-4px 4px 0;border-radius:0 0 5px 5px;overflow:hidden;line-height:0;background:#120e18;border:1px solid color-mix(in srgb,var(--tc,#8a7a62) 70%,#000);border-top:0}
 .artstrip img,.zart img{display:block;width:100%;image-rendering:pixelated}
 .artstrip img{height:100%;object-fit:cover;object-position:center 40%}
 #czoom{position:fixed;inset:0;z-index:210;background:rgba(10,8,16,.8);overflow:auto;-webkit-tap-highlight-color:transparent;cursor:pointer}
@@ -408,6 +409,10 @@ body.pxui .card.zoom .cost{width:40px;height:40px;font-size:22px;top:-14px;left:
 .zgl{width:260px;max-width:100%;background:var(--stone2);border:1px solid var(--torch);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;font-size:13.5px;line-height:1.35;box-shadow:0 8px 24px rgba(0,0,0,.5)}
 .zgl b{display:block;color:var(--torch2);font-weight:800;font-size:14.5px;margin-bottom:1px}
 .zhint{color:var(--muted);font-size:12px}
+#cprev{position:fixed;z-index:205;display:flex;gap:12px;align-items:flex-start;pointer-events:none;animation:cpin .12s ease-out}
+#cprev[hidden]{display:none}#cprev.rev{flex-direction:row-reverse}#cprev .zgl{width:250px}
+@keyframes cpin{from{opacity:0;transform:translateY(6px)}}
+body.noanim #cprev{animation:none}
 /* Energia come runa grande */
 body.pxui .energy{position:relative;background:none;border:0;box-shadow:none;color:#ffe2a0;text-shadow:0 1px 0 #000;z-index:0}
 body.pxui .energy::before{content:'';position:absolute;inset:7px;transform:rotate(45deg);background:linear-gradient(135deg,#5a4870,#1a1424);border:3px solid #d8b25a;border-radius:8px;z-index:-1;box-shadow:0 0 16px rgba(216,178,90,.45)}
@@ -2257,6 +2262,7 @@ function pxOkK(k){try{return !!(SET.px&&PXI[k])}catch(e){return false}}
 function pxIco(name){return pxOkK('icone/'+name)?'pixel/icone/'+name+'.png':null}
 /* Illustrazioni delle carte (v7.7): si caricano solo quando una carta compare. Se un'immagine manca, la striscia sparisce e la carta resta come prima. */
 const PXC={};// id carta → 1 c'è, 0 manca
+const PXFY={addestramento:27,adrenalina:30,ammonimento:30,anime:30,arcimago:30,armonia:27,artiglio:30,ascia:27,assalto:33,assorbire:30,aura:27,azzanna:30,balzo:13,banchetto:30,barriera:40,benecomune:23,benedizione:37,boomerang:30,borseggio:0,branco:30,calcio:27,cappa:33,carica:17,caricaben:27,castigo:30,catalisi:33,catena:47,cerchio:37,colpo:27,colpodrago:30,colposacro:27,coltello:10,cometa:30,concentrazione:30,congela:37,contrattacco:30,coraggio:27,corazzaviva:27,corteccia:37,cuorebosco:30,curaferite:27,dardo:30,disarmo:30,diversivo:27,doppio:30,dose:17,ecoarcano:27,esercito:0,esplosione:30,evocascheletro:63,falco:13,fede:40,fedeincr:30,fendente:27,fendpesante:53,ferita:37,ferro:30,fiamma:30,fiammavor:30,finale:77,fortezza:70,freccia:43,frugare:23,fulmine:23,furia:27,furiaforesta:27,gelo:17,gigante:37,giudizio:30,grido:27,imboscata:0,imposizione:30,incendio:30,inferno:30,inno:37,innocresc:30,interposizione:30,intrise:27,istinto:63,lamaaffam:30,lamainsaz:50,lamaveleno:37,luce:27,luceabb:13,luceacc:27,luceguida:63,maledizione:7,malstrisc:27,mana:30,marchiocacc:27,marchiomorte:30,martello:47,martellofede:7,martellorit:30,martirio:50,massa:27,massacro:27,meditazione:0,meteora:37,mietitura:27,milletagli:30,miracolo:27,morso:27,mortale:30,muro:40,muroacciaio:30,muta:10,mutaforma:43,nube:27,occhiogufo:27,ombra:27,ossaprot:0,paginebr:30,pallafuoco:50,palmo:30,paralizzante:30,parata:30,paratamani:37,paura:30,penitenza:30,perforante:30,pergamene:30,pioggia:30,polvere:30,possente:13,potere:30,preghiera:43,preparazione:100,protettore:30,provoca:17,pugnalata:43,pugnalerit:30,pugno:30,pugnoferro:30,punizione:23,raffica:30,rafficapugni:30,rapide:30,rappresaglia:30,respiro:30,rianima:30,richiamo:33,riparo:67,risveglio:30,ritorno:27,roccia:27,ruggito:10,sacra:30,sacrificio:27,sacrservi:33,santuario:40,schivata:30,scintilla:43,scossa:40,scudata:30,scudoarc:30,scudogiur:30,scudoluce:27,scudosacro:37,scudotutti:0,sentenza:50,sfida:17,sfogo:50,sigillo:40,signoreossa:77,spallata:30,spalle:57,specchio:83,spintascudo:30,spirale:30,spire:30,spiritonat:27,tempesta:33,tempestacong:83,tendini:0,testuggine:77,tiromirato:30,titano:53,toccofine:37,toccogelido:30,trappola:47,turbine:27,ultimagrazia:77,ultimobal:50,ululato:30,ustione:37,ventaglio:100,ventoprof:33,vigilanza:30,voto:23,zelo:10};// punto verticale (%) dove sta il soggetto di ogni illustrazione, per inquadrarlo nella striscia
 function pxCardArt(id){try{return SET.px&&PXC[id]!==0?'pixel/carte/'+id+'.png':null}catch(e){return null}}
 function pxArtOk(im,id,ok){PXC[id]=ok?1:0;if(!ok){const s=im.closest('.artstrip,.zart');if(s)s.remove()}}
 // nomi lunghi nella cornice «B»: un trattino invisibile (va a capo solo se serve) a metà parola, tra vocale e consonante o tra due consonanti uguali
@@ -2264,7 +2270,7 @@ function hyIt(w){if(w.length<11)return w;const v=ch=>'aeiouàèéìòù'.include
   for(let i=2;i<w.length-3;i++){const a=w[i],b=w[i+1],c=w[i+2];const cut=(v(a)&&!v(b)&&v(c))||(!v(a)&&a===b)?i+1:-1;
     if(cut>0&&Math.abs(cut-w.length/2)<bd){bd=Math.abs(cut-w.length/2);best=cut}}
   return best>0?w.slice(0,best)+'­'+w.slice(best):w}
-function artStrip(id){const a=pxCardArt(id);return a?`<span class="artstrip"><img src="${a}" alt="" loading="lazy" decoding="async" onload="pxArtOk(this,'${id}',1)" onerror="pxArtOk(this,'${id}',0)"></span>`:''}
+function artStrip(id){const a=pxCardArt(id);return a?`<span class="artstrip"><img src="${a}" alt="" style="object-position:center ${PXFY[id]??40}%" loading="lazy" decoding="async" onload="pxArtOk(this,'${id}',1)" onerror="pxArtOk(this,'${id}',0)"></span>`:''}
 function pxLuogo(k,px){return pxOkK('luoghi/'+k)?`<img class="spr" src="pixel/luoghi/${k}.png" width="${px}" height="${px}" alt="">`:sprImg(k,px)}
 function pxVil(b,n){const k='villaggio/'+b+'-'+Math.max(0,Math.min(n|0,(PXV[b]||1)-1));return pxOkK(k)?k:null}
 function vilPixHTML(){const v=getVil(),L=vilList();if(!L.every(b=>pxVil(b.id,v[b.id])))return '';
@@ -2353,7 +2359,32 @@ function glShow(card,touch){
   clearTimeout(glT);glTouch=!!touch;if(touch)glT=setTimeout(()=>{glTouch=false;glHide()},3500);
 }
 function glHide(){const t=$('#gltip');if(t)t.hidden=true}
-document.addEventListener('pointerover',e=>{if(e.pointerType==='touch')return;const c=e.target.closest&&e.target.closest('.card[data-gl]');if(c)glShow(c);else glHide()});
+document.addEventListener('pointerover',e=>{if(e.pointerType==='touch')return;const c=e.target.closest&&e.target.closest('.card[data-gl]');
+  if(c&&prevOn()){glHide();cardPreview(c);return}cardPreviewHide();if(c)glShow(c);else glHide()});
+/* Col mouse e «Grafica Pixellab»: passando sopra una carta la vedi ingrandita (testo intero e illustrazione), con le parole chiave a fianco. */
+const prevOn=()=>{try{return !!SET.px&&matchMedia('(hover:hover) and (pointer:fine)').matches}catch(e){return false}};
+let cpvEl=null;
+function bigCard(el){const id=el.dataset.cid,a=id&&pxCardArt(id);
+  const k=document.createElement('div');k.className=el.className.replace(/\b(sel|cant|upgraded|noshadow)\b/g,'')+' zoom';k.innerHTML=el.innerHTML;
+  const st=k.querySelector('.artstrip');if(st)st.remove();
+  if(a)k.querySelector('.cname').insertAdjacentHTML('afterend',`<span class="zart"><img src="${a}" alt="" onerror="pxArtOk(this,'${id}',0)"></span>`);
+  return k}
+function cardPreview(el){let p=$('#cprev');
+  if(!p){p=document.createElement('div');p.id='cprev';p.setAttribute('aria-hidden','true');document.body.appendChild(p)}
+  if(el.classList.contains('sel')){cardPreviewHide();return}// carta già scelta: si lascia libera la vista dei bersagli
+  if(cpvEl===el&&!p.hidden)return;cpvEl=el;
+  const keys=(el.dataset.gl||'').split(',').filter(Boolean);p.className='';p.innerHTML='';const k=bigCard(el);p.appendChild(k);
+  if(keys.length)p.insertAdjacentHTML('beforeend',`<div class="zgl">${glHTML(keys)}</div>`);
+  p.hidden=false;
+  // la carta grande sopra quella piccola (o di fianco se sopra non c'è spazio), le parole chiave alla sua destra o, se non ci stanno, a sinistra
+  const r=el.getBoundingClientRect(),W=innerWidth,H=innerHeight,kw=k.offsetWidth;let pw=p.offsetWidth,ph=p.offsetHeight;
+  let x=r.left+r.width/2-kw/2,y=r.top-ph-14;
+  if(y<8){y=Math.max(8,Math.min(H-ph-8,r.top+r.height/2-ph/2));x=r.right+14;if(x+pw>W-8){p.className='rev';x=r.left-pw-14}}
+  else if(x+pw>W-8){p.className='rev';x=r.left+r.width/2+kw/2-pw}
+  p.style.left=Math.max(8,Math.min(W-pw-8,x))+'px';p.style.top=Math.max(8,y)+'px'}
+function cardPreviewHide(){const p=$('#cprev');if(p&&!p.hidden){p.hidden=true;p.innerHTML=''}cpvEl=null}
+document.addEventListener('pointerdown',()=>cardPreviewHide(),true);
+addEventListener('scroll',()=>cardPreviewHide(),true);
 let glLP=null,glEat=false;
 /* Tenendo premuta una carta: con «Grafica Pixellab» si apre la carta grande con l'illustrazione e le parole chiave (anche col mouse); senza, il fumetto delle parole chiave. */
 document.addEventListener('pointerdown',e=>{const c=e.target.closest&&e.target.closest('.card[data-gl]');
@@ -2363,12 +2394,9 @@ document.addEventListener('pointerdown',e=>{const c=e.target.closest&&e.target.c
 ['pointerup','pointercancel','pointermove'].forEach(ev=>document.addEventListener(ev,e=>{if(ev==='pointermove'&&(Math.abs(e.movementX)+Math.abs(e.movementY))<6)return;clearTimeout(glLP);if(ev!=='pointermove'&&glEat)setTimeout(()=>{glEat=false},350)},true));
 document.addEventListener('click',e=>{if(glEat){glEat=false;e.preventDefault();e.stopPropagation()}},true);
 document.addEventListener('contextmenu',e=>{const c=e.target.closest&&e.target.closest('.card[data-gl]');if(!c)return;e.preventDefault();if(SET.px&&e.pointerType!=='touch'&&!glEat)cardZoom(c)});
-function cardZoom(el){glHide();let z=$('#czoom');
+function cardZoom(el){glHide();cardPreviewHide();let z=$('#czoom');
   if(!z){z=document.createElement('div');z.id='czoom';z.setAttribute('role','dialog');z.setAttribute('aria-modal','true');z.setAttribute('aria-label','Carta ingrandita');z.addEventListener('click',cardZoomClose);document.body.appendChild(z)}
-  const id=el.dataset.cid,a=id&&pxCardArt(id),keys=(el.dataset.gl||'').split(',').filter(Boolean);
-  const k=document.createElement('div');k.className=el.className.replace(/\b(sel|cant|upgraded|noshadow)\b/g,'')+' zoom';k.innerHTML=el.innerHTML;
-  const st=k.querySelector('.artstrip');if(st)st.remove();
-  if(a)k.querySelector('.cname').insertAdjacentHTML('afterend',`<span class="zart"><img src="${a}" alt="" onerror="pxArtOk(this,'${id}',0)"></span>`);
+  const keys=(el.dataset.gl||'').split(',').filter(Boolean),k=bigCard(el);
   z.innerHTML=`<div class="zbox"><div class="zwrap"></div><small class="zhint">${matchMedia('(hover:none)').matches?'Tocca':'Clicca'} un punto qualsiasi per chiudere</small></div>`;
   const w=z.querySelector('.zwrap');w.appendChild(k);if(keys.length)w.insertAdjacentHTML('beforeend',`<div class="zgl">${glHTML(keys)}</div>`);
   z.hidden=false;z.scrollTop=0}
@@ -2497,7 +2525,7 @@ function render(fxs){
   flushFx(fxs);
   musicFollow();
   try{seenTrack();if(R&&R.phase==='end')statsAward()}catch(e){}
-  if(!glTouch){const hv=document.querySelector('.card[data-gl]:hover');if(hv)glShow(hv);else glHide()}
+  if(!glTouch){const hv=document.querySelector('.card[data-gl]:hover');if(hv&&prevOn())cardPreview(hv);else{cardPreviewHide();if(hv)glShow(hv);else glHide()}}
 }
 
 function classPicker(){
@@ -3139,7 +3167,7 @@ function startVoteAnim(va){
 }
 function paintAnim(){document.querySelectorAll('.mapsvg .node').forEach(n=>{n.classList.toggle('spin',!!UI.anim&&n.dataset.k===UI.anim.cur)})}
 /* ================= IMPOSTAZIONI ================= */
-const VERSION='v7.7',VDATE='18/11';
+const VERSION='v7.8',VDATE='18/11';
 const SET_K='valdombra-impostazioni';
 const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),vib:true,ts:1,hc:false,tut:true,stats:true,lo:true,vil:true,gem:true,px:false};
 let SET=(()=>{try{return Object.assign({},SET_DEF,JSON.parse(load(SET_K)||'{}'))}catch(e){return Object.assign({},SET_DEF)}})();
@@ -3195,7 +3223,7 @@ function settingsHTML(){
       <div class="srow"><div class="lab">Codice<small>Hai un codice? Scrivilo qui.</small></div><input id="rcode" class="txt" maxlength="40" style="max-width:200px" autocomplete="off" placeholder="Codice"><button class="btn" onclick="redeem()">Usa</button></div>
       <div class="srow"><div class="lab">Profilo</div><b>${ACC?esc(ACC.nome):'nessuno'}</b><button class="btn" onclick="openProfilo()">${ACC?'Gestisci':'Accedi'}</button></div>
       ${inRoom?`<div class="srow"><div class="lab">Stanza</div><b>${R.code}</b></div><div class="srow"><div class="lab">Connessione</div><b>${isHost?'Sei tu a guidare la stanza':'Collegato'}</b></div>`:''}
-      <p class="muted" style="font-size:13px">Novità della 7.7: con «Grafica Pixellab» accesa tutte le 191 carte hanno un'illustrazione sotto il nome; tenendo premuta una carta (anche col mouse, o con il tasto destro) la vedi in grande con l'illustrazione e le parole chiave. La Guida del gioco ha la sua icona, un libro. Novità della 7.6: con «Grafica Pixellab» accesa le carte hanno la nuova cornice del colore del tipo, il costo su una runa e la rarità come gemma; anche l'Energia è una runa. Novità della 7.5: con «Grafica Pixellab» accesa i nemici sconfitti hanno la loro animazione di morte e restano a terra, gli aspetti degli eroi hanno la versione Pixellab e Azhrakel ha nuovi colori. Novità della 7.4: con «Grafica Pixellab» accesa il villaggio cambia aspetto a ogni ricostruzione, reliquie, pozioni e icone sono nuove, eventi e luoghi hanno la loro illustrazione, i combattimenti hanno lo sfondo del dungeon e la mappa ha sfondo, decorazioni e la figura del tuo eroe. Novità della 7.3: con «Grafica Pixellab» accesa anche nemici, élite e boss sono disegnati con PixelLab, attaccano e reagiscono ai colpi; nuova icona del gioco. Novità della 7.2: con «Grafica Pixellab» accesa gli eroi disegnati con PixelLab compaiono ovunque, anche nella scelta dell'eroe, nei menu e nei riepiloghi. Novità della 7.1: in Sviluppo c'è «Grafica Pixellab», spenta di base. Accesa, in combattimento gli eroi sono disegnati con PixelLab e hanno le animazioni di attacco, difesa e colpo subito. Novità della 7.0: il pulsante «Gioca» sempre visibile per scegliere la modalità; Luce e Ombra (ogni carta si può giocare dal lato Ombra, più forte ma rischioso; creature d'ombra, mercante, eventi e bottino reagiscono alla tua Ombra), il Villaggio di Valdombra da ricostruire per avere vantaggi in ogni partita, e le Gemme, la seconda moneta per cimeli permanenti e aspetti. Si possono spegnere da Sviluppo. Dalla 6.4: la sfida del giorno usa tutti e 10 gli eroi e non ripete eroe, dungeon o modificatore del giorno prima; dalla 6.3: corretto il blocco quando l'eroe cade per una carta Ustione o Maledizione, tratti delle élite più leggeri (soprattutto da soli); dalla 6.2: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
+      <p class="muted" style="font-size:13px">Novità della 7.8: con «Grafica Pixellab» accesa, passando col mouse sopra una carta la vedi ingrandita, con il testo intero e le parole chiave a fianco; le illustrazioni nella striscia sono più alte e inquadrate sul soggetto. Con «Contrasto alto» la descrizione delle carte giocate dal lato Ombra ora si legge. Novità della 7.7: con «Grafica Pixellab» accesa tutte le 191 carte hanno un'illustrazione sotto il nome; tenendo premuta una carta (anche col mouse, o con il tasto destro) la vedi in grande con l'illustrazione e le parole chiave. La Guida del gioco ha la sua icona, un libro. Novità della 7.6: con «Grafica Pixellab» accesa le carte hanno la nuova cornice del colore del tipo, il costo su una runa e la rarità come gemma; anche l'Energia è una runa. Novità della 7.5: con «Grafica Pixellab» accesa i nemici sconfitti hanno la loro animazione di morte e restano a terra, gli aspetti degli eroi hanno la versione Pixellab e Azhrakel ha nuovi colori. Novità della 7.4: con «Grafica Pixellab» accesa il villaggio cambia aspetto a ogni ricostruzione, reliquie, pozioni e icone sono nuove, eventi e luoghi hanno la loro illustrazione, i combattimenti hanno lo sfondo del dungeon e la mappa ha sfondo, decorazioni e la figura del tuo eroe. Novità della 7.3: con «Grafica Pixellab» accesa anche nemici, élite e boss sono disegnati con PixelLab, attaccano e reagiscono ai colpi; nuova icona del gioco. Novità della 7.2: con «Grafica Pixellab» accesa gli eroi disegnati con PixelLab compaiono ovunque, anche nella scelta dell'eroe, nei menu e nei riepiloghi. Novità della 7.1: in Sviluppo c'è «Grafica Pixellab», spenta di base. Accesa, in combattimento gli eroi sono disegnati con PixelLab e hanno le animazioni di attacco, difesa e colpo subito. Novità della 7.0: il pulsante «Gioca» sempre visibile per scegliere la modalità; Luce e Ombra (ogni carta si può giocare dal lato Ombra, più forte ma rischioso; creature d'ombra, mercante, eventi e bottino reagiscono alla tua Ombra), il Villaggio di Valdombra da ricostruire per avere vantaggi in ogni partita, e le Gemme, la seconda moneta per cimeli permanenti e aspetti. Si possono spegnere da Sviluppo. Dalla 6.4: la sfida del giorno usa tutti e 10 gli eroi e non ripete eroe, dungeon o modificatore del giorno prima; dalla 6.3: corretto il blocco quando l'eroe cade per una carta Ustione o Maledizione, tratti delle élite più leggeri (soprattutto da soli); dalla 6.2: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
       <p class="muted" style="font-size:13px">Le impostazioni (audio, chat, grafica) valgono solo per questo dispositivo. I progressi di gioco seguono il tuo profilo.</p>
       <div><button class="btn" onclick="SET=Object.assign({},SET_DEF);saveSet();render()">Ripristina le impostazioni</button></div>
     </div></div>`;
