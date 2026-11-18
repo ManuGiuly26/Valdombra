@@ -1408,6 +1408,7 @@ const BSK='valdombra-vinti-sopravv';
 function beatenS(){try{return JSON.parse(load(BSK))||[]}catch(e){return[]}}
 function markBeatenS(dg){const b=beatenS();if(!b.includes(dg)){b.push(dg);store(BSK,JSON.stringify(b))}}
 // modalità normale: serve aver completato il dungeon precedente; in Sopravvivenza basta anche aver superato un ciclo lì
+const MODEN={norm:'Normale',surv:'Sopravvivenza',porta:'Aprite il cancello'};const noLvl=m=>m==='surv'||m==='porta';
 const curMode=()=>R&&R.phase==='lobby'&&!solo?(R.lmode||'norm'):pickMode;
 const dgUnlocked=(id,m)=>{const q=DUNGEONS[id].req;if(!q)return true;if(beaten().includes(q))return true;return (m||curMode())==='surv'&&beatenS().includes(q)};
 const dmgBonus=(L,strong)=>Math.floor(L/2)+(strong&&L>=5?1:0);
@@ -1473,10 +1474,10 @@ function checkProgress(){
 const ACT={
   cls:(a,P)=>{if((R.phase==='lobby'||R.phase==='end')&&CLASSES[a.cls])P.cls=a.cls},
   ready:(a,P)=>{if(R.phase==='lobby')P.ready=!P.ready},
-  start:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host){if(!dgUnlocked(R.ldg||'rocca',R.lmode||'norm'))R.ldg='rocca';const L=R.lmode==='surv'?0:(a.lvl|0);if(blockers(R.ldg||'rocca',R.lmode||'norm',L).length)return;startRunRoom(a.lvl|0,a.seed,R.lmode,R.ldg)}},
+  start:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host){if(!dgUnlocked(R.ldg||'rocca',R.lmode||'norm'))R.ldg='rocca';const L=noLvl(R.lmode)?0:(a.lvl|0);if(blockers(R.ldg||'rocca',R.lmode||'norm',L).length)return;startRunRoom(a.lvl|0,a.seed,R.lmode,R.ldg)}},
   dg:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host&&DUNGEONS[a.d])R.ldg=a.d},
   lvl:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host)R.llvl=Math.max(0,Math.min(MAXLVL,a.l|0))},
-  mode:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host)R.lmode=a.m==='surv'?'surv':'norm';if(R.ldg&&!dgUnlocked(R.ldg,R.lmode))R.ldg='rocca'},
+  mode:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host)R.lmode=MODEN[a.m]?a.m:'norm';if(R.lmode==='porta'||(R.ldg&&!dgUnlocked(R.ldg,R.lmode)))R.ldg='rocca'},
   kick:(a,P,pid)=>{if(R.phase==='lobby'&&pid===R.host&&a.p!==R.host){delete R.players[a.p];R.order=R.order.filter(x=>x!==a.p)}},
   again:(a,P,pid)=>{if(R.phase==='end'&&pid===R.host)toLobby()},
   restart:(a,P,pid)=>{if(R.phase!=='end'||pid!==R.host||R.daily)return;const dg=R.dg||'rocca',mode=R.mode;const lvl=mode==='surv'?0:Math.max(0,Math.min(MAXLVL,a.lvl|0,getUnlocked(dg)));if(blockers(dg,mode,lvl).length)return;
@@ -1591,7 +1592,7 @@ function startRunRoom(lvl,seed,mode,dg){
   if(R.mode==='porta'){R.porta={ondata:0,fuori:PORTA_ONDATE*PORTA_GRUPPO,gruppo:0,salvati:0,persi:0,falo:0};R.clima={};portaOndata()}
 }
 function soloRestart(lvl){const P=R.players.solo;pickCls=P.cls;pickDg=R.dg||'rocca';pickMode=R.mode==='surv'||R.mode==='porta'?R.mode:'norm';pickLvl=Math.max(0,Math.min(MAXLVL,lvl|0));UI.lbMsg='';UI.dMsg='';R=null;g=null;startSolo()}
-function mpRestart(l){const dg=R.dg||'rocca',m=R.mode==='surv'?'surv':'norm';const L=m==='surv'?0:l;const bl=blockers(dg,m,L);
+function mpRestart(l){const dg=R.dg||'rocca',m=MODEN[R.mode]?R.mode:'norm';const L=noLvl(m)?0:l;const bl=blockers(dg,m,L);
   if(bl.length){toast(blockMsg(bl,dg,m,L)+' Tornate alla stanza e scegliete un livello che avete tutti.');return}UI.lbMsg='';send({t:'restart',lvl:l})}
 function againBtns(){
   if(R.daily)return `<button class="btn primary" onclick="R=null;g=null;screen='title';render()">Torna al menu</button>`;
@@ -1734,12 +1735,19 @@ function portaAward(){if(!isPorta()||R.phase!=='end'||!R.porta)return null;const
   if(done.includes(key))return UI.lastPorta&&UI.lastPorta.key===key?UI.lastPorta:{cr,gm,rec:false};
   done.push(key);store(PORTA_K,JSON.stringify(done.slice(-50)));setCrowns(getCrowns()+cr);if(gm&&GEMON())setGems(getGems()+gm);
   const rec=n>(parseInt(load(PORTA_REC)||'0',10)||0);if(rec)store(PORTA_REC,String(n));UI.lastPorta={key,cr,gm,rec};return UI.lastPorta}
+// punteggio: abitanti salvati, ondate respinte, nemici uccisi (nella tabella «classifica»: dungeon 'porta', piani = abitanti salvati)
+function portaScore(kills){const P=R.porta||{};return (P.salvati|0)*100+(R.win?PORTA_ONDATE:Math.max(0,(P.ondata|0)-1))*50+(kills|0)*2}
 function portaEndScreen(){const P=R.porta||{salvati:0,persi:0,ondata:0},a=portaAward()||{cr:0,gm:0},tot=PORTA_ONDATE*PORTA_GRUPPO,rec=parseInt(load(PORTA_REC)||'0',10)||0;
   const t=R.win?(P.salvati>=tot?'Tutti in salvo!':'Il cancello è chiuso'):'Il cancello è caduto';
   const d=R.win?(P.salvati>=tot?'Nessun abitante è rimasto fuori: Valdombra canterà il tuo nome per generazioni.':'Gorrak è sconfitto e il cancello si chiude alle spalle degli ultimi fuggiaschi.'):'Le orde hanno sfondato. Chi è riuscito a entrare racconterà del tuo coraggio.';
   return `<main><div class="wrap"><h1 style="font-size:clamp(38px,8vw,60px)">${t}</h1><p class="lede muted">${d}</p>
     <div class="panel portafine"><div class="adtiles"><div class="adtile"><small>Abitanti salvati</small><b style="color:#9be06a">${P.salvati}</b><span>su ${tot}</span></div><div class="adtile"><small>Persi</small><b style="color:#ff9a8f">${P.persi}</b><span>catturati dalle orde</span></div><div class="adtile"><small>Ondate</small><b>${R.win?PORTA_ONDATE:Math.max(0,P.ondata-1)}</b><span>respinte su ${PORTA_ONDATE}</span></div><div class="adtile"><small>Il tuo record</small><b>${rec}</b><span>${a.rec?'nuovo record!':'abitanti salvati'}</span></div></div>
     <p><b style="color:var(--torch2)">+${a.cr} Corone</b>${a.gm?` e <b class="gemc">+${a.gm} ${pl(a.gm,'Gemma','Gemme')}</b>`:''} · ${PORTA_CR} Corone per ogni abitante salvato; 1 Gemma se ne salvi almeno 30, 2 se li salvi tutti.</p></div>
+    ${(()=>{const kills=R.order.reduce((s,p)=>s+(R.players[p].kills||0),0),mode=solo?'solo':'coop';
+      if((solo||R.host===ME)&&!R.lbId&&!UI.lbMsg)setTimeout(submitScore,0);
+      if(R.lbId&&UI.lbFor!==R.lbId){UI.lbFor=R.lbId;UI.lb=null;UI.lbDg='porta';fetchBoard(mode).then(r=>{UI.lb=r;render()})}
+      return `<div class="endstats"><div><b>${portaScore(kills)}</b>Punteggio</div><div><b>${P.salvati}</b>Abitanti salvati</div><div><b>${kills}</b>Nemici uccisi</div></div>
+      <div class="panel"><h3>Classifica ${solo?'giocatore singolo':'cooperativa'}: Aprite il cancello</h3>${boardBody(UI.lbMsg?{error:UI.lbMsg}:R.lbId?UI.lb:null,R.lbId,true)}</div>`})()}
     ${summaryHTML()}${achPanel()}${xpPanel()}${gemsPanel()}
     <div class="row">${againBtns()}</div></div></main>`}
 function newCycle(){
@@ -2325,7 +2333,7 @@ function guidaHTML(){const t=UI.guTab||'base';const sec=(h,b)=>`<div class="pane
   if(t==='dungeon')b=Object.entries(DUNGEONS).map(([k,d])=>sec(d.n,`<span>${d.desc}</span><span class="muted">${d.req?`Si sblocca completando ${DUNGEONS[d.req].n} in modalità normale (in Sopravvivenza basta superare lì un ciclo).`:'Disponibile da subito.'} Vittoria: ${d.crowns} Corone, più 20 per ogni Livello di Assedio.</span>`+(BOSSES[k]||[d.boss]).map(id=>`<div class="row" style="gap:10px;flex-wrap:nowrap;margin-top:6px">${sprImg(id,44)}<div><b>${ENEMIES[id].n}</b><br><span class="muted">${BOSSI[id][3]}</span></div></div>`).join(''))).join('')
     +sec('Tratti delle élite','Ogni élite ha un tratto scelto a caso. Toccando l\'etichetta sotto il nome lo rileggi in combattimento.'+'<span class="muted">Da soli i tratti sono più deboli che in gruppo.</span>'+Object.keys(ETRAITS).map(k=>def(ETRAITS[k][0],`Da soli: ${trDesc(k,false)} In gruppo: ${trDesc(k,true)}`)).join(''))
     +sec('Bestiario','Nel Diario, alla voce «Mostri», trovi tutti i nemici che hai incontrato, con i loro PV e i dungeon in cui vivono.');
-  if(t==='modi')b=sec('Aprite il cancello','Le campagne di Valdombra bruciano e i contadini corrono verso la Rocca. Tu tieni aperto il cancello contro <b>8 ondate</b> di mostri (Gorrak arriva all\'ultima). A ogni ondata 5 abitanti aspettano di entrare: a ogni tuo turno ne passa uno, ma nei turni in cui i nemici ti feriscono ne catturano 1 (2 se c\'è un\'élite o il boss). Quando vinci l\'ondata entrano tutti quelli rimasti. Dopo la 3ª e la 6ª ondata c\'è un Falò. A fine partita prendi '+PORTA_CR+' Corone per ogni abitante salvato, 1 Gemma se ne salvi almeno 30 e 2 se li salvi tutti.')
+  if(t==='modi')b=sec('Aprite il cancello','Le campagne di Valdombra bruciano e i contadini corrono verso la Rocca. Tu tieni aperto il cancello contro <b>8 ondate</b> di mostri (Gorrak arriva all\'ultima). A ogni ondata 5 abitanti aspettano di entrare: a ogni tuo turno ne passa uno, ma nei turni in cui i nemici ti feriscono ne catturano 1 (2 se c\'è un\'élite o il boss). Quando vinci l\'ondata entrano tutti quelli rimasti. Dopo la 3ª e la 6ª ondata c\'è un Falò. A fine partita prendi '+PORTA_CR+' Corone per ogni abitante salvato, 1 Gemma se ne salvi almeno 30 e 2 se li salvi tutti. Si gioca anche in gruppo e ha la sua classifica: 100 punti per ogni abitante salvato, 50 per ogni ondata respinta e 2 per ogni nemico ucciso.')
     +sec('Normale',`Attraversi i 15 piani del dungeon e affronti il boss. Se vinci guadagni Corone, il dungeon conta come completato (sblocca il successivo) e sblocchi il Livello di Assedio seguente in quel dungeon.`)
     +sec('Livelli di Assedio',`Da 0 a ${MAXLVL}. Ogni livello rende i nemici più forti ma dà più oro, carte rare più frequenti e più Corone. Per esempio, Assedio 1: ${lvlDesc(1)} Assedio ${MAXLVL}: ${lvlDesc(MAXLVL)}`)
     +sec('Sopravvivenza','Il dungeon non finisce mai: dopo il boss ricomincia da capo più difficile (un nuovo «ciclo»), e recuperi un po\' di PV. Si va avanti finché cadete. Il punteggio va nella classifica, le Corone dipendono dai piani superati, il Livello di Assedio non si usa.')
@@ -2361,7 +2369,7 @@ function startSolo(){
   solo=true;isHost=true;chan=null;ME='solo';online=new Set([ME]);
   R=newLobby('SOLO');R.players.solo.name=CLASSES[pickCls].n;R.players.solo.loadout=getZaino();R.players.solo.tal=getTal();R.players.solo.vil=SET.vil!==false?getVil():{};R.players.solo.cim=GEMON()?cimSel():[];rng=new RNG(1);
   if($('#sname')&&$('#sname').value.trim()){myName=$('#sname').value.trim().slice(0,16);store('valdombra-nome',myName)}
-  if(pickMode==='surv'&&myName)R.players.solo.name=myName;
+  if(noLvl(pickMode)&&myName)R.players.solo.name=myName;
   if(pickMode==='porta'||!dgUnlocked(pickDg,pickMode))pickDg='rocca';
   startRunRoom(Math.min(pickLvl,getUnlocked(pickDg)),($('#seed')&&$('#seed').value)||'',pickMode,pickDg);commit();
 }
@@ -2444,7 +2452,7 @@ function setCls(k){if(!heroOwned(k)){openBuyHero(k);return}pickCls=k;if(R&&R.pha
 function startGame(){
   const notReady=active().filter(p=>!R.players[p].ready&&p!==R.host);
   if(notReady.length){toast('Aspetta che siano tutti pronti: '+notReady.map(pname).join(', '));return}
-  {const dg=R.ldg||'rocca',m=R.lmode||'norm',L=m==='surv'?0:Math.min(pickLvl,getUnlocked(dg));const bl=blockers(dg,m,L);if(bl.length){toast(blockMsg(bl,dg,m,L)+' Scegli un dungeon o un livello che avete tutti.');return}}
+  {const dg=R.ldg||'rocca',m=R.lmode||'norm',L=noLvl(m)?0:Math.min(pickLvl,getUnlocked(dg));const bl=blockers(dg,m,L);if(bl.length){toast(blockMsg(bl,dg,m,L)+' Scegli un dungeon o un livello che avete tutti.');return}}
   send({t:'start',lvl:Math.min(pickLvl,getUnlocked(R.ldg||'rocca')),seed:UI.seed});
 }
 function copyText(s,ok){try{navigator.clipboard.writeText(s).then(()=>toast(ok),()=>toast(s))}catch(e){toast(s)}}
@@ -2867,11 +2875,11 @@ function titleHTML(){
     <h3>Da solo: scegli il tuo eroe</h3>
     ${classPicker()}
     <h3>Modalità</h3>
-    ${modePicker(pickMode,"pickMode='%';if(!dgUnlocked(pickDg,pickMode))pickDg='rocca';render()")}
+    ${modePicker(pickMode,"pickMode='%';if(pickMode==='porta'||!dgUnlocked(pickDg,pickMode))pickDg='rocca';render()")}
     <h3>Dungeon</h3>
-    ${dungeonPicker(pickDg,"pickDg='%';pickLvl=Math.min(pickLvl,getUnlocked('%'));render()")}
-    ${pickMode==='surv'?`<div class="panel"><label for="sname"><b>Il tuo nome per la classifica</b></label><input id="sname" class="txt" style="width:100%;max-width:360px" maxlength="16" value="${esc(myName)}" placeholder="Per esempio: Manu" autocomplete="off"></div>`:''}
-    ${pickMode==='surv'?'<p class="note">In Sopravvivenza il Livello di Assedio non si usa: la difficoltà cresce da sola a ogni ciclo, ed è uguale per tutti in classifica.</p>':`<h3>Livello di Assedio</h3>
+    ${pickMode==='porta'?`<p class="muted">Si difende sempre il cancello della <b style="color:var(--fg)">${DUNGEONS.rocca.n}</b>.</p>`:dungeonPicker(pickDg,"pickDg='%';pickLvl=Math.min(pickLvl,getUnlocked('%'));render()")}
+    ${noLvl(pickMode)?`<div class="panel"><label for="sname"><b>Il tuo nome per la classifica</b></label><input id="sname" class="txt" style="width:100%;max-width:360px" maxlength="16" value="${esc(myName)}" placeholder="Per esempio: Manu" autocomplete="off"></div>`:''}
+    ${pickMode==='surv'?'<p class="note">In Sopravvivenza il Livello di Assedio non si usa: la difficoltà cresce da sola a ogni ciclo, ed è uguale per tutti in classifica.</p>':pickMode==='porta'?'<p class="note">In «Aprite il cancello» il Livello di Assedio non si usa: le 8 ondate sono uguali per tutti in classifica.</p>':`<h3>Livello di Assedio</h3>
     ${levelPicker()}`}
     <div class="seedrow"><label for="seed" class="muted">Seed (opzionale)</label><input id="seed" maxlength="12" placeholder="${newSeed()}" autocomplete="off">
       <button class="btn primary" onclick="startSolo()" style="padding:10px 22px;font-size:17px">Inizia la scalata</button></div>
@@ -2916,10 +2924,10 @@ function lobbyHTML(){
       ${host&&p!==ME?`<button class="btn" onclick="send({t:'kick',p:'${p}'})" aria-label="Rimuovi ${esc(P.name)}">✕</button>`:''}</div>`}).join('')}</div>
     <h3>Scegli il tuo eroe</h3>
     ${classPicker()}
-    <h3>Modalità</h3>${host?modePicker(R.lmode||'norm',"send({t:'mode',m:'%'})"):`<p class="muted">L'host ha scelto: <b style="color:var(--fg)">${R.lmode==='surv'?'Sopravvivenza':'Normale'}</b></p>`}
-    <h3>Dungeon</h3>${host?dungeonPicker(R.ldg||'rocca',"send({t:'dg',d:'%'})"):`<p class="muted">L'host ha scelto: <b style="color:var(--fg)">${DUNGEONS[R.ldg||'rocca'].n}</b>${bm==='surv'?'':` · Assedio ${bL}`}</p>`}
+    <h3>Modalità</h3>${host?modePicker(R.lmode||'norm',"send({t:'mode',m:'%'})"):`<p class="muted">L'host ha scelto: <b style="color:var(--fg)">${MODEN[R.lmode||'norm']}</b></p>`}
+    <h3>Dungeon</h3>${bm==='porta'?`<p class="muted">Si difende sempre il cancello della <b style="color:var(--fg)">${DUNGEONS.rocca.n}</b>.</p>`:host?dungeonPicker(R.ldg||'rocca',"send({t:'dg',d:'%'})"):`<p class="muted">L'host ha scelto: <b style="color:var(--fg)">${DUNGEONS[R.ldg||'rocca'].n}</b>${bm==='surv'?'':` · Assedio ${bL}`}</p>`}
     ${bl.length?`<div class="netwarn" role="status">${ic('i_lock',14)} ${blockMsg(bl,bdg,bm,bL)} Per giocare insieme, ognuno deve aver sbloccato il dungeon${bm==='surv'?'':' e il Livello di Assedio'} scelto: ${host?'scegline uno che avete tutti.':'chiedi all\'host di sceglierne uno che avete tutti.'}</div>`:''}
-    ${host?`${R.lmode==='surv'?'<p class="note">In Sopravvivenza il Livello di Assedio non si usa: la difficoltà cresce da sola a ogni ciclo.</p>':`<h3>Livello di Assedio</h3>${levelPicker()}`}
+    ${host?`${R.lmode==='surv'?'<p class="note">In Sopravvivenza il Livello di Assedio non si usa: la difficoltà cresce da sola a ogni ciclo.</p>':R.lmode==='porta'?'<p class="note">In «Aprite il cancello» il Livello di Assedio non si usa: le 8 ondate sono uguali per tutti in classifica.</p>':`<h3>Livello di Assedio</h3>${levelPicker()}`}
       <div class="seedrow"><label for="seed" class="muted">Seed (opzionale)</label><input id="seed" maxlength="12" value="${esc(UI.seed)}" oninput="UI.seed=this.value" placeholder="casuale" autocomplete="off">
       <button class="btn primary" onclick="startGame()" style="padding:10px 22px;font-size:17px" ${notReady.length||bl.length?'aria-disabled="true"':''}>Avvia la partita</button></div>
       ${notReady.length?`<p class="muted">In attesa di: ${notReady.map(p=>esc(pname(p))).join(', ')}</p>`:''}`
@@ -3280,11 +3288,11 @@ ACT.loadout=(a,P)=>{if(R.phase==='lobby'||R.phase==='end'){P.loadout=cleanZ(a.z)
 // cosa ha sbloccato ogni giocatore: {dungeon:[normale,sopravvivenza,livello max]}
 function myProg(){const o={};Object.keys(DUNGEONS).forEach(k=>o[k]=[dgUnlocked(k,'norm')?1:0,dgUnlocked(k,'surv')?1:0,getUnlocked(k)]);return o}
 function cleanProg(a){const o={};if(!a||typeof a!=='object')return o;Object.keys(DUNGEONS).forEach(k=>{const x=a[k];if(Array.isArray(x))o[k]=[x[0]?1:0,x[1]?1:0,Math.max(0,Math.min(MAXLVL,x[2]|0))]});return o}
-function lackWhat(p,dg,mode,lvl){const pr=p===ME?myProg():R.players[p]&&R.players[p].prog;if(!pr)return null;const x=pr[dg],n=DUNGEONS[dg].n;
+function lackWhat(p,dg,mode,lvl){if(mode==='porta')return null;const pr=p===ME?myProg():R.players[p]&&R.players[p].prog;if(!pr)return null;const x=pr[dg],n=DUNGEONS[dg].n;
   if(mode==='surv')return x&&x[1]?null:n+' in Sopravvivenza';if(!x||!x[0])return n;if(x[2]<lvl)return 'l\'Assedio '+lvl+' in '+n+' ('+(p===ME?'sei':'è')+' al '+x[2]+')';return null}
 function blockers(dg,mode,lvl){return R.order.filter(p=>R.players[p]&&lackWhat(p,dg,mode,lvl))}
 function blockMsg(bl,dg,mode,lvl){return bl.map(p=>`${p===ME?'Tu non hai':esc(pname(p))+' non ha'} ancora sbloccato ${lackWhat(p,dg,mode,lvl)}`).join('. ')+'.'}
-const lobbyLvl=()=>(R.lmode==='surv')?0:(R.llvl|0);
+const lobbyLvl=()=>noLvl(R.lmode)?0:(R.llvl|0);
 
 
 
@@ -3377,7 +3385,7 @@ function dungeonPicker(cur,on,owner){
 }
 function modePicker(cur,on){
   const b=(m,t,d)=>`<button class="opt ${cur===m?'on':''}" onclick="${on.replace('%',m)}" aria-pressed="${cur===m}"><b>${t}</b><br><span class="muted">${d}</span></button>`;
-  return `<div class="modes">${b('norm','Normale','15 piani e il boss del dungeon. Vinci per guadagnare Corone e sbloccare i Livelli di Assedio.')}${b('surv','Sopravvivenza','Il dungeon non finisce mai: dopo ogni boss ricomincia, più forte. Si va avanti finché cadete. Punteggio in classifica.')}</div>`;
+  return `<div class="modes">${b('norm','Normale','15 piani e il boss del dungeon. Vinci per guadagnare Corone e sbloccare i Livelli di Assedio.')}${b('surv','Sopravvivenza','Il dungeon non finisce mai: dopo ogni boss ricomincia, più forte. Si va avanti finché cadete. Punteggio in classifica.')}${b('porta','Aprite il cancello','Tenete aperto il cancello della Rocca contro 8 ondate e salvate più abitanti che potete. Sempre nella Rocca. Punteggio in classifica.')}</div>`;
 }
 const survScore=(kills)=>Math.round((totalFloors()*10+kills*3)*scoreMult(R.lvl||0));
 function sbClient(){if(typeof supabase==='undefined')return null;return sbc||(sbc=supabase.createClient(SB_URL,SB_KEY))}
@@ -3391,11 +3399,11 @@ async function submitScore(){
   const key='lb:'+R.code+':'+R.seed+':'+(R.t0||0);if(load(key))return;store(key,'1');
   const c=sbClient();if(!c){UI.lbMsg='Classifica non disponibile qui: apri il gioco dal sito.';render();return}
   const kills=R.order.reduce((s,p)=>s+(R.players[p].kills||0),0);
-  const row={dungeon:R.dg||'rocca',modalita:solo?'solo':'coop',nomi:R.order.map(p=>R.players[p].name).join(', ').slice(0,200),classi:R.order.map(p=>R.players[p].cls).join(','),
-    giocatori:R.order.length,piani:totalFloors(),uccisioni:kills,livello:R.lvl||0,punteggio:survScore(kills),stanza:solo?null:R.code};
+  const pt=isPorta();const row={dungeon:pt?'porta':R.dg||'rocca',modalita:solo?'solo':'coop',nomi:R.order.map(p=>R.players[p].name).join(', ').slice(0,200),classi:R.order.map(p=>R.players[p].cls).join(','),
+    giocatori:R.order.length,piani:pt?(R.porta.salvati|0):totalFloors(),uccisioni:kills,livello:pt?0:R.lvl||0,punteggio:pt?portaScore(kills):survScore(kills),stanza:solo?null:R.code};
   const {data,error}=await c.from('classifica').insert(row).select('id').single();
   if(error){UI.lbMsg=lbErr(error);store(key,null);render();return}
-  if(R&&R.mode==='surv'){R.lbId=data.id;if(isHost)commit();else render()}
+  if(R&&(R.mode==='surv'||R.mode==='porta')){R.lbId=data.id;if(isHost)commit();else render()}
 }
 function survEndScreen(L,kills){
   const score=survScore(kills),mode=solo?'solo':'coop';
@@ -3413,19 +3421,20 @@ function survEndScreen(L,kills){
     <div class="panel"><h3>Classifica ${solo?'giocatore singolo':'cooperativa'}</h3>${boardBody(UI.lbMsg?{error:UI.lbMsg}:R.lbId?UI.lb:null,R.lbId)}</div>
     <div class="row">${againBtns()}</div></div></main>`;
 }
-function boardBody(r,mine){
+function boardBody(r,mine,pt){
   if(!r)return '<p class="muted">Carico la classifica...</p>';
   if(r.error)return `<p class="muted">${r.error}</p>`;
-  if(!r.rows.length)return '<p class="muted">Ancora nessun punteggio. Gioca una partita in Sopravvivenza per entrare per primo!</p>';
+  if(!r.rows.length)return `<p class="muted">Ancora nessun punteggio. Gioca una partita ${pt?'ad «Aprite il cancello»':'in Sopravvivenza'} per entrare per primo!</p>`;
   return `<div class="board">${r.rows.map((x,i)=>`<div class="brow ${x.id===mine?'mine':''}"><span class="pos">${i+1}</span>
-    <span class="who"><span class="cls">${String(x.classi||'').split(',').filter(k=>CLASSES[k]).map(k=>sprImg(k,20,'inl')).join('')}</span><b>${esc(x.nomi)}</b><small class="muted">${x.giocatori>1?x.giocatori+' giocatori · ':''}${x.piani} piani${x.livello?' · Assedio '+x.livello:''} · ${new Date(x.creato).toLocaleDateString('it-IT')}</small></span>
+    <span class="who"><span class="cls">${String(x.classi||'').split(',').filter(k=>CLASSES[k]).map(k=>sprImg(k,20,'inl')).join('')}</span><b>${esc(x.nomi)}</b><small class="muted">${x.giocatori>1?x.giocatori+' giocatori · ':''}${pt?x.piani+' '+pl(x.piani,'abitante salvato','abitanti salvati'):x.piani+' piani'}${x.livello?' · Assedio '+x.livello:''} · ${new Date(x.creato).toLocaleDateString('it-IT')}</small></span>
     <span class="pts">${x.punteggio}</span></div>`).join('')}</div>`;
 }
-function openBoard(mode,dg){if(dg)UI.lbDg=dg;UI.lbDg=UI.lbDg||'rocca';modal={title:'Classifiche Sopravvivenza',board:mode||'solo',cancel:true,list:[]};UI.boardData=null;fetchBoard(modal.board).then(r=>{if(modal&&modal.board){UI.boardData=r;render()}});render()}
+function openBoard(mode,dg){if(dg)UI.lbDg=dg;UI.lbDg=UI.lbDg||'rocca';modal={title:'Classifiche',board:mode||'solo',cancel:true,list:[]};UI.boardData=null;fetchBoard(modal.board).then(r=>{if(modal&&modal.board){UI.boardData=r;render()}});render()}
 function boardModalHTML(){const m=modal.board;
-  return `<div class="wrap" style="gap:12px"><div class="row">${Object.keys(DUNGEONS).map(k=>`<button class="btn ${UI.lbDg===k?'primary':''}" onclick="openBoard('${m}','${k}')">${DUNGEONS[k].n}</button>`).join('')}</div><div class="row"><button class="btn ${m==='solo'?'primary':''}" onclick="openBoard('solo')">Giocatore singolo</button><button class="btn ${m==='coop'?'primary':''}" onclick="openBoard('coop')">Cooperativa</button></div>
-    <p class="muted">${m==='coop'?'Più giocatori ci sono, più i nemici sono numerosi e resistenti.':'Le migliori partite in solitaria.'} Il punteggio conta i piani superati, i nemici uccisi e il Livello di Assedio.</p>
-    <div class="panel">${boardBody(UI.boardData,null)}</div></div>`}
+  const pt=UI.lbDg==='porta';
+  return `<div class="wrap" style="gap:12px"><div class="row">${Object.keys(DUNGEONS).map(k=>`<button class="btn ${UI.lbDg===k?'primary':''}" onclick="openBoard('${m}','${k}')">${DUNGEONS[k].n}</button>`).join('')}<button class="btn ${pt?'primary':''}" onclick="openBoard('${m}','porta')">Aprite il cancello</button></div><div class="row"><button class="btn ${m==='solo'?'primary':''}" onclick="openBoard('solo')">Giocatore singolo</button><button class="btn ${m==='coop'?'primary':''}" onclick="openBoard('coop')">Cooperativa</button></div>
+    <p class="muted">${m==='coop'?'Più giocatori ci sono, più i nemici sono numerosi e resistenti.':'Le migliori partite in solitaria.'} ${pt?'Il punteggio conta gli abitanti salvati (100 punti l\'uno), le ondate respinte e i nemici uccisi.':'Il punteggio conta i piani superati, i nemici uccisi e il Livello di Assedio.'}</p>
+    <div class="panel">${boardBody(UI.boardData,null,pt)}</div></div>`}
 
 /* ================= CHAT ================= */
 let chatOpen=false,chatSeen=0;
@@ -3468,7 +3477,7 @@ function startVoteAnim(va){
 }
 function paintAnim(){document.querySelectorAll('.mapsvg .node').forEach(n=>{n.classList.toggle('spin',!!UI.anim&&n.dataset.k===UI.anim.cur)})}
 /* ================= IMPOSTAZIONI ================= */
-const VERSION='v8.4',VDATE='18/11';
+const VERSION='v8.5',VDATE='18/11';
 const SET_K='valdombra-impostazioni';
 const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),vib:true,ts:1,hc:false,tut:true,stats:true,lo:true,lox:false,scena:false,vil:true,gem:true,px:true};
 // dalla v8.2 Villaggio, Gemme e Grafica Pixellab sono sempre accesi (in Sviluppo resta solo Luce e Ombra)
@@ -3528,7 +3537,7 @@ function settingsHTML(){
       <div class="srow"><div class="lab">Profilo</div><b>${ACC?esc(ACC.nome):'nessuno'}</b><button class="btn" onclick="openProfilo()">${ACC?'Gestisci':'Accedi'}</button></div>
       ${ADM.ok?`<div class="srow"><div class="lab">Amministrazione<small>Visite, visitatori unici, partite, eroi, carte e classifica.</small></div><button class="btn primary" onclick="openAdmin()">Apri il pannello</button></div>`:''}
       ${inRoom?`<div class="srow"><div class="lab">Stanza</div><b>${R.code}</b></div><div class="srow"><div class="lab">Connessione</div><b>${isHost?'Sei tu a guidare la stanza':'Collegato'}</b></div>`:''}
-      <p class="muted" style="font-size:13px">Novità della 8.4: nuova modalità «Aprite il cancello»: le campagne bruciano e tu tieni aperto il cancello della Rocca contro 8 ondate, salvando più abitanti che puoi (4 Corone per ognuno). Nell'enciclopedia le carte si vedono anche dal lato Ombra. In combattimento le barre della vita sono più grandi e leggibili; sulla mappa la figura dell'eroe non copre più i nodi; le Gemme si vedono nella barra in alto. Un nemico si cura al massimo di metà dei suoi PV per combattimento. Novità della 8.3: Luce e Ombra più equilibrate. Con 0-2 Ombra sei nella Luce: cure +25%, Scudo di Luce e il potere di Luce del tuo eroe; da 5 Ombra c'è il potere d'Ombra, ma da 7 le cure ti curano la metà. Missioni di partita (tre obiettivi per Corone e Gemme), reliquie maledette, piani con un clima (Nebbia, Gelo, Luna nera, Vento) e un aiuto dal villaggio per partita. Le carte giocate dal lato Ombra hanno la loro illustrazione. Goblin ridisegnati. In Sviluppo c'è «Combattimento a scena». La purificazione dall'Ombra si paga in Gemme, che ora sono più rare. Corretto: un nemico che si cura e aggiunge Ferite non può più rendere un combattimento senza fine (al massimo 10 maledizioni per combattimento). Novità della 8.2: di rado sulla mappa si apre una strada segreta con tesori unici, tra cui sei reliquie segrete più forti del solito. In Sviluppo c'è «Ombra per tutti gli eroi»: anche cure, Marchio, Condanna, evocazioni e carte pescate hanno un lato Ombra. Villaggio, Gemme e Grafica Pixellab ora sono sempre accesi. C'è un codice premio per le Gemme. Novità della 8.1: le app del gioco per altre piattaforme possono inviare e ricevere le statistiche (visite, partite, le tue statistiche) tramite un unico indirizzo; il pannello di amministrazione mostra da quali piattaforme si gioca e le chiamate delle app. Novità della 8.0:il gioco conta le visite in modo anonimo (un codice casuale per dispositivo, niente nomi: si spegne con «Invia statistiche anonime»); per l'amministratrice c'è un pannello con visite, visitatori unici, partite, eroi, carte e classifica. Novità della 7.9: la mappa del dungeon ha i nodi più al centro, più grandi e più facili da toccare sul telefono; con «Grafica Pixellab» lo sfondo della mappa riempie tutto lo schermo. In combattimento le carte in mano hanno tutte la stessa altezza: l'illustrazione resta intera e il testo lungo sfuma (lo leggi tutto passando col mouse o tenendo premuta la carta). Novità della 7.8: con «Grafica Pixellab» accesa, passando col mouse sopra una carta la vedi ingrandita, con il testo intero e le parole chiave a fianco; le illustrazioni nella striscia sono più alte e inquadrate sul soggetto. Con «Contrasto alto» la descrizione delle carte giocate dal lato Ombra ora si legge. Novità della 7.7: con «Grafica Pixellab» accesa tutte le 191 carte hanno un'illustrazione sotto il nome; tenendo premuta una carta (anche col mouse, o con il tasto destro) la vedi in grande con l'illustrazione e le parole chiave. La Guida del gioco ha la sua icona, un libro. Novità della 7.6: con «Grafica Pixellab» accesa le carte hanno la nuova cornice del colore del tipo, il costo su una runa e la rarità come gemma; anche l'Energia è una runa. Novità della 7.5: con «Grafica Pixellab» accesa i nemici sconfitti hanno la loro animazione di morte e restano a terra, gli aspetti degli eroi hanno la versione Pixellab e Azhrakel ha nuovi colori. Novità della 7.4: con «Grafica Pixellab» accesa il villaggio cambia aspetto a ogni ricostruzione, reliquie, pozioni e icone sono nuove, eventi e luoghi hanno la loro illustrazione, i combattimenti hanno lo sfondo del dungeon e la mappa ha sfondo, decorazioni e la figura del tuo eroe. Novità della 7.3: con «Grafica Pixellab» accesa anche nemici, élite e boss sono disegnati con PixelLab, attaccano e reagiscono ai colpi; nuova icona del gioco. Novità della 7.2: con «Grafica Pixellab» accesa gli eroi disegnati con PixelLab compaiono ovunque, anche nella scelta dell'eroe, nei menu e nei riepiloghi. Novità della 7.1: in Sviluppo c'è «Grafica Pixellab», spenta di base. Accesa, in combattimento gli eroi sono disegnati con PixelLab e hanno le animazioni di attacco, difesa e colpo subito. Novità della 7.0: il pulsante «Gioca» sempre visibile per scegliere la modalità; Luce e Ombra (ogni carta si può giocare dal lato Ombra, più forte ma rischioso; creature d'ombra, mercante, eventi e bottino reagiscono alla tua Ombra), il Villaggio di Valdombra da ricostruire per avere vantaggi in ogni partita, e le Gemme, la seconda moneta per cimeli permanenti e aspetti. Si possono spegnere da Sviluppo. Dalla 6.4: la sfida del giorno usa tutti e 10 gli eroi e non ripete eroe, dungeon o modificatore del giorno prima; dalla 6.3: corretto il blocco quando l'eroe cade per una carta Ustione o Maledizione, tratti delle élite più leggeri (soprattutto da soli); dalla 6.2: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
+      <p class="muted" style="font-size:13px">Novità della 8.5: «Aprite il cancello» si gioca anche in gruppo (lo sceglie l'host nella stanza) e ha la sua classifica, da soli e in cooperativa: 100 punti per ogni abitante salvato, più le ondate respinte e i nemici uccisi. Novità della 8.4: nuova modalità «Aprite il cancello»: le campagne bruciano e tu tieni aperto il cancello della Rocca contro 8 ondate, salvando più abitanti che puoi (4 Corone per ognuno). Nell'enciclopedia le carte si vedono anche dal lato Ombra. In combattimento le barre della vita sono più grandi e leggibili; sulla mappa la figura dell'eroe non copre più i nodi; le Gemme si vedono nella barra in alto. Un nemico si cura al massimo di metà dei suoi PV per combattimento. Novità della 8.3: Luce e Ombra più equilibrate. Con 0-2 Ombra sei nella Luce: cure +25%, Scudo di Luce e il potere di Luce del tuo eroe; da 5 Ombra c'è il potere d'Ombra, ma da 7 le cure ti curano la metà. Missioni di partita (tre obiettivi per Corone e Gemme), reliquie maledette, piani con un clima (Nebbia, Gelo, Luna nera, Vento) e un aiuto dal villaggio per partita. Le carte giocate dal lato Ombra hanno la loro illustrazione. Goblin ridisegnati. In Sviluppo c'è «Combattimento a scena». La purificazione dall'Ombra si paga in Gemme, che ora sono più rare. Corretto: un nemico che si cura e aggiunge Ferite non può più rendere un combattimento senza fine (al massimo 10 maledizioni per combattimento). Novità della 8.2: di rado sulla mappa si apre una strada segreta con tesori unici, tra cui sei reliquie segrete più forti del solito. In Sviluppo c'è «Ombra per tutti gli eroi»: anche cure, Marchio, Condanna, evocazioni e carte pescate hanno un lato Ombra. Villaggio, Gemme e Grafica Pixellab ora sono sempre accesi. C'è un codice premio per le Gemme. Novità della 8.1: le app del gioco per altre piattaforme possono inviare e ricevere le statistiche (visite, partite, le tue statistiche) tramite un unico indirizzo; il pannello di amministrazione mostra da quali piattaforme si gioca e le chiamate delle app. Novità della 8.0:il gioco conta le visite in modo anonimo (un codice casuale per dispositivo, niente nomi: si spegne con «Invia statistiche anonime»); per l'amministratrice c'è un pannello con visite, visitatori unici, partite, eroi, carte e classifica. Novità della 7.9: la mappa del dungeon ha i nodi più al centro, più grandi e più facili da toccare sul telefono; con «Grafica Pixellab» lo sfondo della mappa riempie tutto lo schermo. In combattimento le carte in mano hanno tutte la stessa altezza: l'illustrazione resta intera e il testo lungo sfuma (lo leggi tutto passando col mouse o tenendo premuta la carta). Novità della 7.8: con «Grafica Pixellab» accesa, passando col mouse sopra una carta la vedi ingrandita, con il testo intero e le parole chiave a fianco; le illustrazioni nella striscia sono più alte e inquadrate sul soggetto. Con «Contrasto alto» la descrizione delle carte giocate dal lato Ombra ora si legge. Novità della 7.7: con «Grafica Pixellab» accesa tutte le 191 carte hanno un'illustrazione sotto il nome; tenendo premuta una carta (anche col mouse, o con il tasto destro) la vedi in grande con l'illustrazione e le parole chiave. La Guida del gioco ha la sua icona, un libro. Novità della 7.6: con «Grafica Pixellab» accesa le carte hanno la nuova cornice del colore del tipo, il costo su una runa e la rarità come gemma; anche l'Energia è una runa. Novità della 7.5: con «Grafica Pixellab» accesa i nemici sconfitti hanno la loro animazione di morte e restano a terra, gli aspetti degli eroi hanno la versione Pixellab e Azhrakel ha nuovi colori. Novità della 7.4: con «Grafica Pixellab» accesa il villaggio cambia aspetto a ogni ricostruzione, reliquie, pozioni e icone sono nuove, eventi e luoghi hanno la loro illustrazione, i combattimenti hanno lo sfondo del dungeon e la mappa ha sfondo, decorazioni e la figura del tuo eroe. Novità della 7.3: con «Grafica Pixellab» accesa anche nemici, élite e boss sono disegnati con PixelLab, attaccano e reagiscono ai colpi; nuova icona del gioco. Novità della 7.2: con «Grafica Pixellab» accesa gli eroi disegnati con PixelLab compaiono ovunque, anche nella scelta dell'eroe, nei menu e nei riepiloghi. Novità della 7.1: in Sviluppo c'è «Grafica Pixellab», spenta di base. Accesa, in combattimento gli eroi sono disegnati con PixelLab e hanno le animazioni di attacco, difesa e colpo subito. Novità della 7.0: il pulsante «Gioca» sempre visibile per scegliere la modalità; Luce e Ombra (ogni carta si può giocare dal lato Ombra, più forte ma rischioso; creature d'ombra, mercante, eventi e bottino reagiscono alla tua Ombra), il Villaggio di Valdombra da ricostruire per avere vantaggi in ogni partita, e le Gemme, la seconda moneta per cimeli permanenti e aspetti. Si possono spegnere da Sviluppo. Dalla 6.4: la sfida del giorno usa tutti e 10 gli eroi e non ripete eroe, dungeon o modificatore del giorno prima; dalla 6.3: corretto il blocco quando l'eroe cade per una carta Ustione o Maledizione, tratti delle élite più leggeri (soprattutto da soli); dalla 6.2: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
       <p class="muted" style="font-size:13px">Le impostazioni (audio, chat, grafica) valgono solo per questo dispositivo. I progressi di gioco seguono il tuo profilo.</p>
       <div><button class="btn" onclick="SET=Object.assign({},SET_DEF);saveSet();render()">Ripristina le impostazioni</button></div>
     </div></div>`;

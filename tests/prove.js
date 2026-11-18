@@ -389,6 +389,35 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(ac.barra&&ac.numeri&&ac.gemme,'combattimento: barre della vita più alte e numeri più grandi; le Gemme si vedono nella barra in alto');
   ok(ac.figura&&ac.sotto,'mappa: la figura dell\'eroe sta sotto i nodi e non prende i tocchi');
 
+  console.log('7e. Aprite il cancello in gruppo e in classifica');
+  const gr=await page.evaluate(async()=>{const r={};SET.tut=false;SPEED=0;const sleep=ms=>new Promise(t=>setTimeout(t,ms));
+    // stanza di gruppo: l'host sceglie la modalità
+    solo=false;isHost=true;ME='pA';myName='Luca';chan=null;R=newLobby('CANC');R.players.pA.cls='guerriero';R.players.pB={pid:'pB',name:'Sara',cls:'chierico',ready:true};R.order.push('pB');online=new Set(R.order);R.ldg='cripte';
+    dispatch('pA',{t:'mode',m:'porta'});r.scelta=R.lmode==='porta'&&R.ldg==='rocca';render();r.stanza=document.body.innerHTML.includes('Aprite il cancello')&&document.body.innerHTML.includes('le 8 ondate sono uguali per tutti');
+    dispatch('pB',{t:'mode',m:'norm'});r.soloHost=R.lmode==='porta';
+    dispatch('pA',{t:'start',lvl:3,seed:'CANCELLO'});r.avvio=R.mode==='porta'&&R.dg==='rocca'&&R.lvl===0&&R.phase==='combat'&&!!R.porta&&Object.keys(R.combat.heroes).length===2;
+    // un'ondata vinta in due: ricompense per entrambi, poi l'ondata dopo
+    ctx('pA');g.enemies.forEach(e=>hurtEnemy(e,99999));checkEnd();await sleep(700);r.ricompense=R.phase==='room'&&R.players.pA.screen==='reward'&&R.players.pB.screen==='reward';
+    const s1=R.porta.salvati;dispatch('pA',{t:'done'});dispatch('pB',{t:'done'});r.seconda=R.phase==='combat'&&R.porta.ondata===2&&s1>=5;
+    // la partita riparte nella stessa modalità
+    R.phase='end';R.win=false;const ms=window.mpRestart;r.riparte=MODEN[R.mode]==='Aprite il cancello'&&noLvl(R.mode);
+    // classifica: con un finto Supabase si controlla la riga inviata (nessuna riga vera)
+    const sb0=window.sbClient;let riga=null;const rows=[{id:7,creato:new Date().toISOString(),nomi:'Prova',classi:'guerriero',giocatori:1,piani:31,livello:0,punteggio:3500}];
+    const q={eq(){return q},order(){return q},limit:async()=>({data:rows,error:null})};
+    window.sbClient=()=>({from:()=>({insert:row=>{riga=row;return {select:()=>({single:async()=>({data:{id:7},error:null})})}},select:()=>q})});
+    R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);pickCls='mago';pickDg='rocca';pickMode='porta';pickLvl=0;startSolo();ctx(ME);
+    R.porta.salvati=31;R.porta.persi=9;R.porta.ondata=8;R.porta.fuori=0;R.porta.gruppo=0;run.kills=20;endRun(true);UI.lbMsg='';render();await sleep(300);render();
+    r.riga=!!riga&&riga.dungeon==='porta'&&riga.piani===31&&riga.modalita==='solo'&&riga.punteggio===31*100+8*50+20*2&&riga.livello===0;r.lbId=R.lbId===7;
+    await sleep(100);render();r.classifica=document.body.innerHTML.includes('31 abitanti salvati')&&document.body.innerHTML.includes('Classifica giocatore singolo');
+    modal=null;R=null;screen='title';openBoard('solo','porta');await sleep(100);render();r.tab=!!document.querySelector('.modal')&&document.body.innerHTML.includes('100 punti')&&UI.lbDg==='porta';closeModal();modal=null;
+    window.sbClient=sb0;UI.lbDg='rocca';
+    // scelta della modalità nella schermata da solo
+    R=null;screen='title';pickMode='porta';render();r.picker=!!document.querySelector('.modes')&&document.querySelector('.modes').textContent.includes('Aprite il cancello');pickMode='norm';render();
+    return r});
+  ok(gr.scelta&&gr.stanza&&gr.soloHost&&gr.avvio,'in gruppo: l\'host sceglie «Aprite il cancello», si gioca sempre nella Rocca senza Livello di Assedio '+JSON.stringify({s:gr.scelta,t:gr.stanza,h:gr.soloHost,a:gr.avvio}));
+  ok(gr.ricompense&&gr.seconda&&gr.riparte,'in gruppo: dopo un\'ondata vinta ognuno prende la ricompensa, poi arriva l\'ondata dopo');
+  ok(gr.riga&&gr.lbId&&gr.classifica&&gr.tab&&gr.picker,'classifica del cancello: riga con abitanti salvati e punteggio, scheda nelle classifiche, modalità nella schermata da solo '+JSON.stringify({r:gr.riga,i:gr.lbId,c:gr.classifica,t:gr.tab,p:gr.picker}));
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;
