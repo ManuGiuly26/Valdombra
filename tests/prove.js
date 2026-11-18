@@ -215,7 +215,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     SET.px=false;saveSet();nuova('guerriero');r.spenta=!document.querySelector('.pxh')&&!!document.querySelector('#ent-h-pA img.spr');
     openSettings();r.interruttore=document.querySelector('button.sw[aria-label="Grafica Pixellab"]')?.getAttribute('aria-pressed')==='false';closeModal();
     // accesa: le 40 immagini e la figura di ogni eroe
-    SET.px=true;saveSet();let w=0;while(Object.keys(PXI).length<275&&w<900){await sleep(10);w++}
+    SET.px=true;saveSet();let w=0;while(Object.keys(PXI).length<276&&w<900){await sleep(10);w++}
     r.caricate=Object.values(PXI).filter(Boolean).length;
     r.senzaFigura=Object.keys(CLASSES).filter(cls=>{nuova(cls);const s=sp('pA');return !(s&&s.style.backgroundImage.includes('pixel/'+cls+'.png')&&s.classList.contains('idle'))});
     nuova('guerriero');
@@ -249,15 +249,34 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     openVillaggio();r.villaggio=document.querySelectorAll('.pxvil img').length>=5&&document.querySelectorAll('.vilimg').length>=5&&document.querySelector('.pxvil').innerHTML.includes('villaggio/locanda-'+Math.min(getVil().locanda|0,3)+'.png');closeModal();
     // carta «B»: classe sul body con l'interruttore acceso, runa del costo
     {const tmp=document.createElement('div');tmp.innerHTML=cardHTML({id:'colpo',uid:9,up:false},{});document.body.appendChild(tmp);r.cartaB=document.body.classList.contains('pxui')&&getComputedStyle(tmp.querySelector('.cost'),'::before').transform!=='none';tmp.remove()}
+    r.guidaLibro=[...document.querySelectorAll('.panel')].some(p=>p.textContent.includes('Guida del gioco')&&p.innerHTML.includes('pixel/icone/i_book.png'));
+    // illustrazioni delle carte (v7.7): striscia in mano, ogni carta ha il suo disegno, carta grande tenendo premuto
+    nuova('guerriero');
+    r.strisce=g.hero.hand.length>0&&document.querySelectorAll('.hand .card .artstrip img').length===g.hero.hand.length;
+    r.senzaArte=(await Promise.all(Object.keys(CARDS).map(id=>new Promise(fine=>{const im=new Image();im.onload=()=>fine(null);im.onerror=()=>fine(id);im.src='pixel/carte/'+id+'.png'})))).filter(Boolean);
+    r.nCarte=Object.keys(CARDS).length;
+    ctx(ME);g.hero.hand.push({id:'parata',uid:9e6+77,up:false});render();
+    {const c=document.querySelector('.hand .card[data-cid="parata"]'),n=g.hero.hand.length;
+      c.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerType:'touch',isPrimary:true}));await sleep(550);
+      const z=document.querySelector('#czoom');r.grande=!!z&&!z.hidden&&!!z.querySelector('.card.zoom .zart img')&&!!z.querySelector('.zgl b')&&!z.querySelector('.card.zoom .artstrip')&&!z.querySelector('[onclick]');
+      document.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerType:'touch'}));c.click();ctx(ME);
+      r.nonGiocata=g.hero.hand.length===n&&!document.querySelector('.hand .card.sel');
+      await sleep(400);if(z)z.click();r.chiusa=!!z&&z.hidden}
+    PXC.colpo=0;r.mancante=!cardHTML({id:'colpo',uid:1,up:false},{}).includes('artstrip');delete PXC.colpo;
+    R=null;solo=true;ME='solo';screen='title';modal=null;render();
     // fuori dal combattimento: scelta dell'eroe e negozio degli aspetti
     R=null;solo=true;ME='solo';screen='title';modal=null;render();
     const scelta=()=>[...document.querySelectorAll('.classes .pxs')].map(e=>e.style.backgroundImage);
     r.scelta=scelta();setSkin('guerriero','cremisi');r.sceltaAspetto=scelta();setSkin('guerriero',null);
     UI.skCls='guerriero';modal={title:'Aspetti',cancel:true,html:skinsHTML()};render();{let w=0;while(!PXI['aspetti/guerriero-gelo']&&w<300){await sleep(10);w++}}render();r.negozio=document.querySelectorAll('.shopgrid .pxs').length>=2;modal=null;
     SET.px=false;saveSet();render();r.rispenta=!document.querySelector('.pxh')&&!document.querySelector('.pxs');r.carteSpente=!document.body.classList.contains('pxui');
+    r.senzaStriscia=!cardHTML({id:'colpo',uid:1,up:false},{}).includes('artstrip')&&/<img|<canvas|<svg/.test(ic('i_book',34))&&!ic('i_book',34).includes('pixel/');
+    // spenta: tenendo premuto torna il fumetto delle parole chiave
+    nuova('guerriero');ctx(ME);g.hero.hand.push({id:'parata',uid:9e6+78,up:false});render();{const c=document.querySelector('.hand .card[data-cid="parata"]');c.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerType:'touch',isPrimary:true}));render();await sleep(550);// ridisegno durante la pressione
+      const z=document.querySelector('#czoom'),t=document.querySelector('#gltip');r.fumetto=(!z||z.hidden)&&!!t&&!t.hidden;document.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerType:'touch'}));c.click();glHide()}
     R=null;solo=true;ME='solo';screen='title';modal=null;render();return r});
   ok(px.base&&px.spenta&&px.interruttore,'Grafica Pixellab: spenta di base, con l\'interruttore in Sviluppo, e senza resta lo sprite di sempre');
-  ok(px.caricate===275&&!px.senzaFigura.length,`le immagini in pixel/ si caricano (${px.caricate}/275) e ogni eroe ha la sua figura${px.senzaFigura.length?' (mancano: '+px.senzaFigura+')':''}`);
+  ok(px.caricate===276&&!px.senzaFigura.length,`le immagini in pixel/ si caricano (${px.caricate}/276) e ogni eroe ha la sua figura${px.senzaFigura.length?' (mancano: '+px.senzaFigura+')':''}`);
   ok(!px.nemTutti.length&&/pixel\/nemici\/.+\.png/.test(px.nemFig)&&/pxan/.test(px.nemAtt)&&/-attacco/.test(px.nemAtt)&&/pxan/.test(px.nemCol)&&/-colpito/.test(px.nemCol)&&!px.nemFlash,`nemici (${px.nemiciIn}): figura, attacco quando agiscono, colpito al posto del lampo; tutti i 30 hanno le immagini${px.nemTutti.length?' (mancano: '+px.nemTutti+')':''}`);
   ok(/pxan/.test(px.nemMorte)&&/-morte/.test(px.nemMorte)&&/pxdead/.test(px.nemMorto)&&/-morte/.test(px.nemMorto),'nemico sconfitto: animazione di morte, poi resta a terra');
   ok(/pxan/.test(px.attacco)&&/guerriero-attacco/.test(px.attacco)&&/pxan/.test(px.resta)&&/idle/.test(px.fine)&&/pixel\/guerriero\.png/.test(px.fine),'carta Attacco: animazione d\'attacco, che continua se la schermata si ridisegna, poi torna la figura ferma');
@@ -266,6 +285,9 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(px.aspetto&&px.negozio,'gli aspetti hanno la loro versione Pixellab, anche nel negozio degli aspetti');
   ok(/combattimento-rocca/.test(px.sfondo)&&px.mappa&&px.mappaEroi&&px.luogo&&px.icona&&px.titolo&&px.villaggio,'sfondi del combattimento, mappa con decorazioni e figura dell\'eroe, luoghi, icone, schermata iniziale e villaggio a stadi '+JSON.stringify({s:!!px.sfondo,m:px.mappa,e:px.mappaEroi,l:px.luogo,i:px.icona,t:px.titolo,v:px.villaggio}));
   ok(px.cartaB&&px.carteSpente,'carte con cornice del tipo e costo a runa solo con l\'interruttore acceso');
+  ok(px.strisce&&!px.senzaArte.length&&px.mancante&&px.senzaStriscia,`illustrazioni: striscia sotto il nome in mano, tutte le ${px.nCarte} carte hanno il disegno${px.senzaArte.length?' (mancano: '+px.senzaArte+')':''}, niente striscia se l'immagine manca o l'interruttore è spento`);
+  ok(px.grande&&px.nonGiocata&&px.chiusa&&px.fumetto,'tenendo premuta una carta si apre la carta grande con illustrazione e parole chiave (senza giocarla) e si chiude toccando; spento resta il fumetto '+JSON.stringify({g:px.grande,n:px.nonGiocata,c:px.chiusa,f:px.fumetto}));
+  ok(px.guidaLibro,'la Guida del gioco ha la sua icona (libro), diversa dalle Impostazioni');
   ok(px.scelta.length>=4&&px.scelta.some(s=>s.includes('pixel/guerriero.png'))&&!px.sceltaAspetto.some(s=>s.includes('pixel/guerriero.png')),`fuori dal combattimento: figure Pixellab nella scelta dell'eroe (${px.scelta.length}), che seguono l'aspetto scelto`);
 
   console.log('');
