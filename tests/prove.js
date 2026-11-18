@@ -317,6 +317,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     run.relics=[];run.om=8;h=lotta();const t8=h.blk;run.om=3;h=lotta();r.fidArm=h.blk-t8;
     // limite alle maledizioni in un combattimento (prima il Troll poteva riempire il mazzo di Ferite all'infinito)
     nuova('chierico');h=lotta(['troll']);for(let i=0;i<20;i++)addCurse('ferita',2);r.maledizioni=[...h.draw,...h.hand,...h.disc].filter(x=>x.id==='ferita').length;
+    {const tr=g.enemies[0];tr.hp=1;for(let i=0;i<20;i++){tr.intent={heal:14};doIntent(tr)}r.cureNemico=tr.hp-1;r.trollMax=tr.max}
     // purificazione pagata in Gemme
     nuova('guerriero');R.phase='room';run.screen='shop';genShop();run.om=5;setGems(1);render();const bi=[...document.querySelectorAll('.relicbox')].find(x=>x.textContent.includes('Incenso'));bi.click();ctx(ME);r.gemNo=run.om===5&&getGems()===1;
     setGems(5);render();[...document.querySelectorAll('.relicbox')].find(x=>x.textContent.includes('Incenso')).click();ctx(ME);r.gemSi=run.om===2&&getGems()===3;
@@ -337,10 +338,56 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(eq.dueClimi&&eq.gelo&&eq.nebbia&&eq.luna&&eq.vento&&eq.mappa,'climi: due piani per mappa; Gelo, Nebbia, Luna nera e Vento funzionano e si vedono sulla mappa '+JSON.stringify({d:eq.dueClimi,g:eq.gelo,n:eq.nebbia,l:eq.luna,v:eq.vento,m:eq.mappa}));
   ok(eq.aiutiLista==='locanda,mercato,fucina'&&eq.aiutoCura&&eq.aiutoUno,'aiuti del villaggio: uno per partita, dagli edifici ricostruiti ('+eq.aiutiLista+')');
   ok(eq.fidMeta&&eq.fidNo&&eq.fidTempio&&eq.fidArm===4,'più Ombra, meno aiuto: da 5 a metà, da 7 solo la sacerdotessa; l\'Armatura del Tempio sparisce nell\'Ombra '+JSON.stringify({m:eq.fidMeta,n:eq.fidNo,t:eq.fidTempio,a:eq.fidArm}));
+  ok(eq.cureNemico<=Math.floor(eq.trollMax*.5),'un nemico si cura al massimo di metà dei suoi PV per combattimento ('+eq.cureNemico+'/'+eq.trollMax+')');
   ok(eq.maledizioni===10,'al massimo 10 maledizioni per combattimento: niente più combattimenti senza fine ('+eq.maledizioni+')');
   ok(eq.gemNo&&eq.gemSi&&eq.pelBlocco&&eq.pelNo&&eq.pelSi,'purificazione pagata in Gemme: Incenso 2, Pellegrino 4; senza Gemme non si può '+JSON.stringify({a:eq.gemNo,b:eq.gemSi,c:eq.pelBlocco,d:eq.pelNo,e:eq.pelSi}));
   ok(eq.artOmbra&&eq.ricaduta,'carte dal lato Ombra con la loro illustrazione; se manca resta quella normale');
   ok(eq.interruttore&&eq.scena&&eq.scenaVia,'Combattimento a scena: interruttore in Sviluppo, spento di base');
+
+  console.log('7d. Aprite il cancello, enciclopedia Ombra, barre, mappa e Gemme');
+  const ac=await page.evaluate(async()=>{const r={};SET.tut=false;SPEED=0;SET.lo=true;const sleep=ms=>new Promise(t=>setTimeout(t,ms));
+    // una partita intera con il bot
+    R=null;solo=true;pickCls='guerriero';pickDg='cripte';pickMode='porta';pickLvl=0;startSolo();ctx(ME);const falo=new Set();
+    r.inizio=R.mode==='porta'&&R.dg==='rocca'&&R.phase==='combat'&&R.porta.ondata===1&&R.porta.fuori===35&&!run.miss.length;render();r.banner=!!document.querySelector('.portabar')&&document.querySelector('.hud').textContent.includes('Ondata');
+    {const c=R.combat;const g0=R.porta.gruppo,s0=R.porta.salvati;c.ferito=1;portaCattura();r.cattura=R.porta.gruppo===g0-1;c.ferito=0;portaCattura();r.senzaFerite=R.porta.gruppo===g0-1;R.porta.gruppo=g0;R.porta.persi=0;R.porta.salvati=s0}
+      let passi=0;const skip=new Set();
+      while(R.phase!=='end'&&passi<8000){passi++;ctx(ME);
+        // il bot gioca male: lo teniamo in vita per arrivare in fondo, ma non nei combattimenti che durano troppo
+        if(!(R.combat&&R.combat.turn>40))run.hp=Math.max(run.hp,Math.floor(run.max*.7));
+        if(run.pendPot){send({t:'potLeave'});continue}
+        if(R.phase==='map'){const a=availNodes();vote(a[0].y,a[0].x);await sleep(0);continue}
+        if(R.phase==='combat'){if(R.combat.busy||R.combat.won){await sleep(15);continue}const h=g.hero;render();
+          const k=h.hand.findIndex(c=>costOf(c)<=h.energy&&!CARDS[c.id].unplay&&!skip.has(c.uid));
+          if(k>=0){const al=alive(),u=h.hand[k].uid,n=h.hand.length,en=h.energy;modal=null;send({t:'play',uid:u,j:al[0]?g.enemies.indexOf(al[0]):null,a:ME,pk:Math.floor(Math.random()*4)});
+            // carte che chiedono una scelta (per esempio dagli scarti): se non è successo niente il bot le salta
+            ctx(ME);if(g&&g.hero&&g.hero.hand.some(c=>c.uid===u)&&g.hero.energy===en&&g.hero.hand.length===n)skip.add(u);modal=null}
+          else{skip.clear();send({t:'end'});await sleep(10)}continue}
+        if(R.phase==='room'){const P=run;render();if(P.screen==='rest')falo.add(R.porta.ondata);if(P.screen==='event'&&!P.event.result){const ev=EVENTS.find(e=>e.id===P.event.id);const o=ev.opts.findIndex(o=>!o.pick&&(!o.req||o.req()));send(o>=0?{t:'ev',k:o}:{t:'done'})}
+          else if(P.screen==='reward'&&P.reward&&P.reward.cards)send({t:'takeCard',k:0});else if(P.screen==='rest')send(has('coronanera')?{t:'done'}:{t:'restHeal'});else if(P.screen==='secret'&&P.secret)send({t:'secret',i:0});else send({t:'done'});await sleep(0);continue}
+        await sleep(5)}
+
+    r.fine=R.phase==='end';r.tutte=R.porta.ondata===8||!R.win;r.conti=R.porta.salvati+R.porta.persi+R.porta.fuori+R.porta.gruppo===40;r.falo=[...falo].join(',');r.win=R.win;r.salvati=R.porta.salvati;
+    render();r.schermata=document.body.innerHTML.includes('Abitanti salvati')&&document.body.innerHTML.includes('Riapri il cancello');const pa=UI.lastPorta;r.premio=!!pa&&pa.cr===4*R.porta.salvati;const c1=getCrowns();render();r.unaVolta=getCrowns()===c1;
+    r.record=(parseInt(localStorage.getItem('valdombra-porta-record')||'0',10)||0)>=R.porta.salvati;
+    R=null;screen='title';modal=null;openGioca();render();r.menu=document.body.innerHTML.includes('Aprite il cancello');closeModal();
+    // enciclopedia: lato Ombra
+    SET.lox=false;openDiario('c');UI.diTab='c';UI.diSh=true;render();const om=document.querySelectorAll('.cardgrid .card.shadow').length,no=document.querySelectorAll('.cardgrid .card.noshadow').length;
+    r.encOmbra=om>0&&no>0;SET.lox=true;render();r.encOmbraTutti=document.querySelectorAll('.cardgrid .card.shadow').length>om;
+    r.encArte=[...document.querySelectorAll('.cardgrid .card.shadow img')].some(im=>/carte-ombra/.test(im.getAttribute('src')));UI.diSh=false;render();r.encLuce=!document.querySelector('.cardgrid .card.shadow');SET.lox=false;closeModal();modal=null;
+    // barre della vita più alte in combattimento
+    R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);pickCls='mago';pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();ctx(ME);startCombat(['goblin'],'combat');ctx(ME);render();
+    {const b=document.querySelector('.combat .ent.enemy .bar');r.barra=b&&b.getBoundingClientRect().height>=17;const sp=b&&b.querySelector('span');r.numeri=sp&&parseFloat(getComputedStyle(sp).fontSize)>=12}
+    r.gemme=document.querySelector('.hud').textContent.includes('Gemme');
+    // mappa: la figura dell'eroe non prende i tocchi e sta sotto i nodi
+    R.combat=null;R.phase='map';const a0=availNodes()[0];R.pos={y:a0.y,x:a0.x};R.path=[[a0.y,a0.x]];render();
+    {const fig=document.querySelector('.mapsvg .maperoe');r.figura=!fig||getComputedStyle(fig).pointerEvents==='none';const svg=document.querySelector('.mapsvg');const kids=[...svg.children];const fi=kids.findIndex(k=>k.classList&&k.classList.contains('maperoe')),ni=kids.findIndex(k=>k.classList&&k.classList.contains('node'));r.sotto=fi<0||fi<ni}
+    R=null;screen='title';modal=null;render();return r});
+  ok(ac.inizio&&ac.banner&&ac.cattura&&ac.senzaFerite,'Aprite il cancello: parte alla Rocca con la prima ondata; i nemici catturano abitanti solo se ti feriscono');
+  ok(ac.fine&&ac.tutte&&ac.conti&&(ac.falo==='3,6'||!ac.win),`Aprite il cancello: il bot arriva in fondo (${ac.salvati} salvati), Falò dopo la 3ª e la 6ª ondata (${ac.falo}), i conti degli abitanti tornano`);
+  ok(ac.schermata&&ac.premio&&ac.unaVolta&&ac.record&&ac.menu,'Aprite il cancello: schermata finale, 4 Corone per abitante una volta sola, record, pulsante nel menu Gioca');
+  ok(ac.encOmbra&&ac.encOmbraTutti&&ac.encArte&&ac.encLuce,'enciclopedia: le carte si vedono anche dal lato Ombra, con la loro illustrazione');
+  ok(ac.barra&&ac.numeri&&ac.gemme,'combattimento: barre della vita più alte e numeri più grandi; le Gemme si vedono nella barra in alto');
+  ok(ac.figura&&ac.sotto,'mappa: la figura dell\'eroe sta sotto i nodi e non prende i tocchi');
 
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));

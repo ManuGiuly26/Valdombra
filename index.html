@@ -232,6 +232,12 @@ body[data-dg="cripte"] .mapsvg .edge.done{stroke:#8fd3ff}body[data-dg="cripte"] 
 .intent{font-size:14px;font-weight:700;background:var(--stone);border:1px solid var(--line);border-radius:999px;padding:2px 9px;white-space:nowrap}
 .intent .atk{color:#ff8c7f}.intent .def{color:#8cc4ff}.intent .buf{color:var(--torch2)}.intent .deb{color:#c49bff}
 .bar{width:100%;height:12px;background:#0d0b12;border-radius:6px;overflow:hidden;position:relative;border:1px solid #000}
+/* v8.3: in combattimento le barre della vita sono più alte, con numeri grandi e contornati, leggibili su qualsiasi sfondo */
+.combat .ent .bar{height:18px;border-radius:7px;border:1px solid #000;box-shadow:0 0 0 1px rgba(255,255,255,.22),0 2px 6px rgba(0,0,0,.7)}
+.combat .ent .bar span{font-size:12.5px;font-weight:800;letter-spacing:.2px;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000,0 0 3px #000}
+.combat .ent .bar i{background:linear-gradient(#ff6b5e,#b3261b)}
+.combat .ent .nm{text-shadow:0 1px 2px #000,0 0 6px #000}
+body.scena .ent .bar{width:min(150px,100%)}
 .bar i{display:block;height:100%;background:linear-gradient(#e2574a,#9e2c23)}
 .bar span{position:absolute;inset:0;font-size:10px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;text-align:center;font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 1px 1px #000}
 .blk{font-size:12px;font-weight:700;color:#bfe0ff;background:#22436a;border-radius:6px;padding:0 6px}
@@ -389,6 +395,7 @@ body.hc{--muted:#ddd6ea;--line:#8d82a6}body.hc .card .cdesc{color:#15101c}body.h
 .mx.clima-nebbia,.mx.clima-gelo,.mx.clima-luna,.mx.clima-vento{border:1px solid}
 .mapsvg .clima-r rect{fill:rgba(255,255,255,.05);stroke:rgba(255,255,255,.18);stroke-dasharray:6 6}.mapsvg .clima-r text{fill:#e8e2f2;font-size:15px;font-weight:700;opacity:.85}
 .mapsvg .clima-nebbia rect{fill:rgba(160,175,195,.13)}.mapsvg .clima-gelo rect{fill:rgba(127,200,232,.12)}.mapsvg .clima-luna rect{fill:rgba(155,123,224,.14)}.mapsvg .clima-vento rect{fill:rgba(155,224,106,.10)}
+.portabar{border-color:#e0bd5c}.portafine{border-color:#e0bd5c}
 .ombar.lu{border-color:#e0bd5c}.ombar.lu span{color:#ffe7a8}
 /* Combattimento «a scena» (Sviluppo, v8.3): niente riquadri, figure sul terreno, vignetta e nebbia */
 body.scena .combat::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 115% 80% at 50% 42%,transparent 48%,rgba(6,4,10,.82) 100%)}
@@ -466,6 +473,7 @@ body.pxui .hand .card .cdesc.trunc{align-items:flex-start;-webkit-mask-image:lin
 .mapwrap.pxfill{background:linear-gradient(rgba(14,11,20,.74),rgba(14,11,20,.74)),var(--mapbg) center top/560px auto repeat;background-attachment:local}
 .mapwrap.pxfill .mapsvg{box-shadow:0 0 0 2px rgba(0,0,0,.35),0 0 48px 10px rgba(0,0,0,.55)}
 .mapsvg .node .hit{fill:transparent!important;stroke:none!important}
+.mapsvg .maperoe{pointer-events:none}
 /* pannello di amministrazione (v8.0) */
 .admin{display:flex;flex-direction:column;gap:10px;text-align:left}.admin h4{margin:10px 0 0;color:var(--torch2)}.admin h5{margin:8px 0 0;font-size:15px}
 .adtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
@@ -1457,7 +1465,7 @@ function dispatch(pid,a){
 function checkProgress(){
   if(!R||!isHost)return;
   if(R.phase==='map'){if(R.voteAnim)return;const act=active();if(act.length&&act.every(p=>R.votes[p]))resolveVote()}
-  else if(R.phase==='room'){if(active().every(p=>R.players[p].done)){R.order.forEach(p=>{R.players[p].screen=null;R.players[p].secret=null});if(R.segNext){const s=R.segNext;R.segNext=null;nodeContent(s.y,s.x);return}R.phase='map';R.votes={}}}
+  else if(R.phase==='room'){if(active().every(p=>R.players[p].done)){R.order.forEach(p=>{R.players[p].screen=null;R.players[p].secret=null});if(R.segNext){const s=R.segNext;R.segNext=null;nodeContent(s.y,s.x);return}if(isPorta()){portaDopo();return}R.phase='map';R.votes={}}}
   else if(R.phase==='combat'){const c=R.combat;if(c&&!c.busy&&!c.won&&Object.values(c.heroes).every(h=>h.down)){checkEnd();return}if(c&&!c.busy&&!c.won){const hs=Object.keys(c.heroes).filter(p=>!c.heroes[p].down&&isOnline(p));if(hs.length&&hs.every(p=>c.heroes[p].ended))enemyPhase()}}
 }
 
@@ -1574,14 +1582,15 @@ function initPlayer(P){
 }
 function startRunRoom(lvl,seed,mode,dg){
   dg=DUNGEONS[dg]?dg:'rocca';
-  if(mode==='surv')lvl=0;
+  if(mode==='surv'||mode==='porta')lvl=0;if(mode==='porta')dg='rocca';
   R.order=R.order.filter(p=>isOnline(p));Object.keys(R.players).forEach(p=>{if(!R.order.includes(p))delete R.players[p]});
   seed=String(seed||'').trim().toUpperCase().slice(0,12)||newSeed();
-  Object.assign(R,{lo:!!SET.lo,lox:!!(SET.lo&&SET.lox),seg:true,segN:0,segNext:null,seed,dg,deathAt:null,mode:mode==='surv'?'surv':'norm',cycle:1,lbId:null,t0:Date.now(),lvl:Math.max(0,Math.min(MAXLVL,lvl)),map:genMap(new RNG(hashStr(seed+'#map'+(dg==='rocca'?'':dg)))),bossI:hashStr(seed+'#boss'+dg)%2,pos:null,path:[],floor:0,votes:{},seenEv:[],combat:null,win:null,phase:'map'});
+  Object.assign(R,{lo:!!SET.lo,lox:!!(SET.lo&&SET.lox),seg:true,segN:0,segNext:null,seed,dg,deathAt:null,mode:mode==='surv'||mode==='porta'?mode:'norm',cycle:1,lbId:null,t0:Date.now(),lvl:Math.max(0,Math.min(MAXLVL,lvl)),map:genMap(new RNG(hashStr(seed+'#map'+(dg==='rocca'?'':dg)))),bossI:hashStr(seed+'#boss'+dg)%2,pos:null,path:[],floor:0,votes:{},seenEv:[],combat:null,win:null,phase:'map'});
   rng=new RNG(hashStr(seed+'#'+R.order.map(p=>R.players[p].cls).join('')));R.clima=genClimi();
   R.order.forEach(p=>{const P=R.players[p];const tal=P.tal;initPlayer(P);applyLoadout(P);P.tal=tal;applyTalents(P);applyVillage(P);P.miss=R.mode==='norm'?missPick(p):[];P.aiuto=null});
+  if(R.mode==='porta'){R.porta={ondata:0,fuori:PORTA_ONDATE*PORTA_GRUPPO,gruppo:0,salvati:0,persi:0,falo:0};R.clima={};portaOndata()}
 }
-function soloRestart(lvl){const P=R.players.solo;pickCls=P.cls;pickDg=R.dg||'rocca';pickMode=R.mode==='surv'?'surv':'norm';pickLvl=Math.max(0,Math.min(MAXLVL,lvl|0));UI.lbMsg='';UI.dMsg='';R=null;g=null;startSolo()}
+function soloRestart(lvl){const P=R.players.solo;pickCls=P.cls;pickDg=R.dg||'rocca';pickMode=R.mode==='surv'||R.mode==='porta'?R.mode:'norm';pickLvl=Math.max(0,Math.min(MAXLVL,lvl|0));UI.lbMsg='';UI.dMsg='';R=null;g=null;startSolo()}
 function mpRestart(l){const dg=R.dg||'rocca',m=R.mode==='surv'?'surv':'norm';const L=m==='surv'?0:l;const bl=blockers(dg,m,L);
   if(bl.length){toast(blockMsg(bl,dg,m,L)+' Tornate alla stanza e scegliete un livello che avete tutti.');return}UI.lbMsg='';send({t:'restart',lvl:l})}
 function againBtns(){
@@ -1592,6 +1601,7 @@ function againBtns(){
   const back=solo?`<button class="btn" onclick="R=null;g=null;UI.lbMsg='';screen='title';render()">Cambia eroe o dungeon</button>`:`<button class="btn" onclick="UI.lbMsg='';send({t:'again'})">Torna alla stanza</button><button class="btn" onclick="UI.lbMsg='';leaveRoom(true)">Esci dalla stanza</button>`;
   let main='';
   if(surv)main=`<button class="btn primary" onclick="${go(0)}">Ricomincia la Sopravvivenza</button>`;
+  else if(R.mode==='porta')main=`<button class="btn primary" onclick="${go(0)}">Riapri il cancello</button>`;
   else if(R.win&&L<MAXLVL)main=`<button class="btn primary" onclick="${go(L+1)}">Continua: Assedio ${L+1}</button><button class="btn" onclick="${go(L)}">Rigioca all'Assedio ${L}</button>`;
   else if(R.win)main=`<button class="btn primary" onclick="${go(L)}">Rigioca all'Assedio ${L} (il massimo)</button>`;
   else main=`<button class="btn primary" onclick="${go(L)}">Riprova${L?' all\'Assedio '+L:''}</button>${L>0?`<button class="btn" onclick="${go(L-1)}">Riprova all'Assedio ${L-1}</button>`:''}`;
@@ -1668,7 +1678,7 @@ const CLIMI={
   vento:{n:'Vento favorevole',d:'Nel primo turno peschi 1 carta in più.'},
 };
 function genClimi(){const r=new RNG(hashStr(R.seed+'#clima'+(R.dg||'')+':'+(R.cycle||1)));const o={};
-  r.shuffle([2,3,4,5,6,7,9,10,11,12]).slice(0,2).forEach(y=>{o[y]=r.pick(['nebbia','gelo',R.lo?'luna':'vento'])});return o}
+  const ids=r.shuffle(['nebbia','gelo',R.lo?'luna':'vento']);r.shuffle([2,3,4,5,6,7,9,10,11,12]).slice(0,2).forEach((y,i)=>{o[y]=ids[i]});return o}
 const climaOf=y=>R&&!R.daily&&R.clima?R.clima[y]||null:null;
 const climiList=()=>R&&!R.daily&&R.clima?Object.keys(R.clima).map(Number).sort((a,b)=>a-b).map(y=>[y,R.clima[y]]):[];
 function climaStart(){const c=R.combat;if(!c||!c.clima)return;
@@ -1700,6 +1710,38 @@ function mapExtraHTML(){const P=R&&R.players[ME];if(!P)return '';const out=[];
   const cl=climiList();if(cl.length)out.push(`<div class="mxbox"><b>Piani con un clima</b>${cl.map(([y,id])=>`<span class="mx clima-${id}">Piano ${y+1}: ${CLIMI[id].n}<small>${CLIMI[id].d}</small></span>`).join('')}</div>`);
   const ai=aiutiDisp(P);if(ai.length||P.aiuto)out.push(`<div class="mxbox"><b>${ic('i_house',16)} Aiuto dal villaggio</b>${P.aiuto?`<span class="mx ok">Già chiamato: ${AIUTI[P.aiuto].n}</span>`:`<button class="btn" onclick="aiutoUI()">Chiama un abitante (una volta per partita)</button>${LO()&&vilFiducia(ME)<1?`<small class="muted">${vilFidTxt(vilFiducia(ME))}</small>`:''}`}</div>`);
   return out.length?`<div class="mapextra">${out.join('')}</div>`:''}
+/* «Aprite il cancello» (v8.4): le campagne bruciano e i contadini corrono verso la Rocca.
+   Tieni aperto il cancello: 8 ondate di mostri, a ogni ondata 5 abitanti provano a entrare.
+   A ogni tuo turno uno passa il cancello; nei turni in cui i nemici ti feriscono ne catturano 1 (2 con élite o boss); vincendo entrano tutti gli altri.
+   Dopo la 3ª e la 6ª ondata un Falò; all'8ª arriva Gorrak. I premi dipendono da quanti abitanti salvi. */
+const PORTA_ONDATE=8,PORTA_GRUPPO=5,PORTA_CR=4,PORTA_K='valdombra-porta-premiate',PORTA_REC='valdombra-porta-record';
+const isPorta=()=>!!(R&&R.mode==='porta');
+function portaIds(w){const D=DUNGEONS.rocca,e=()=>rng.pick(D.easy),h=()=>rng.pick(D.hard),m=()=>rng.pick(D.easy.flat());
+  return [null,[e(),'combat'],[[...e(),m()],'combat'],[h(),'combat'],[rng.pick(D.elites),'elite'],[[...h(),m()],'combat'],[[...h(),...e()],'combat'],[[...rng.pick(D.elites),m()],'elite'],[['signoreguerra'],'boss']][w]}
+function portaOndata(){const P=R.porta;P.ondata++;P.gruppo=Math.min(PORTA_GRUPPO,P.fuori);P.fuori-=P.gruppo;R.floor=P.ondata;R.pos=null;
+  const [ids,kind]=portaIds(P.ondata);startCombat(Array.isArray(ids)?ids:[ids],kind)}
+function portaCattura(){const c=R.combat,P=R.porta;if(!isPorta()||!c||!P||!P.gruppo||!c.ferito)return;const al=alive();if(!al.length)return;
+  const n=Math.min(P.gruppo,al.some(e=>e.boss||ENEMIES[e.id].elite)?2:1);P.gruppo-=n;P.persi+=n;
+  fx(eid(al[0]),n>1?'−'+n+' abitanti':'−1 abitante','dmg')}
+// dopo la ricompensa: Falò alla 3ª e alla 6ª ondata, poi l'ondata seguente
+function portaDopo(){const P=R.porta;if((P.ondata===3||P.ondata===6)&&P.falo!==P.ondata){P.falo=P.ondata;const ids=active();R.phase='room';
+    R.order.forEach(pid=>{const Q=R.players[pid];Q.done=!ids.includes(pid);Q.screen=Q.done?null:'rest'});return}
+  portaOndata()}
+function portaBanner(){const P=R.porta;if(!P)return '';
+  return `<div class="climabar portabar"><b>Ondata ${P.ondata}/${PORTA_ONDATE}</b> · ${P.gruppo?`${P.gruppo} ${pl(P.gruppo,'abitante aspetta','abitanti aspettano')} al cancello: a ogni tuo turno ne entra uno, ma se i nemici ti feriscono ne catturano ${alive().some(e=>e.boss||ENEMIES[e.id].elite)?2:1}`:'Nessuno in attesa al cancello'} · <span style="color:#9be06a">Salvati ${P.salvati}</span> · <span style="color:#ff9a8f">Persi ${P.persi}</span></div>`}
+function portaAward(){if(!isPorta()||R.phase!=='end'||!R.porta)return null;const key=R.code+':'+R.seed+':'+(R.t0||0);const done=jsonArr(PORTA_K);
+  const n=R.porta.salvati,cr=n*PORTA_CR,gm=n>=PORTA_ONDATE*PORTA_GRUPPO?2:n>=30?1:0;
+  if(done.includes(key))return UI.lastPorta&&UI.lastPorta.key===key?UI.lastPorta:{cr,gm,rec:false};
+  done.push(key);store(PORTA_K,JSON.stringify(done.slice(-50)));setCrowns(getCrowns()+cr);if(gm&&GEMON())setGems(getGems()+gm);
+  const rec=n>(parseInt(load(PORTA_REC)||'0',10)||0);if(rec)store(PORTA_REC,String(n));UI.lastPorta={key,cr,gm,rec};return UI.lastPorta}
+function portaEndScreen(){const P=R.porta||{salvati:0,persi:0,ondata:0},a=portaAward()||{cr:0,gm:0},tot=PORTA_ONDATE*PORTA_GRUPPO,rec=parseInt(load(PORTA_REC)||'0',10)||0;
+  const t=R.win?(P.salvati>=tot?'Tutti in salvo!':'Il cancello è chiuso'):'Il cancello è caduto';
+  const d=R.win?(P.salvati>=tot?'Nessun abitante è rimasto fuori: Valdombra canterà il tuo nome per generazioni.':'Gorrak è sconfitto e il cancello si chiude alle spalle degli ultimi fuggiaschi.'):'Le orde hanno sfondato. Chi è riuscito a entrare racconterà del tuo coraggio.';
+  return `<main><div class="wrap"><h1 style="font-size:clamp(38px,8vw,60px)">${t}</h1><p class="lede muted">${d}</p>
+    <div class="panel portafine"><div class="adtiles"><div class="adtile"><small>Abitanti salvati</small><b style="color:#9be06a">${P.salvati}</b><span>su ${tot}</span></div><div class="adtile"><small>Persi</small><b style="color:#ff9a8f">${P.persi}</b><span>catturati dalle orde</span></div><div class="adtile"><small>Ondate</small><b>${R.win?PORTA_ONDATE:Math.max(0,P.ondata-1)}</b><span>respinte su ${PORTA_ONDATE}</span></div><div class="adtile"><small>Il tuo record</small><b>${rec}</b><span>${a.rec?'nuovo record!':'abitanti salvati'}</span></div></div>
+    <p><b style="color:var(--torch2)">+${a.cr} Corone</b>${a.gm?` e <b class="gemc">+${a.gm} ${pl(a.gm,'Gemma','Gemme')}</b>`:''} · ${PORTA_CR} Corone per ogni abitante salvato; 1 Gemma se ne salvi almeno 30, 2 se li salvi tutti.</p></div>
+    ${summaryHTML()}${achPanel()}${xpPanel()}${gemsPanel()}
+    <div class="row">${againBtns()}</div></div></main>`}
 function newCycle(){
   R.cycle++;R.map=genMap(new RNG(hashStr(R.seed+'#map'+R.cycle)));R.pos=null;R.path=[];R.floor=0;R.votes={};R.segN=0;R.segNext=null;R.clima=genClimi();
   R.order.forEach(p=>{const P=R.players[p];P.hp=Math.min(P.max,P.hp+Math.floor(P.max*.3))});
@@ -1729,6 +1771,8 @@ function canShadow(c){return omBase(c)||omExt(c)}
 function shadowVals(v){const o={...v};OM_KEYS.forEach(k=>{if(o[k]>0)o[k]=shUp(o[k])});return o}
 // i valori mostrati e usati dal lato Ombra
 function omVals(c){return omExt(c)?omxVals(vals(c)):shadowVals(vals(c))}
+// per l'enciclopedia (fuori dalla partita): 'O' lato Ombra di base, 'X' esteso (solo con «Ombra per tutti gli eroi»), null nessuno
+function encShadow(id){const d=CARDS[id];if(!d||d.unplay||d.nosh||d.t==='P'||d.t==='X')return null;const v=d.v||{};if(OM_KEYS.some(k=>v[k]>0))return 'O';return SET.lo&&SET.lox?'X':null}
 // Equilibrio (v8.3): chi resta nella Luce (0-2 Ombra) ha i suoi vantaggi, chi scende nell'Ombra paga di più.
 // Luce: cure +25%, Scudo di Luce (+3 Armatura a fine turno se hai giocato solo carte Luce) e il potere di Luce dell'eroe.
 // Ombra 5+: i nemici colpiscono più forte e c'è il potere d'Ombra dell'eroe; da 7 le cure curano la metà.
@@ -1807,6 +1851,7 @@ function rollIntents(){
 }
 function startTurn(){
   const c=R.combat;c.turn++;c.pings={};
+  if(isPorta()&&R.porta&&R.porta.gruppo>0){R.porta.gruppo--;R.porta.salvati++;fxq.push({k:'h-'+(R.order[0]),txt:'+1 abitante in salvo',cls:'heal'})}
   Object.values(c.heroes).forEach(h=>{if(!h.pw.fortezza)h.blk=0;h.played={};h.nTurn=0;h.shTurn=0;delete h.st.spine});
   Object.keys(c.heroes).forEach(pid=>{const h=c.heroes[pid];if(h.down)return;ctx(pid);heroTurnStart(h,c.turn)});
   checkEnd();
@@ -1867,7 +1912,7 @@ function hurtHero(d){
   const h=g.hero;const b=Math.min(h.blk,d);h.blk-=b;let r=d-b;
   if(r>0&&h.min&&h.min.length){const m=h.min[0];m.hp-=r;fx('hero','Lo Scheletro para','blk');if(m.hp<=0)h.min.shift();r=0;heroDown();return}
   if(r>0&&has('giuramento'))S(h,'fervor',1+(h.pw.zelo||0));
-  if(r>0){run.hp-=r;if(run.stx)run.stx.taken+=r;fx('hero','-'+r,'dmg')}else fx('hero','Parato','blk');
+  if(r>0){run.hp-=r;if(run.stx)run.stx.taken+=r;fx('hero','-'+r,'dmg');if(R.combat&&R.combat.busy)R.combat.ferito=1}else fx('hero','Parato','blk');
   heroDown();
 }
 /* Effetti usati dalle carte */
@@ -1951,7 +1996,7 @@ function endHeroTurn(){
   decay(h);h.ended=true;
 }
 async function enemyPhase(){
-  const c=R.combat;if(!c||c.busy)return;c.busy=true;
+  const c=R.combat;if(!c||c.busy)return;c.busy=true;c.ferito=0;
   await wait(10);commit();await wait(300);
   if(Object.values(c.heroes).some(h=>!h.down&&((h.min&&h.min.length)||h.pet))){allyAttacks();commit();await wait(350);if(R.combat!==c)return;if(!alive().length){c.busy=false;checkEnd();checkProgress();commit();return}}
   for(const e of c.enemies){
@@ -1968,7 +2013,7 @@ async function enemyPhase(){
   }
   if(R.combat!==c)return;
   Object.values(c.heroes).forEach(h=>{if(h.st.taunt){h.st.taunt--;if(!h.st.taunt)delete h.st.taunt}});
-  c.enemies.forEach(decay);c.busy=false;
+  c.enemies.forEach(decay);c.busy=false;portaCattura();
   if(!checkEnd()){rollIntents();startTurn()}
   checkProgress();commit();
 }
@@ -1978,7 +2023,8 @@ function doIntent(e){
   if(it.b){e.blk+=Math.round(it.b*(e.dm||1));fx(eid(e),'+'+Math.round(it.b*(e.dm||1)),'blk')}
   if(it.s)(it.all?alive():[e]).forEach(x=>x.st.str=(x.st.str||0)+it.s);
   if(it.summon&&alive().length<5){const ne=mkEnemy(it.summon);c.enemies.push(ne);fx(eid(ne),'Evocato!','blk')}
-  if(it.heal){const b=e.hp;e.hp=Math.min(e.max,e.hp+Math.round(it.heal*(1+.7*(c.n-1))));fx(eid(e),'+'+(e.hp-b),'heal')}
+  // un nemico si cura al massimo di metà dei suoi PV per combattimento: così un combattimento non può durare per sempre
+  if(it.heal){const b=e.hp,lim=Math.max(0,Math.floor(e.max*.5)-(e.healed|0));const v=Math.min(lim,Math.round(it.heal*(1+.7*(c.n-1))));e.hp=Math.min(e.max,e.hp+v);e.healed=(e.healed|0)+(e.hp-b);fx(eid(e),v>0?'+'+(e.hp-b):'Non si cura più','heal')}
   if(it.d||it.deb||it.curse){
     fxq.push({k:eid(e),txt:'',cls:'pxa'});// segnale per l'animazione d'attacco della Grafica Pixellab
     const fix=p=>{const tt=taunter();if(tt)return tt;if(p&&c.heroes[p]&&!c.heroes[p].down)return p;const t=targetable();return t.length?rng.pick(t):null};
@@ -1997,6 +2043,7 @@ function checkEnd(){
 }
 function winCombat(){
   const c=R.combat,kind=c.kind,pids=Object.keys(c.heroes);
+  if(isPorta()&&R.porta){R.porta.salvati+=R.porta.gruppo;R.porta.gruppo=0}
   pids.forEach(pid=>{const P=R.players[pid],x=P&&P.stx;if(!x)return;if(kind==='elite')x.elites=(x.elites||0)+1;
     if(kind==='boss'){x.bk=(x.bk||0)+1;x.bosses=x.bosses||[];c.enemies.forEach(e=>{if(BOSSI[e.id]&&!x.bosses.includes(e.id))x.bosses.push(e.id)});if(!c.heroes[pid].down&&c.hp0&&P.hp>=c.hp0[pid])x.flawless=1}});
   pids.forEach(pid=>{ctx(pid);missWin(c,pid);if(c.heroes[pid].down)run.hp=Math.max(1,Math.floor(run.max*.25));else{if(has('elmo'))H(6);if(has('calicestelle'))H(8);if(TE('heal'))H(TE('heal'));if(has('martellonano')){const ids=run.deck.map((c,i)=>i).filter(i=>canUp(run.deck[i]));if(ids.length)run.deck[rng.pick(ids)].up=true}if(hasT('g5')||hasT('c2'))H(5);if(has('calice')){run.max++;run.hp++}}});
@@ -2278,7 +2325,8 @@ function guidaHTML(){const t=UI.guTab||'base';const sec=(h,b)=>`<div class="pane
   if(t==='dungeon')b=Object.entries(DUNGEONS).map(([k,d])=>sec(d.n,`<span>${d.desc}</span><span class="muted">${d.req?`Si sblocca completando ${DUNGEONS[d.req].n} in modalità normale (in Sopravvivenza basta superare lì un ciclo).`:'Disponibile da subito.'} Vittoria: ${d.crowns} Corone, più 20 per ogni Livello di Assedio.</span>`+(BOSSES[k]||[d.boss]).map(id=>`<div class="row" style="gap:10px;flex-wrap:nowrap;margin-top:6px">${sprImg(id,44)}<div><b>${ENEMIES[id].n}</b><br><span class="muted">${BOSSI[id][3]}</span></div></div>`).join(''))).join('')
     +sec('Tratti delle élite','Ogni élite ha un tratto scelto a caso. Toccando l\'etichetta sotto il nome lo rileggi in combattimento.'+'<span class="muted">Da soli i tratti sono più deboli che in gruppo.</span>'+Object.keys(ETRAITS).map(k=>def(ETRAITS[k][0],`Da soli: ${trDesc(k,false)} In gruppo: ${trDesc(k,true)}`)).join(''))
     +sec('Bestiario','Nel Diario, alla voce «Mostri», trovi tutti i nemici che hai incontrato, con i loro PV e i dungeon in cui vivono.');
-  if(t==='modi')b=sec('Normale',`Attraversi i 15 piani del dungeon e affronti il boss. Se vinci guadagni Corone, il dungeon conta come completato (sblocca il successivo) e sblocchi il Livello di Assedio seguente in quel dungeon.`)
+  if(t==='modi')b=sec('Aprite il cancello','Le campagne di Valdombra bruciano e i contadini corrono verso la Rocca. Tu tieni aperto il cancello contro <b>8 ondate</b> di mostri (Gorrak arriva all\'ultima). A ogni ondata 5 abitanti aspettano di entrare: a ogni tuo turno ne passa uno, ma nei turni in cui i nemici ti feriscono ne catturano 1 (2 se c\'è un\'élite o il boss). Quando vinci l\'ondata entrano tutti quelli rimasti. Dopo la 3ª e la 6ª ondata c\'è un Falò. A fine partita prendi '+PORTA_CR+' Corone per ogni abitante salvato, 1 Gemma se ne salvi almeno 30 e 2 se li salvi tutti.')
+    +sec('Normale',`Attraversi i 15 piani del dungeon e affronti il boss. Se vinci guadagni Corone, il dungeon conta come completato (sblocca il successivo) e sblocchi il Livello di Assedio seguente in quel dungeon.`)
     +sec('Livelli di Assedio',`Da 0 a ${MAXLVL}. Ogni livello rende i nemici più forti ma dà più oro, carte rare più frequenti e più Corone. Per esempio, Assedio 1: ${lvlDesc(1)} Assedio ${MAXLVL}: ${lvlDesc(MAXLVL)}`)
     +sec('Sopravvivenza','Il dungeon non finisce mai: dopo il boss ricomincia da capo più difficile (un nuovo «ciclo»), e recuperi un po\' di PV. Si va avanti finché cadete. Il punteggio va nella classifica, le Corone dipendono dai piani superati, il Livello di Assedio non si usa.')
     +sec('Sfida del giorno','Ogni giorno una partita uguale per tutti: eroe, dungeon, seed e un modificatore speciale sono decisi dal giorno, e non si ripetono mai uguali al giorno prima. L\'eroe può essere uno qualsiasi dei 10, anche uno che non hai ancora sbloccato: è l\'occasione per provarlo gratis. Vale solo il primo tentativo, senza zaino né abilità uniche, e c\'è una classifica giornaliera. Non sblocca dungeon né livelli.')
@@ -2314,7 +2362,7 @@ function startSolo(){
   R=newLobby('SOLO');R.players.solo.name=CLASSES[pickCls].n;R.players.solo.loadout=getZaino();R.players.solo.tal=getTal();R.players.solo.vil=SET.vil!==false?getVil():{};R.players.solo.cim=GEMON()?cimSel():[];rng=new RNG(1);
   if($('#sname')&&$('#sname').value.trim()){myName=$('#sname').value.trim().slice(0,16);store('valdombra-nome',myName)}
   if(pickMode==='surv'&&myName)R.players.solo.name=myName;
-  if(!dgUnlocked(pickDg,pickMode))pickDg='rocca';
+  if(pickMode==='porta'||!dgUnlocked(pickDg,pickMode))pickDg='rocca';
   startRunRoom(Math.min(pickLvl,getUnlocked(pickDg)),($('#seed')&&$('#seed').value)||'',pickMode,pickDg);commit();
 }
 function continueSolo(){const s=load(SOLO_K);if(!s)return;solo=true;isHost=true;chan=null;ME='solo';online=new Set([ME]);R=JSON.parse(s);rng=new RNG(0);rng.s=R.rs|0;commit()}
@@ -2512,7 +2560,7 @@ function pxMapLayer(map,W,H,G,pos){const d=R.dg||'rocca';if(!pxOkK('sfondi/mappa
   let deco='';map.forEach((row,y)=>{for(let x=0;x<7;x++){if(row&&row[x])continue;const h=hashStr(R.seed+'#d'+y+','+x);if(h%100>=45)continue;const i=1+h%4;if(!pxOkK('mappa/'+d+'-'+i))continue;
     const cx=mapX(x,(h>>3)%30-15),cy=H-50-y*G+(h>>6)%24-12;deco+=`<image href="pixel/mappa/${d}-${i}.png" x="${cx-24}" y="${cy-24}" width="48" height="48" style="image-rendering:pixelated" opacity=".9"/>`}});
   let heroes='';if(R.pos){const n=map[R.pos.y][R.pos.x];if(n){const[x1,y1]=pos(n),r=n.type==='boss'?44:28;const ids=R.order.filter(p=>R.players[p]);
-    ids.forEach((p,i)=>{const P=R.players[p],c=pxCls(P),off=(i-(ids.length-1)/2)*20;heroes+=c?`<image href="pixel/${c}.png" x="${x1-34+off}" y="${y1-r-58}" width="68" height="68" style="image-rendering:pixelated"/>`:`<image href="${spr(hsk(P))}" x="${x1-14+off}" y="${y1-r-32}" width="28" height="28" style="image-rendering:pixelated"/>`})}}
+    ids.forEach((p,i)=>{const P=R.players[p],c=pxCls(P),off=(i-(ids.length-1)/2)*20;heroes+=c?`<image class="maperoe" href="pixel/${c}.png" x="${x1+r-14+off}" y="${y1-30}" width="52" height="52" style="image-rendering:pixelated"/>`:`<image class="maperoe" href="${spr(hsk(P))}" x="${x1+r-4+off}" y="${y1-14}" width="26" height="26" style="image-rendering:pixelated"/>`})}}
   return {bg,deco,heroes}}
 function pxMapNode(n,x1,y1,r,bid){if(n.type==='boss'&&pxeOk(bid)){const [C,x0,y0,xx,yy]=PXE[bid],F=Math.max(xx-x0,yy-y0),s=r*1.7/F,S=C*s;
     return `<image href="pixel/nemici/${bid}.png" x="${(x1-(x0+xx)/2*s).toFixed(1)}" y="${(y1-(y0+yy)/2*s).toFixed(1)}" width="${S.toFixed(1)}" height="${S.toFixed(1)}" style="image-rendering:pixelated"/>`}
@@ -2636,7 +2684,7 @@ function cardHTML(c,o={}){
   const d=CARDS[c.id];const tag=o.click?'button':'div';
   return `<${tag} class="card t-${d.t} r-${d.r} ${c.up?'up':''} ${o.cls||''}" data-gl="${glKeys(c,d).join(',')}" data-cid="${c.id}"${c.uid!=null?` data-uid="${c.uid}"`:''} ${o.click?`onclick="${o.click}" aria-label="${d.n}"`:''}>
     <span class="cost ${!d.unplay&&!d.xc&&costOf(c)<CARDS[c.id].c?'cheap':''}${d.xc?' xcost':''}">${d.unplay?'–':d.xc?'X':costOf(c)}</span><span class="cname">${SET.px?d.n.split(' ').map(hyIt).join(' '):d.n}${c.up?'+':''}</span>${artStrip(c.id,o.sh)}<span class="ctype">${TYPEN[d.t]}</span>
-    <span class="cdesc"><span>${innOf(c)?'<b>Innata.</b> ':''}${d.x(o.sh?omVals(c):vals(c)).replace(KW,'<b>$1</b>')}${o.sh?` <b class="omtag">Lato Ombra: ${omExt(c)&&omxDraw(c)?'peschi 1 carta in più, ':''}+1 Ombra.</b>`:''}${d.grow&&((c.g||0)+(c.pg||0))?` <i class="gained">Finora +${vals(c).gi*((c.g||0)+(c.pg||0))}.</i>`:''}${liveNote(c,d)}${d.back?' <b>Ritorna</b> in cima al mazzo.':''}${exOf(c)?' <b>Esaurisci.</b>':''}${d.t==='X'?' <i>Sparisce a fine combattimento.</i>':''}</span></span></${tag}>`;
+    <span class="cdesc"><span>${innOf(c)?'<b>Innata.</b> ':''}${d.x(o.sh?((o.shx||(omExt(c)?'X':'O'))==='X'?omxVals(vals(c)):shadowVals(vals(c))):vals(c)).replace(KW,'<b>$1</b>')}${o.sh?` <b class="omtag">Lato Ombra: ${(o.shx||(omExt(c)?'X':'O'))==='X'&&omxDraw(c)?'peschi 1 carta in più, ':''}+1 Ombra.</b>`:''}${d.grow&&((c.g||0)+(c.pg||0))?` <i class="gained">Finora +${vals(c).gi*((c.g||0)+(c.pg||0))}.</i>`:''}${liveNote(c,d)}${d.back?' <b>Ritorna</b> in cima al mazzo.':''}${exOf(c)?' <b>Esaurisci.</b>':''}${d.t==='X'?' <i>Sparisce a fine combattimento.</i>':''}</span></span></${tag}>`;
 }
 function liveNote(c,d){const h=typeof g!=='undefined'&&g&&g.hero;if(!h||!h.hand||!h.hand.includes(c))return '';
   if(d.xc)return ` <i class="gained">Ora X = ${h.energy}.</i>`;
@@ -2676,7 +2724,8 @@ function hud(){
     <span class="cls">${sprImg(hsk(run),26,'inl')} ${solo?cl.n:esc(run.name)}</span>
     <span class="stat hp-t"><b>PV</b>${Math.max(0,run.hp)}/${run.max}</span>
     <span class="stat gold-t"><b>Oro</b>${run.gold}</span>
-    <span class="stat"><b>Piano</b>${R.floor}/${ROWS+1}</span>${R.mode==='surv'?`<span class="stat" style="color:var(--torch2)"><b>Ciclo</b>${R.cycle}</span>`:''}${R.lvl?`<span class="stat" style="color:#ff9a8f"><b>Assedio</b>${R.lvl}</span>`:''}
+    ${GEMON()?`<span class="stat gem-t" title="Le tue Gemme: servono anche per purificarti dall'Ombra"><b>Gemme</b><span class="gemc">${getGems()}</span></span>`:''}
+    ${isPorta()&&R.porta?`<span class="stat"><b>Ondata</b>${R.porta.ondata}/${PORTA_ONDATE}</span><span class="stat" style="color:#9be06a"><b>Salvati</b>${R.porta.salvati}</span>`:`<span class="stat"><b>Piano</b>${R.floor}/${ROWS+1}</span>`}${R.mode==='surv'?`<span class="stat" style="color:var(--torch2)"><b>Ciclo</b>${R.cycle}</span>`:''}${R.lvl?`<span class="stat" style="color:#ff9a8f"><b>Assedio</b>${R.lvl}</span>`:''}
     <span class="pots">${[0,1,2].map(i=>{const id=run.potions[i];return id?`<button class="pot full ${UI.sel&&UI.sel.k==='p'&&UI.sel.i===i?'sel':''}" title="${POTIONS[id].n}: ${POTIONS[id].d}" aria-label="${POTIONS[id].n}" onclick="clickPotion(${i})">${potIc(id,20)}</button>`:'<span class="pot" aria-hidden="true"></span>'}).join('')}</span>
     <span class="relics">${run.relics.map(r=>`<button class="relic" title="${RELICS[r].n}: ${RELICS[r].d}" aria-label="${RELICS[r].n}" onclick="relicInfo('${r}')">${relIc(r,22)}</button>`).join('')}</span>
     <span class="grow"></span>
@@ -2777,7 +2826,7 @@ function levelPicker(){
 function vilPanel(){if(SET.vil===false)return '';const d=vilDone(),t=vilTot();return `<div class="panel" style="flex-direction:row;align-items:center;flex-wrap:wrap;${d?'':'border-color:var(--torch)'}"><span style="line-height:0">${ic('i_house',34)}</span><div style="flex:1;min-width:200px"><b style="font-size:17px">Villaggio di Valdombra</b><br><span class="muted">${d?`Ricostruzioni: ${d}/${t}. Ogni edificio ti dà un vantaggio a inizio partita.`:'Il villaggio è in macerie: aiuta gli abitanti e ricostruiscilo per ottenere vantaggi in ogni partita.'}</span></div><button class="btn" onclick="openVillaggio()">Vai al villaggio</button></div>`}
 const dgIn=k=>({rocca:'nella ',cripte:'nelle ',abisso:'nell\''}[k]||'in ')+DUNGEONS[k].n;
 function openGioca(){modal={title:'Gioca',gioca:true,cancel:true,list:[]};render()}
-function giocaSolo(m){pickMode=m;if(!dgUnlocked(pickDg,m))pickDg='rocca';pickLvl=Math.min(pickLvl,getUnlocked(pickDg));modal=null;startSolo()}
+function giocaSolo(m){pickMode=m;if(m==='porta')pickDg='rocca';else if(!dgUnlocked(pickDg,m))pickDg='rocca';pickLvl=Math.min(pickLvl,getUnlocked(pickDg));modal=null;startSolo()}
 function giocaScroll(){setTimeout(()=>{const el=$('.classes');if(el)el.scrollIntoView({behavior:SET.anim?'smooth':'auto',block:'start'})},60)}
 function giocaHTML(){
   let sv=null;try{const x=load(SOLO_K);sv=x?JSON.parse(x):null}catch(e){}const sp=sv&&sv.players&&sv.players.solo;
@@ -2789,6 +2838,7 @@ function giocaHTML(){
     <div class="gopts">
       ${b("giocaSolo('norm')",ic('combat',36),'Da solo: Normale',`I 15 piani di ${DUNGEONS[dg].n} fino al boss. Vinci Corone e Livelli di Assedio.`,!sp)}
       ${b("giocaSolo('surv')",ic('boss',36),'Da solo: Sopravvivenza','Il dungeon non finisce mai e diventa sempre più forte. Punteggio in classifica.')}
+      ${b("giocaSolo('porta')",ic('i_house',36),'Aprite il cancello','Le campagne bruciano: tieni aperto il cancello della Rocca contro 8 ondate. A ogni turno un abitante entra, ma se i nemici ti feriscono ne catturano. Salvane più che puoi.'+((r=>r?' Record: '+r+' salvati.':'')(parseInt(load(PORTA_REC)||'0',10)||0)))}
       ${b("modal=null;startDaily()",ic('event',36),'Sfida del giorno',`${CLASSES[info.cls].n} ${dgIn(info.dg)} · ${info.mod.n}${dd?' · già giocata oggi: sarà un allenamento':''}`)}
       ${b("modal=null;screen='mp';render()",ic('i_crown',36),'Con gli amici',`Crea una stanza o entra con un codice. Fino a ${MAXP} eroi.`)}
     </div></div>`}
@@ -2913,7 +2963,7 @@ function mapScreen(){
     ${mine.length?`<button class="btn" onclick="send({t:'plan',p:[]})">Cancella il mio</button>`:''}<button class="btn ${UI.draw?'primary':''}" onclick="UI.draw=!UI.draw;render()">${UI.draw?'Fine, torna a votare':'Traccia un percorso'}</button></div>`;
   const pxl=pxMapLayer(map,W,H,G,pos);
   const climi=climiList().map(([y,id])=>{const yy=H-50-y*G;return `<g class="clima-r clima-${id}"><rect x="6" y="${yy-38}" width="${W-12}" height="76" rx="14"/><text x="18" y="${yy-22}">${CLIMI[id].n}</text></g>`}).join('');
-  return `<main class="flush">${banner}${tools}<div class="mapwrap ${pxl.bg?'pxfill':''}" id="mapwrap"${pxl.bg?` style="--mapbg:url(pixel/sfondi/mappa-${R.dg||'rocca'}.png)"`:''}><svg class="mapsvg ${UI.draw?'drawing':''} ${pxl.bg?'pxmap':''}" id="mapsvg" viewBox="0 0 ${W} ${H}" aria-label="Mappa della Rocca">${pxl.bg}${climi}${pxl.deco}${lines}${plans}${nodes}${pxl.heroes}</svg></div>
+  return `<main class="flush">${banner}${tools}<div class="mapwrap ${pxl.bg?'pxfill':''}" id="mapwrap"${pxl.bg?` style="--mapbg:url(pixel/sfondi/mappa-${R.dg||'rocca'}.png)"`:''}><svg class="mapsvg ${UI.draw?'drawing':''} ${pxl.bg?'pxmap':''}" id="mapsvg" viewBox="0 0 ${W} ${H}" aria-label="Mappa della Rocca">${pxl.bg}${climi}${pxl.deco}${lines}${plans}${pxl.heroes}${nodes}</svg></div>
     <div class="legend">${Object.keys(NODEIC).map(k=>`<span>${sprImg(k,16,'inl')} ${NODEN[k]}</span>`).join('')}<span style="color:var(--torch2)">${msg}</span></div>${mapExtraHTML()}</main>`;
 }
 function scrollMap(){
@@ -2940,7 +2990,7 @@ function combatScreen(){
   const heroes=Object.keys(g.heroes).filter(p=>!g.heroes[p].down&&isOnline(p));const ended=heroes.filter(p=>g.heroes[p].ended).length;
   let status=UI.ping?'Segnala: tocca un nemico («attacco questo!») o il tuo eroe («proteggimi!»)':UI.om&&!sel?'Lato Ombra: scegli la carta da giocare (+50%, +1 Ombra)':sel?(sel.ally?'Scegli l\'eroe da aiutare':'Scegli un nemico come bersaglio'):'Turno '+g.turn;
   if(g.busy)status='Turno dei nemici...';else if(h.down)status='Sei a terra: ti rialzi a fine combattimento';else if(h.ended&&!solo)status=`In attesa degli altri (${ended}/${heroes.length})`;
-  return `<main class="flush"><div class="combat" style="--omb:${LO()?(omOf(ME)/OM_MAX*.75).toFixed(2):0}${pxCombatBg()}"><div class="cscroll" id="cscroll">${g.clima&&CLIMI[g.clima]?`<div class="climabar clima-${g.clima}"><b>${CLIMI[g.clima].n}</b> · ${CLIMI[g.clima].d}</div>`:''}
+  return `<main class="flush"><div class="combat" style="--omb:${LO()?(omOf(ME)/OM_MAX*.75).toFixed(2):0}${pxCombatBg()}"><div class="cscroll" id="cscroll">${isPorta()?portaBanner():''}${g.clima&&CLIMI[g.clima]?`<div class="climabar clima-${g.clima}"><b>${CLIMI[g.clima].n}</b> · ${CLIMI[g.clima].d}</div>`:''}
     <div class="enemies">${en}</div>
     ${allies?`<div class="allies">${allies}</div>`:''}
     <div class="herorow">
@@ -3030,11 +3080,12 @@ function treasureScreen(){
 }
 function endScreen(){
   const L=R.lvl||0;
-  if(R.win&&!R.daily&&R.mode!=='surv'&&R.players[ME]&&UI.unlockSeed!==R.code+R.seed+R.t0){UI.unlockSeed=R.code+R.seed+R.t0;UI.unlocked=null;UI.newDg=null;const dg=R.dg||'rocca';
+  if(R.win&&!R.daily&&R.mode==='norm'&&R.players[ME]&&UI.unlockSeed!==R.code+R.seed+R.t0){UI.unlockSeed=R.code+R.seed+R.t0;UI.unlocked=null;UI.newDg=null;const dg=R.dg||'rocca';
     const had=Object.keys(DUNGEONS).filter(k=>dgUnlocked(k,'norm'));markBeaten(dg);UI.newDg=Object.keys(DUNGEONS).find(k=>dgUnlocked(k,'norm')&&!had.includes(k))||null;
     if(L<MAXLVL&&getUnlocked(dg)<=L){setUnlocked(L+1,dg);UI.unlocked=L+1;pickLvl=L+1}}
   const kills=R.order.reduce((s,p)=>s+(R.players[p].kills||0),0);
   if(R.mode==='surv')return survEndScreen(L,kills);
+  if(R.mode==='porta')return portaEndScreen();
   const score=Math.round((R.floor*10+kills*3+(R.win?150:0))*scoreMult(L));
   return `<main><div class="wrap"><h1 style="font-size:clamp(40px,8vw,64px)">${R.win?DG().winT:(solo?'Sei caduto':'Il gruppo è caduto')}</h1>
     <p class="lede muted">${R.win?BOSSI[bossId()][1]:DG().loseD}</p>
@@ -3417,7 +3468,7 @@ function startVoteAnim(va){
 }
 function paintAnim(){document.querySelectorAll('.mapsvg .node').forEach(n=>{n.classList.toggle('spin',!!UI.anim&&n.dataset.k===UI.anim.cur)})}
 /* ================= IMPOSTAZIONI ================= */
-const VERSION='v8.3',VDATE='18/11';
+const VERSION='v8.4',VDATE='18/11';
 const SET_K='valdombra-impostazioni';
 const SET_DEF={mus:.5,sfx:.7,mute:false,chat:true,chatToast:true,anim:!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),vib:true,ts:1,hc:false,tut:true,stats:true,lo:true,lox:false,scena:false,vil:true,gem:true,px:true};
 // dalla v8.2 Villaggio, Gemme e Grafica Pixellab sono sempre accesi (in Sviluppo resta solo Luce e Ombra)
@@ -3477,7 +3528,7 @@ function settingsHTML(){
       <div class="srow"><div class="lab">Profilo</div><b>${ACC?esc(ACC.nome):'nessuno'}</b><button class="btn" onclick="openProfilo()">${ACC?'Gestisci':'Accedi'}</button></div>
       ${ADM.ok?`<div class="srow"><div class="lab">Amministrazione<small>Visite, visitatori unici, partite, eroi, carte e classifica.</small></div><button class="btn primary" onclick="openAdmin()">Apri il pannello</button></div>`:''}
       ${inRoom?`<div class="srow"><div class="lab">Stanza</div><b>${R.code}</b></div><div class="srow"><div class="lab">Connessione</div><b>${isHost?'Sei tu a guidare la stanza':'Collegato'}</b></div>`:''}
-      <p class="muted" style="font-size:13px">Novità della 8.3: Luce e Ombra più equilibrate. Con 0-2 Ombra sei nella Luce: cure +25%, Scudo di Luce e il potere di Luce del tuo eroe; da 5 Ombra c'è il potere d'Ombra, ma da 7 le cure ti curano la metà. Missioni di partita (tre obiettivi per Corone e Gemme), reliquie maledette, piani con un clima (Nebbia, Gelo, Luna nera, Vento) e un aiuto dal villaggio per partita. Le carte giocate dal lato Ombra hanno la loro illustrazione. Goblin ridisegnati. In Sviluppo c'è «Combattimento a scena». La purificazione dall'Ombra si paga in Gemme, che ora sono più rare. Corretto: un nemico che si cura e aggiunge Ferite non può più rendere un combattimento senza fine (al massimo 10 maledizioni per combattimento). Novità della 8.2: di rado sulla mappa si apre una strada segreta con tesori unici, tra cui sei reliquie segrete più forti del solito. In Sviluppo c'è «Ombra per tutti gli eroi»: anche cure, Marchio, Condanna, evocazioni e carte pescate hanno un lato Ombra. Villaggio, Gemme e Grafica Pixellab ora sono sempre accesi. C'è un codice premio per le Gemme. Novità della 8.1: le app del gioco per altre piattaforme possono inviare e ricevere le statistiche (visite, partite, le tue statistiche) tramite un unico indirizzo; il pannello di amministrazione mostra da quali piattaforme si gioca e le chiamate delle app. Novità della 8.0:il gioco conta le visite in modo anonimo (un codice casuale per dispositivo, niente nomi: si spegne con «Invia statistiche anonime»); per l'amministratrice c'è un pannello con visite, visitatori unici, partite, eroi, carte e classifica. Novità della 7.9: la mappa del dungeon ha i nodi più al centro, più grandi e più facili da toccare sul telefono; con «Grafica Pixellab» lo sfondo della mappa riempie tutto lo schermo. In combattimento le carte in mano hanno tutte la stessa altezza: l'illustrazione resta intera e il testo lungo sfuma (lo leggi tutto passando col mouse o tenendo premuta la carta). Novità della 7.8: con «Grafica Pixellab» accesa, passando col mouse sopra una carta la vedi ingrandita, con il testo intero e le parole chiave a fianco; le illustrazioni nella striscia sono più alte e inquadrate sul soggetto. Con «Contrasto alto» la descrizione delle carte giocate dal lato Ombra ora si legge. Novità della 7.7: con «Grafica Pixellab» accesa tutte le 191 carte hanno un'illustrazione sotto il nome; tenendo premuta una carta (anche col mouse, o con il tasto destro) la vedi in grande con l'illustrazione e le parole chiave. La Guida del gioco ha la sua icona, un libro. Novità della 7.6: con «Grafica Pixellab» accesa le carte hanno la nuova cornice del colore del tipo, il costo su una runa e la rarità come gemma; anche l'Energia è una runa. Novità della 7.5: con «Grafica Pixellab» accesa i nemici sconfitti hanno la loro animazione di morte e restano a terra, gli aspetti degli eroi hanno la versione Pixellab e Azhrakel ha nuovi colori. Novità della 7.4: con «Grafica Pixellab» accesa il villaggio cambia aspetto a ogni ricostruzione, reliquie, pozioni e icone sono nuove, eventi e luoghi hanno la loro illustrazione, i combattimenti hanno lo sfondo del dungeon e la mappa ha sfondo, decorazioni e la figura del tuo eroe. Novità della 7.3: con «Grafica Pixellab» accesa anche nemici, élite e boss sono disegnati con PixelLab, attaccano e reagiscono ai colpi; nuova icona del gioco. Novità della 7.2: con «Grafica Pixellab» accesa gli eroi disegnati con PixelLab compaiono ovunque, anche nella scelta dell'eroe, nei menu e nei riepiloghi. Novità della 7.1: in Sviluppo c'è «Grafica Pixellab», spenta di base. Accesa, in combattimento gli eroi sono disegnati con PixelLab e hanno le animazioni di attacco, difesa e colpo subito. Novità della 7.0: il pulsante «Gioca» sempre visibile per scegliere la modalità; Luce e Ombra (ogni carta si può giocare dal lato Ombra, più forte ma rischioso; creature d'ombra, mercante, eventi e bottino reagiscono alla tua Ombra), il Villaggio di Valdombra da ricostruire per avere vantaggi in ogni partita, e le Gemme, la seconda moneta per cimeli permanenti e aspetti. Si possono spegnere da Sviluppo. Dalla 6.4: la sfida del giorno usa tutti e 10 gli eroi e non ripete eroe, dungeon o modificatore del giorno prima; dalla 6.3: corretto il blocco quando l'eroe cade per una carta Ustione o Maledizione, tratti delle élite più leggeri (soprattutto da soli); dalla 6.2: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
+      <p class="muted" style="font-size:13px">Novità della 8.4: nuova modalità «Aprite il cancello»: le campagne bruciano e tu tieni aperto il cancello della Rocca contro 8 ondate, salvando più abitanti che puoi (4 Corone per ognuno). Nell'enciclopedia le carte si vedono anche dal lato Ombra. In combattimento le barre della vita sono più grandi e leggibili; sulla mappa la figura dell'eroe non copre più i nodi; le Gemme si vedono nella barra in alto. Un nemico si cura al massimo di metà dei suoi PV per combattimento. Novità della 8.3: Luce e Ombra più equilibrate. Con 0-2 Ombra sei nella Luce: cure +25%, Scudo di Luce e il potere di Luce del tuo eroe; da 5 Ombra c'è il potere d'Ombra, ma da 7 le cure ti curano la metà. Missioni di partita (tre obiettivi per Corone e Gemme), reliquie maledette, piani con un clima (Nebbia, Gelo, Luna nera, Vento) e un aiuto dal villaggio per partita. Le carte giocate dal lato Ombra hanno la loro illustrazione. Goblin ridisegnati. In Sviluppo c'è «Combattimento a scena». La purificazione dall'Ombra si paga in Gemme, che ora sono più rare. Corretto: un nemico che si cura e aggiunge Ferite non può più rendere un combattimento senza fine (al massimo 10 maledizioni per combattimento). Novità della 8.2: di rado sulla mappa si apre una strada segreta con tesori unici, tra cui sei reliquie segrete più forti del solito. In Sviluppo c'è «Ombra per tutti gli eroi»: anche cure, Marchio, Condanna, evocazioni e carte pescate hanno un lato Ombra. Villaggio, Gemme e Grafica Pixellab ora sono sempre accesi. C'è un codice premio per le Gemme. Novità della 8.1: le app del gioco per altre piattaforme possono inviare e ricevere le statistiche (visite, partite, le tue statistiche) tramite un unico indirizzo; il pannello di amministrazione mostra da quali piattaforme si gioca e le chiamate delle app. Novità della 8.0:il gioco conta le visite in modo anonimo (un codice casuale per dispositivo, niente nomi: si spegne con «Invia statistiche anonime»); per l'amministratrice c'è un pannello con visite, visitatori unici, partite, eroi, carte e classifica. Novità della 7.9: la mappa del dungeon ha i nodi più al centro, più grandi e più facili da toccare sul telefono; con «Grafica Pixellab» lo sfondo della mappa riempie tutto lo schermo. In combattimento le carte in mano hanno tutte la stessa altezza: l'illustrazione resta intera e il testo lungo sfuma (lo leggi tutto passando col mouse o tenendo premuta la carta). Novità della 7.8: con «Grafica Pixellab» accesa, passando col mouse sopra una carta la vedi ingrandita, con il testo intero e le parole chiave a fianco; le illustrazioni nella striscia sono più alte e inquadrate sul soggetto. Con «Contrasto alto» la descrizione delle carte giocate dal lato Ombra ora si legge. Novità della 7.7: con «Grafica Pixellab» accesa tutte le 191 carte hanno un'illustrazione sotto il nome; tenendo premuta una carta (anche col mouse, o con il tasto destro) la vedi in grande con l'illustrazione e le parole chiave. La Guida del gioco ha la sua icona, un libro. Novità della 7.6: con «Grafica Pixellab» accesa le carte hanno la nuova cornice del colore del tipo, il costo su una runa e la rarità come gemma; anche l'Energia è una runa. Novità della 7.5: con «Grafica Pixellab» accesa i nemici sconfitti hanno la loro animazione di morte e restano a terra, gli aspetti degli eroi hanno la versione Pixellab e Azhrakel ha nuovi colori. Novità della 7.4: con «Grafica Pixellab» accesa il villaggio cambia aspetto a ogni ricostruzione, reliquie, pozioni e icone sono nuove, eventi e luoghi hanno la loro illustrazione, i combattimenti hanno lo sfondo del dungeon e la mappa ha sfondo, decorazioni e la figura del tuo eroe. Novità della 7.3: con «Grafica Pixellab» accesa anche nemici, élite e boss sono disegnati con PixelLab, attaccano e reagiscono ai colpi; nuova icona del gioco. Novità della 7.2: con «Grafica Pixellab» accesa gli eroi disegnati con PixelLab compaiono ovunque, anche nella scelta dell'eroe, nei menu e nei riepiloghi. Novità della 7.1: in Sviluppo c'è «Grafica Pixellab», spenta di base. Accesa, in combattimento gli eroi sono disegnati con PixelLab e hanno le animazioni di attacco, difesa e colpo subito. Novità della 7.0: il pulsante «Gioca» sempre visibile per scegliere la modalità; Luce e Ombra (ogni carta si può giocare dal lato Ombra, più forte ma rischioso; creature d'ombra, mercante, eventi e bottino reagiscono alla tua Ombra), il Villaggio di Valdombra da ricostruire per avere vantaggi in ogni partita, e le Gemme, la seconda moneta per cimeli permanenti e aspetti. Si possono spegnere da Sviluppo. Dalla 6.4: la sfida del giorno usa tutti e 10 gli eroi e non ripete eroe, dungeon o modificatore del giorno prima; dalla 6.3: corretto il blocco quando l'eroe cade per una carta Ustione o Maledizione, tratti delle élite più leggeri (soprattutto da soli); dalla 6.2: aspetto Autunno per Ladro, Ranger e Druido, barra per la dimensione del testo, Guida del gioco, il tutorial riprende da dove eri rimasto; dalla 6.0: tutorial, Imprese con corone, un secondo boss per ogni dungeon, élite con tratti speciali, segnali in combattimento, rianimazione, aspetti degli eroi, opzioni di accessibilità e statistiche anonime; dalla 5.4: in multigiocatore ognuno deve aver sbloccato il dungeon e il Livello di Assedio scelto; in modalità normale i dungeon si sbloccano solo completando il precedente, in Sopravvivenza anche superando lì un ciclo; sei nuovi eroi da sbloccare (Necromante, Ranger, Druido, Monaco, Guardiano, Paladino); dalla 4.0: terzo dungeon, carte di gruppo, sfida del giorno, diario con statistiche ed enciclopedia, riepilogo di fine partita, percorsi disegnati sulla mappa, «Riprendi il turno» e gioco installabile.</p>
       <p class="muted" style="font-size:13px">Le impostazioni (audio, chat, grafica) valgono solo per questo dispositivo. I progressi di gioco seguono il tuo profilo.</p>
       <div><button class="btn" onclick="SET=Object.assign({},SET_DEF);saveSet();render()">Ripristina le impostazioni</button></div>
     </div></div>`;
@@ -3679,14 +3730,14 @@ function achHTML(){const have=getAch(),st=getStats();const tot=ACH.reduce((t,a)=
     return `<div class="ach ${ok?'ok':''}"><b>${ok?'✓ ':''}${a.n}</b><span class="muted">${a.d}</span>${pr}<small style="color:var(--torch2)">${ic('i_crown',12)} ${a.cr} Corone${GEMON()?` · <span class="gemc">${ic('i_gem',12)} ${ACH_GEM} Gemme</span>`:''}</small></div>`}).join('')}</div>`}
 
 // statistiche anonime per il bilanciamento: niente nomi, solo eroe, dungeon, esito, mazzo e reliquie
-function statSend(P,x,fl){if(!SET.stats)return;const c=sbClient();if(!c)return;
+function statSend(P,x,fl){if(!SET.stats||isPorta())return;const c=sbClient();if(!c)return;
   const row={versione:VERSION,dungeon:R.dg||'rocca',modalita:R.daily?'daily':R.mode==='surv'?'surv':'norm',livello:R.lvl|0,giocatori:Math.min(8,R.order.length),classe:P.cls,vittoria:!!R.win&&R.mode!=='surv',piano:fl|0,
     boss:(R.mode!=='surv'&&R.floor>=ROWS+1)||R.win?bossId():null,morte:R.win?null:(R.deathAt||null),carte:P.deck.slice(0,80).map(d=>d.id+(d.up?'+':'')),reliquie:(P.relics||[]).slice(0,40),danni:Math.min(1e7,x.dmg|0),uccisioni:P.kills|0};
   try{c.from('statistiche').insert(row).then(()=>{},()=>{})}catch(e){}}
 function statsAward(){
   if(!R||R.phase!=='end'||!R.players[ME])return;const key=R.code+':'+R.seed+':'+(R.t0||0);let done=[];try{done=JSON.parse(load(STATP_K))||[]}catch(e){}
   if(done.includes(key))return;done.push(key);store(STATP_K,JSON.stringify(done.slice(-50)));
-  const P=R.players[ME],st=getStats(),x=P.stx||{},fl=R.mode==='surv'?totalFloors():R.floor,win=!!R.win&&R.mode!=='surv';
+  const P=R.players[ME],st=getStats(),x=P.stx||{},fl=R.mode==='surv'?totalFloors():R.floor,win=!!R.win&&R.mode==='norm';
   const inc=(o,k,n=1)=>{o[k]=(o[k]||0)+n};
   inc(st,'runs');if(win)inc(st,'wins');if(!solo)inc(st,'coop');if(R.mode==='surv')inc(st,'surv');if(R.daily)inc(st,'daily');
   inc(st,'kills',P.kills||0);inc(st,'dmg',x.dmg||0);inc(st,'heal',x.heal||0);inc(st,'blk',x.blk||0);inc(st,'floors',fl);
@@ -3719,7 +3770,8 @@ function diarioHTML(){
   if(t==='c'){const f=UI.diCls||'all';const list=allC.filter(k=>f==='all'||CARDS[k].cl===f).sort((a,b)=>(S.c.has(b)?1:0)-(S.c.has(a)?1:0));
     body=`<div class="row">${[['all','Tutte'],...Object.keys(CLASSES).map(k=>[k,CLASSES[k].n])].map(([k,n])=>`<button class="btn ${f===k?'primary':''}" onclick="UI.diCls='${k}';render()">${n}</button>`).join('')}</div>
       <p class="muted" style="font-size:13px">Le carte compaiono qui quando le vedi per la prima volta: nel mazzo, nelle ricompense o dal mercante.${canHover()?' Passa sopra una carta per il glossario.':' Tieni premuta una carta per il glossario.'}</p>
-      <div class="cardgrid">${list.map(k=>S.c.has(k)?cardHTML({id:k,up:false}):`<div class="card unknown"><span class="cname">???</span><span class="ctype">${CLASSES[CARDS[k].cl]?CLASSES[CARDS[k].cl].n:''}</span></div>`).join('')}</div>`}
+      <div class="row" style="gap:6px"><button class="btn ${UI.diSh?'':'primary'}" onclick="UI.diSh=false;render()">Lato Luce</button><button class="btn ombtn ${UI.diSh?'primary':''}" onclick="UI.diSh=true;render()">Lato Ombra</button>${UI.diSh?`<span class="muted" style="font-size:13px">${SET.lo&&SET.lox?'Con «Ombra per tutti gli eroi» quasi tutte le carte hanno un lato Ombra.':'Hanno un lato Ombra le carte con danni, Armatura o Veleno; le altre si vedono sbiadite (in Sviluppo puoi accendere «Ombra per tutti gli eroi»).'}</span>`:''}</div>
+      <div class="cardgrid">${list.map(k=>{if(!S.c.has(k))return null;if(!UI.diSh)return cardHTML({id:k,up:false});const x=encShadow(k);return cardHTML({id:k,up:false},x?{sh:true,shx:x,cls:'shadow'}:{cls:'noshadow'})}).map((h,i)=>h||`<div class="card unknown"><span class="cname">???</span><span class="ctype">${CLASSES[CARDS[list[i]].cl]?CLASSES[CARDS[list[i]].cl].n:''}</span></div>`).join('')}</div>`}
   if(t==='e'){const where=id=>Object.keys(DUNGEONS).filter(d=>{const D=DUNGEONS[d];return [D.easy,D.hard,D.elites].some(L=>L.some(g=>g.includes(id)))||(BOSSES[d]||[D.boss]).includes(id)}).map(d=>DUNGEONS[d].n);
     body=`<div class="bestiary">${allE.map(k=>{const E=ENEMIES[k],ok=S.e.has(k),w=where(k);return `<div class="beast ${ok?'':'unk'} ${E.boss?'boss':''}">${sprImg(k,E.boss?72:56,ok?'':'locked')}<b>${ok?E.n:'???'}</b>
       <span class="muted">${E.boss?'Boss':E.elite?'Élite':'Nemico'}${ok?` · ${E.hp[0]===E.hp[1]?E.hp[0]:E.hp[0]+'–'+E.hp[1]} PV`:''}</span>${ok&&w.length?`<small>${w.join(', ')}</small>`:''}</div>`}).join('')}</div>`}
