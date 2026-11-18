@@ -445,6 +445,47 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(me.chiede&&me.bottoni&&me.annulla&&me.compra&&me.libera,'mercante: con 3 pozioni chiede conferma e quale sostituire; con Annulla non paga, con un posto libero si compra subito '+JSON.stringify({c:me.chiede,b:me.bottoni,a:me.annulla,p:me.compra,l:me.libera}));
   ok(me.mazzo&&me.scelta&&me.testa&&me.annulla2&&me.brucia,'mercante: «Brucia una carta» apre il mazzo, la carta si conferma, con Annulla non si paga '+JSON.stringify({m:me.mazzo,s:me.scelta,t:me.testa,a:me.annulla2,b:me.brucia}));
 
+  console.log('7g. Anteprima dei danni, Retrovie e abitanti in salvo');
+  const an=await page.evaluate(async()=>{const r={};SET.tut=false;SPEED=0;SET.lo=true;
+    const nuova=(cls,m='norm')=>{R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);modal=null;UI.sel=null;UI.om=false;pickCls=cls;pickDg='rocca';pickMode=m;pickLvl=0;startSolo();ctx(ME)};
+    // ogni carta di ogni eroe: l'anteprima è uguale ai danni veri e lo stato non cambia
+    let prove=0;const diverse=[],cambiato=[];
+    for(const cls of Object.keys(CLASSES)){const ids=Object.keys(CARDS).filter(k=>CARDS[k].cl===cls&&!CARDS[k].unplay&&!CARDS[k].ally&&!CARDS[k].choose&&!CARDS[k].pick);
+      for(const id of ids)for(const up of [false,true])for(const sh of [0,1]){
+        nuova(cls);startCombat(['orco','goblin'],'combat');ctx(ME);g.enemies.forEach((e,i)=>{e.hp=e.max=999;e.blk=i?0:4;e.intent={d:0}});g.enemies[0].st.vuln=1;g.hero.st.str=2;
+        const c={id,up,uid:uid++};g.hero.hand.push(c);g.hero.energy=9;if(sh&&!canShadow(c))continue;
+        const prima=ser(),rs=rng.s,u0=uid,f0=fxq.length;const pv=simHit('c',c.uid,0,sh);
+        if(ser()!==prima||rng.s!==rs||uid!==u0||fxq.length!==f0)cambiato.push(id);
+        const e=g.enemies[0],hp0=e.hp,b0=e.blk;dispatch(ME,{t:'play',uid:c.uid,j:0,sh});ctx(ME);const e2=R.combat.enemies[0];prove++;
+        if(!pv||pv.tot!==(hp0-e2.hp)+Math.max(0,b0-e2.blk))diverse.push(cls+':'+id+(up?'+':'')+(sh?' ombra':''))}}
+    r.tutte=prove>400&&!diverse.length&&!cambiato.length;r.n=prove;r.diverse=diverse.slice(0,5);r.cambiato=cambiato.slice(0,5);
+    // Colpo con Forza 2 contro Vulnerabile e 5 Armatura: (6+2)×1,5 = 12, 5 all'Armatura e 7 alla vita
+    nuova('guerriero');startCombat(['orco','goblin'],'combat');ctx(ME);g.enemies.forEach(e=>{e.hp=e.max=200;e.intent={d:0}});g.hero.st.str=2;g.enemies[0].st.vuln=2;g.enemies[0].blk=5;
+    g.hero.hand=[{id:'colpo',up:false,uid:uid++},{id:'parata',up:false,uid:uid++}];g.hero.energy=3;render();
+    const pc=simHit('c',g.hero.hand[0].uid,0,0);r.colpo=!!pc&&pc.tot===12&&pc.bl===5&&pc.hp===7&&!pc.kill;
+    const tl=dmgTipHTML(0);r.elenco=tl.includes('Danni su')&&tl.includes('Colpo')&&tl.includes('12')&&tl.includes('7 alla vita')&&tl.includes('Forza +2')&&tl.includes('Vulnerabile +50%')&&!tl.includes('Parata');
+    UI.sel={k:'c',uid:g.hero.hand[0].uid,sh:0};render();const bd=document.querySelector('#ent-e0 .dmgprev');r.numero=!!bd&&bd.textContent.includes('12');
+    const ts=dmgTipHTML(0);r.scelta=ts.includes('Colpo → ')&&ts.includes('12 danni')&&ts.includes("5 all'Armatura, 7 alla vita");
+    g.enemies[1].hp=5;const k=dmgTipHTML(1);r.letale=k.includes('Lo sconfiggi');render();r.letale=r.letale&&document.querySelector('#ent-e1 .dmgprev').textContent.includes('letale');
+    const el=document.getElementById('ent-e0');dmgTip(el);const tip=document.getElementById('dmgtip');r.riquadro=!!tip&&!tip.hidden&&tip.textContent.includes('12 danni');UI.sel=null;dmgTipHide();
+    g.hero.ended=true;r.fineTurno=simHit('c',g.hero.hand[0].uid,0,0)===null;g.hero.ended=false;
+    // Retrovie al posto del Falò nel cancello; il Falò resta nella partita normale
+    nuova('guardiano','porta');R.phase='room';run.screen='rest';render();const hb=document.querySelector('main').innerHTML;
+    r.retrovie=hb.includes('<h2>Retrovie</h2>')&&hb.includes('Fatti bendare')&&hb.includes('Vai dagli armaioli')&&!hb.includes('<h2>Falò</h2>');
+    const hp0=run.hp=Math.max(1,run.hp-30);dispatch(ME,{t:'restHeal'});ctx(ME);r.benda=run.hp>hp0;
+    nuova('guardiano');R.phase='room';run.screen='rest';render();r.falo=document.querySelector('main').innerHTML.includes('<h2>Falò</h2>');
+    // abitanti in salvo: 2 fino a 5, 5 fino a 10, poi 8, 11, 14; calano con i persi
+    nuova('guardiano','porta');const N=(a,b)=>{R.porta.salvati=a;R.porta.persi=b;return portaFollaN()};
+    r.soglie=N(0,0)===0&&N(1,0)===2&&N(5,0)===2&&N(6,0)===5&&N(10,0)===5&&N(11,0)===8&&N(20,0)===8&&N(25,0)===11&&N(33,0)===14&&N(40,0)===14;
+    r.calano=N(12,1)===8&&N(12,2)===5&&N(4,4)===0&&N(3,9)===0;
+    N(12,0);render();let w=0;while(!PXI['abitanti/ab1']&&w<300){await new Promise(t=>setTimeout(t,10));w++}render();const f1=document.querySelectorAll('.folla img').length;
+    N(12,3);render();const f2=document.querySelectorAll('.folla img').length;r.vede=f1===8&&f2===5;
+    nuova('guardiano');render();r.normale=!document.querySelector('.folla');
+    R=null;modal=null;screen='title';render();return r});
+  ok(an.tutte&&an.colpo&&an.elenco&&an.numero&&an.scelta&&an.letale&&an.riquadro&&an.fineTurno,`anteprima dei danni: uguale ai danni veri per ogni carta (${an.n} prove) senza toccare lo stato; elenco col mouse, numero sul bersaglio, letale `+JSON.stringify({t:an.tutte,d:an.diverse,c:an.cambiato,co:an.colpo,e:an.elenco,n:an.numero,s:an.scelta,l:an.letale,q:an.riquadro,f:an.fineTurno}));
+  ok(an.retrovie&&an.benda&&an.falo,'Aprite il cancello: Retrovie con bende e armaioli al posto del Falò (che resta nella partita normale) '+JSON.stringify({r:an.retrovie,b:an.benda,f:an.falo}));
+  ok(an.soglie&&an.calano&&an.vede&&an.normale,'Aprite il cancello: dietro l\'eroe gli abitanti in salvo, a soglie, e calano quando se ne perdono '+JSON.stringify({s:an.soglie,c:an.calano,v:an.vede,n:an.normale}));
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;
@@ -457,7 +498,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     SET.px=false;saveSet();nuova('guerriero');r.spenta=!document.querySelector('.pxh')&&!!document.querySelector('#ent-h-pA img.spr');
     openSettings();r.interruttore=!document.querySelector('button.sw[aria-label="Grafica Pixellab"]');closeModal();
     // accesa: le 40 immagini e la figura di ogni eroe
-    SET.px=true;saveSet();let w=0;while(Object.keys(PXI).length<288&&w<900){await sleep(10);w++}
+    SET.px=true;saveSet();let w=0;while(Object.keys(PXI).length<294&&w<900){await sleep(10);w++}
     r.caricate=Object.values(PXI).filter(Boolean).length;r.mancanti=pxExtraKeys().filter(k=>!PXI[k]);
     r.senzaFigura=Object.keys(CLASSES).filter(cls=>{nuova(cls);const s=sp('pA');return !(s&&s.style.backgroundImage.includes('pixel/'+cls+'.png')&&s.classList.contains('idle'))});
     nuova('guerriero');
@@ -535,7 +576,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
       const z=document.querySelector('#czoom'),t=document.querySelector('#gltip');r.fumetto=(!z||z.hidden)&&!!t&&!t.hidden;document.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerType:'touch'}));c.click();glHide()}
     R=null;solo=true;ME='solo';screen='title';modal=null;render();return r});
   ok(px.base&&px.spenta&&px.interruttore,'Grafica Pixellab: sempre accesa, senza interruttore; se le immagini mancano resta lo sprite di sempre');
-  ok(px.caricate>=288&&!px.mancanti.length&&!px.senzaFigura.length,`le immagini in pixel/ si caricano (${px.caricate}, tutte le ${288} di base${px.mancanti.length?'; mancano: '+px.mancanti.slice(0,8):''}) e ogni eroe ha la sua figura${px.senzaFigura.length?' (mancano: '+px.senzaFigura+')':''}`);
+  ok(px.caricate>=294&&!px.mancanti.length&&!px.senzaFigura.length,`le immagini in pixel/ si caricano (${px.caricate}, tutte le ${294} di base${px.mancanti.length?'; mancano: '+px.mancanti.slice(0,8):''}) e ogni eroe ha la sua figura${px.senzaFigura.length?' (mancano: '+px.senzaFigura+')':''}`);
   ok(!px.nemTutti.length&&/pixel\/nemici\/.+\.png/.test(px.nemFig)&&/pxan/.test(px.nemAtt)&&/-attacco/.test(px.nemAtt)&&/pxan/.test(px.nemCol)&&/-colpito/.test(px.nemCol)&&!px.nemFlash,`nemici (${px.nemiciIn}): figura, attacco quando agiscono, colpito al posto del lampo; tutti i 30 hanno le immagini${px.nemTutti.length?' (mancano: '+px.nemTutti+')':''}`);
   ok(/pxan/.test(px.nemMorte)&&/-morte/.test(px.nemMorte)&&/pxdead/.test(px.nemMorto)&&/-morte/.test(px.nemMorto),'nemico sconfitto: animazione di morte, poi resta a terra');
   ok(/pxan/.test(px.attacco)&&/guerriero-attacco/.test(px.attacco)&&/pxan/.test(px.resta)&&/idle/.test(px.fine)&&/pixel\/guerriero\.png/.test(px.fine),'carta Attacco: animazione d\'attacco, che continua se la schermata si ridisegna, poi torna la figura ferma');
