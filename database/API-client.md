@@ -162,6 +162,32 @@ Dalla v9.8 (`database/api-password.sql`, applicato il 19/11/2026). Serve `giocat
 - Non salvare né mandare la password altrove; il token nuovo non finisce nel registro delle chiamate.
 - Nel gioco web la stessa cosa sta in Profilo → «Reimposta la password».
 
+### `amici`: la lista amici
+
+Dalla v10.4 (`database/amici.sql`, applicato il 19/11/2026; l'azione nell'endpoint unico è in `database/api-amici.sql`, **da applicare**: finché non c'è usa gli indirizzi diretti `amici_*` della tabella più sotto, che fanno le stesse cose). Serve `giocatore` con nome e token. In `dati` c'è `op` (se manca vale `lista`):
+
+| `op` | Altri campi in `dati` | Risposta in `dati` |
+|---|---|---|
+| `lista` | — | `{"amici": [{"nome", "stato", "dal"}], "codice": "K7PX2M"}`; `stato` è `amici`, `ricevuta` (ti ha chiesto l'amicizia), `inviata` (l'hai chiesta tu) o `bloccato` (l'hai bloccato tu) |
+| `richiedi` | `nome` | `{"esito", "nome"}` |
+| `rispondi` | `nome`, `si` (true accetta, false rifiuta) | `{"esito", "nome"}` |
+| `togli` | `nome` | `{"esito", "nome"}`: toglie l'amico, annulla la richiesta inviata o sblocca |
+| `blocca` | `nome` | `{"esito", "nome"}` |
+| `codice` | `nuovo` (facoltativo, true = codice nuovo, il vecchio non vale più) | `{"codice"}` |
+| `usa_codice` | `codice` (6 caratteri, maiuscole, minuscole e trattini vanno bene) | `{"esito", "nome"}`: si diventa amici subito |
+
+```json
+{ "azione": "amici", "client": { ... }, "giocatore": { "nome": "manugiuly", "token": "..." }, "dati": { "op": "richiedi", "nome": "pandoris" } }
+```
+```json
+{ "ok": true, "azione": "amici", "chi": { ... }, "dati": { "esito": "inviata", "nome": "pandoris" } }
+```
+- **Esiti** (sono risposte normali con `ok: true`, da mostrare al giocatore): `inviata`, `amici` (siete amici: anche quando l'altro ti aveva già chiesto l'amicizia), `gia_amici`, `gia_inviata`, `non_trovato` (nessun profilo con quel nome, oppure ti ha bloccato: per riservatezza non si distingue), `se_stesso`, `bloccato_da_te`, `troppe_richieste` (50 in attesa), `troppi_amici` (200), `nessuna_richiesta`, `rifiutata`, `tolto`, `bloccato`, `codice_sbagliato`.
+- Errori: `serve_accesso`, `credenziali` (token non più valido: fai accedere di nuovo), `dati_non_validi` (`op` sconosciuta).
+- I nomi sono sempre in minuscolo. Il token non finisce nel registro delle chiamate.
+
+**Chi è in gioco e inviti (Realtime, come il gioco web).** Con il profilo collegato il gioco si iscrive al canale Supabase Realtime `valdombra-amici` con la presenza; la chiave della presenza **non è il nome** ma la sua impronta: `'a' + (hashStr('am#' + nome_in_minuscolo) >>> 0).toString(36)`, dove `hashStr` è la stessa funzione del gioco web (`index.html`). Un amico è «in gioco» se la sua impronta è tra le chiavi della presenza. Per invitare un amico nella propria stanza si manda sullo stesso canale il broadcast `invito` con `{"a": impronta_dell_amico, "da": mio_nome, "c": "ABCD"}` (codice della stanza). Chi lo riceve lo mostra solo se `a` è la sua impronta e `da` è nella sua lista amici; «Entra» fa entrare nella stanza `c` come col link d'invito.
+
 ### `mie_statistiche`: le statistiche di chi chiama
 
 Serve `giocatore`. Restituisce due cose:
@@ -310,6 +336,10 @@ Per il resto del gioco online il client può usare gli stessi indirizzi del gioc
 | Reimpostare la password | `/rest/v1/rpc/profilo_password` | `{"p_nome": "...", "p_token": "...", "p_nuova": "..."}` → `[{"token"}]` (il token nuovo; quello vecchio non vale più) |
 | Leggere il salvataggio | `/rest/v1/rpc/profilo_leggi` | `{"p_nome": "...", "p_token": "..."}` → `[{"dati", "rev"}]` |
 | Salvare | `/rest/v1/rpc/profilo_salva` | `{"p_nome", "p_token", "p_dati", "p_rev"}` → nuova revisione, oppure la revisione attuale in negativo se un altro dispositivo ha salvato prima (allora rileggi, unisci e riprova) |
+| Amici: lista | `/rest/v1/rpc/amici_lista` | `{"p_nome", "p_token"}` → `[{"nome", "stato", "dal"}]` |
+| Amici: chiedere, accettare, togliere, bloccare | `/rest/v1/rpc/amici_richiedi` · `amici_rispondi` · `amici_togli` · `amici_blocca` | `{"p_nome", "p_token", "p_altro": "pandoris"}` (per `amici_rispondi` anche `"p_si": true`) → l'esito in parole, es. `"inviata"` |
+| Amici: il mio codice | `/rest/v1/rpc/amici_codice` | `{"p_nome", "p_token", "p_nuovo": false}` → `"K7PX2M"` |
+| Amici: usare un codice | `/rest/v1/rpc/amici_usa_codice` | `{"p_nome", "p_token", "p_codice": "K7PX2M"}` → `[{"nome", "esito"}]` |
 | Classifica Sopravvivenza | `GET /rest/v1/classifica?modalita=eq.solo&dungeon=eq.rocca&order=punteggio.desc&limit=20` | — |
 
 Gli indirizzi completi iniziano con `https://ucwuhzupgsvtphsdmlqf.supabase.co`.
@@ -326,6 +356,7 @@ Cambiamenti recenti del gioco web da riportare nell'app per restare uguali:
 - **v10.1**: l'Ombra **non cala più da sola** a ogni turno di sola Luce: scende solo riposando a un Falò acceso (−3), con l'Incenso, dal Pellegrino o col Tempio. Lo Scudo di Luce (+3 Armatura a fine turno con 0-2 Ombra e solo carte Luce) resta, con la scritta «+3 Armatura». **Al Falò l'Ombra cala solo con la scelta nuova «Medita accanto al fuoco»** (−3, tutta col Tempio al 3; non cura); «Riposa» e «Affila le armi» non la toccano più. Nelle Retrovie del cancello la stessa scelta si chiama «Prega con gli abitanti». Sulla mappa il numero dei voti è un cerchietto chiaro con il numero scuro.
 - **v10.2**: **Gemme più rare**: 1 per ogni boss (prima 2), 1 per la vittoria, 1 per la sfida del giorno (prima 2), 1 per ogni Impresa (prima 3); per le missioni 1 sola Gemma e solo se le completi tutte e tre (prima 1 per missione); nell'Aprite il cancello 1 Gemma solo se salvi tutti i 40 abitanti (prima 1 da 30 e 2 a 40). Le Gemme già guadagnate restano. Nell'Aprite il cancello il pulsante dopo la ricompensa dice «Prossima ondata (N/8)» o «Vai alle Retrovie» invece di «Prosegui sulla mappa». A fine partita in gruppo il riquadro di corone e gemme sta dentro la barra in alto e non copre i pulsanti. Sui campi password c'è l'occhio per mostrare e nascondere quello che si scrive.
 - **v10.3**: **carte con lo stesso nome interno**: nel web la seconda cancellava la prima. Se l'app ha copiato le carte dal web, controlla che abbia queste 6 carte con i nomi nuovi: `raggiogelo` (Raggio di Gelo del Mago: è nel **mazzo iniziale del Mago** al posto di `gelo`, che resta la carta di stato «Gelo nelle Ossa»), `pioggiadardi` (Pioggia di Dardi, Mago), `barrierapr` (Barriera Prismatica, Mago; il potenziamento la porta a costo 1), `rafficalame` (Raffica di Lame, Ladro), `ventagliocolt` (Ventaglio di Coltelli, Ladro), `giudiziofede` (Giudizio del Chierico, danni pari all'Armatura). Il **Monaco** parte con `rafficapugni` (Raffica di Pugni) invece di `raffica`. Illustrazioni in `pixel/carte/` e `pixel/carte-ombra/` con gli stessi nomi. **Monaco più debole**: Acqua 1 PV, Terra 2 Armatura, Aria 2 danni (Fuoco resta 2 Bruciatura); Rosario di Giada 2 Armatura. **Corone circa dimezzate**: vittoria 40/55/70 più 10 per Livello di Assedio, missioni 10, cancello 2 per abitante, Imprese a metà. **Cancello**: dietro l'eroe un abitante per ogni salvato meno i persi (file da 10), con l'animazione di chi entra e di chi viene preso. Consigli aggiornati, il riquadro non copre l'elemento indicato.
+- **v10.4**: **Amici** (serve il profilo). Finestra «Amici» (da Profilo, schermata Multigiocatore, menu e stanza): codice amico con Copia e «Fanne uno nuovo», aggiungi per nome (richiesta) o con il codice (amici subito), richieste ricevute con Accetta / Rifiuta / Blocca, lista amici con il pallino verde per chi è in gioco e «Togli» con conferma, richieste inviate con Annulla, bloccati con Sblocca. Nella stanza il riquadro «Invita i tuoi amici» mostra gli amici in gioco con «Invita». Chi riceve l'invito vede in alto «X ti invita nella stanza ABCD — Entra / No, grazie»; durante una partita di gruppo in corso solo «Più tardi» (l'invito resta in Amici 10 minuti). Pallino rosso con il numero delle richieste su Amici e Profilo; avviso quando arriva una richiesta. Presenza e inviti: vedi la sezione `amici` più sopra.
 
 ## Riservatezza
 

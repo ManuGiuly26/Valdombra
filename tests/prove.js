@@ -798,6 +798,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
         if(id==='start'||id==='villaggio'||id==='menu'){R=null;screen='title'}else if(id==='mappa'){gioca();R.phase='map'}
         else if(['energia','carte','intenti','armatura','fineturno'].includes(id))gioca('normal','combat',['goblin']);else if(id==='ombra'){gioca('normal','combat',['goblin']);g.turn=2}
         else if(id==='segnali'){solo=false;isHost=true;ME='pA';chan=null;R=newLobby('TUTO');rng=new RNG(hashStr('TUTO'));R.players.pA.cls='guerriero';R.players.pB={pid:'pB',name:'Amico',cls:'mago',ready:true};R.order.push('pB');online=new Set(R.order);startRunRoom(0,'TUTO1');startCombat(['goblin'],'combat');ctx('pA')}
+        else if(id==='amicilobby'){solo=false;isHost=true;ME='pA';chan=null;R=newLobby('TUTA');rng=new RNG(1);online=new Set(['pA'])}
         else if(id==='elite')gioca('normal','elite',['orco']);else if(id==='boss')gioca('normal','boss',[bossId()]);else if(id==='cancello')gioca('porta');
         else if(id==='ricompensa'){gioca('normal','combat',['ratto']);g.enemies.forEach(e=>hurtEnemy(e,99999));checkEnd();await sleep(900);ctx(ME)}
         else if(id==='retrovie'){gioca('porta');R.phase='room';run.screen='rest'}else if(id==='falo'){gioca();R.phase='room';run.screen='rest';run.om=3}
@@ -812,6 +813,34 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     ok(v.el,'Monaco (v10.3): Terra 2 Armatura, Aria 2 danni, Acqua 1 PV, Fuoco 2 Bruciatura; Rosario di Giada 2 Armatura');
     ok(v.cr,'Corone circa dimezzate (v10.3): vittoria 40/55/70 +10 per livello, missioni 10, cancello 2 per abitante, Imprese a metà');
     ok(!ev.length,'consigli: nessun errore nella pagina '+ev.slice(0,2).join(' | '));await cv.close()}
+
+  console.log('7w. Amici (v10.4): lista, richieste, codice amico, chi è in gioco, inviti nella stanza (database simulato)');
+  {const cw=await browser.newContext({viewport:{width:1280,height:860}});await cw.route(/^https?:\/\//,r=>r.abort());const pw=await cw.newPage();const ew=[];pw.on('pageerror',e=>ew.push(e.message));await pw.goto(PAGE);await pw.waitForTimeout(400);
+    const am=await pw.evaluate(async()=>{const sleep=ms=>new Promise(t=>setTimeout(t,ms));SET.tut=false;saveSet();const r={},rpc0=window.accRpc,join0=window.joinRoom;
+      const db={lista:[{nome:'pandoris',stato:'amici'},{nome:'sara',stato:'amici'},{nome:'luca',stato:'ricevuta'},{nome:'giada',stato:'inviata'},{nome:'troll',stato:'bloccato'}],ch:[],inviati:[]};
+      window.accRpc=async(fn,a)=>{db.ch.push(fn);if(fn==='amici_lista')return db.lista;if(fn==='amici_codice')return a.p_nuovo?'NUOVO2':'K7PX2M';if(fn==='amici_richiedi')return a.p_altro==='nessuno'?'non_trovato':'inviata';
+        if(fn==='amici_rispondi'){db.lista=db.lista.map(x=>x.nome===a.p_altro?{nome:x.nome,stato:a.p_si?'amici':'x'}:x);return a.p_si?'amici':'rifiutata'}if(fn==='amici_usa_codice')return [{nome:'marco',esito:'amici'}];if(fn==='amici_togli'){db.lista=db.lista.filter(x=>x.nome!==a.p_altro);return 'tolto'}return null};
+      ACC=null;R=null;screen='title';openAmici();r.senzaProfilo=document.querySelector('.modal').textContent.includes('Gli amici sono legati al profilo');closeModal();
+      ACC={nome:'manu',token:'00000000-0000-0000-0000-000000000000',rev:1,dirty:false};AMI.lista=null;AMI.codice='';AMI.ch={send:x=>db.inviati.push(x.payload),unsubscribe(){}};AMI.chK=amH('manu');AMI.on=new Set([amH('pandoris')]);
+      await amiciCarica();render();r.pallino=!!document.querySelector('main .novdot');
+      openAmici();await sleep(30);const M=()=>document.querySelector('.modal');
+      r.sezioni=['Vogliono essere tuoi amici','I tuoi amici (2)','Il tuo codice amico','Aggiungi un amico','Richieste che hai mandato','Profili bloccati'].every(t=>M().textContent.includes(t));
+      r.verde=M().querySelectorAll('.amdot.on').length===1&&M().querySelector('.amcode').textContent==='K7PX2M';
+      UI.amN='nessuno';await amRichiedi();r.nonTrovato=AMI.msg==='Nessun profilo con questo nome.';UI.amN=' Giada2 ';await amRichiedi();r.inviata=AMI.msg==='Richiesta inviata a giada2.'&&!UI.amN;
+      await amRispondi('luca',true);r.accetta=amAmici().length===3&&AMI.msg.includes('luca');UI.amC='abc-12';await amUsaCodice();r.corto=/6 caratteri/.test(AMI.msg);UI.amC='abc-123';await amUsaCodice();r.codice=AMI.msg.includes('marco');
+      const n0=db.ch.filter(x=>x==='amici_togli').length;amTogli('sara');r.conferma=!!M().querySelector('.btn.danger')&&db.ch.filter(x=>x==='amici_togli').length===n0;await amTogli('sara');r.tolto=!amAmici().some(x=>x.nome==='sara');
+      closeModal();solo=false;isHost=true;ME='pA';myName='Manu';chan=null;R=newLobby('QWER');rng=new RNG(1);online=new Set(['pA']);render();
+      const lb=document.querySelector('.amlob');r.stanza=!!lb&&[...lb.querySelectorAll('button')].some(b=>b.textContent.trim()==='Invita');
+      amiciInvita('pandoris');render();const pl=db.inviati[0]||{};r.invito=pl.a===amH('pandoris')&&pl.da==='manu'&&pl.c==='QWER'&&document.querySelector('.amlob').textContent.includes('Invitato ✓');
+      R=null;solo=true;screen='title';render();amiciInvitoArrivato({a:amH('manu'),da:'sconosciuto',c:'HJKL'});amiciInvitoArrivato({a:amH('altro'),da:'pandoris',c:'HJKL'});render();r.filtro=!document.querySelector('.invbox');
+      amiciInvitoArrivato({a:amH('manu'),da:'pandoris',c:'ZXCV'});render();const bx=document.querySelector('.invbox');r.banner=!!bx&&bx.textContent.includes('pandoris')&&bx.textContent.includes('ZXCV');
+      let entrato=null;window.joinRoom=c=>{entrato=c};amEntra('ZXCV');render();r.entra=entrato==='ZXCV'&&!document.querySelector('.invbox');window.joinRoom=join0;
+      solo=false;isHost=true;ME='pA';R=newLobby('PPPP');rng=new RNG(hashStr('PPPP'));online=new Set(['pA']);startRunRoom(0,'PPPP1');amiciInvitoArrivato({a:amH('manu'),da:'pandoris',c:'TTTT'});render();r.inPartita=!!document.querySelector('.invbox')&&!document.querySelector('.invbox .btn.primary');amDopo('TTTT');render();r.dopo=!document.querySelector('.invbox');
+      R=null;solo=true;ME='solo';accLogout();r.uscita=AMI.lista===null&&!AMI.ch&&!AMI.inviti.length;window.accRpc=rpc0;ACC=null;modal=null;screen='title';render();return r});
+    ok(am.senzaProfilo&&am.pallino&&am.sezioni&&am.verde,'amici: senza profilo invita ad accedere; con il profilo pallino delle richieste, tutte le sezioni, chi è in gioco col pallino verde, codice amico '+JSON.stringify(am));
+    ok(am.nonTrovato&&am.inviata&&am.accetta&&am.corto&&am.codice&&am.conferma&&am.tolto,'amici: richiesta per nome (anche con maiuscole e spazi), accetta, codice amico, «Togli» chiede conferma');
+    ok(am.stanza&&am.invito&&am.filtro&&am.banner&&am.entra&&am.inPartita&&am.dopo&&am.uscita,'amici: «Invita» nella stanza manda il codice solo a quell\'amico; si accettano inviti solo dagli amici; «Entra» porta nella stanza; durante una partita solo «Più tardi»; uscendo dal profilo si azzera tutto');
+    ok(!ew.length,'amici: nessun errore nella pagina '+ew.slice(0,2).join(' | '));await cw.close()}
 
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
