@@ -1043,6 +1043,33 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     ok(bt.ledefalse&&bt.ledetrue,'menu principale: la descrizione sotto il titolo è larga quanto la pagina e giustificata (menu normale ed essenziale)');
     ok(!eb.length,'Bottega e menu: nessun errore nella pagina '+eb.slice(0,2).join(' | '));await cb.close()}
 
+  console.log('7ag. Password dimenticata (v10.15): codice di recupero nel Profilo, «Ho dimenticato la password», reimpostazione dall\'amministrazione (database simulato)');
+  {const cr=await browser.newContext({viewport:{width:1280,height:860}});await cr.route(/^https?:\/\//,r=>r.abort());const pr=await cr.newPage();const er=[];pr.on('pageerror',e=>er.push(e.message));await pr.goto(PAGE);await pr.waitForTimeout(400);
+    const rc=await pr.evaluate(async()=>{const sleep=ms=>new Promise(t=>setTimeout(t,ms));const r={},rpc0=window.accRpc;SET.tut=false;saveSet();const DB={ch:[],ha:false,errori:0};
+      window.accRpc=async(fn,a)=>{DB.ch.push(fn+':'+JSON.stringify(a));
+        if(fn==='profilo_recupero_stato')return {ha:DB.ha,creato:DB.ha?'2026-11-19T10:00:00Z':null};if(fn==='profilo_recupero_nuovo'){DB.ha=true;return 'ABCD-EFGH-JKLM'}
+        if(fn==='profilo_recupera'){if(String(a.p_codice).replace(/[^A-Z0-9]/gi,'').toUpperCase()!=='ABCDEFGHJKLM')return [{token:null,esito:'codice_sbagliato'}];DB.ha=false;return [{token:'11111111-1111-1111-1111-111111111111',esito:'fatto'}]}
+        if(fn==='profilo_accedi')return a.p_pass==='nuovapw'?[{token:'11111111-1111-1111-1111-111111111111',rev:3,dati:{}}]:[];
+        if(fn==='admin_reimposta_password')return a.p_altro==='sara'?{esito:'fatto',nome:'sara',password:'K7PXQ2MNRT'}:{esito:'non_trovato'};
+        if(fn==='profilo_leggi')return [{rev:ACC?ACC.rev:1,dati:{}}];if(fn==='profilo_salva')return (ACC?ACC.rev:1)+1;if(fn==='admin_e')return true;if(fn==='admin_statistiche')return null;if(fn==='amici_lista')return [];if(fn==='gilda_mia')return {gilda:null,premi:[]};if(fn==='amici_codice')return 'K7PX2M';return null};
+      ACC=null;R=null;screen='title';openProfilo();await sleep(40);const M=()=>document.querySelector('.modal');
+      r.link=!!M().querySelector('.linkbtn')&&/Ho dimenticato la password/.test(M().textContent);M().querySelector('.linkbtn').click();await sleep(30);
+      r.form=/Codice di recupero/.test(M().textContent)&&!!M().querySelector('#reccod');
+      UI.accN='Manu';UI.recC='abcd-efgh-jkmm';UI.pw1=UI.pw2='nuovapw';await recRecupera();r.sbagliato=/sbagliati/.test(M().textContent)&&!ACC;
+      UI.recC='abcd efgh jklm';UI.pw2='altra';await recRecupera();r.diverse=/non sono uguali/.test(M().textContent);
+      UI.pw2='nuovapw';await recRecupera();await sleep(30);r.entra=!!ACC&&ACC.nome==='manu'&&!UI.recOn&&DB.ch.some(x=>x.startsWith('profilo_accedi'));
+      openProfilo();await recStato();await sleep(30);r.senzaCodice=/Non hai ancora un codice di recupero/.test(M().textContent);
+      [...M().querySelectorAll('.recpanel button')].find(b=>/Crea il codice/.test(b.textContent)).click();await sleep(40);r.mostrato=/ABCD-EFGH-JKLM/.test(M().textContent)&&/non lo vedrai più/.test(M().textContent);
+      closeModal();REC.codice='';openProfilo();await sleep(30);r.nascosto=!/ABCD-EFGH-JKLM/.test(M().textContent)&&/Hai un codice di recupero/.test(M().textContent);
+      [...M().querySelectorAll('.recpanel button')].find(b=>/Fanne uno nuovo/.test(b.textContent)).click();await sleep(20);r.conferma=/Sì, fanne uno nuovo/.test(M().textContent)&&DB.ch.filter(x=>x.startsWith('profilo_recupero_nuovo')).length===1;closeModal();
+      ADM.ok=true;ADM.dati=null;openAdmin();await sleep(40);r.admin=!!M().querySelector('.admpw');ADMPW.nome='Sara';await admPwReimposta();r.admConf=/Sì, reimposta la password di sara/.test(M().textContent)&&!DB.ch.some(x=>x.startsWith('admin_reimposta'));
+      await admPwReimposta();await sleep(20);r.admFatto=/K7PXQ2MNRT/.test(M().textContent);ADMPW.nome='nessuno';ADMPW.pw='';await admPwReimposta();await admPwReimposta();r.admNo=/Non c'è nessun profilo/.test(M().textContent);
+      closeModal();accLogout();r.pulito=!REC.codice&&!ADMPW.pw&&REC.stato===null;ADM.ok=false;window.accRpc=rpc0;ACC=null;R=null;modal=null;screen='title';render();return r});
+    ok(rc.link&&rc.form&&rc.sbagliato&&rc.diverse&&rc.entra,'password dimenticata: «Ho dimenticato la password» con nome, codice e password nuova; codice sbagliato o password diverse fermano; con quello giusto si entra '+JSON.stringify(rc));
+    ok(rc.senzaCodice&&rc.mostrato&&rc.nascosto&&rc.conferma,'codice di recupero nel Profilo: si crea, si vede una volta sola, per farne uno nuovo chiede conferma');
+    ok(rc.admin&&rc.admConf&&rc.admFatto&&rc.admNo&&rc.pulito,'amministrazione: reimposta la password di un giocatore dopo la conferma e mostra la provvisoria; nome sbagliato avvisa; uscendo dal profilo non resta niente');
+    ok(!er.length,'password dimenticata: nessun errore nella pagina '+er.slice(0,2).join(' | '));await cr.close()}
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;
