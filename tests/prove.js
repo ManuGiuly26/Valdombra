@@ -192,7 +192,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(lo.piuDanni===2,'con 5 Ombra i nemici fanno 2 danni in più');
   ok(lo.caduta&&lo.doppio===12,'a 10 Ombra si cade nell\'ombra e ci si resta: danni doppi ('+lo.doppio+') e PV massimi persi');
   ok(lo.puro&&lo.falo,'l\'Ombra non cala da sola con un turno di sola Luce; al Falò cala solo con «Medita», non riposando');
-  ok(lo.spento,'dall\'interruttore Sviluppo Luce e Ombra si spegne');
+  ok(lo.spento,'Luce e Ombra: spenta dall\'interno (solo nelle prove) le carte non hanno il lato Ombra');
   ok(lo.assorbi,'in gruppo si assorbe l\'Ombra di un compagno');
   ok(lo.forzaBuio,'le creature d\'ombra si rafforzano con l\'Ombra del gruppo');
   ok(lo.bloccato&&lo.costruito&&lo.tutto,'villaggio: prima la richiesta, poi le Corone; si ricostruisce tutto');
@@ -207,8 +207,9 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   const nov=await page.evaluate(async()=>{const r={};SET.lo=true;SET.tut=false;SPEED=0;
     const nuova=(cls='guerriero')=>{R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);pickCls=cls;pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();ctx(ME)};
     const carta=(id,up=false)=>{const c={id,up,uid:uid++};g.hero.hand.push(c);g.hero.energy=9;return c};
-    // spenta di base: il Necromante ha ancora carte senza lato Ombra
-    SET.lox=SET_DEF.lox;nuova('necromante');r.spentaBase=SET_DEF.lox===false&&!R.lox&&!canShadow({id:'evocascheletro',up:false})&&canShadow({id:'colpo',up:false});
+    // dalla v10.12 accesa di base (prima era in Sviluppo, spenta): anche il Necromante evoca dal lato Ombra; spenta dall'interno solo le carte con danni, Armatura o Veleno
+    SET.lox=false;nuova('necromante');const spenta=!R.lox&&!canShadow({id:'evocascheletro',up:false})&&canShadow({id:'colpo',up:false});
+    SET.lox=SET_DEF.lox;nuova('necromante');r.spentaBase=spenta&&SET_DEF.lox===true&&R.lox===true&&canShadow({id:'evocascheletro',up:false});
     // accesa: ogni carta giocabile (non i Poteri) ha un lato Ombra
     SET.lox=true;nuova('necromante');r.accesa=R.lox===true;
     const giocabili=Object.keys(CARDS).filter(k=>{const d=CARDS[k];return !d.unplay&&d.t!=='P'&&d.t!=='X'&&!d.nosh});
@@ -230,7 +231,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     const errs=[];R.phase='map';startCombat(['orco','goblin'],'combat');
     for(const k of giocabili)for(const up of [false,true]){try{ctx(ME);if(!R.combat||R.combat.won||g.hero.down||R.phase!=='combat'){R.phase='map';startCombat(['orco','goblin'],'combat');ctx(ME)}
       g.enemies.forEach(x=>{x.hp=x.max=999});run.hp=run.max;run.om=0;g.hero.hand=g.hero.hand.slice(-4);const cc={id:k,up,uid:uid++};g.hero.hand.push(cc);g.hero.energy=9;playCard(cc.uid,0,ME,0,1)}catch(x){errs.push(k+(up?'+':'')+': '+x.message)}}
-    r.errori=errs;SET.lox=false;
+    r.errori=errs;SET.lox=true;
     // strade segrete: circa una partita su quattro, al massimo una per mappa
     nuova('guerriero');let con=0;const seed0=R.seed;
     for(let i=0;i<600;i++){R.seed='prova'+i;R.segN=0;let f=false;for(let y=1;y<ROWS-1&&!f;y++){const x=R.map[y].findIndex(n=>n&&SEG_T.includes(n.type));if(x>=0&&segRoll(y,x,R.map[y][x].type))f=true}if(f)con++}
@@ -257,11 +258,11 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     const sv=REDEEM_G.slice();REDEEM_G[0]=hashStr('vg1#PROVA-GEMME');REDEEM_G[1]=hashStr('vg2#PROVA-GEMME');
     R=null;screen='title';setGems(0);openSettings();render();$('#rcode').value=' prova-gemme ';redeem();r.gemme=getGems()===200;
     openSettings();render();$('#rcode').value='SBAGLIATO';redeem();r.sbagliato=getGems()===200;REDEEM_G[0]=sv[0];REDEEM_G[1]=sv[1];
-    // in Sviluppo resta solo Luce e Ombra
+    // dalla v10.12 non c'è più Sviluppo: nessun interruttore per Luce e Ombra, Ombra per tutti, Villaggio, Gemme, Grafica Pixellab
     openSettings();render();const sw=[...document.querySelectorAll('button.sw')].map(x=>x.getAttribute('aria-label'));
-    r.sviluppo=sw.includes('Luce e Ombra')&&sw.includes('Ombra per tutti gli eroi')&&!['Villaggio di Valdombra','Gemme','Grafica Pixellab','Strade segrete'].some(k=>sw.includes(k));
+    r.sviluppo=!['Luce e Ombra','Ombra per tutti gli eroi','Villaggio di Valdombra','Gemme','Grafica Pixellab','Strade segrete'].some(k=>sw.includes(k));
     r.sempre=SET_DEF.vil&&SET_DEF.gem&&SET_DEF.px&&SET.vil&&SET.gem;closeModal();modal=null;R=null;screen='title';render();return r});
-  ok(nov.spentaBase&&nov.accesa&&!nov.senzaLato.length&&nov.potere,'Ombra per tutti gli eroi: spenta di base; accesa, ogni carta giocabile ha un lato Ombra (non i Poteri)'+(nov.senzaLato.length?' senza: '+nov.senzaLato:''));
+  ok(nov.spentaBase&&nov.accesa&&!nov.senzaLato.length&&nov.potere,'Ombra per tutti gli eroi: accesa di base (v10.12); accesa, ogni carta giocabile ha un lato Ombra (non i Poteri)'+(nov.senzaLato.length?' senza: '+nov.senzaLato:''));
   ok(nov.cura===8&&nov.om===1&&nov.scheletri===2&&nov.condanna===12&&nov.condannaLuce===8,`lato Ombra esteso: cura 6 (+25% nella Luce = 8), 2 Scheletri, 12 Condanna (Luce 8), +1 Ombra (${nov.cura}/${nov.scheletri}/${nov.condanna})`);
   ok(nov.pescaOmbra===0&&nov.pescaLuce===-1&&nov.colpo===9&&nov.testo,`carte senza numeri: 1 carta in più; le carte di base restano uguali (${nov.colpo} danni); il testo mostra i numeri del lato Ombra`);
   ok(!nov.errori.length,'ogni carta si gioca dal lato Ombra esteso senza errori'+(nov.errori.length?': '+nov.errori.slice(0,5).join(' | '):''));
@@ -269,7 +270,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(nov.stanza&&nov.vista&&nov.presa&&nov.scrigno,'strada segreta: due reliquie segrete e uno scrigno, se ne sceglie uno, poi si entra nella casella');
   ok(nov.fuoriPool&&Object.values(nov.reliquie).every(Boolean),'reliquie segrete: non si trovano altrove e funzionano '+JSON.stringify(nov.reliquie));
   ok(nov.hashGemme&&nov.gemme&&nov.sbagliato,'codice Gemme: nel sorgente solo gli hash, dà 200 Gemme, un codice sbagliato no');
-  ok(nov.sviluppo&&nov.sempre,'in Sviluppo restano solo Luce e Ombra e Ombra per tutti gli eroi; Villaggio, Gemme e Grafica Pixellab sempre accesi');
+  ok(nov.sviluppo&&nov.sempre,'niente interruttori per Luce e Ombra, Ombra per tutti, Villaggio, Gemme e Grafica Pixellab: sempre accesi');
 
   console.log('7c. Equilibrio Luce e Ombra, missioni, reliquie maledette, climi, aiuti, scena');
   const eq=await page.evaluate(async()=>{const r={};SET.lo=true;SET.lox=false;SET.tut=false;SPEED=0;
@@ -327,7 +328,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     // illustrazioni Ombra delle carte
     r.artOmbra=artStrip('colpo',true).includes('pixel/carte-ombra/colpo.png')&&artStrip('colpo',false).includes('pixel/carte/colpo.png')&&!artStrip('colpo').includes('carte-ombra');
     {const im=document.createElement('img');const sp=document.createElement('span');sp.className='artstrip';sp.appendChild(im);document.body.appendChild(sp);pxShOk(im,'colpo',0);r.ricaduta=/pixel\/carte\/colpo\.png/.test(im.src);sp.remove();delete PXCO.colpo}
-    // combattimento a scena (Sviluppo)
+    // combattimento a scena (dalla v10.12 in Impostazioni, Grafica)
     R=null;screen='title';openSettings();render();r.interruttore=!!document.querySelector('button.sw[aria-label="Combattimento a scena"]')&&SET_DEF.scena===false;closeModal();
     SET.scena=true;applySet();r.scena=document.body.classList.contains('scena');SET.scena=false;applySet();r.scenaVia=!document.body.classList.contains('scena');
     modal=null;R=null;screen='title';render();return r});
@@ -343,7 +344,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(eq.maledizioni===10,'al massimo 10 maledizioni per combattimento: niente più combattimenti senza fine ('+eq.maledizioni+')');
   ok(eq.gemNo&&eq.gemSi&&eq.pelBlocco&&eq.pelNo&&eq.pelSi,'purificazione pagata in Gemme: Incenso 2, Pellegrino 4; senza Gemme non si può '+JSON.stringify({a:eq.gemNo,b:eq.gemSi,c:eq.pelBlocco,d:eq.pelNo,e:eq.pelSi}));
   ok(eq.artOmbra&&eq.ricaduta,'carte dal lato Ombra con la loro illustrazione; se manca resta quella normale');
-  ok(eq.interruttore&&eq.scena&&eq.scenaVia,'Combattimento a scena: interruttore in Sviluppo, spento di base');
+  ok(eq.interruttore&&eq.scena&&eq.scenaVia,'Combattimento a scena: interruttore nelle Impostazioni, spento di base');
 
   console.log('7d. Aprite il cancello, enciclopedia Ombra, barre, mappa e Gemme');
   const ac=await page.evaluate(async()=>{const r={};SET.tut=false;SPEED=0;SET.lo=true;const sleep=ms=>new Promise(t=>setTimeout(t,ms));
@@ -626,7 +627,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     r.mazzo=duo>=9&&sh===duo;closeModal();
     startCombat(['orco'],'combat');ctx(ME);g.hero.hand=[{id:'possente',up:false,uid:uid++}];render();const el=document.querySelector('.hand .card');cardZoom(el);r.zoom=document.querySelectorAll('#czoom .card').length===2&&!!document.querySelector('#czoom .card.shadow');cardZoomClose();
     R=null;screen='title';modal=null;['colpo'].forEach(k=>seenAdd('c',[k]));UI.diCls='all';openDiario('c');render();r.enc=!!document.querySelector('.modal .duo .card.shadow');closeModal();
-    // menu essenziale (in Sviluppo): poche cose, eroe e dungeon in una pagina a parte
+    // menu essenziale (dalla v10.12 in Impostazioni, Grafica): poche cose, eroe e dungeon in una pagina a parte
     SET.menu=true;screen='title';render();{const gb=document.querySelector('.mbig .btn'),gr=document.querySelector('.mtiles');r.largo=!!gb&&!!gr&&Math.abs(gb.getBoundingClientRect().width-gr.getBoundingClientRect().width)<2}
     r.lite=r.largo&&document.querySelectorAll('.mtile').length===8&&!!document.getElementById('guidabtn')&&![...document.querySelectorAll('.mtile')].some(x=>/Guida/.test(x.textContent))&&!document.querySelector('.classes');giocaScroll();render();r.pagina=screen==='solo'&&!!document.querySelector('.classes');
     SET.menu=false;screen='title';render();r.pieno=!!document.querySelector('.classes')&&!document.querySelector('.mtile');
@@ -639,7 +640,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(v9.tempo&&v9.fine,'bonus di tempo solo vincendo: +30% sotto 5 minuti, +15% fino a 10, +5% fino a 20; si vede a fine partita');
   ok(v9.mazzo&&v9.zoom&&v9.enc,'Luce e Ombra insieme: nel mazzo, nella carta ingrandita e nell\'enciclopedia '+JSON.stringify({m:v9.mazzo,z:v9.zoom,e:v9.enc}));
   ok(v9.elmo&&v9.grimorio,'Guerriero: l\'Elmo dà 1 Forza a inizio combattimento; Mago: il Grimorio dà anche 1 Energia nel primo turno');
-  ok(v9.lite&&v9.pagina&&v9.pieno&&v9.eroi,'menu essenziale in Sviluppo (eroe e dungeon in una pagina a parte), menu completo di base; PV degli eroi ribilanciati '+JSON.stringify({l:v9.lite,p:v9.pagina,c:v9.pieno,e:v9.eroi}));
+  ok(v9.lite&&v9.pagina&&v9.pieno&&v9.eroi,'menu essenziale nelle Impostazioni (eroe e dungeon in una pagina a parte), menu completo di base; PV degli eroi ribilanciati '+JSON.stringify({l:v9.lite,p:v9.pagina,c:v9.pieno,e:v9.eroi}));
 
   {const sd=await page.evaluate(async()=>{const r={};const sb0=window.sbClient,st0=SET.stats;const rows=[];let primo=true;SET.stats=true;
       window.sbClient=()=>({from:()=>({insert:row=>{rows.push(JSON.parse(JSON.stringify(row)));const err=primo&&('durata' in row)?{code:'PGRST204',message:'colonna durata'}:null;primo=false;return Promise.resolve({error:err})}})});
@@ -1003,6 +1004,29 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     ok(gd.parte&&gd.hud&&gd.forza,'dungeon di gilda: parte nel dungeon del boss della settimana (Morvath, Cripte), Assedio dal grado, senza missioni; in alto «Piano 0/9» e «Grado 3»; nemici +10% al grado 3, boss +25% in più');
     ok(gd.fine&&gd.corone&&gd.imprese&&gd.bottoni&&gd.ancora&&gd.ritorno&&gd.giaPreso&&gd.senzaGilda&&gd.pulito,'dungeon di gilda: a fine partita va alla gilda con il grado e mostra il premio del giorno; metà Corone normali, niente sblocchi né Imprese da dungeon completato; «Continua: grado 4»; si torna alla stanza di gilda');
     ok(!ei.length,'dungeon di gilda: nessun errore nella pagina '+ei.slice(0,2).join(' | '));await ci.close()}
+
+  console.log('7ae. Niente più Sviluppo (v10.12): Luce e Ombra e Ombra per tutti sempre accese, Combattimento a scena e Menu essenziale in Grafica, pulsante «A scena» in combattimento');
+  {const cs=await browser.newContext({viewport:{width:1280,height:860}});await cs.route(/^https?:\/\//,r=>r.abort());
+    await cs.addInitScript(()=>{try{if(!sessionStorage.getItem('prova-sv')){sessionStorage.setItem('prova-sv','1');localStorage.setItem('valdombra-impostazioni',JSON.stringify({lo:false,lox:false,scena:true,menu:true,tut:false}))}}catch(e){}});
+    const ps=await cs.newPage();const es=[];ps.on('pageerror',e=>es.push(e.message));await ps.goto(PAGE);await ps.waitForTimeout(500);
+    const sv=await ps.evaluate(async()=>{const sleep=ms=>new Promise(t=>setTimeout(t,ms));const r={};
+      r.forzate=SET.lo===true&&SET.lox===true&&SET.scena===true&&SET.menu===true&&SET_DEF.lox===true;
+      SET.menu=false;R=null;screen='title';openSettings();render();await sleep(30);const M=document.querySelector('.modal');
+      const h4=[...M.querySelectorAll('h4')].map(x=>x.textContent.trim()),sw=[...M.querySelectorAll('button.sw')].map(x=>x.getAttribute('aria-label'));
+      const graf=[...M.querySelectorAll('.panel')].find(p=>(p.querySelector('h4')||{}).textContent==='Grafica');
+      r.pannello=!h4.some(t=>/Sviluppo/.test(t))&&!sw.includes('Luce e Ombra')&&!sw.includes('Ombra per tutti gli eroi')&&!!graf&&!!graf.querySelector('button.sw[aria-label="Combattimento a scena"]')&&!!graf.querySelector('button.sw[aria-label="Menu essenziale"]');
+      graf.querySelector('button.sw[aria-label="Menu essenziale"]').click();r.menuSi=SET.menu===true;graf.ownerDocument.querySelector('button.sw[aria-label="Menu essenziale"]').click();r.menuNo=SET.menu===false;closeModal();
+      R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);pickCls='necromante';pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();ctx(ME);
+      r.partita=R.lo===true&&R.lox===true&&canShadow({id:'evocascheletro',up:false});
+      startCombat(['goblin'],'combat');R.phase='combat';ctx(ME);render();await sleep(40);
+      let b=document.querySelector('.pilebar .scenabtn');r.bottone=!!b&&b.getAttribute('aria-pressed')==='true'&&document.body.classList.contains('scena');
+      b.click();await sleep(30);b=document.querySelector('.pilebar .scenabtn');r.classica=SET.scena===false&&!document.body.classList.contains('scena')&&b.getAttribute('aria-pressed')==='false'&&JSON.parse(localStorage.getItem('valdombra-impostazioni')).scena===false;
+      b.click();await sleep(30);r.ancoraScena=SET.scena===true&&document.body.classList.contains('scena');
+      r.guida=['base','comb','dungeon','eroi','gruppo','modi','ombra','prog','set','vil'].every(t=>{UI.guTab=t;return guidaHTML().length>200&&!/Sviluppo/.test(guidaHTML())});UI.guTab='base';
+      SET.scena=false;saveSet();R=null;solo=true;screen='title';modal=null;render();return r});
+    ok(sv.forzate&&sv.pannello&&sv.menuSi&&sv.menuNo,'niente sezione Sviluppo: Luce e Ombra e Ombra per tutti accese anche se salvate spente; «Combattimento a scena» e «Menu essenziale» in Impostazioni, Grafica '+JSON.stringify(sv));
+    ok(sv.partita&&sv.bottone&&sv.classica&&sv.ancoraScena&&sv.guida,'in combattimento il pulsante «A scena» cambia la grafica al volo e la ricorda; nella guida niente più Sviluppo');
+    ok(!es.length,'niente Sviluppo: nessun errore nella pagina '+es.slice(0,2).join(' | '));await cs.close()}
 
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
