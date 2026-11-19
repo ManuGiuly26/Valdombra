@@ -930,7 +930,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
       window.accRpc=async()=>{throw new Error('offline')};R=null;solo=true;startSolo();ctx(ME);R.phase='end';R.win=false;render();await sleep(120);r.coda=jsonArr(GIL_CODA).length===1&&/arriverà/.test(document.querySelector('main').textContent);
       window.accRpc=async(fn,a)=>{DB.ch.push(fn+':'+JSON.stringify(a));if(fn==='gilda_mia')return mia();if(fn==='gilda_partita')return {esito:'contata',pe:10,punti_boss:0};return []};await gilInvia();r.riprova=jsonArr(GIL_CODA).length===0;
       R=null;screen='title';const pl0=skSel().guerriero;openBottega();await sleep(40);const tb=document.querySelector('.modal').textContent;r.bottega=tb.includes('Aspetti di gilda')&&tb.includes('Stendardo')&&tb.includes('Leggenda');closeModal();
-      r.cleanGil=JSON.stringify(cleanGil({l:99,n:'x'.repeat(40),t:'Imperatore',c:99}))===JSON.stringify({l:10,n:'x'.repeat(24),t:'',c:PCOL.length-1})&&cleanGil({l:0})===null;
+      r.cleanGil=JSON.stringify(cleanGil({l:99,n:'x'.repeat(40),t:'Imperatore',c:99}))===JSON.stringify({l:10,n:'x'.repeat(24),t:'',c:PCOL.length-1,i:0})&&cleanGil({l:0})===null;
       accLogout();window.accRpc=rpc0;ACC=null;setCrowns(c0);setGems(g0);store(SKO_K,sk0);R=null;solo=true;ME='solo';modal=null;screen='title';render();return r});
     ok(gv.stendardo&&gv.leggenda&&gv.pallino&&gv.sezioni&&gv.titoli&&gv.ritira,'gilda: la finestra mostra premi, missioni, boss, livello e titolo; «Ritira» aggiunge 55 Corone e 2 Gemme; aspetti Stendardo (livello 5) e Leggenda (10) sbloccati per tutti gli eroi '+JSON.stringify(gv));
     ok(gv.bonus&&gv.giorno,'gilda: al livello 10 la partita parte con +10% oro, una pozione, +5 PV e una reliquia in più; niente bonus nella sfida del giorno');
@@ -954,6 +954,55 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
       T.find(x=>/Gilda/.test(x.textContent)).click();await sleep(20);r.casellaGilda=!!(modal&&modal.gilda);closeModal();
       SET.menu=false;saveSet();accLogout();window.accRpc=rpc0;ACC=null;modal=null;screen='title';render();return r});
     ok(mm.senzaProfilo&&mm.gilda&&mm.amici&&mm.vaiGilda&&mm.vaiAmici&&mm.caselle&&mm.casellaGilda,'menu principale: riquadri «Gilda» (livello, titolo, missioni, boss, premi) e «Amici» (in gioco, richieste) che portano subito lì; nel menu essenziale 8 caselle in 2 file con Gilda e Amici '+JSON.stringify(mm))}
+
+  console.log('7ad. Dungeon di gilda (v10.11): stanza solo per la gilda, gradi fino al livello, 8 piani e boss della settimana, premi una volta al giorno (database simulato)');
+  {const ci=await browser.newContext({viewport:{width:1280,height:860}});await ci.route(/^https?:\/\//,r=>r.abort());const pi=await ci.newPage();const ei=[];pi.on('pageerror',e=>ei.push(e.message));await pi.goto(PAGE);await pi.waitForTimeout(400);
+    const gd=await pi.evaluate(async()=>{const sleep=ms=>new Promise(t=>setTimeout(t,ms));SET.tut=false;saveSet();const r={},rpc0=window.accRpc,cn0=window.connect,c0=getCrowns();
+      const DB={ch:[],oggi:null};
+      const mia=()=>({gilda:{id:3,nome:'Lupi',descrizione:'',aperta:true,posti:15,livello:5,pe:6000},io:{ruolo:'membro',pe:300},membri:[{nome:'sara',ruolo:'capo',pe:900},{nome:'manu',ruolo:'membro',pe:300},{nome:'luca',ruolo:'membro',pe:50}],richieste:[],
+        settimana:{inizio:'2026-11-16',fine:'2026-11-22',missioni:[],boss:{boss:'lich',vita:3000,danni:500,sconfitto:null},io:{partite:0,boss:0,missioni:{}},migliori:[]},premi:[],dungeon:{oggi:DB.oggi,gilda_oggi:!!DB.oggi}});
+      window.accRpc=async(fn,a)=>{DB.ch.push(fn+':'+JSON.stringify(a));if(fn==='gilda_mia')return mia();if(fn==='gilda_partita')return {esito:'contata',pe:25,punti_boss:220,missioni_completate:[],dungeon:{premio:true,grado:3,corone:15,gemme:0,pe_gilda:250,pe_tuoi:25}};if(fn==='amici_lista')return [];if(fn==='amici_codice')return 'K7PX2M';return 'fatto'};
+      window.connect=(c,f)=>{setTimeout(f,0);return true};
+      ACC={nome:'manu',token:'00000000-0000-0000-0000-000000000000',rev:1,dirty:false};AMI.lista=[];R=null;screen='title';await gilCarica();
+      const m8=genMap(new RNG(7),2,GD_PIANI,true);r.mappa=m8.length===9&&m8[8][3].type==='boss'&&m8[4].filter(Boolean).every(n=>n.type==='treasure')&&m8[7].filter(Boolean).every(n=>n.type==='rest')&&!m8.slice(1,7).some(w=>w.some(n=>n&&n.type==='rest'));
+      r.normale=JSON.stringify(genMap(new RNG(7),2))===JSON.stringify(genMap(new RNG(7),2,ROWS,false))&&genMap(new RNG(7),2).length===16;
+      let e8=0,n8=0,e15=0,n15=0;for(let k=0;k<40;k++){genMap(new RNG(k),0,GD_PIANI,true).flat().forEach(n=>{if(n&&n.type!=='boss'){n8++;if(n.type==='elite')e8++}});genMap(new RNG(k),0).flat().forEach(n=>{if(n&&n.type!=='boss'){n15++;if(n.type==='elite')e15++}})}r.elite=e8/n8>e15/n15;
+      r.gradi=[1,2,3,4,5,6,7,8,9,10].map(gdAss).join('')==='0112233445'&&gdCor(10)===50&&gdGem(3)===0&&gdGem(4)===1&&gdGem(8)===2&&gdPeG(1)===150;
+      openGilda();await sleep(60);const M=()=>document.querySelector('.modal');r.finestra=['Dungeon di gilda','Gradi da 1 a 5','Apri il dungeon di gilda','Morvath','al grado 1 5 Corone','al grado 5 25 Corone e 1 Gemma'].every(x=>M().textContent.includes(x));
+      M().querySelector('.gildun .btn.primary').click();await sleep(80);
+      r.stanza=!!R&&!solo&&R.phase==='lobby'&&R.lmode==='gilda'&&!!R.lgil&&R.lgil.i===3&&R.lgr===5&&R.lgil.b==='lich'&&!modal;
+      render();await sleep(30);const T=()=>document.querySelector('main').textContent;
+      r.lobby=T().includes('Dungeon di gilda')&&T().includes('Morvath')&&T().includes('Servono almeno 2 membri')&&document.querySelectorAll('.gdgr .lvl:not([disabled])').length===5&&document.querySelectorAll('.gdgr .lvl[disabled]').length===5&&document.querySelectorAll('.modes .opt').length===4&&!T().includes('Livello di Assedio');
+      R.players.pB={pid:'pB',name:'sara',cls:'mago',ready:true,gil:{l:5,n:'Lupi',t:'Scudiero',c:3,i:3}};R.order.push('pB');online.add('pB');
+      R.players.pC={pid:'pC',name:'ugo',cls:'ladro',ready:true,gil:{l:2,n:'Orsi',t:'Recluta',c:1,i:9}};R.order.push('pC');online.add('pC');render();await sleep(20);
+      r.estraneo=blockers(null,'gilda',0).join()==='pC'&&T().includes('ugo non è nella gilda Lupi')&&T().includes('Non è della gilda');
+      send({t:'start',lvl:0,seed:'GILDA1'});r.bloccata=R.phase==='lobby';
+      send({t:'kick',p:'pC'});send({t:'gr',g:9});r.gradoMax=R.lgr===5;send({t:'gr',g:3});r.grado3=R.lgr===3;
+      const sent=[];AMI.ch={send:x=>sent.push(x.payload)};AMI.on=new Set([amH('luca'),amH('sara')]);gdInvitaTutti();r.invito=sent.length===1&&sent[0].g===3&&sent[0].c===R.code&&sent[0].a===amH('luca');
+      AMI.inviti=[];amiciInvitoArrivato({a:amH('manu'),da:'sara',c:'QWER',g:4});r.arrivo=AMI.inviti.length===1&&AMI.inviti[0].g===4&&/apre il dungeon di gilda \(grado 4\)/.test(invitoHTML().replace(/<[^>]+>/g,''));AMI.inviti=[];
+      send({t:'start',lvl:0,seed:'GILDA1'});
+      r.parte=R.phase==='map'&&!!R.gd&&R.gd.gr===3&&R.mode==='norm'&&R.dg==='cripte'&&R.lvl===1&&R.map.length===9&&bossId()==='lich'&&R.players[ME].miss.length===0&&!missOn();
+      render();await sleep(20);const hu=(document.querySelector('.hud')||{}).textContent||'';r.hud=/Piano\s*0\/9/.test(hu)&&/Grado\s*3/.test(hu);
+      const sv=R.gd;startCombat(['zombi'],'combat');const h1=R.combat.hpM,d1=R.combat.dM;R.gd=null;startCombat(['zombi'],'combat');const h0=R.combat.hpM,d0=R.combat.dM;R.gd=sv;
+      startCombat(['lich'],'boss');const hb=R.combat.hpM;R.gd=null;startCombat(['lich'],'boss');const hb0=R.combat.hpM;R.gd=sv;
+      r.forza=Math.abs(h1/h0-1.1)<1e-9&&Math.abs(d1/d0-1.1)<1e-9&&Math.abs(hb/hb0-1.1*1.25)<1e-9;R.combat=null;
+      R.phase='end';R.win=true;ctx(ME);render();await sleep(150);render();await sleep(40);
+      const t=T(),inv=DB.ch.find(x=>x.startsWith('gilda_partita')),dd=inv&&JSON.parse(inv.slice(14)).p_dati;
+      r.fine=t.includes('Dungeon di gilda completato!')&&!!dd&&dd.dungeon===3&&dd.gruppo===true&&/premio del giorno 15 Corone da ritirare/.test(t)&&/la gilda prende 250 PE/.test(t);
+      r.corone=!!UI.lastAward&&UI.lastAward.n===Math.round((DUNGEONS.cripte.crowns+CR_LVL)/2)&&!UI.unlocked&&!UI.newDg&&!beaten().includes('cripte');
+      r.bottoni=t.includes('Continua: grado 4')&&t.includes('Rigioca il grado 3');const st=getStats();r.imprese=!(st.wins|0)&&st.gdWins===1&&!((st.dg||{}).cripte||{}).wins&&!/Purificatore delle Cripte/.test(t);
+      [...document.querySelectorAll('button')].find(b=>/Continua: grado 4/.test(b.textContent)).click();await sleep(20);r.ancora=R.phase==='map'&&!!R.gd&&R.gd.gr===4&&R.lvl===2;
+      R.phase='end';send({t:'again'});r.ritorno=R.phase==='lobby'&&!R.gd&&R.lmode==='gilda'&&!!R.players.pB.gil&&R.players.pB.gil.i===3;
+      r.giaPreso=/già preso/.test(gdEsitoTxt({premio:false,grado:3}))&&gdEsitoTxt(null)==='';
+      const gm=GIL.dati;GIL.dati={gilda:null,premi:[]};send({t:'mode',m:'gilda'});r.senzaGilda=R.lmode==='norm';GIL.dati=gm;
+      r.pulito=JSON.stringify(cleanGil({l:5,n:'Lupi',t:'Recluta',c:3,i:3}))==='{"l":5,"n":"Lupi","t":"Recluta","c":3,"i":3}';
+      accLogout();window.accRpc=rpc0;window.connect=cn0;ACC=null;AMI.ch=null;R=null;solo=true;ME='solo';modal=null;screen='title';setCrowns(c0);render();return r});
+    ok(gd.mappa&&gd.normale&&gd.elite&&gd.gradi,'dungeon di gilda: mappa di 8 piani più il boss (forziere al 5° piano, falò prima del boss, più élite); la mappa normale non cambia; gradi = Assedio g/2, premi 5 Corone × grado e Gemme dal grado 4 '+JSON.stringify(gd));
+    ok(gd.finestra&&gd.stanza&&gd.lobby&&gd.estraneo&&gd.bloccata&&gd.gradoMax&&gd.grado3,'dungeon di gilda: dalla Gilda «Apri il dungeon di gilda» crea la stanza; gradi fino al livello della gilda; chi non è della gilda blocca la partenza');
+    ok(gd.invito&&gd.arrivo,'dungeon di gilda: «Invita tutta la gilda» manda l\'invito ai compagni in gioco fuori dalla stanza, con il grado; a chi lo riceve compare «apre il dungeon di gilda»');
+    ok(gd.parte&&gd.hud&&gd.forza,'dungeon di gilda: parte nel dungeon del boss della settimana (Morvath, Cripte), Assedio dal grado, senza missioni; in alto «Piano 0/9» e «Grado 3»; nemici +10% al grado 3, boss +25% in più');
+    ok(gd.fine&&gd.corone&&gd.imprese&&gd.bottoni&&gd.ancora&&gd.ritorno&&gd.giaPreso&&gd.senzaGilda&&gd.pulito,'dungeon di gilda: a fine partita va alla gilda con il grado e mostra il premio del giorno; metà Corone normali, niente sblocchi né Imprese da dungeon completato; «Continua: grado 4»; si torna alla stanza di gilda');
+    ok(!ei.length,'dungeon di gilda: nessun errore nella pagina '+ei.slice(0,2).join(' | '));await ci.close()}
 
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
