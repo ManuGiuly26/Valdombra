@@ -881,6 +881,32 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
       SET.lo=false;R.lo=false;run.screen='rest';render();r.spento=!document.querySelector('main .omriga')&&!document.querySelector('.hud .om-t');SET.lo=true;saveSet();R=null;screen='title';render();return r});
     ok(om.hud&&om.stanze&&om.ricompensa&&om.spento,'Ombra: si vede nella barra in alto e con la sua barra al Mercante, al Falò, negli eventi e nei tesori; non nella ricompensa né senza Luce e Ombra '+JSON.stringify(om))}
 
+  console.log('7aa. Gilda (v10.8): cerca, entra, crea (150 Corone), ruoli, posti con le Gemme, inviti dai compagni (database simulato)');
+  {const cg=await browser.newContext({viewport:{width:1280,height:860}});await cg.route(/^https?:\/\//,r=>r.abort());const pg=await cg.newPage();const eg=[];pg.on('pageerror',e=>eg.push(e.message));await pg.goto(PAGE);await pg.waitForTimeout(400);
+    const gl=await pg.evaluate(async()=>{const sleep=ms=>new Promise(t=>setTimeout(t,ms));SET.tut=false;saveSet();const r={},rpc0=window.accRpc,c0=getCrowns(),g0=getGems();
+      const DB={mia:{gilda:null,richieste_mie:[{id:7,nome:"L'Ordine"}]},ch:[]};
+      window.accRpc=async(fn,a)=>{DB.ch.push(fn+':'+JSON.stringify(a));if(fn==='gilda_mia')return DB.mia;if(fn==='gilda_cerca')return [{id:3,nome:'Lupi',descrizione:'',aperta:true,membri:12,posti:15,livello:3},{id:7,nome:"L'Ordine",descrizione:'',aperta:false,membri:4,posti:15,livello:1},{id:8,nome:'Piena',descrizione:'',aperta:true,membri:15,posti:15,livello:2}];
+        if(fn==='gilda_crea')return [{id:11,esito:a.p_gilda==='Usata'?'nome_usato':'creata'}];if(fn==='gilda_entra')return a.p_gilda==3?'entrato':'richiesta_inviata';if(fn==='gilda_posto')return [{posti:16,esito:'fatto'}];if(fn==='amici_lista')return [];if(fn==='amici_codice')return 'K7PX2M';return 'fatto'};
+      ACC=null;openGilda();r.senzaProfilo=document.querySelector('.modal').textContent.includes('La gilda è legata al profilo');closeModal();
+      ACC={nome:'manu',token:'00000000-0000-0000-0000-000000000000',rev:1,dirty:false};AMI.lista=[];GIL.dati=null;GIL.cerca=null;R=null;screen='title';openGilda();await sleep(60);const M=()=>document.querySelector('.modal');
+      r.cerca=M().querySelectorAll('.gilrow').length===3&&M().textContent.includes('Chiedi di entrare')&&M().textContent.includes('Piena')&&!!M().querySelector('button[onclick="gilEntra(7)"]');
+      setCrowns(200);UI.gilN='Usata';await gilCrea();r.rimborso=getCrowns()===200&&/già una gilda/.test(GIL.msg);UI.gilN='Nuova';await gilCrea();r.crea=getCrowns()===50&&/Nuova/.test(GIL.msg);
+      setCrowns(100);UI.gilN='Altra';const nCrea=()=>DB.ch.filter(x=>x.startsWith('gilda_crea')).length,n0=nCrea();await gilCrea();r.poche=getCrowns()===100&&nCrea()===n0&&/servono 150 Corone/.test(GIL.msg);
+      await gilEntra(7);r.richiesta=/aspetta/.test(GIL.msg);
+      DB.mia={gilda:{id:3,nome:'Lupi',descrizione:'',aperta:false,posti:15,livello:3,pe:0,codice:'QW3RTY'},io:{ruolo:'capo',pe:0},membri:[{nome:'manu',ruolo:'capo',pe:0},{nome:'pandoris',ruolo:'vice',pe:0},{nome:'sara',ruolo:'membro',pe:0}],richieste:[{nome:'giada'}]};
+      await gilCarica();render();r.capo=['Chiedono di entrare',"Codice d'invito",'Impostazioni','Membri (3/15)'].every(t=>M().textContent.includes(t))&&gilRicN()===1;
+      setGems(4);await gilPosto();r.gemmePoche=getGems()===4&&/5 Gemme/.test(GIL.msg);setGems(10);gilPosto();r.conferma=!!M().querySelector('.btn.danger');await gilPosto();r.posto=getGems()===5;
+      const k0=DB.ch.filter(x=>x.startsWith('gilda_caccia')).length;gilCaccia('sara');r.cacciaConferma=DB.ch.filter(x=>x.startsWith('gilda_caccia')).length===k0&&!!M().querySelector('.btn.danger');GIL.conf=null;
+      DB.mia.io={ruolo:'membro',pe:0};DB.mia.gilda.codice=null;DB.mia.richieste=[];await gilCarica();render();r.membro=!M().textContent.includes('Impostazioni')&&!M().textContent.includes("Codice d'invito")&&!M().querySelector('button[onclick^="gilCaccia"]');
+      closeModal();solo=false;isHost=true;ME='pA';myName='Manu';chan=null;R=newLobby('GILD');rng=new RNG(1);online=new Set(['pA']);AMI.on=new Set([amH('sara')]);AMI.ch={send(){},unsubscribe(){}};render();
+      r.stanza=[...document.querySelectorAll('.amlob .amrow')].some(x=>/sara/.test(x.textContent)&&/gilda/.test(x.textContent)&&/Invita/.test(x.textContent));
+      R=null;solo=true;ME='solo';screen='title';render();amiciInvitoArrivato({a:amH('manu'),da:'sara',c:'ZZZZ'});render();r.invito=!!document.querySelector('.invbox');AMI.inviti=[];
+      accLogout();r.uscita=GIL.dati===null;window.accRpc=rpc0;ACC=null;setCrowns(c0);setGems(g0);modal=null;render();return r});
+    ok(gl.senzaProfilo&&gl.cerca&&gl.rimborso&&gl.crea&&gl.poche&&gl.richiesta,'gilda: senza profilo invita ad accedere; ricerca con Entra / Chiedi di entrare / Piena; crearla costa 150 Corone, restituite se il nome è già usato '+JSON.stringify(gl));
+    ok(gl.capo&&gl.gemmePoche&&gl.conferma&&gl.posto&&gl.cacciaConferma&&gl.membro,'gilda: il capo vede richieste, codice e impostazioni; un posto in più costa 5 Gemme e chiede conferma; «Allontana» chiede conferma; il membro semplice non vede codice né impostazioni');
+    ok(gl.stanza&&gl.invito&&gl.uscita,'gilda: nella stanza i compagni di gilda in gioco si invitano; i loro inviti si accettano; uscendo dal profilo si azzera');
+    ok(!eg.length,'gilda: nessun errore nella pagina '+eg.slice(0,2).join(' | '));await cg.close()}
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;

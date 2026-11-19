@@ -188,6 +188,29 @@ Dalla v10.4 (`database/amici.sql` e `database/api-amici.sql`, applicati il 19/11
 
 **Chi è in gioco e inviti (Realtime, come il gioco web).** Con il profilo collegato il gioco si iscrive al canale Supabase Realtime `valdombra-amici` con la presenza; la chiave della presenza **non è il nome** ma la sua impronta: `'a' + (hashStr('am#' + nome_in_minuscolo) >>> 0).toString(36)`, dove `hashStr` è la stessa funzione del gioco web (`index.html`). Un amico è «in gioco» se la sua impronta è tra le chiavi della presenza. Per invitare un amico nella propria stanza si manda sullo stesso canale il broadcast `invito` con `{"a": impronta_dell_amico, "da": mio_nome, "c": "ABCD"}` (codice della stanza). Chi lo riceve lo mostra solo se `a` è la sua impronta e `da` è nella sua lista amici; «Entra» fa entrare nella stanza `c` come col link d'invito.
 
+### `gilda`: la gilda
+
+Dalla v10.8 (`database/gilde.sql`, applicato il 19/11/2026; l'azione nell'endpoint unico è in `database/api-gilde.sql`, **da applicare**: finché non c'è usa gli indirizzi diretti `gilda_*` più sotto). In `dati` c'è `op` (se manca vale `mia`). `cerca` va anche senza `giocatore`; tutto il resto serve `giocatore` con nome e token.
+
+| `op` | Altri campi in `dati` | Risposta in `dati` |
+|---|---|---|
+| `cerca` | `testo` (facoltativo) | `{"gilde": [{"id", "nome", "descrizione", "aperta", "membri", "posti", "livello"}]}` (al massimo 30) |
+| `mia` | — | `{"gilda": {"id", "nome", "descrizione", "aperta", "posti", "livello", "pe", "creata", "codice"}, "io": {"ruolo", "pe", "entrato"}, "membri": [{"nome", "ruolo", "pe", "entrato"}], "richieste": [{"nome", "creata"}]}`; `codice` e `richieste` solo per capo e vice. Senza gilda: `{"gilda": null, "richieste_mie": [{"id", "nome"}]}` |
+| `crea` | `nome` (3-24 caratteri), `aperta` (true), `descrizione` | `{"esito", "id"}` — **nel gioco costa 150 Corone**: toglile prima e restituiscile se l'esito non è `creata` |
+| `entra` | `id` | `{"esito"}`: `entrato` se è aperta, `richiesta_inviata` se è chiusa |
+| `usa_codice` | `codice` | `{"esito", "id", "nome"}`: si entra subito anche se è chiusa |
+| `annulla` | `id` | `{"esito"}` (annulla una mia richiesta) |
+| `rispondi` | `nome`, `si` | `{"esito"}` (capo o vice) |
+| `caccia` | `nome` | `{"esito"}` (il capo chiunque, il vice solo i membri) |
+| `ruolo` | `nome`, `ruolo` (`vice`, `membro`, `capo`) | `{"esito"}` (solo il capo; `capo` passa il comando e lui diventa vice) |
+| `esci` | — | `{"esito"}`: `uscito`, o `sciolta` se era l'ultimo; se esce il capo comanda il vice (o il membro) più vecchio |
+| `modifica` | `aperta`, `descrizione`, `nome` (quelli che mancano non cambiano) | `{"esito"}` (solo il capo) |
+| `codice` | `nuovo` (facoltativo) | `{"codice"}` (capo o vice; null per gli altri) |
+| `posto` | — | `{"esito", "posti"}` (solo il capo, fino a 30) — **nel gioco si paga in Gemme**: il posto numero n+1 costa `5 + 2 × (n − 15)` Gemme (16° 5, 17° 7, … 30° 33); toglile prima e restituiscile se l'esito non è `fatto` |
+
+- **Esiti**: `creata`, `entrato`, `richiesta_inviata`, `gia_in_gilda`, `gia_richiesta`, `piena`, `non_trovata`, `troppe_richieste` (10 mie in attesa o 50 per gilda), `codice_sbagliato`, `nome_non_valido`, `nome_usato`, `annullata`, `rifiutata`, `nessuna_richiesta`, `non_permesso`, `cacciato`, `fatto`, `uscito`, `sciolta`, `massimo`, `se_stesso`, `non_trovato`, `non_in_gilda`, `ruolo_non_valido`.
+- I compagni di gilda in gioco si vedono e si invitano come gli amici (presenza e broadcast `invito` sul canale `valdombra-amici`): chi riceve un invito lo accetta se viene da un amico **o da un compagno di gilda**.
+
 ### `mie_statistiche`: le statistiche di chi chiama
 
 Serve `giocatore`. Restituisce due cose:
@@ -340,6 +363,11 @@ Per il resto del gioco online il client può usare gli stessi indirizzi del gioc
 | Amici: chiedere, accettare, togliere, bloccare | `/rest/v1/rpc/amici_richiedi` · `amici_rispondi` · `amici_togli` · `amici_blocca` | `{"p_nome", "p_token", "p_altro": "pandoris"}` (per `amici_rispondi` anche `"p_si": true`) → l'esito in parole, es. `"inviata"` |
 | Amici: il mio codice | `/rest/v1/rpc/amici_codice` | `{"p_nome", "p_token", "p_nuovo": false}` → `"K7PX2M"` |
 | Amici: usare un codice | `/rest/v1/rpc/amici_usa_codice` | `{"p_nome", "p_token", "p_codice": "K7PX2M"}` → `[{"nome", "esito"}]` |
+| Gilda: cercare | `/rest/v1/rpc/gilda_cerca` | `{"p_testo": "lupi"}` (anche senza profilo) → `[{"id", "nome", "descrizione", "aperta", "membri", "posti", "livello"}]` |
+| Gilda: la mia | `/rest/v1/rpc/gilda_mia` | `{"p_nome", "p_token"}` → lo stesso oggetto di `op: mia` |
+| Gilda: creare, entrare, codice | `/rest/v1/rpc/gilda_crea` · `gilda_entra` · `gilda_usa_codice` · `gilda_annulla` | `{"p_nome", "p_token", "p_gilda": "Nome", "p_aperta": true, "p_descrizione": ""}` · `{"p_nome", "p_token", "p_gilda": 3}` · `{"p_nome", "p_token", "p_codice": "QW3RTY"}` · `{"p_nome", "p_token", "p_gilda": 3}` |
+| Gilda: capo e vice | `/rest/v1/rpc/gilda_rispondi` · `gilda_caccia` · `gilda_ruolo` · `gilda_modifica` · `gilda_codice` · `gilda_posto` | `{"p_nome", "p_token", "p_altro", "p_si"}` · `{"p_nome", "p_token", "p_altro"}` · `{"p_nome", "p_token", "p_altro", "p_ruolo"}` · `{"p_nome", "p_token", "p_aperta", "p_descrizione", "p_gilda"}` · `{"p_nome", "p_token", "p_nuovo"}` · `{"p_nome", "p_token"}` |
+| Gilda: uscire | `/rest/v1/rpc/gilda_esci` | `{"p_nome", "p_token"}` → `"uscito"` o `"sciolta"` |
 | Classifica Sopravvivenza | `GET /rest/v1/classifica?modalita=eq.solo&dungeon=eq.rocca&order=punteggio.desc&limit=20` | — |
 
 Gli indirizzi completi iniziano con `https://ucwuhzupgsvtphsdmlqf.supabase.co`.
@@ -360,6 +388,7 @@ Cambiamenti recenti del gioco web da riportare nell'app per restare uguali:
 - **v10.5**: l'azione `amici` dell'endpoint unico è attiva. **Mappa**: falò ed eventi più rari a ogni Livello di Assedio (probabilità ×(1 − 0,08 × livello)); un falò, evento o tesoro casuale diventa combattimento se un nodo che porta lì è dello stesso tipo o se farebbe tre bonus di fila (la fila di tesori al piano 9 e quella prima del boss restano fisse); prima del boss falò fino al livello 3, al livello 4 tipi a caso ma senza falò, al livello 5 solo élite; in Sopravvivenza e nel cancello conta come livello 0. **Falò**: dal livello 3 curano il 15% dei PV (20% con le Erbe del Villaggio al 2). **Riepilogo del percorso** sotto la mappa per ogni percorso disegnato: da solo con le parole, in gruppo nome, numeri e icone.
 - **v10.6**: **esperienza degli eroi (PE) più lenta**: a fine partita 3 PE per piano, 1 per nemico ucciso, 15 per la vittoria e 5 per Livello di Assedio (prima 10, 2, 100 e 25), minimo 5 e **al massimo 90 a partita**, così per il livello 10 (2.700 PE) servono almeno 30 partite. Le soglie dei livelli non cambiano e i PE già guadagnati restano.
 - **v10.7**: l'**Ombra** del giocatore si vede sempre nella barra in alto («Ombra N/10», anche sulla mappa) e con la sua barra in cima alle stanze: Mercante, Falò (anche spento), eventi, tesori e strade segrete, perché alcune scelte dipendono da quanta Ombra hai.
+- **v10.8**: **Gilde** (serve il profilo). Finestra «Gilda» accanto ad «Amici» (Profilo, Multigiocatore, menu, stanza). Senza gilda: le mie richieste (Annulla), entra con codice, cerca (Entra se aperta, «Chiedi di entrare» se chiusa, «Piena»), crea (nome, descrizione, aperta/chiusa, **150 Corone**). In gilda: nome, livello, aperta/chiusa, membri x/posti; richieste (capo e vice) con Accetta/Rifiuta; membri col pallino verde e i pulsanti per ruolo (capo: Fai vice / Togli vice, Fai capo, Allontana; vice: Allontana i membri); codice d'invito (capo e vice) con Copia e «Fanne uno nuovo»; impostazioni del capo (aperta/chiusa, nome, descrizione, **posto in più a 5 + 2 × (posti − 15) Gemme**, fino a 30); «Esci dalla gilda» con conferma. Nella stanza «Invita» anche per i compagni di gilda in gioco (etichetta «gilda»); gli inviti si accettano da amici e compagni di gilda.
 
 ## Riservatezza
 
