@@ -714,6 +714,18 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     modal=null;ACC=acc0;accKeep();window.accRpc=rpc0;UI.pw1=UI.pw2=UI.pwMsg='';render();return r});
   ok(pw.form&&pw.corta&&pw.diverse&&pw.cambia&&pw.salvato&&pw.scaduto,'profilo: si reimposta la password (controlli su lunghezza e ripetizione, il codice nuovo del dispositivo viene salvato, messaggio se il collegamento è scaduto) '+JSON.stringify(pw));
 
+  console.log('7r. La chat del gruppo si chiude: niente sopra il pulsante «Chiudi»');
+  {const res=[];for(const [nome,opt] of [['PC',{viewport:{width:1280,height:800}}],['telefono',{viewport:{width:390,height:844},isMobile:true,hasTouch:true}]]){
+      const c7=await browser.newContext(opt);await c7.route(/^https?:\/\//,r=>r.abort());const p7=await c7.newPage();await p7.goto(PAGE);await p7.waitForTimeout(300);
+      for(const fase of ['stanza','combattimento']){const r=await p7.evaluate(async fase=>{SET.tut=false;SET.menu=true;saveSet();solo=false;isHost=true;ME='pA';myName='Prova';chan=null;modal=null;
+          R=newLobby('CHAT');rng=new RNG(hashStr('CHAT'));R.players.pB={pid:'pB',name:'Sara',cls:'mago',ready:true};R.order.push('pB');online=new Set(R.order);
+          if(fase==='combattimento'){startRunRoom(0,'CHAT');startCombat(['goblin'],'combat');ctx('pA')}render();toggleChat(true);await new Promise(t=>setTimeout(t,80));
+          const b=[...document.querySelectorAll('#chat .chead button')].find(x=>/Chiudi/.test(x.textContent));if(!b)return 'manca';const q=b.getBoundingClientRect();
+          const sopra=document.elementFromPoint(q.left+q.width/2,q.top+q.height/2);const ok=!!sopra&&b.contains(sopra);toggleChat(false);SET.menu=false;saveSet();R=null;screen='title';render();return ok?'ok':'coperto da '+(sopra?sopra.id||sopra.className:'niente')},fase);
+        res.push(nome+' '+fase+': '+r)}
+      await c7.close()}
+    ok(res.every(x=>x.endsWith(': ok')),'chat del gruppo: il pulsante «Chiudi» non è coperto da corone, gemme o versione ('+res.join(' | ')+')');}
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;
