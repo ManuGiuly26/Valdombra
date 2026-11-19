@@ -75,7 +75,7 @@ Non scrive niente e non serve `client`.
 { "azione": "ping" }
 ```
 ```json
-{ "ok": true, "azione": "ping", "dati": { "api": 1, "ora": "2026-11-18T11:54:52", "azioni": ["ping", "visita", "partita", "accedi", "mie_statistiche", "admin"] } }
+{ "ok": true, "azione": "ping", "dati": { "api": 1, "ora": "2026-11-18T11:54:52", "azioni": ["ping", "visita", "partita", "accedi", "mie_statistiche", "admin", "reimposta_password"] } }
 ```
 
 ### `visita`: l'app è stata aperta
@@ -145,7 +145,22 @@ Nome e password del profilo del gioco (gli stessi del gioco web) vanno in `dati`
 ```json
 { "ok": true, "azione": "accedi", "chi": { "giocatore": "manugiuly", "admin": true, ... }, "dati": { "nome": "manugiuly", "token": "3932296e-..." } }
 ```
-Il profilo si crea dal gioco web (o con `profilo_crea`, vedi sotto). Il token resta valido finché esiste il profilo; se una chiamata risponde `credenziali`, cancella il token salvato e fai accedere di nuovo il giocatore.
+Il profilo si crea dal gioco web (o con `profilo_crea`, vedi sotto). Il token resta valido finché esiste il profilo e finché nessuno cambia la password (vedi `reimposta_password`); se una chiamata risponde `credenziali`, cancella il token salvato e fai accedere di nuovo il giocatore, spiegandogli che forse la password è stata cambiata da un altro dispositivo.
+
+### `reimposta_password`: scegliere una password nuova
+
+Dalla v9.8 (`database/api-password.sql`, applicato il 19/11/2026). Serve `giocatore` con nome e token: chi è già collegato può scegliere una password nuova anche se ha dimenticato quella vecchia. In `dati` va la password `nuova` (da 4 a 72 caratteri).
+
+```json
+{ "azione": "reimposta_password", "client": { ... }, "giocatore": { "nome": "manugiuly", "token": "..." }, "dati": { "nuova": "..." } }
+```
+```json
+{ "ok": true, "azione": "reimposta_password", "chi": { ... }, "dati": { "nome": "manugiuly", "token": "7d1c0a3e-..." } }
+```
+- La risposta contiene il **token nuovo**: salvalo al posto di quello vecchio. Il token vecchio smette di funzionare, e così quelli degli altri dispositivi (anche il gioco web): lì il giocatore deve accedere di nuovo con la password nuova.
+- Errori possibili: `serve_accesso` (manca `giocatore`), `credenziali` (token non più valido: fai accedere di nuovo), `password_corta`.
+- Non salvare né mandare la password altrove; il token nuovo non finisce nel registro delle chiamate.
+- Nel gioco web la stessa cosa sta in Profilo → «Reimposta la password».
 
 ### `mie_statistiche`: le statistiche di chi chiama
 
@@ -188,6 +203,7 @@ Serve `giocatore` con un profilo amministratore (oggi `manugiuly`). Restituisce 
 | `serve_accesso` | l'azione richiede `giocatore` |
 | `non_autorizzato` | il profilo non è amministratore |
 | `dati_non_validi` | un campo di `dati` manca o non va bene (vedi `dettaglio`) |
+| `password_corta` | in `reimposta_password` la password nuova ha meno di 4 o più di 72 caratteri |
 | `errore_interno` | problema del server: riprova più tardi |
 
 Ogni errore ha anche `messaggio`, un testo in italiano che si può mostrare al giocatore.
@@ -291,11 +307,21 @@ Per il resto del gioco online il client può usare gli stessi indirizzi del gioc
 | Cosa | Indirizzo (`POST`) | Corpo |
 |---|---|---|
 | Creare un profilo | `/rest/v1/rpc/profilo_crea` | `{"p_nome": "...", "p_pass": "...", "p_dati": {}}` → `[{"token", "rev"}]` |
+| Reimpostare la password | `/rest/v1/rpc/profilo_password` | `{"p_nome": "...", "p_token": "...", "p_nuova": "..."}` → `[{"token"}]` (il token nuovo; quello vecchio non vale più) |
 | Leggere il salvataggio | `/rest/v1/rpc/profilo_leggi` | `{"p_nome": "...", "p_token": "..."}` → `[{"dati", "rev"}]` |
 | Salvare | `/rest/v1/rpc/profilo_salva` | `{"p_nome", "p_token", "p_dati", "p_rev"}` → nuova revisione, oppure la revisione attuale in negativo se un altro dispositivo ha salvato prima (allora rileggi, unisci e riprova) |
 | Classifica Sopravvivenza | `GET /rest/v1/classifica?modalita=eq.solo&dungeon=eq.rocca&order=punteggio.desc&limit=20` | — |
 
 Gli indirizzi completi iniziano con `https://ucwuhzupgsvtphsdmlqf.supabase.co`.
+
+## Da allineare nell'app (gioco web)
+
+Cambiamenti recenti del gioco web da riportare nell'app per restare uguali:
+
+- **v9.5**: la forma **Gufo** del Druido fa di nuovo pescare 2 carte in più all'inizio del turno (dalla 9.0 era spenta per errore).
+- **v9.6 → v9.8**: per qualche ora le carte si potevano giocare cliccando la carta ingrandita; dalla **9.8** non più. Le carte si giocano solo dalla mano e il lato Ombra si sceglie col pulsante «Lato Ombra» (che diventa «Lato Luce» per tornare indietro). La carta ingrandita mostra le due facce solo in anteprima.
+- **v9.7**: nel combattimento a scena, in gruppo, i compagni stanno nella colonna del proprio eroe, subito sopra di lui (compatti da 4 giocatori in su).
+- **v9.8**: nel Profilo c'è «Reimposta la password» (qui: azione `reimposta_password`). Dopo il cambio tutti gli altri dispositivi devono accedere di nuovo.
 
 ## Riservatezza
 
