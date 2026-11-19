@@ -1104,6 +1104,22 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     ok(gv.stanza&&gv.loadout&&gv.torna,'eroine: in gruppo il genere di ognuno viaggia con lo zaino e si vede nella stanza');
     ok(!eg.length,'eroine: nessun errore nella pagina '+eg.slice(0,2).join(' | '));await cg.close()}
 
+  console.log('7ai. Provocazione (v10.17): anche gli attacchi a tutto il gruppo vanno solo su chi provoca');
+  {const pv=await page.evaluate(async()=>{const sleep=ms=>new Promise(t=>setTimeout(t,ms));const r={};SET.tut=false;SPEED=0;
+      solo=false;isHost=true;ME='pA';myName='Manu';chan=null;modal=null;R=newLobby('PROV');R.players.pA.cls='guardiano';
+      R.players.pB={pid:'pB',name:'Sara',cls:'mago',ready:true};R.order.push('pB');online=new Set(R.order);startRunRoom(0,'PROVA');
+      startCombat(['goblin'],'combat');R.phase='combat';const c=R.combat,e=c.enemies[0];e.hp=e.max=999;e.st={};
+      const zero=()=>Object.values(c.heroes).forEach(h=>{h.blk=0;h.st={}});
+      e.intent={d:10,aoe:1};zero();let a=R.players.pA.hp,b=R.players.pB.hp;ctx('pA');doIntent(e);ctx(ME);r.senza=R.players.pA.hp<a&&R.players.pB.hp<b;
+      ctx(ME);render();await sleep(20);r.tutti=/→\s*tutti/.test(document.querySelector('.intent').textContent);
+      e.intent={d:10,aoe:1,deb:'weak',dn:1};zero();ctx('pA');TAUNT(1);ctx(ME);render();await sleep(20);
+      const t=document.querySelector('.intent').textContent;r.scritta=/→\s*te/.test(t)&&!/tutti/.test(t);
+      a=R.players.pA.hp;b=R.players.pB.hp;ctx('pA');doIntent(e);ctx(ME);
+      r.soloLui=R.players.pA.hp<a&&R.players.pB.hp===b&&!!c.heroes.pA.st.weak&&!c.heroes.pB.st.weak;
+      ME='pB';ctx('pB');render();await sleep(20);r.vistaAltro=/→\s*Manu/.test(document.querySelector('.intent').textContent);ME='pA';
+      R=null;solo=true;ME='solo';isHost=true;online=new Set(['solo']);screen='title';render();return r});
+    ok(pv.senza&&pv.tutti&&pv.scritta&&pv.soloLui&&pv.vistaAltro,'Provocazione: senza, l\'attacco «→ tutti» colpisce tutti; con Provocazione colpisce (danni e Debole) solo chi provoca e la scritta diventa «→ te» / il suo nome '+JSON.stringify(pv))}
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;
