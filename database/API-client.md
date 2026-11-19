@@ -190,7 +190,7 @@ Dalla v10.4 (`database/amici.sql` e `database/api-amici.sql`, applicati il 19/11
 
 ### `gilda`: la gilda
 
-Dalla v10.8 (`database/gilde.sql`, applicato il 19/11/2026; l'azione nell'endpoint unico è in `database/api-gilde.sql`, **da applicare**: finché non c'è usa gli indirizzi diretti `gilda_*` più sotto). In `dati` c'è `op` (se manca vale `mia`). `cerca` va anche senza `giocatore`; tutto il resto serve `giocatore` con nome e token.
+Dalla v10.8 (`database/gilde.sql` e `database/api-gilde.sql`, applicati il 19/11/2026; in alternativa ci sono gli indirizzi diretti `gilda_*` più sotto). In `dati` c'è `op` (se manca vale `mia`). `cerca` va anche senza `giocatore`; tutto il resto serve `giocatore` con nome e token.
 
 | `op` | Altri campi in `dati` | Risposta in `dati` |
 |---|---|---|
