@@ -1070,6 +1070,40 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     ok(rc.admin&&rc.admConf&&rc.admFatto&&rc.admNo&&rc.pulito,'amministrazione: reimposta la password di un giocatore dopo la conferma e mostra la provvisoria; nome sbagliato avvisa; uscendo dal profilo non resta niente');
     ok(!er.length,'password dimenticata: nessun errore nella pagina '+er.slice(0,2).join(' | '));await cr.close()}
 
+  console.log('7ah. Eroine (v10.16): pulsante Genere per tutti gli eroi, immagini e aspetti femminili, nomi e testi al femminile, nome del profilo in combattimento');
+  {const cg=await browser.newContext({viewport:{width:1280,height:860}});await cg.route(/^https?:\/\//,r=>r.abort());const pg=await cg.newPage();const eg=[];pg.on('pageerror',e=>eg.push(e.message));await pg.goto(PAGE);await pg.waitForTimeout(400);
+    const gv=await pg.evaluate(async()=>{const sleep=ms=>new Promise(t=>setTimeout(t,ms));const r={};SET.tut=false;SET.px=true;saveSet();SET.menu=false;
+      let w=0;while((!PXI['guerriero-f']||!PXI['mago-f-attacco'])&&w<400){await sleep(10);w++}
+      r.caricate=['guerriero','mago','ladro','chierico','necromante','ranger','druido','monaco','guardiano','paladino'].every(c=>PXI[c+'-f']&&PXI[c+'-f-attacco']&&PXI[c+'-f-difesa']&&PXI[c+'-f-colpito']&&PXI[c+'-f-attacco'].n===7);
+      R=null;solo=true;ME='solo';screen='title';modal=null;render();await sleep(20);const T=()=>document.querySelector('main').textContent;
+      const gr=()=>[...document.querySelectorAll('.genrow .btn')];
+      r.base=myG()==='m'&&gr().length===2&&gr()[0].getAttribute('aria-pressed')==='true'&&T().includes('Guerriero')&&!T().includes('Guerriera');
+      gr()[1].click();await sleep(20);
+      r.femm=myG()==='f'&&load(GEN_K)==='f'&&gr()[1].getAttribute('aria-pressed')==='true'&&['Guerriera','Maga','Chierica','Paladina'].every(n=>T().includes(n))&&[...document.querySelectorAll('.classcard .pxs')].some(x=>/guerriero-f\.png/.test(x.getAttribute('style')||''));
+      r.nomi=CN('mago','f')==='Maga'&&CN('ranger','f')==='Ranger'&&CNa('mago','del','f')==='della Maga'&&CNa('guerriero','con il','m')==='con il Guerriero'&&gfix('Sei ⟨caduto|caduta⟩')==='Sei caduta'&&SYNC_KEYS.includes(GEN_K);
+      pickCls='mago';pickDg='rocca';pickMode='norm';pickLvl=0;ACC=null;startSolo();ctx(ME);
+      r.partita=R.players.solo.g==='f'&&R.players.solo.name==='Maga';
+      startCombat(['goblin'],'combat');R.phase='combat';ctx(ME);render();await sleep(30);
+      const hero=document.querySelector('#ent-h-solo .pxh'),hud=document.querySelector('.hud');
+      r.figura=!!hero&&/pixel\/mago-f\.png/.test(hero.getAttribute('style')||'')&&hero.getAttribute('aria-label')==='Maga'&&/Maga/.test(hud.textContent);
+      ACC={nome:'manu',token:'00000000-0000-0000-0000-000000000000',rev:1,dirty:false};render();await sleep(20);
+      r.profilo=/Manu/.test(document.querySelector('.hud').textContent)&&/Manu/.test(document.querySelector('.combat .hero .nm').textContent);ACC=null;
+      store(SKO_K,JSON.stringify(['mago@cremisi']));setSkin('mago','cremisi');await sleep(20);ctx(ME);render();w=0;while(!PXI['aspetti/mago-f-cremisi']&&w<300){await sleep(10);w++}render();await sleep(20);
+      const h2=document.querySelector('#ent-h-solo .pxh');r.aspetto=!!h2&&/aspetti\/mago-f-cremisi\.png/.test(h2.getAttribute('style')||'')&&pxKey('mago@cremisi')==='aspetti/mago-cremisi'||(PXI['aspetti/mago-cremisi']===undefined&&!!h2&&/aspetti\/mago-f-cremisi\.png/.test(h2.getAttribute('style')||''));
+      setSkin('mago',null);
+      R.phase='end';R.win=false;render();await sleep(40);r.testo=/Sei caduta/.test(T())&&!/Sei caduto/.test(T());
+      toast('Sei ⟨uscito|uscita⟩ dalla gilda.');r.avviso=document.querySelector('.toast').textContent==='Sei uscita dalla gilda.';
+      solo=false;isHost=true;ME='pA';myName='Sara';chan=null;modal=null;R=newLobby('GENE');R.players.pA.cls='guerriero';
+      R.players.pB={pid:'pB',name:'Luca',cls:'mago',ready:true,g:'m'};R.order.push('pB');online=new Set(R.order);render();await sleep(20);
+      const pl=document.querySelector('.plist').textContent;r.stanza=R.players.pA.g==='f'&&/Guerriera/.test(pl)&&/Mago/.test(pl)&&!/Maga\b/.test(pl);
+      ACT.loadout({z:{},tal:[],g:'f'},R.players.pB);r.loadout=R.players.pB.g==='f'&&hg(R.players.pB)==='mago~f';
+      setG('m');r.torna=myG()==='m';R=null;solo=true;ME='solo';screen='title';modal=null;render();return r});
+    ok(gv.caricate&&gv.base&&gv.femm&&gv.nomi,'eroine: le 40 immagini femminili si caricano; «Genere: Maschile / Femminile» sopra gli eroi, di base Maschile; con Femminile nomi e figure al femminile '+JSON.stringify(gv));
+    ok(gv.partita&&gv.figura&&gv.profilo&&gv.aspetto,'eroine: la partita parte con la Maga (figura pixel/mago-f), in combattimento il nome del profilo se c\'è; gli aspetti hanno la versione femminile');
+    ok(gv.testo&&gv.avviso,'eroine: i testi che parlano a te seguono il genere («Sei caduta», «Sei uscita»)');
+    ok(gv.stanza&&gv.loadout&&gv.torna,'eroine: in gruppo il genere di ognuno viaggia con lo zaino e si vede nella stanza');
+    ok(!eg.length,'eroine: nessun errore nella pagina '+eg.slice(0,2).join(' | '));await cg.close()}
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;
@@ -1082,7 +1116,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     SET.px=false;saveSet();nuova('guerriero');r.spenta=!document.querySelector('.pxh')&&!!document.querySelector('#ent-h-pA img.spr');
     openSettings();r.interruttore=!document.querySelector('button.sw[aria-label="Grafica Pixellab"]');closeModal();
     // accesa: le 40 immagini e la figura di ogni eroe
-    SET.px=true;saveSet();let w=0;while(Object.keys(PXI).length<294&&w<900){await sleep(10);w++}
+    SET.px=true;saveSet();let w=0;while(Object.keys(PXI).length<334&&w<900){await sleep(10);w++}
     r.caricate=Object.values(PXI).filter(Boolean).length;r.mancanti=pxExtraKeys().filter(k=>!PXI[k]);
     r.senzaFigura=Object.keys(CLASSES).filter(cls=>{nuova(cls);const s=sp('pA');return !(s&&s.style.backgroundImage.includes('pixel/'+cls+'.png')&&s.classList.contains('idle'))});
     nuova('guerriero');
@@ -1160,7 +1194,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
       const z=document.querySelector('#czoom'),t=document.querySelector('#gltip');r.fumetto=(!z||z.hidden)&&!!t&&!t.hidden;document.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerType:'touch'}));c.click();glHide()}
     R=null;solo=true;ME='solo';screen='title';modal=null;render();return r});
   ok(px.base&&px.spenta&&px.interruttore,'Grafica Pixellab: sempre accesa, senza interruttore; se le immagini mancano resta lo sprite di sempre');
-  ok(px.caricate>=294&&!px.mancanti.length&&!px.senzaFigura.length,`le immagini in pixel/ si caricano (${px.caricate}, tutte le ${294} di base${px.mancanti.length?'; mancano: '+px.mancanti.slice(0,8):''}) e ogni eroe ha la sua figura${px.senzaFigura.length?' (mancano: '+px.senzaFigura+')':''}`);
+  ok(px.caricate>=334&&!px.mancanti.length&&!px.senzaFigura.length,`le immagini in pixel/ si caricano (${px.caricate}, tutte le ${334} di base${px.mancanti.length?'; mancano: '+px.mancanti.slice(0,8):''}) e ogni eroe ha la sua figura${px.senzaFigura.length?' (mancano: '+px.senzaFigura+')':''}`);
   ok(!px.nemTutti.length&&/pixel\/nemici\/.+\.png/.test(px.nemFig)&&/pxan/.test(px.nemAtt)&&/-attacco/.test(px.nemAtt)&&/pxan/.test(px.nemCol)&&/-colpito/.test(px.nemCol)&&!px.nemFlash,`nemici (${px.nemiciIn}): figura, attacco quando agiscono, colpito al posto del lampo; tutti i 30 hanno le immagini${px.nemTutti.length?' (mancano: '+px.nemTutti+')':''}`);
   ok(/pxan/.test(px.nemMorte)&&/-morte/.test(px.nemMorte)&&/pxdead/.test(px.nemMorto)&&/-morte/.test(px.nemMorto),'nemico sconfitto: animazione di morte, poi resta a terra');
   ok(/pxan/.test(px.attacco)&&/guerriero-attacco/.test(px.attacco)&&/pxan/.test(px.resta)&&/idle/.test(px.fine)&&/pixel\/guerriero\.png/.test(px.fine),'carta Attacco: animazione d\'attacco, che continua se la schermata si ridisegna, poi torna la figura ferma');
