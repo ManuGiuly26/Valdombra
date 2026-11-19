@@ -298,7 +298,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     h=lotta(['ratto']);g.enemies.forEach(e=>hurtEnemy(e,99999));checkEnd();await new Promise(t=>setTimeout(t,700));ctx(ME);
     const ok=id=>run.miss.find(m=>m.id===id).ok;r.lampo=ok('lampo');
     run.deck=run.deck.slice(0,10);run.gold=200;run.om=0;R.phase='map';startCombat([bossId()],'boss');ctx(ME);r.alBoss=ok('snello')&&ok('ricco')&&ok('sobrio')&&ok('riposo')&&ok('luce')&&!ok('elite');
-    missDone(run,'segreto');R.phase='end';const cr0=getCrowns(),gm0=getGems();const n=missAward();r.premio=n===7&&getCrowns()===cr0+25*7&&getGems()===gm0;missAward();r.unaVolta=getCrowns()===cr0+25*7;render();r.panelFine=document.body.innerHTML.includes('Missioni: 7 su 8')&&document.body.innerHTML.includes('solo completandole tutte');
+    missDone(run,'segreto');R.phase='end';const cr0=getCrowns(),gm0=getGems();const n=missAward();r.premio=n===7&&getCrowns()===cr0+MISS_CR*7&&MISS_CR===10&&getGems()===gm0;missAward();r.unaVolta=getCrowns()===cr0+MISS_CR*7;render();r.panelFine=document.body.innerHTML.includes('Missioni: 7 su 8')&&document.body.innerHTML.includes('solo completandole tutte');
     {const t0=R.t0;R.t0=(R.t0||0)+7;run.miss.forEach(m=>m.ok=true);const g1=getGems();missAward();r.premio=r.premio&&getGems()===g1+1;R.t0=t0}
     R=null;startDaily();r.maiGiorno=!missOn()&&!climaOf(3)&&!aiutiDisp(R.players.solo).length;
     // climi
@@ -368,7 +368,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
         await sleep(5)}
 
     r.fine=R.phase==='end';r.tutte=R.porta.ondata===8||!R.win;r.conti=R.porta.salvati+R.porta.persi+R.porta.fuori+R.porta.gruppo===40;r.falo=[...falo].join(',');r.win=R.win;r.salvati=R.porta.salvati;
-    render();r.schermata=document.body.innerHTML.includes('Abitanti salvati')&&document.body.innerHTML.includes('Riapri il cancello');const pa=UI.lastPorta;r.premio=!!pa&&pa.cr===4*R.porta.salvati&&pa.gm===(R.porta.salvati>=40?1:0);{const P=R.porta,o=P.ondata,f=P.falo;P.ondata=2;P.falo=0;const t1=proseguiTxt();P.ondata=3;const t2=proseguiTxt();P.falo=3;const t3=proseguiTxt();P.ondata=o;P.falo=f;r.pulsante=t1==='Prossima ondata (3/8)'&&t2==='Vai alle Retrovie'&&t3==='Prossima ondata (4/8)'}const c1=getCrowns();render();r.unaVolta=getCrowns()===c1;
+    render();r.schermata=document.body.innerHTML.includes('Abitanti salvati')&&document.body.innerHTML.includes('Riapri il cancello');const pa=UI.lastPorta;r.premio=!!pa&&pa.cr===2*R.porta.salvati&&pa.gm===(R.porta.salvati>=40?1:0);{const P=R.porta,o=P.ondata,f=P.falo;P.ondata=2;P.falo=0;const t1=proseguiTxt();P.ondata=3;const t2=proseguiTxt();P.falo=3;const t3=proseguiTxt();P.ondata=o;P.falo=f;r.pulsante=t1==='Prossima ondata (3/8)'&&t2==='Vai alle Retrovie'&&t3==='Prossima ondata (4/8)'}const c1=getCrowns();render();r.unaVolta=getCrowns()===c1;
     r.record=(parseInt(localStorage.getItem('valdombra-porta-record')||'0',10)||0)>=R.porta.salvati;
     R=null;screen='title';modal=null;openGioca();render();r.menu=document.body.innerHTML.includes('Aprite il cancello');closeModal();
     // enciclopedia: lato Ombra
@@ -385,7 +385,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     R=null;screen='title';modal=null;render();return r});
   ok(ac.inizio&&ac.banner&&ac.cattura&&ac.senzaFerite,'Aprite il cancello: parte alla Rocca con la prima ondata; i nemici catturano abitanti solo se ti feriscono');
   ok(ac.fine&&ac.tutte&&ac.conti&&(ac.falo==='3,6'||!ac.win),`Aprite il cancello: il bot arriva in fondo (${ac.salvati} salvati), Falò dopo la 3ª e la 6ª ondata (${ac.falo}), i conti degli abitanti tornano`);
-  ok(ac.schermata&&ac.premio&&ac.unaVolta&&ac.record&&ac.menu,'Aprite il cancello: schermata finale, 4 Corone per abitante una volta sola, record, pulsante nel menu Gioca');
+  ok(ac.schermata&&ac.premio&&ac.unaVolta&&ac.record&&ac.menu,'Aprite il cancello: schermata finale, 2 Corone per abitante una volta sola, record, pulsante nel menu Gioca');
   ok(ac.pulsante,'Aprite il cancello: dopo la ricompensa il pulsante dice «Prossima ondata (N/8)» o «Vai alle Retrovie», non «Prosegui sulla mappa»; 1 Gemma solo salvandoli tutti');
   ok(ac.encOmbra&&ac.encOmbraTutti&&ac.encArte&&ac.encLuce,'enciclopedia: accanto a ogni carta col lato Ombra c\'è la sua faccia viola, con la sua illustrazione');
   ok(ac.barra&&ac.numeri&&ac.gemme,'combattimento: barre della vita più alte e numeri più grandi; le Gemme si vedono nella barra in alto');
@@ -476,17 +476,18 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     r.retrovie=hb.includes('<h2>Retrovie</h2>')&&hb.includes('Fatti bendare')&&hb.includes('Vai dagli armaioli')&&!hb.includes('<h2>Falò</h2>');
     const hp0=run.hp=Math.max(1,run.hp-30);dispatch(ME,{t:'restHeal'});ctx(ME);r.benda=run.hp>hp0;
     nuova('guardiano');R.phase='room';run.screen='rest';render();r.falo=document.querySelector('main').innerHTML.includes('<h2>Falò</h2>');
-    // abitanti in salvo: 2 fino a 5, 5 fino a 10, poi 8, 11, 14; calano con i persi
+    // abitanti in salvo (v10.3): uno per abitante, salvati − persi (al massimo 40)
     nuova('guardiano','porta');const N=(a,b)=>{R.porta.salvati=a;R.porta.persi=b;return portaFollaN()};
-    r.soglie=N(0,0)===0&&N(1,0)===2&&N(5,0)===2&&N(6,0)===5&&N(10,0)===5&&N(11,0)===8&&N(20,0)===8&&N(25,0)===11&&N(33,0)===14&&N(40,0)===14;
-    r.calano=N(12,1)===8&&N(12,2)===5&&N(4,4)===0&&N(3,9)===0;
-    N(12,0);render();let w=0;while(!PXI['abitanti/ab1']&&w<300){await new Promise(t=>setTimeout(t,10));w++}render();const f1=document.querySelectorAll('.folla img').length;
-    N(12,3);render();const f2=document.querySelectorAll('.folla img').length;r.vede=f1===8&&f2===5;
+    r.soglie=N(0,0)===0&&N(1,0)===1&&N(5,0)===5&&N(6,0)===6&&N(23,0)===23&&N(40,0)===40;
+    r.calano=N(12,1)===11&&N(12,2)===10&&N(4,4)===0&&N(3,9)===0;
+    UI.folla=null;N(12,0);render();let w=0;while(!PXI['abitanti/ab1']&&w<300){await new Promise(t=>setTimeout(t,10));w++}UI.folla=null;render();const f1=document.querySelectorAll('.folla img').length,righe=document.querySelectorAll('.folla .riga').length;
+    N(12,3);render();const f2=document.querySelectorAll('.folla img:not(.via)').length,via=document.querySelectorAll('.folla img.via').length;N(13,3);render();const nuovo=document.querySelectorAll('.folla img.nuovo').length;
+    r.vede=f1===12&&righe===2&&f2===9&&via===3&&nuovo===1;r.dettFolla=[f1,righe,f2,via,nuovo];
     nuova('guardiano');render();r.normale=!document.querySelector('.folla');
     R=null;modal=null;screen='title';render();return r});
   ok(an.tutte&&an.colpo&&an.elenco&&an.numero&&an.scelta&&an.letale&&an.riquadro&&an.fineTurno,`anteprima dei danni: uguale ai danni veri per ogni carta (${an.n} prove) senza toccare lo stato; elenco col mouse, numero sul bersaglio, letale `+JSON.stringify({t:an.tutte,d:an.diverse,c:an.cambiato,co:an.colpo,e:an.elenco,n:an.numero,s:an.scelta,l:an.letale,q:an.riquadro,f:an.fineTurno}));
   ok(an.retrovie&&an.benda&&an.falo,'Aprite il cancello: Retrovie con bende e armaioli al posto del Falò (che resta nella partita normale) '+JSON.stringify({r:an.retrovie,b:an.benda,f:an.falo}));
-  ok(an.soglie&&an.calano&&an.vede&&an.normale,'Aprite il cancello: dietro l\'eroe gli abitanti in salvo, a soglie, e calano quando se ne perdono '+JSON.stringify({s:an.soglie,c:an.calano,v:an.vede,n:an.normale}));
+  ok(an.soglie&&an.calano&&an.vede&&an.normale,'Aprite il cancello: dietro l\'eroe un abitante per ogni salvato (meno i persi), in file da 10; chi arriva salta dentro, chi si perde sbiadisce '+JSON.stringify({s:an.soglie,c:an.calano,v:an.vede,d:an.dettFolla,n:an.normale}));
 
   console.log('7h. La vita persa si vede: numeri sui nemici in tante finestre, viste e numeri di nemici');
   {const casi=[['PC',{viewport:{width:1280,height:800}},1],['PC largo',{viewport:{width:1920,height:1000}},1],['PC basso',{viewport:{width:1000,height:560}},1],
@@ -672,7 +673,12 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   {// controllo del codice: un commento // messo dopo del codice non deve lasciare altro codice sulla stessa riga (non verrebbe eseguito: è successo al Gufo nella 9.0)
     const src=require('fs').readFileSync(path.resolve(__dirname,'..','index.html'),'utf8');const a0=src.indexOf('<script>'),b0=src.lastIndexOf('</script>');const off=src.slice(0,a0).split('\n').length-1;
     const spenti=[];src.slice(a0,b0).split('\n').forEach((l,i)=>{const m=l.match(/[;})\]]\s*\/\/(?!\/)(.*)$/);if(m&&/if\(|\)\{|=>\{|;\s*[A-Za-z_$][\w$.]*\(|\bconst |\blet |\breturn /.test(m[1]))spenti.push('riga '+(i+off+1)+': '+l.trim().slice(0,90))});
-    ok(!spenti.length,'nel codice nessun commento // spegne il resto della riga'+(spenti.length?' — '+spenti.join(' | '):''));}
+    ok(!spenti.length,'nel codice nessun commento // spegne il resto della riga'+(spenti.length?' — '+spenti.join(' | '):''));
+    // carte con lo stesso nome interno: la seconda cancella la prima (v10.3: il Mago partiva con «Gelo nelle Ossa», il Monaco con la Raffica del Ranger)
+    const ids={};[...src.matchAll(/^[ \t]*([a-z0-9]+):\{n:'[^']*',cl:'/gm)].forEach(m=>{ids[m[1]]=(ids[m[1]]||0)+1});const doppie=Object.keys(ids).filter(k=>ids[k]>1);
+    ok(!doppie.length,'nessuna carta ha lo stesso nome interno di un\'altra (la seconda cancellerebbe la prima)'+(doppie.length?' — '+doppie.join(', '):''));
+    const fuori=await page.evaluate(()=>Object.entries(CLASSES).flatMap(([k,c])=>c.deck.filter(id=>!CARDS[id]||(CARDS[id].cl&&CARDS[id].cl!==k)).map(id=>k+':'+id)));
+    ok(!fuori.length,'il mazzo iniziale di ogni eroe ha solo carte sue (Raggio di Gelo per il Mago, Raffica di Pugni per il Monaco)'+(fuori.length?' — '+fuori.join(', '):''));}
   ok(fo.gufo&&fo.orso,'forme del Druido a inizio turno: il Gufo fa pescare 2 carte in più, l\'Orso dà 2 Armatura '+JSON.stringify(fo.dett));
 
   console.log('7o. Carta ingrandita in combattimento: anteprima delle due facce, si gioca solo dalla mano');
@@ -782,6 +788,30 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
         res.push(nome+' '+fase+': '+(r.badge?'':'senza corone ')+(r.cop.length?'coperti '+r.cop.join(','):'ok'))}
       await c9.close()}
     ok(res.every(x=>x.endsWith(': ok')),'in gruppo (fine partita e stanza) corone e gemme ci sono e non coprono Chat, Menu o altri pulsanti ('+res.join(' | ')+')');}
+
+  console.log('7v. Consigli: ognuno compare nella sua situazione, indica un elemento che si vede e non lo copre; Monaco, Corone e abitanti della 10.3');
+  {const cv=await browser.newContext({viewport:{width:1280,height:860}});await cv.route(/^https?:\/\//,r=>r.abort());const pv=await cv.newPage();const ev=[];pv.on('pageerror',e=>ev.push(e.message));await pv.goto(PAGE);await pv.waitForTimeout(400);
+    const male=[];for(const id of await pv.evaluate(()=>TUT.map(t=>t.id))){
+      const r=await pv.evaluate(async id=>{const sleep=ms=>new Promise(t=>setTimeout(t,ms));SET.tut=true;SET.menu=id==='menu';SET.lo=true;SET.anim=false;saveSet();applySet();SPEED=0;modal=null;
+        store(TUT_K,JSON.stringify(TUT.filter(t=>t.id!==id).map(t=>t.id)));const st=getStats();st.runs=Math.max(1,st.runs|0);store(STAT_K,JSON.stringify(st));
+        const gioca=(mode,kind,ids)=>{R=null;solo=true;pickCls='guerriero';pickDg='rocca';pickMode=mode||'normal';pickLvl=0;startSolo();ctx(ME);if(kind){startCombat(ids,kind);ctx(ME)}};
+        if(id==='start'||id==='villaggio'||id==='menu'){R=null;screen='title'}else if(id==='mappa'){gioca();R.phase='map'}
+        else if(['energia','carte','intenti','armatura','fineturno'].includes(id))gioca('normal','combat',['goblin']);else if(id==='ombra'){gioca('normal','combat',['goblin']);g.turn=2}
+        else if(id==='segnali'){solo=false;isHost=true;ME='pA';chan=null;R=newLobby('TUTO');rng=new RNG(hashStr('TUTO'));R.players.pA.cls='guerriero';R.players.pB={pid:'pB',name:'Amico',cls:'mago',ready:true};R.order.push('pB');online=new Set(R.order);startRunRoom(0,'TUTO1');startCombat(['goblin'],'combat');ctx('pA')}
+        else if(id==='elite')gioca('normal','elite',['orco']);else if(id==='boss')gioca('normal','boss',[bossId()]);else if(id==='cancello')gioca('porta');
+        else if(id==='ricompensa'){gioca('normal','combat',['ratto']);g.enemies.forEach(e=>hurtEnemy(e,99999));checkEnd();await sleep(900);ctx(ME)}
+        else if(id==='retrovie'){gioca('porta');R.phase='room';run.screen='rest'}else if(id==='falo'){gioca();R.phase='room';run.screen='rest';run.om=3}
+        else if(id==='negozio'){gioca();R.phase='room';run.screen='shop';genShop()}else if(id==='finepartita'){gioca();R.phase='end';R.win=true}
+        render();await sleep(200);render();const t=TUT.find(x=>x.id===id),box=document.querySelector('.tutbox'),el=document.querySelector(t.sel.split(',')[0]);
+        let vis=false,copre=false;if(el){const q=el.getBoundingClientRect();vis=q.width>0&&q.bottom>0&&q.top<innerHeight;if(box){const c=box.getBoundingClientRect();copre=!(q.right<=c.left||q.left>=c.right||q.bottom<=c.top||q.top>=c.bottom)}}
+        const out={id,ok:!!box&&box.dataset.id===id&&vis&&(!copre||id==='negozio')};R=null;solo=true;ME='solo';screen='title';SET.menu=false;saveSet();render();return out},id);
+      if(!r.ok)male.push(r.id)}
+    ok(!male.length,'consigli: tutti compaiono nella loro situazione e indicano un elemento visibile senza coprirlo'+(male.length?' — non vanno: '+male.join(', '):''));
+    const v=await pv.evaluate(()=>({el:ELEM_V.terra===2&&ELEM_V.aria===2&&ELEM_V.acqua===1&&ELEM_V.fuoco===2&&ROSARIO_B===2&&/2 Armatura/.test(RELICS.rosario.d)&&/2 Armatura/.test(ELEMS.terra[1]),
+      cr:DUNGEONS.rocca.crowns===40&&DUNGEONS.cripte.crowns===55&&DUNGEONS.abisso.crowns===70&&CR_LVL===10&&MISS_CR===10&&PORTA_CR===2&&ACH.find(a=>a.id&&/Prima vittoria/.test(a.n)).cr===15}));
+    ok(v.el,'Monaco (v10.3): Terra 2 Armatura, Aria 2 danni, Acqua 1 PV, Fuoco 2 Bruciatura; Rosario di Giada 2 Armatura');
+    ok(v.cr,'Corone circa dimezzate (v10.3): vittoria 40/55/70 +10 per livello, missioni 10, cancello 2 per abitante, Imprese a metà');
+    ok(!ev.length,'consigli: nessun errore nella pagina '+ev.slice(0,2).join(' | '));await cv.close()}
 
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
