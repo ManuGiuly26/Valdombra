@@ -726,6 +726,41 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
       await c7.close()}
     ok(res.every(x=>x.endsWith(': ok')),'chat del gruppo: il pulsante «Chiudi» non è coperto da corone, gemme o versione ('+res.join(' | ')+')');}
 
+  console.log('7s. Gruppo: voti (maggioranza subito, sorteggio solo col pareggio), chat senza ripetizioni, attesa della stanza');
+  const gv=await page.evaluate(async()=>{const r={};SET.tut=false;SPEED=0;const sleep=ms=>new Promise(t=>setTimeout(t,ms));
+    const stanza=()=>{solo=false;isHost=true;ME='pA';myName='Manu';chan=null;modal=null;R=newLobby('VOTI');rng=new RNG(hashStr('VOTI'));
+      [['pB','Pan','monaco'],['pC','Vas','guerriero'],['pD','Zak','ladro']].forEach(([id,nm,cl])=>{R.players[id]={pid:id,name:nm,cls:cl,ready:true};R.order.push(id)});
+      online=new Set(R.order);startRunRoom(0,'VOTIGRUPPO');ctx('pA')};
+    stanza();const n=availNodes();r.nodi=n.length;const A=n[0].y+','+n[0].x,B=n[1].y+','+n[1].x;
+    // 3 contro 1, con due dei tre che per un attimo risultano scollegati: si va subito alla maggioranza
+    online=new Set(['pA','pD']);R.votes={pA:A,pB:A,pC:A,pD:B};resolveVote();
+    r.maggioranza=!R.voteAnim&&!!R.pos&&R.pos.y+','+R.pos.x===A&&!!R.lastVote&&/3 voti contro 1/.test(R.lastVote.txt);
+    // 2 contro 2: sorteggio
+    stanza();R.votes={pA:A,pB:A,pC:B,pD:B};resolveVote();r.pareggio=!!R.voteAnim&&R.voteAnim.tie&&R.voteAnim.opts.length===2;R.voteAnim=null;
+    // chat: un messaggio nuovo si mostra una volta sola, anche con tanti aggiornamenti
+    stanza();const t0=window.toast;let quanti=0,testi=[];window.toast=m=>{quanti++;testi.push(m)};chatOpen=false;chatLastK=null;render();
+    ACT.chat({text:'Oooooo'},R.players.pB,'pB');for(let i=0;i<6;i++){commit();render();await sleep(5)}
+    const unaVolta=testi.filter(x=>/Oooooo/.test(x)).length;ACT.chat({text:'Secondo'},R.players.pC,'pC');render();render();
+    r.chat=unaVolta===1&&testi.filter(x=>/Secondo/.test(x)).length===1&&!!document.querySelector('.chatbtn .dot');window.toast=t0;
+    // chi entra aspetta fino a 40 secondi, con Annulla
+    R=null;solo=false;screen='mp';UI.joining='ABCD';render();r.attesa=document.body.innerHTML.includes('fino a 40 secondi')&&[...document.querySelectorAll('button')].some(b=>b.textContent==='Annulla');
+    UI.joining=null;solo=true;isHost=true;ME='solo';screen='title';render();return r});
+  ok(gv.nodi>=2&&gv.maggioranza&&gv.pareggio,'voti in gruppo: con la maggioranza si parte subito (contano anche i voti di chi è un attimo scollegato), il sorteggio c\'è solo col pareggio '+JSON.stringify(gv));
+  ok(gv.chat,'chat del gruppo: ogni messaggio nuovo compare una volta sola nel riquadro in basso, non a ogni aggiornamento');
+  ok(gv.attesa,'entrando in una stanza si aspetta fino a 40 secondi chi l\'ha creata, con il pulsante Annulla');
+
+  console.log('7t. Intenzione del nemico: tutto dentro il riquadro, anche il bersaglio');
+  {const res=[];for(const [nome,opt] of [['PC',{viewport:{width:1280,height:860}}],['telefono',{viewport:{width:390,height:844},isMobile:true,hasTouch:true}]]){
+      const c8=await browser.newContext(opt);await c8.route(/^https?:\/\//,r=>r.abort());const p8=await c8.newPage();await p8.goto(PAGE);await p8.waitForTimeout(300);
+      for(const sc of [false,true]){const r=await p8.evaluate(async sc=>{SET.tut=false;SET.scena=sc;SET.lo=true;saveSet();applySet();solo=false;isHost=true;ME='pA';myName='Manu';chan=null;modal=null;R=newLobby('INTE');rng=new RNG(1);
+          R.players.pB={pid:'pB',name:'PanDoris',cls:'monaco',ready:true};R.order.push('pB');online=new Set(R.order);startRunRoom(0,'INTE');startCombat(['goblin','scheletro'],'combat');ctx('pA');
+          g.enemies[0].intent={d:6,deb:'weak',tg:'pB'};g.enemies[1].intent={d:9,s:2,deb:'vuln',tg:'pB'};render();await new Promise(t=>setTimeout(t,120));
+          const bad=[];document.querySelectorAll('.ent.enemy .intent').forEach((it,i)=>{const q=it.getBoundingClientRect();[...it.children].forEach(c=>{const k=c.getBoundingClientRect();if(k.left<q.left-1||k.right>q.right+1||k.top<q.top-1||k.bottom>q.bottom+1)bad.push(i+':'+c.className)})});
+          SET.scena=false;saveSet();applySet();R=null;solo=true;isHost=true;ME='solo';screen='title';render();return bad},sc);
+        res.push(nome+(sc?' scena':'')+': '+(r.length?'fuori '+r.join(','):'ok'))}
+      await c8.close()}
+    ok(res.every(x=>x.endsWith(': ok')),'intenzione del nemico: attacco, effetto e bersaglio («→ nome») stanno dentro il riquadro ('+res.join(' | ')+')');}
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;
