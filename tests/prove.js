@@ -1120,6 +1120,18 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
       R=null;solo=true;ME='solo';isHost=true;online=new Set(['solo']);screen='title';render();return r});
     ok(pv.senza&&pv.tutti&&pv.scritta&&pv.soloLui&&pv.vistaAltro,'Provocazione: senza, l\'attacco «→ tutti» colpisce tutti; con Provocazione colpisce (danni e Debole) solo chi provoca e la scritta diventa «→ te» / il suo nome '+JSON.stringify(pv))}
 
+  console.log('7aj. A terra in gruppo (v10.18): messaggio «Sei morto/morta» con cosa si può fare e il pulsante per uscire dal dungeon');
+  {const dm=await page.evaluate(async()=>{const sleep=ms=>new Promise(t=>setTimeout(t,ms));const r={};SET.tut=false;SPEED=0;const g0=myG();
+      solo=false;isHost=true;ME='pA';myName='Manu';chan=null;modal=null;R=newLobby('MORT');R.players.pA.cls='guardiano';
+      R.players.pB={pid:'pB',name:'Sara',cls:'monaco',ready:true};R.order.push('pB');online=new Set(R.order);startRunRoom(0,'MORTO');
+      startCombat(['goblin'],'combat');R.phase='combat';ctx(ME);render();await sleep(20);r.vivo=!document.querySelector('.downmsg');
+      const h=R.combat.heroes.pA;h.down=true;h.ended=true;h.hand=[];R.players.pA.hp=0;store(GEN_K,'m');ctx(ME);render();await sleep(20);
+      const d=document.querySelector('.downmsg');r.maschio=!!d&&/Sei morto\./.test(d.textContent)&&/rianimarti/.test(d.textContent)&&/uscire dal dungeon/.test(d.textContent)&&!/Riprendi il turno/.test(document.querySelector('.hand').textContent)&&/aspetta i compagni/.test(document.querySelector('.pilebar').textContent);
+      store(GEN_K,'f');render();await sleep(20);r.femmina=/Sei morta\./.test(document.querySelector('.downmsg').textContent);
+      document.querySelector('.downmsg .btn').click();await sleep(20);r.esci=!!modal&&/Abbandonare il dungeon/.test(modal.title);modal=null;
+      store(GEN_K,g0);R=null;solo=true;ME='solo';isHost=true;online=new Set(['solo']);screen='title';render();return r});
+    ok(dm.vivo&&dm.maschio&&dm.femmina&&dm.esci,'a terra in gruppo: al posto di «Hai finito il turno» compare «Sei morto/morta» con la rianimazione e il pulsante «Esci dal dungeon» '+JSON.stringify(dm))}
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;
