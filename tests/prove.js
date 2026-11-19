@@ -1074,7 +1074,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
       r.mappaPiena=!!document.querySelector('#mapwrap.pxfill')}
     ctx(ME);R.pos={y:0,x:R.map[0].findIndex(Boolean)};render();r.mappaEroi=document.querySelectorAll('#mapsvg image[href="pixel/guerriero.png"]').length>0;
     r.luogo=pxLuogo('shop',60).includes('pixel/luoghi/shop.png');r.icona=ic('r_elmo',20).includes('pixel/icone/r_elmo.png')&&potIc('cura',20).includes('pixel/icone/pot_cura.png');
-    R=null;solo=true;ME='solo';screen='title';modal=null;render();r.titolo=!!document.querySelector('.pxtitle img');
+    R=null;solo=true;ME='solo';screen='title';modal=null;render();r.titolo=!!document.querySelector('.pxtitle img');{const ti=document.querySelector('.pxtitle img'),b=ti?ti.getBoundingClientRect():{width:0,height:0};r.titolo=r.titolo&&b.height>0&&Math.abs(b.width/b.height-16/9)<.03&&getComputedStyle(ti).objectFit!=='cover'}/* v10.13: immagine del titolo intera */
     openVillaggio();r.villaggio=document.querySelectorAll('.pxvil img').length>=5&&document.querySelectorAll('.vilimg').length>=5&&document.querySelector('.pxvil').innerHTML.includes('villaggio/locanda-'+Math.min(getVil().locanda|0,3)+'.png');closeModal();
     // carta «B»: classe sul body con l'interruttore acceso, runa del costo
     {const tmp=document.createElement('div');tmp.innerHTML=cardHTML({id:'colpo',uid:9,up:false},{});document.body.appendChild(tmp);r.cartaB=document.body.classList.contains('pxui')&&getComputedStyle(tmp.querySelector('.cost'),'::before').transform!=='none';tmp.remove()}
@@ -1125,7 +1125,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(/guerriero-difesa/.test(px.difesa)&&/guerriero-colpito/.test(px.colpito)&&!/\bhit\b/.test(px.colpito)&&/mago-colpito/.test(px.compagno),'carta con Armatura: difesa; danni subiti: colpito al posto del lampo, anche per il compagno');
   ok(px.lampo&&px.sprite&&px.rispenta,'se un\'immagine manca resta la grafica di sempre');
   ok(px.aspetto&&px.negozio,'gli aspetti hanno la loro versione Pixellab, anche nel negozio degli aspetti');
-  ok(/combattimento-rocca/.test(px.sfondo)&&px.mappa&&px.mappaEroi&&px.luogo&&px.icona&&px.titolo&&px.villaggio,'sfondi del combattimento, mappa con decorazioni e figura dell\'eroe, luoghi, icone, schermata iniziale e villaggio a stadi '+JSON.stringify({s:!!px.sfondo,m:px.mappa,e:px.mappaEroi,l:px.luogo,i:px.icona,t:px.titolo,v:px.villaggio}));
+  ok(/combattimento-rocca/.test(px.sfondo)&&px.mappa&&px.mappaEroi&&px.luogo&&px.icona&&px.titolo&&px.villaggio,'sfondi del combattimento, mappa con decorazioni e figura dell\'eroe, luoghi, icone, schermata iniziale (immagine intera) e villaggio a stadi '+JSON.stringify({s:!!px.sfondo,m:px.mappa,e:px.mappaEroi,l:px.luogo,i:px.icona,t:px.titolo,v:px.villaggio}));
   ok(px.cartaB&&px.carteSpente,'carte con cornice del tipo e costo a runa solo con l\'interruttore acceso');
   ok(px.strisce&&!px.senzaArte.length&&px.mancante&&px.senzaStriscia,`illustrazioni: striscia sotto il nome in mano, tutte le ${px.nCarte} carte hanno il disegno${px.senzaArte.length?' (mancano: '+px.senzaArte+')':''}, niente striscia se l'immagine manca o l'interruttore è spento`);
   ok(px.grande&&px.nonGiocata&&px.chiusa&&px.fumetto,'tenendo premuta una carta si apre la carta grande con illustrazione e parole chiave (senza giocarla) e si chiude toccando; spento resta il fumetto '+JSON.stringify({g:px.grande,n:px.nonGiocata,c:px.chiusa,f:px.fumetto}));
