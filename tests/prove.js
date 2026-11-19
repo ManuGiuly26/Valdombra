@@ -873,6 +873,14 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     r.trenta=Math.ceil(XP_LV[MAXHLV]/XP_MAX)>=30;return r});
     ok(xp.vittoria<=90&&xp.vittoria>=80&&xp.alta===90&&xp.persa===36&&xp.zero===5&&xp.surv<=90&&xp.trenta,'esperienza: una vittoria normale ~'+xp.vittoria+' PE, mai più di 90 a partita (anche al livello 5 e in Sopravvivenza), una sconfitta al piano 8 ne dà '+xp.persa+': servono almeno 30 partite per il livello 10 '+JSON.stringify(xp))}
 
+  console.log('7z. Ombra visibile (v10.7): nella barra in alto e nelle stanze (mercante, falò, eventi, tesori, strade segrete)');
+  {const om=await page.evaluate(()=>{const r={};SET.tut=false;SET.lo=true;saveSet();R=null;solo=true;pickCls='guerriero';pickDg='rocca';pickMode='normal';pickLvl=0;startSolo();ctx(ME);run.om=4;
+      R.phase='map';render();const h=document.querySelector('.hud .om-t');r.hud=!!h&&/4\/10/.test(h.textContent);
+      const st={};for(const sc of ['shop','event','rest','treasure','spento']){R.phase='room';run.screen=sc;if(sc==='shop')genShop();if(sc==='event')run.event={id:EVENTS[0].id,result:null};if(sc==='treasure')run.treasure={gold:30,relic:null};render();const q=document.querySelector('main .omriga');st[sc]=!!q&&/Ombra 4\/10/.test(q.textContent)}
+      r.stanze=Object.values(st).every(Boolean);r.dett=st;run.screen='reward';run.reward={title:'Vittoria!',gold:5,cards:null};render();r.ricompensa=!document.querySelector('main .omriga');
+      SET.lo=false;R.lo=false;run.screen='rest';render();r.spento=!document.querySelector('main .omriga')&&!document.querySelector('.hud .om-t');SET.lo=true;saveSet();R=null;screen='title';render();return r});
+    ok(om.hud&&om.stanze&&om.ricompensa&&om.spento,'Ombra: si vede nella barra in alto e con la sua barra al Mercante, al Falò, negli eventi e nei tesori; non nella ricompensa né senza Luce e Ombra '+JSON.stringify(om))}
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;
