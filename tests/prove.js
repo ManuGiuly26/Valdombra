@@ -628,7 +628,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     R=null;screen='title';modal=null;['colpo'].forEach(k=>seenAdd('c',[k]));UI.diCls='all';openDiario('c');render();r.enc=!!document.querySelector('.modal .duo .card.shadow');closeModal();
     // menu essenziale (in Sviluppo): poche cose, eroe e dungeon in una pagina a parte
     SET.menu=true;screen='title';render();{const gb=document.querySelector('.mbig .btn'),gr=document.querySelector('.mtiles');r.largo=!!gb&&!!gr&&Math.abs(gb.getBoundingClientRect().width-gr.getBoundingClientRect().width)<2}
-    r.lite=r.largo&&document.querySelectorAll('.mtile').length===6&&!!document.getElementById('guidabtn')&&![...document.querySelectorAll('.mtile')].some(x=>/Guida/.test(x.textContent))&&!document.querySelector('.classes');giocaScroll();render();r.pagina=screen==='solo'&&!!document.querySelector('.classes');
+    r.lite=r.largo&&document.querySelectorAll('.mtile').length===8&&!!document.getElementById('guidabtn')&&![...document.querySelectorAll('.mtile')].some(x=>/Guida/.test(x.textContent))&&!document.querySelector('.classes');giocaScroll();render();r.pagina=screen==='solo'&&!!document.querySelector('.classes');
     SET.menu=false;screen='title';render();r.pieno=!!document.querySelector('.classes')&&!document.querySelector('.mtile');
     // eroi ribilanciati
     r.eroi=CLASSES.guerriero.hp===86&&CLASSES.mago.hp===76&&CLASSES.ladro.hp===75&&CLASSES.guardiano.hp===88&&CARDS.scudoarc.v.b===7&&CARDS.dardo.v.d===7&&CARDS.pallafuoco.v.d===9;
@@ -937,6 +937,23 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     ok(gv.fine&&gv.dati&&gv.coda&&gv.riprova,'gilda: a fine partita la partita va alla gilda una volta sola (+45 PE, il boss perde 160 punti); senza rete resta in coda e parte appena si può');
     ok(gv.bottega&&gv.cleanGil,'gilda: nella Bottega gli aspetti di gilda non si comprano; i dati della gilda degli altri giocatori sono ripuliti');
     ok(!eh.length,'gilda (settimana): nessun errore nella pagina '+eh.slice(0,2).join(' | '));await ch.close()}
+
+  console.log('7ac. Menu principale (v10.10): riquadri Gilda e Amici, caselle Gilda e Amici nel menu essenziale');
+  {const mm=await page.evaluate(async()=>{const sleep=ms=>new Promise(t=>setTimeout(t,ms));const r={},rpc0=window.accRpc;SET.tut=false;saveSet();
+      ACC=null;GIL.dati=null;AMI.lista=null;R=null;solo=true;ME='solo';screen='title';SET.menu=false;render();const g0=document.querySelector('.gilmenu'),a0=document.querySelector('.amimenu');
+      r.senzaProfilo=!!g0&&!!a0&&/profilo/.test(g0.textContent)&&/profilo/.test(a0.textContent);
+      window.accRpc=async fn=>{if(fn==='gilda_mia')return {gilda:{id:3,nome:'Lupi',livello:6,pe:9200,posti:15,aperta:true},io:{ruolo:'capo',pe:1100},membri:[],richieste:[{nome:'giada'}],settimana:{inizio:'2026-11-16',fine:'2026-11-22',missioni:[{tipo:'elite',obiettivo:26,progresso:26,fatta:'x'}],boss:{boss:'drago',vita:2000,danni:1000}},premi:[{id:1,corone:15,gemme:0,motivo:'missione:elite'}]};
+        if(fn==='amici_lista')return [{nome:'pandoris',stato:'amici'},{nome:'luca',stato:'ricevuta'}];if(fn==='amici_codice')return 'K7PX2M';return []};
+      ACC={nome:'manu',token:'00000000-0000-0000-0000-000000000000',rev:1,dirty:false};await gilCarica();await amiciCarica();AMI.on=new Set([amH('pandoris')]);render();
+      const g=document.querySelector('.gilmenu'),a=document.querySelector('.amimenu');
+      r.gilda=/Gilda: Lupi/.test(g.textContent)&&/Livello 6/.test(g.textContent)&&/Cavaliere/.test(g.textContent)&&/boss al 50%/.test(g.textContent)&&/1 premio/.test(g.textContent)&&g.querySelector('.novdot').textContent==='2';
+      r.amici=/1 amico/.test(a.textContent)&&/1 in gioco/.test(a.textContent)&&/1 richiesta/.test(a.textContent);
+      g.querySelector('button').click();await sleep(20);r.vaiGilda=!!(modal&&modal.gilda);closeModal();a.querySelector('button').click();await sleep(20);r.vaiAmici=!!(modal&&modal.amici);closeModal();
+      SET.menu=true;render();const T=[...document.querySelectorAll('.mtile')],tops=T.map(x=>Math.round(x.getBoundingClientRect().top));
+      r.caselle=T.length===8&&T.some(x=>/Gilda/.test(x.textContent))&&T.some(x=>/Amici/.test(x.textContent))&&new Set(tops).size===2;
+      T.find(x=>/Gilda/.test(x.textContent)).click();await sleep(20);r.casellaGilda=!!(modal&&modal.gilda);closeModal();
+      SET.menu=false;saveSet();accLogout();window.accRpc=rpc0;ACC=null;modal=null;screen='title';render();return r});
+    ok(mm.senzaProfilo&&mm.gilda&&mm.amici&&mm.vaiGilda&&mm.vaiAmici&&mm.caselle&&mm.casellaGilda,'menu principale: riquadri «Gilda» (livello, titolo, missioni, boss, premi) e «Amici» (in gioco, richieste) che portano subito lì; nel menu essenziale 8 caselle in 2 file con Gilda e Amici '+JSON.stringify(mm))}
 
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
