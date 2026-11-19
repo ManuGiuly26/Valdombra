@@ -866,6 +866,13 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     ok(rp.solo&&rp.gruppo&&rp.vuoto,'riepilogo del percorso: da solo «Lungo il percorso: 8 combattimenti · 1 falò…», in gruppo una riga per giocatore con nome, numeri e icone; sparisce senza percorsi');
     ok(!ex.length,'mappa e riepilogo: nessun errore nella pagina '+ex.slice(0,2).join(' | '));await cx.close()}
 
+  console.log('7y. Esperienza degli eroi (v10.6): almeno 30 vittorie per il livello massimo');
+  {const xp=await page.evaluate(()=>{const r={},R0=R;const g=(o)=>{R={mode:'norm',floor:16,win:true,lvl:0,players:{[ME]:{kills:25}},...o};const n=xpGain();return n};
+    r.vittoria=g({});r.alta=g({lvl:5,players:{[ME]:{kills:60}}});r.persa=g({win:false,floor:8,players:{[ME]:{kills:12}}});r.zero=g({win:false,floor:0,players:{[ME]:{kills:0}}});
+    r.surv=(()=>{R={mode:'surv',floor:5,cycle:3,win:false,lvl:0,players:{[ME]:{kills:200}}};return xpGain()})();R=R0;
+    r.trenta=Math.ceil(XP_LV[MAXHLV]/XP_MAX)>=30;return r});
+    ok(xp.vittoria<=90&&xp.vittoria>=80&&xp.alta===90&&xp.persa===36&&xp.zero===5&&xp.surv<=90&&xp.trenta,'esperienza: una vittoria normale ~'+xp.vittoria+' PE, mai più di 90 a partita (anche al livello 5 e in Sopravvivenza), una sconfitta al piano 8 ne dà '+xp.persa+': servono almeno 30 partite per il livello 10 '+JSON.stringify(xp))}
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;
