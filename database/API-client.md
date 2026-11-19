@@ -322,6 +322,8 @@ Cambiamenti recenti del gioco web da riportare nell'app per restare uguali:
 - **v9.6 → v9.8**: per qualche ora le carte si potevano giocare cliccando la carta ingrandita; dalla **9.8** non più. Le carte si giocano solo dalla mano e il lato Ombra si sceglie col pulsante «Lato Ombra» (che diventa «Lato Luce» per tornare indietro). La carta ingrandita mostra le due facce solo in anteprima.
 - **v9.7**: nel combattimento a scena, in gruppo, i compagni stanno nella colonna del proprio eroe, subito sopra di lui (compatti da 4 giocatori in su).
 - **v9.8**: nel Profilo c'è «Reimposta la password» (qui: azione `reimposta_password`). Dopo il cambio tutti gli altri dispositivi devono accedere di nuovo.
+- **v10.0**: in gruppo contano i voti di tutti quelli che hanno votato (anche se per un attimo risultano scollegati); con una maggioranza si parte subito con il messaggio «Si va: … (3 voti contro 1)», il sorteggio solo col pareggio. Chi entra in una stanza riprova ogni 2,5 secondi e aspetta fino a 40 secondi chi l'ha creata. I messaggi della chat si mostrano una volta sola. L'intenzione del nemico contiene sempre il bersaglio («→ nome»).
+- **v10.1**: l'Ombra **non cala più da sola** a ogni turno di sola Luce: scende solo riposando a un Falò acceso (−3), con l'Incenso, dal Pellegrino o col Tempio. Lo Scudo di Luce (+3 Armatura a fine turno con 0-2 Ombra e solo carte Luce) resta, con la scritta «+3 Armatura». **Al Falò l'Ombra cala solo con la scelta nuova «Medita accanto al fuoco»** (−3, tutta col Tempio al 3; non cura); «Riposa» e «Affila le armi» non la toccano più. Nelle Retrovie del cancello la stessa scelta si chiama «Prega con gli abitanti». Sulla mappa il numero dei voti è un cerchietto chiaro con il numero scuro.
 
 ## Riservatezza
 

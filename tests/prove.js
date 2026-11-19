@@ -119,9 +119,9 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     run.om=9;const mx=run.max;e.hp=e.max=999;c=carta('colpo');playCard(c.uid,0,ME,null,1);ctx(ME);r.caduta=run.om===10&&!!run.caduto&&run.max===mx-4&&!!g.hero.st.oscuro;
     e.hp=999;c=carta('colpo');playCard(c.uid,0,ME,null,0);ctx(ME);r.doppio=999-e.hp;
     // turno puro
-    run.om=3;g.hero.ended=false;g.hero.shTurn=0;c=carta('colpo');playCard(c.uid,0,ME,null,0);ctx(ME);endHeroTurn();r.puro=run.om===2&&!g.hero.st.oscuro;
+    run.om=3;g.hero.ended=false;g.hero.shTurn=0;c=carta('colpo');playCard(c.uid,0,ME,null,0);ctx(ME);endHeroTurn();r.puro=run.om===3&&!g.hero.st.oscuro;// v10.1: un turno di sola Luce non fa più calare l'Ombra
     // falò
-    run.om=6;run.screen='rest';ACT.restHeal({},run);r.falo=run.om===3;
+    run.om=6;run.screen='rest';ACT.restHeal({},run);const dopoRiposo=run.om;run.screen='rest';ACT.restOm({},run);r.falo=dopoRiposo===6&&run.om===3;// v10.1: riposare non toglie Ombra, «Medita» sì
     // spento
     SET.lo=false;nuova();r.spento=R.lo===false&&!canShadow({id:'colpo',up:false});SET.lo=true;
     // assorbire in gruppo
@@ -191,7 +191,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(lo.buio&&lo.buioOmbra===6&&lo.buioLuce===7,`creature d'ombra: niente bonus Ombra, +25% con la Luce (${lo.buioOmbra}/${lo.buioLuce})`);
   ok(lo.piuDanni===2,'con 5 Ombra i nemici fanno 2 danni in più');
   ok(lo.caduta&&lo.doppio===12,'a 10 Ombra si cade nell\'ombra e ci si resta: danni doppi ('+lo.doppio+') e PV massimi persi');
-  ok(lo.puro&&lo.falo,'l\'Ombra cala con un turno di sola Luce e al Falò');
+  ok(lo.puro&&lo.falo,'l\'Ombra non cala da sola con un turno di sola Luce; al Falò cala solo con «Medita», non riposando');
   ok(lo.spento,'dall\'interruttore Sviluppo Luce e Ombra si spegne');
   ok(lo.assorbi,'in gruppo si assorbe l\'Ombra di un compagno');
   ok(lo.forzaBuio,'le creature d\'ombra si rafforzano con l\'Ombra del gruppo');
@@ -737,6 +737,8 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     r.maggioranza=!R.voteAnim&&!!R.pos&&R.pos.y+','+R.pos.x===A&&!!R.lastVote&&/3 voti contro 1/.test(R.lastVote.txt);
     // 2 contro 2: sorteggio
     stanza();R.votes={pA:A,pB:A,pC:B,pD:B};resolveVote();r.pareggio=!!R.voteAnim&&R.voteAnim.tie&&R.voteAnim.opts.length===2;R.voteAnim=null;
+    stanza();R.votes={pA:A,pB:A};render();{const c=document.querySelector('.mapsvg circle.vbadge'),tx=document.querySelector('.mapsvg .vbadge-t');const f=c&&getComputedStyle(c).fill,t=tx&&getComputedStyle(tx).fill;r.badge=f==='rgb(255, 210, 122)'&&t==='rgb(27, 20, 36)'&&tx.textContent==='2'}
+    {solo=true;ME='solo';isHost=true;online=new Set(['solo']);R=null;pickCls='guerriero';pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();ctx(ME);SET.lo=true;R.phase='room';run.screen='rest';run.om=0;render();const senza=!document.querySelector('main').innerHTML.includes('Medita accanto al fuoco');run.om=5;render();r.medita=senza&&document.querySelector('main').innerHTML.includes('Medita accanto al fuoco');}
     // chat: un messaggio nuovo si mostra una volta sola, anche con tanti aggiornamenti
     stanza();const t0=window.toast;let quanti=0,testi=[];window.toast=m=>{quanti++;testi.push(m)};chatOpen=false;chatLastK=null;render();
     ACT.chat({text:'Oooooo'},R.players.pB,'pB');for(let i=0;i<6;i++){commit();render();await sleep(5)}
@@ -745,6 +747,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     // chi entra aspetta fino a 40 secondi, con Annulla
     R=null;solo=false;screen='mp';UI.joining='ABCD';render();r.attesa=document.body.innerHTML.includes('fino a 40 secondi')&&[...document.querySelectorAll('button')].some(b=>b.textContent==='Annulla');
     UI.joining=null;solo=true;isHost=true;ME='solo';screen='title';render();return r});
+  ok(gv.badge&&gv.medita,'mappa: il numero dei voti su ogni nodo si legge (cerchietto chiaro, numero scuro); al Falò «Medita» c\'è solo se hai Ombra '+JSON.stringify({b:gv.badge,m:gv.medita}));
   ok(gv.nodi>=2&&gv.maggioranza&&gv.pareggio,'voti in gruppo: con la maggioranza si parte subito (contano anche i voti di chi è un attimo scollegato), il sorteggio c\'è solo col pareggio '+JSON.stringify(gv));
   ok(gv.chat,'chat del gruppo: ogni messaggio nuovo compare una volta sola nel riquadro in basso, non a ogni aggiornamento');
   ok(gv.attesa,'entrando in una stanza si aspetta fino a 40 secondi chi l\'ha creata, con il pulsante Annulla');
