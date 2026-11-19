@@ -616,7 +616,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     const tk=todayKey;todayKey=()=>'20261121';try{localStorage.removeItem(DAILY_K)}catch(e){}modal=null;startDaily();ctx(ME);r.livello3=R.lvl===3&&!!R.daily;todayKey=tk;
     // i malus fanno quello che dicono
     const mod=m=>{R.daily.mod=m};mod('furiosi');R.phase='map';startCombat(['goblin'],'combat');ctx(ME);r.furiosi=(g.enemies[0].st.str|0)>=1;
-    mod('umido');r.umido=Math.abs(restPct(run)-(run.vb&&run.vb.erbe>=2?.2:.15))<1e-9;
+    mod('umido');r.umido=Math.abs(restPct(run)-(run.vb&&run.vb.erbe>=2?.1:.075))<1e-9;
     // bonus di tempo solo vincendo: +30% sotto 5 minuti, +15% fino a 10, +5% fino a 20
     R.win=true;r.tempo=tempoBonus(4*60000)===.3&&tempoBonus(9*60000)===.15&&tempoBonus(19*60000)===.05&&tempoBonus(25*60000)===0;R.win=false;r.tempo=r.tempo&&tempoBonus(60000)===0;
     R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);modal=null;pickCls='guerriero';pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();ctx(ME);R.tAcc=3*60000;R.tLast=Date.now();endRun(true);commit();render();
@@ -841,6 +841,30 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     ok(am.nonTrovato&&am.inviata&&am.accetta&&am.corto&&am.codice&&am.conferma&&am.tolto,'amici: richiesta per nome (anche con maiuscole e spazi), accetta, codice amico, «Togli» chiede conferma');
     ok(am.stanza&&am.invito&&am.filtro&&am.banner&&am.entra&&am.inPartita&&am.dopo&&am.uscita,'amici: «Invita» nella stanza manda il codice solo a quell\'amico; si accettano inviti solo dagli amici; «Entra» porta nella stanza; durante una partita solo «Più tardi»; uscendo dal profilo si azzera tutto');
     ok(!ew.length,'amici: nessun errore nella pagina '+ew.slice(0,2).join(' | '));await cw.close()}
+
+  console.log('7x. Mappa (v10.5): bonus mai uguali di fila né tre di fila, più rari coi livelli; prima del boss falò, a caso o élite; falò al 15% dal livello 3; riepilogo dei percorsi');
+  {const cx=await browser.newContext({viewport:{width:1280,height:860}});await cx.route(/^https?:\/\//,r=>r.abort());const px=await cx.newPage();const ex=[];px.on('pageerror',e=>ex.push(e.message));await px.goto(PAGE);await px.waitForTimeout(400);
+    const mp=await px.evaluate(()=>{const r={},BON=['rest','event','treasure'],tot={};let ugual=0,fila3=0;const pre={};
+      for(let L=0;L<=5;L++){tot[L]=0;pre[L]=new Set();for(let i=0;i<120;i++){const m=genMap(new RNG(hashStr('P'+i+'#map')),L),fila=new Map();
+        for(let y=0;y<ROWS;y++)m[y].forEach(n=>{if(!n)return;if(n.type==='rest'||n.type==='event')tot[L]++;const par=y?m[y-1].filter(q=>q&&q.next.includes(n.x)):[],fx=y===8||(y===ROWS-1&&L<4);
+          if(!fx&&BON.includes(n.type)&&par.some(q=>q.type===n.type))ugual++;const f=BON.includes(n.type)?1+Math.max(0,...par.map(q=>fila.get(q)||0)):0;fila.set(n,f);if(f>2&&!fx)fila3++;if(y===ROWS-1)pre[L].add(n.type)})}}
+      r.regole=ugual===0&&fila3===0;r.rari=tot[0]>tot[2]&&tot[2]>tot[3]&&tot[3]>tot[5];
+      const s=L=>[...pre[L]].sort().join(',');r.primaBoss=s(0)==='rest'&&s(3)==='rest'&&!pre[4].has('rest')&&pre[4].size>1&&s(5)==='elite';r.dett={ugual,fila3,tot,pre:[0,3,4,5].map(L=>L+':'+s(L))};
+      const P={vb:{}},E={vb:{erbe:2}};const pc=L=>{R={mode:'norm',lvl:L};return [restPct(P),restPct(E)].join('/')};r.cura=pc(0)==='0.3/0.4'&&pc(2)==='0.3/0.4'&&pc(3)==='0.15/0.2'&&pc(5)==='0.15/0.2';R={mode:'porta',lvl:0};r.curaCancello=restPct(P)===.3;R=null;
+      r.desc=/15%/.test(lvlDesc(3))&&/niente falò/.test(lvlDesc(4))&&/solo élite/.test(lvlDesc(5))&&!/15%/.test(lvlDesc(2));
+      return r});
+    ok(mp.regole&&mp.rari,'mappa: falò, eventi e tesori mai uguali di fila né tre bonus di fila; falò ed eventi più rari salendo di livello '+JSON.stringify(mp.dett));
+    ok(mp.primaBoss&&mp.cura&&mp.curaCancello&&mp.desc,'prima del boss: falò fino al livello 3, a caso senza falò al 4, solo élite al 5; falò al 15% (20% con le Erbe) dal livello 3, non nel cancello; descrizioni dei livelli aggiornate');
+    const rp=await px.evaluate(async()=>{SET.tut=false;saveSet();const r={};R=null;solo=true;pickCls='guerriero';pickDg='rocca';pickMode='normal';pickLvl=0;startSolo();ctx(ME);R.phase='map';
+      const strada=x0=>{const out=[];let y=0,x=x0;while(y<ROWS){const n=R.map[y][x];if(!n)break;out.push([y,x]);if(!n.next.length)break;x=n.next[0];y++}return out};
+      const xs=R.map[0].map((n,i)=>n?i:-1).filter(i=>i>=0);R.plans={[ME]:strada(xs[0])};render();const c=planConta(R.plans[ME]);const tot=Object.values(c).reduce((a,b)=>a+b,0);
+      const t=(document.querySelector('.planriep')||{}).textContent||'';r.solo=tot===R.plans[ME].length&&/Lungo il percorso/.test(t)&&(!c.rest||/falò/.test(t))&&(!c.elite||/élite/.test(t));
+      solo=false;isHost=true;ME='pA';myName='Manu';chan=null;R=newLobby('MAPP');rng=new RNG(1);R.players.pA.name='Manu';R.players.pB={pid:'pB',name:'PanDoris',cls:'mago',ready:true};R.order.push('pB');online=new Set(R.order);startRunRoom(0,'MAPPA1');ctx('pA');
+      const ys=R.map[0].map((n,i)=>n?i:-1).filter(i=>i>=0);R.plans={pA:strada(ys[0]),pB:strada(ys[ys.length-1])};render();const righe=[...document.querySelectorAll('.planriep .priep')].map(d=>d.textContent);
+      r.gruppo=righe.length===2&&righe[0].startsWith('Manu:')&&righe[1].startsWith('PanDoris:')&&document.querySelectorAll('.planriep .priep img').length>=4;
+      R.plans={};render();r.vuoto=!document.querySelector('.planriep');R=null;solo=true;ME='solo';screen='title';render();return r});
+    ok(rp.solo&&rp.gruppo&&rp.vuoto,'riepilogo del percorso: da solo «Lungo il percorso: 8 combattimenti · 1 falò…», in gruppo una riga per giocatore con nome, numeri e icone; sparisce senza percorsi');
+    ok(!ex.length,'mappa e riepilogo: nessun errore nella pagina '+ex.slice(0,2).join(' | '));await cx.close()}
 
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
