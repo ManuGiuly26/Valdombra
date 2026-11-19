@@ -907,6 +907,37 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     ok(gl.stanza&&gl.invito&&gl.uscita,'gilda: nella stanza i compagni di gilda in gioco si invitano; i loro inviti si accettano; uscendo dal profilo si azzera');
     ok(!eg.length,'gilda: nessun errore nella pagina '+eg.slice(0,2).join(' | '));await cg.close()}
 
+  console.log('7ab. Gilda (v10.9): settimana, livelli, premi da ritirare, partita mandata alla gilda una volta, bonus, titoli e aspetti (database simulato)');
+  {const ch=await browser.newContext({viewport:{width:1280,height:860}});await ch.route(/^https?:\/\//,r=>r.abort());const ph=await ch.newPage();const eh=[];ph.on('pageerror',e=>eh.push(e.message));await ph.goto(PAGE);await ph.waitForTimeout(400);
+    const gv=await ph.evaluate(async()=>{const sleep=ms=>new Promise(t=>setTimeout(t,ms));SET.tut=false;saveSet();const r={},rpc0=window.accRpc,c0=getCrowns(),g0=getGems(),sk0=load(SKO_K);
+      const DB={ch:[],premi:[{id:1,corone:15,gemme:0,motivo:'missione:elite'},{id:2,corone:40,gemme:2,motivo:'boss:drago'}],lv:6,pe:1100};
+      const mia=()=>({gilda:{id:3,nome:'Lupi',descrizione:'',aperta:true,posti:15,livello:DB.lv,pe:9200,codice:'QW3RTY'},io:{ruolo:'capo',pe:DB.pe},membri:[{nome:'manu',ruolo:'capo',pe:DB.pe},{nome:'sara',ruolo:'membro',pe:250}],richieste:[],
+        settimana:{inizio:'2026-11-16',fine:'2026-11-22',missioni:[{tipo:'elite',obiettivo:26,progresso:26,fatta:'x'},{tipo:'vittorie',obiettivo:8,progresso:5,fatta:null},{tipo:'abitanti',obiettivo:156,progresso:40,fatta:null}],boss:{boss:'drago',vita:2250,danni:1300,sconfitto:null},io:{partite:6,boss:420,missioni:{elite:9}},migliori:[{nome:'manu',boss:420,partite:6}]},premi:DB.premi});
+      window.accRpc=async(fn,a)=>{DB.ch.push(fn+':'+JSON.stringify(a));if(fn==='gilda_mia')return mia();if(fn==='gilda_ritira'){const c=DB.premi.reduce((s,x)=>s+x.corone,0),g=DB.premi.reduce((s,x)=>s+x.gemme,0),n=DB.premi.length;DB.premi=[];return [{corone:c,gemme:g,premi:n}]}
+        if(fn==='gilda_partita')return {esito:'contata',pe:45,punti_boss:160,missioni_completate:['vittorie'],gilda:{livello:6,pe:9245}};if(fn==='amici_lista')return [];if(fn==='amici_codice')return 'K7PX2M';return 'fatto'};
+      ACC={nome:'manu',token:'00000000-0000-0000-0000-000000000000',rev:1,dirty:false};AMI.lista=[];R=null;screen='title';setCrowns(10);setGems(1);store(SKO_K,'[]');try{localStorage.removeItem(GIL_CODA);localStorage.removeItem(GIL_FATTE)}catch(e){}
+      await gilCarica();r.stendardo=skOwned().filter(x=>/@stendardo$/.test(x)).length===10&&!skOwned().some(x=>/@leggenda$/.test(x));r.pallino=gilAvvN()===2;
+      openGilda();await sleep(60);const M=()=>document.querySelector('.modal');
+      r.sezioni=['Premi da ritirare','La settimana della gilda','Sconfiggete 26 élite','Vincete 8 partite','Ignivora della gilda','950 punti di vita su 2250','Livello 6 della gilda','Il tuo livello nella gilda: 5 · Cavaliere'].every(x=>M().textContent.includes(x));
+      r.titoli=[...M().querySelectorAll('.amrow .badge')].some(x=>x.textContent==='Recluta');
+      await gilRitira();r.ritira=getCrowns()===65&&getGems()===3&&DB.premi.length===0&&!M().textContent.includes('Premi da ritirare');closeModal();
+      DB.lv=10;DB.pe=5000;await gilCarica();r.leggenda=skOwned().filter(x=>/@leggenda$/.test(x)).length===10;
+      R=null;solo=true;pickCls='guerriero';pickDg='rocca';pickMode='normal';pickLvl=0;startSolo();ctx(ME);r.bonus=run.gilOro===.1&&run.max===91&&run.potions.length===2&&run.relics.length===2&&/gilda/.test(run.vApplied);
+      const tk=todayKey;todayKey=()=>'20261121';try{localStorage.removeItem(DAILY_K)}catch(e){}startDaily();ctx(ME);r.giorno=!run.gilOro&&!/gilda/.test(run.vApplied||'');todayKey=tk;
+      R=null;solo=true;startSolo();ctx(ME);R.phase='end';R.win=true;render();await sleep(150);render();const n1=DB.ch.filter(x=>x.startsWith('gilda_partita')).length;render();await sleep(60);
+      r.fine=n1===1&&DB.ch.filter(x=>x.startsWith('gilda_partita')).length===1&&/\+45 PE/.test(document.querySelector('main').textContent)&&/perde 160 punti/.test(document.querySelector('main').textContent);
+      const inv=JSON.parse(DB.ch.find(x=>x.startsWith('gilda_partita')).slice(14));r.dati=inv.p_dati.vinta===true&&typeof inv.p_id==='string'&&inv.p_id.length===36&&jsonArr(GIL_CODA).length===0;
+      window.accRpc=async()=>{throw new Error('offline')};R=null;solo=true;startSolo();ctx(ME);R.phase='end';R.win=false;render();await sleep(120);r.coda=jsonArr(GIL_CODA).length===1&&/arriverà/.test(document.querySelector('main').textContent);
+      window.accRpc=async(fn,a)=>{DB.ch.push(fn+':'+JSON.stringify(a));if(fn==='gilda_mia')return mia();if(fn==='gilda_partita')return {esito:'contata',pe:10,punti_boss:0};return []};await gilInvia();r.riprova=jsonArr(GIL_CODA).length===0;
+      R=null;screen='title';const pl0=skSel().guerriero;openBottega();await sleep(40);const tb=document.querySelector('.modal').textContent;r.bottega=tb.includes('Aspetti di gilda')&&tb.includes('Stendardo')&&tb.includes('Leggenda');closeModal();
+      r.cleanGil=JSON.stringify(cleanGil({l:99,n:'x'.repeat(40),t:'Imperatore',c:99}))===JSON.stringify({l:10,n:'x'.repeat(24),t:'',c:PCOL.length-1})&&cleanGil({l:0})===null;
+      accLogout();window.accRpc=rpc0;ACC=null;setCrowns(c0);setGems(g0);store(SKO_K,sk0);R=null;solo=true;ME='solo';modal=null;screen='title';render();return r});
+    ok(gv.stendardo&&gv.leggenda&&gv.pallino&&gv.sezioni&&gv.titoli&&gv.ritira,'gilda: la finestra mostra premi, missioni, boss, livello e titolo; «Ritira» aggiunge 55 Corone e 2 Gemme; aspetti Stendardo (livello 5) e Leggenda (10) sbloccati per tutti gli eroi '+JSON.stringify(gv));
+    ok(gv.bonus&&gv.giorno,'gilda: al livello 10 la partita parte con +10% oro, una pozione, +5 PV e una reliquia in più; niente bonus nella sfida del giorno');
+    ok(gv.fine&&gv.dati&&gv.coda&&gv.riprova,'gilda: a fine partita la partita va alla gilda una volta sola (+45 PE, il boss perde 160 punti); senza rete resta in coda e parte appena si può');
+    ok(gv.bottega&&gv.cleanGil,'gilda: nella Bottega gli aspetti di gilda non si comprano; i dati della gilda degli altri giocatori sono ripuliti');
+    ok(!eh.length,'gilda (settimana): nessun errore nella pagina '+eh.slice(0,2).join(' | '));await ch.close()}
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;
