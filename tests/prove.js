@@ -1028,6 +1028,21 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     ok(sv.partita&&sv.bottone&&sv.classica&&sv.ancoraScena&&sv.guida,'in combattimento il pulsante «A scena» cambia la grafica al volo e la ricorda; nella guida niente più Sviluppo');
     ok(!es.length,'niente Sviluppo: nessun errore nella pagina '+es.slice(0,2).join(' | '));await cs.close()}
 
+  console.log('7af. Bottega e menu (v10.14): quanti oggetti si possono portare, descrizione del titolo larga e giustificata');
+  {const cb=await browser.newContext({viewport:{width:1280,height:860}});await cb.route(/^https?:\/\//,r=>r.abort());const pb=await cb.newPage();const eb=[];pb.on('pageerror',e=>eb.push(e.message));await pb.goto(PAGE);await pb.waitForTimeout(400);
+    const bt=await pb.evaluate(async()=>{const sleep=ms=>new Promise(t=>setTimeout(t,ms));const r={};SET.tut=false;saveSet();
+      setCrowns(500);setZaino({potions:['cura'],relics:[],gold:1,hp:2,upg:0});R=null;screen='title';openBottega();await sleep(60);
+      const M=document.querySelector('.modal'),t=M.textContent,alt=[...M.querySelectorAll('.panel')].find(x=>/^Altro/.test((x.querySelector('h3')||{}).textContent||'')).textContent;
+      r.titoli=/Pozioni \(puoi portarne 2 in tutto · nello zaino 1\)/.test(t)&&/Reliquie \(puoi portarne 2 in tutto · nello zaino 0\)/.test(t);
+      r.altro=/Puoi prenderne 3Nello zaino: 1/.test(alt)&&/Al massimo2 su 2/.test(alt)&&/Puoi prenderne 2Nello zaino: 0/.test(alt);
+      buyMeta('gold');await sleep(30);r.compra=/Puoi prenderne 3Nello zaino: 2/.test(document.querySelector('.modal').textContent)&&getZaino().gold===2;
+      buyMeta('potions','cura');await sleep(30);r.pieno=/Pozioni \(al massimo: 2 su 2 nello zaino\)/.test(document.querySelector('.modal').textContent);closeModal();setZaino({potions:[],relics:[],gold:0,hp:0,upg:0});
+      for(const m of [false,true]){SET.menu=m;R=null;screen='title';modal=null;render();await sleep(30);const l=document.querySelector('.lede.intro');r['lede'+m]=!!l&&getComputedStyle(l).textAlign==='justify'&&Math.abs(l.getBoundingClientRect().width-l.parentElement.getBoundingClientRect().width)<2}
+      SET.menu=false;saveSet();render();return r});
+    ok(bt.titoli&&bt.altro&&bt.compra&&bt.pieno,'Bottega: ogni oggetto dice quanti se ne possono portare e quanti sono nello zaino; si aggiorna comprando '+JSON.stringify(bt));
+    ok(bt.ledefalse&&bt.ledetrue,'menu principale: la descrizione sotto il titolo è larga quanto la pagina e giustificata (menu normale ed essenziale)');
+    ok(!eb.length,'Bottega e menu: nessun errore nella pagina '+eb.slice(0,2).join(' | '));await cb.close()}
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;
