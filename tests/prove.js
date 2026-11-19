@@ -145,7 +145,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     SET.vil=false;SET.gem=false;nuova('guerriero');r.senza={max:R.players.solo.max,rel:R.players.solo.relics.join(',')};SET.vil=true;SET.gem=true;
     R=null;startDaily();r.giorno=JSON.stringify(R.players.solo.vb||{})==='{}';
     // gemme di fine partita
-    nuova('guerriero');R.players.solo.stx.elites=2;R.players.solo.stx.bk=1;R.win=true;R.phase='end';const g0=getGems();r.premio=gemsAward();r.premioOk=getGems()===g0+3;
+    nuova('guerriero');R.players.solo.stx.elites=2;R.players.solo.stx.bk=1;R.win=true;R.phase='end';const g0=getGems();r.premio=gemsAward();r.premioOk=getGems()===g0+2;r.costanti=ACH_GEM===1&&GEM_DAILY===1;
     // schermate
     R=null;screen='title';render();openVillaggio();render();r.vilModal=!!document.querySelector('.vilsvg,.pxvil');closeModal();
     openBottega();render();r.bottega=document.body.innerHTML.includes('Cimeli permanenti');closeModal();
@@ -200,7 +200,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(lo.bonus.max===98&&lo.bonus.oro===99+75&&lo.bonus.pot===3&&lo.bonus.su===3&&/lanterna/.test(lo.bonus.rel)&&/ancora/.test(lo.bonus.rel)&&lo.tempio>=7,'i bonus del villaggio e i cimeli valgono in partita '+JSON.stringify(lo.bonus)+' armatura '+lo.tempio);
   ok(lo.senza.max===86&&!/lanterna/.test(lo.senza.rel),'senza Villaggio e Gemme (ora sempre accesi) i bonus non si applicano');
   ok(lo.giorno,'nella sfida del giorno il villaggio non vale');
-  ok(lo.premio===3&&lo.premioOk,'gemme di fine partita (più rare dalla v8.3): niente per le élite, 2 per il boss, 1 per la vittoria');
+  ok(lo.premio===2&&lo.premioOk&&lo.costanti,'gemme di fine partita (più rare dalla v10.2): niente per le élite, 1 per il boss, 1 per la vittoria; 1 per impresa e per la sfida del giorno');
   ok(lo.vilModal&&lo.bottega&&lo.sviluppo&&lo.ui,'villaggio, bottega, guida, impostazioni e combattimento in Ombra si vedono');
 
   console.log('7b. Ombra per tutti gli eroi, strade segrete e codice Gemme');
@@ -298,7 +298,8 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     h=lotta(['ratto']);g.enemies.forEach(e=>hurtEnemy(e,99999));checkEnd();await new Promise(t=>setTimeout(t,700));ctx(ME);
     const ok=id=>run.miss.find(m=>m.id===id).ok;r.lampo=ok('lampo');
     run.deck=run.deck.slice(0,10);run.gold=200;run.om=0;R.phase='map';startCombat([bossId()],'boss');ctx(ME);r.alBoss=ok('snello')&&ok('ricco')&&ok('sobrio')&&ok('riposo')&&ok('luce')&&!ok('elite');
-    missDone(run,'segreto');R.phase='end';const cr0=getCrowns(),gm0=getGems();const n=missAward();r.premio=n===7&&getCrowns()===cr0+25*7&&getGems()===gm0+1*7;missAward();r.unaVolta=getCrowns()===cr0+25*7;render();r.panelFine=document.body.innerHTML.includes('Missioni: 7 su 8');
+    missDone(run,'segreto');R.phase='end';const cr0=getCrowns(),gm0=getGems();const n=missAward();r.premio=n===7&&getCrowns()===cr0+25*7&&getGems()===gm0;missAward();r.unaVolta=getCrowns()===cr0+25*7;render();r.panelFine=document.body.innerHTML.includes('Missioni: 7 su 8')&&document.body.innerHTML.includes('solo completandole tutte');
+    {const t0=R.t0;R.t0=(R.t0||0)+7;run.miss.forEach(m=>m.ok=true);const g1=getGems();missAward();r.premio=r.premio&&getGems()===g1+1;R.t0=t0}
     R=null;startDaily();r.maiGiorno=!missOn()&&!climaOf(3)&&!aiutiDisp(R.players.solo).length;
     // climi
     nuova('mago');r.dueClimi=Object.keys(R.clima).length===2;
@@ -334,7 +335,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(eq.curaLuce===10&&eq.cura===8&&eq.curaBuio===4&&eq.scudo===3&&eq.scudoNo===0,`Luce: cure +25% (${eq.curaLuce}) e Scudo di Luce +3 (${eq.scudo}); da 7 Ombra le cure sono a metà (${eq.curaBuio})`);
   ok(eq.spentoArm===0&&eq.spentoCura===8,'senza Luce e Ombra niente poteri né cure cambiate');
   ok(eq.maledette.energia===1&&eq.maledette.mano===1&&eq.maledette.forza===3&&eq.maledette.cursed&&eq.maledette.sanguina===2&&eq.maledette.niente&&eq.maledette.prosegui&&eq.maledette.cuore&&eq.maledette.meta===4&&eq.maledette.fuori&&eq.maledette.mercante,'reliquie maledette: forti e con il loro difetto; le vende il Mercante d\'Ombra '+JSON.stringify(eq.maledette));
-  ok(eq.tre&&eq.lampo&&eq.alBoss&&eq.premio&&eq.unaVolta&&eq.panelFine&&eq.maiGiorno,'missioni: tre a partita, si completano, premio di Corone e Gemme una volta sola, niente nella sfida del giorno '+JSON.stringify({t:eq.tre,l:eq.lampo,b:eq.alBoss,p:eq.premio,u:eq.unaVolta,f:eq.panelFine,g:eq.maiGiorno}));
+  ok(eq.tre&&eq.lampo&&eq.alBoss&&eq.premio&&eq.unaVolta&&eq.panelFine&&eq.maiGiorno,'missioni: tre a partita, si completano, Corone per ognuna e 1 Gemma solo completandole tutte, una volta sola, niente nella sfida del giorno '+JSON.stringify({t:eq.tre,l:eq.lampo,b:eq.alBoss,p:eq.premio,u:eq.unaVolta,f:eq.panelFine,g:eq.maiGiorno}));
   ok(eq.dueClimi&&eq.gelo&&eq.nebbia&&eq.luna&&eq.vento&&eq.mappa,'climi: due piani per mappa; Gelo, Nebbia, Luna nera e Vento funzionano e si vedono sulla mappa '+JSON.stringify({d:eq.dueClimi,g:eq.gelo,n:eq.nebbia,l:eq.luna,v:eq.vento,m:eq.mappa}));
   ok(eq.aiutiLista==='locanda,mercato,fucina'&&eq.aiutoCura&&eq.aiutoUno,'aiuti del villaggio: uno per partita, dagli edifici ricostruiti ('+eq.aiutiLista+')');
   ok(eq.fidMeta&&eq.fidNo&&eq.fidTempio&&eq.fidArm===4,'più Ombra, meno aiuto: da 5 a metà, da 7 solo la sacerdotessa; l\'Armatura del Tempio sparisce nell\'Ombra '+JSON.stringify({m:eq.fidMeta,n:eq.fidNo,t:eq.fidTempio,a:eq.fidArm}));
@@ -367,7 +368,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
         await sleep(5)}
 
     r.fine=R.phase==='end';r.tutte=R.porta.ondata===8||!R.win;r.conti=R.porta.salvati+R.porta.persi+R.porta.fuori+R.porta.gruppo===40;r.falo=[...falo].join(',');r.win=R.win;r.salvati=R.porta.salvati;
-    render();r.schermata=document.body.innerHTML.includes('Abitanti salvati')&&document.body.innerHTML.includes('Riapri il cancello');const pa=UI.lastPorta;r.premio=!!pa&&pa.cr===4*R.porta.salvati;const c1=getCrowns();render();r.unaVolta=getCrowns()===c1;
+    render();r.schermata=document.body.innerHTML.includes('Abitanti salvati')&&document.body.innerHTML.includes('Riapri il cancello');const pa=UI.lastPorta;r.premio=!!pa&&pa.cr===4*R.porta.salvati&&pa.gm===(R.porta.salvati>=40?1:0);{const P=R.porta,o=P.ondata,f=P.falo;P.ondata=2;P.falo=0;const t1=proseguiTxt();P.ondata=3;const t2=proseguiTxt();P.falo=3;const t3=proseguiTxt();P.ondata=o;P.falo=f;r.pulsante=t1==='Prossima ondata (3/8)'&&t2==='Vai alle Retrovie'&&t3==='Prossima ondata (4/8)'}const c1=getCrowns();render();r.unaVolta=getCrowns()===c1;
     r.record=(parseInt(localStorage.getItem('valdombra-porta-record')||'0',10)||0)>=R.porta.salvati;
     R=null;screen='title';modal=null;openGioca();render();r.menu=document.body.innerHTML.includes('Aprite il cancello');closeModal();
     // enciclopedia: lato Ombra
@@ -385,6 +386,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
   ok(ac.inizio&&ac.banner&&ac.cattura&&ac.senzaFerite,'Aprite il cancello: parte alla Rocca con la prima ondata; i nemici catturano abitanti solo se ti feriscono');
   ok(ac.fine&&ac.tutte&&ac.conti&&(ac.falo==='3,6'||!ac.win),`Aprite il cancello: il bot arriva in fondo (${ac.salvati} salvati), Falò dopo la 3ª e la 6ª ondata (${ac.falo}), i conti degli abitanti tornano`);
   ok(ac.schermata&&ac.premio&&ac.unaVolta&&ac.record&&ac.menu,'Aprite il cancello: schermata finale, 4 Corone per abitante una volta sola, record, pulsante nel menu Gioca');
+  ok(ac.pulsante,'Aprite il cancello: dopo la ricompensa il pulsante dice «Prossima ondata (N/8)» o «Vai alle Retrovie», non «Prosegui sulla mappa»; 1 Gemma solo salvandoli tutti');
   ok(ac.encOmbra&&ac.encOmbraTutti&&ac.encArte&&ac.encLuce,'enciclopedia: accanto a ogni carta col lato Ombra c\'è la sua faccia viola, con la sua illustrazione');
   ok(ac.barra&&ac.numeri&&ac.gemme,'combattimento: barre della vita più alte e numeri più grandi; le Gemme si vedono nella barra in alto');
   ok(ac.figura&&ac.sotto,'mappa: la figura dell\'eroe sta sotto i nodi e non prende i tocchi');
@@ -711,7 +713,12 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     r.cambia=!!ch&&ch[1].p_nome==='prova'&&ch[1].p_token==='11111111-1111-4111-8111-111111111111'&&ch[1].p_nuova==='nuova1'&&ACC.token==='22222222-2222-4222-8222-222222222222'&&UI.pwOk&&!UI.pw1;
     r.salvato=JSON.parse(localStorage.getItem(ACC_K)).token==='22222222-2222-4222-8222-222222222222';
     modo='scaduto';UI.pw1='altra1';UI.pw2='altra1';await accNuovaPw();r.scaduto=/scaduto/.test(UI.pwMsg)&&!UI.pwOk;
+    // occhio sulle password: mostra e nasconde; riaprendo il Profilo torna nascosta
+    const tipi=()=>[...document.querySelectorAll('.pwwrap input')].map(i=>i.type).join(',');openProfilo();await sleep(20);const t1=tipi();pwEye();const t2=tipi();closeModal();openProfilo();await sleep(20);const t3=tipi();
+    r.occhio=t1==='password,password'&&t2==='text,text'&&t3==='password,password'&&document.querySelectorAll('.pweye').length===2;
+    ACC=null;render();openProfilo();await sleep(20);r.occhioAccesso=tipi()==='password'&&!!document.querySelector('.pweye');closeModal();
     modal=null;ACC=acc0;accKeep();window.accRpc=rpc0;UI.pw1=UI.pw2=UI.pwMsg='';render();return r});
+  ok(pw.occhio&&pw.occhioAccesso,'profilo: l\'occhio sui campi password mostra e nasconde quello che si scrive (anche per accedere); riaprendo torna nascosta');
   ok(pw.form&&pw.corta&&pw.diverse&&pw.cambia&&pw.salvato&&pw.scaduto,'profilo: si reimposta la password (controlli su lunghezza e ripetizione, il codice nuovo del dispositivo viene salvato, messaggio se il collegamento è scaduto) '+JSON.stringify(pw));
 
   console.log('7r. La chat del gruppo si chiude: niente sopra il pulsante «Chiudi»');
@@ -763,6 +770,18 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
         res.push(nome+(sc?' scena':'')+': '+(r.length?'fuori '+r.join(','):'ok'))}
       await c8.close()}
     ok(res.every(x=>x.endsWith(': ok')),'intenzione del nemico: attacco, effetto e bersaglio («→ nome») stanno dentro il riquadro ('+res.join(' | ')+')');}
+
+  console.log('7u. Fine partita e stanza in gruppo: corone e gemme non coprono i pulsanti');
+  {const res=[];for(const [nome,opt] of [['PC',{viewport:{width:1280,height:800}}],['telefono',{viewport:{width:390,height:844},isMobile:true,hasTouch:true}]]){
+      const c9=await browser.newContext(opt);await c9.route(/^https?:\/\//,r=>r.abort());const p9=await c9.newPage();await p9.goto(PAGE);await p9.waitForTimeout(300);
+      for(const fase of ['fine','stanza']){const r=await p9.evaluate(async fase=>{SET.tut=false;saveSet();solo=false;isHost=true;ME='pA';myName='Manu';chan=null;modal=null;R=newLobby('VDG6');rng=new RNG(1);
+          [['pB','Pan','monaco'],['pC','Vas','guerriero'],['pD','Zak','ladro']].forEach(([id,nm,cl])=>{R.players[id]={pid:id,name:nm,cls:cl,ready:true};R.order.push(id)});online=new Set(R.order);
+          if(fase==='fine'){startRunRoom(0,'FINE');endRun(true)}ctx('pA');render();await new Promise(t=>setTimeout(t,100));
+          const cop=[];document.querySelectorAll('header.hud .btn, main .row .btn').forEach(bt=>{const q=bt.getBoundingClientRect();if(!q.width||q.bottom<0||q.top>innerHeight)return;const e=document.elementFromPoint(q.left+q.width/2,q.top+q.height/2);if(e&&!bt.contains(e)&&!e.contains(bt))cop.push(bt.textContent.trim().slice(0,10))});
+          const cb=document.querySelector('.crownbadge');const r={cop,badge:!!cb};R=null;solo=true;isHost=true;ME='solo';screen='title';render();return r},fase);
+        res.push(nome+' '+fase+': '+(r.badge?'':'senza corone ')+(r.cop.length?'coperti '+r.cop.join(','):'ok'))}
+      await c9.close()}
+    ok(res.every(x=>x.endsWith(': ok')),'in gruppo (fine partita e stanza) corone e gemme ci sono e non coprono Chat, Menu o altri pulsanti ('+res.join(' | ')+')');}
 
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
