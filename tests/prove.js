@@ -917,12 +917,12 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
       window.accRpc=async(fn,a)=>{DB.ch.push(fn+':'+JSON.stringify(a));if(fn==='gilda_mia')return mia();if(fn==='gilda_ritira'){const c=DB.premi.reduce((s,x)=>s+x.corone,0),g=DB.premi.reduce((s,x)=>s+x.gemme,0),n=DB.premi.length;DB.premi=[];return [{corone:c,gemme:g,premi:n}]}
         if(fn==='gilda_partita')return {esito:'contata',pe:45,punti_boss:160,missioni_completate:['vittorie'],gilda:{livello:6,pe:9245}};if(fn==='amici_lista')return [];if(fn==='amici_codice')return 'K7PX2M';return 'fatto'};
       ACC={nome:'manu',token:'00000000-0000-0000-0000-000000000000',rev:1,dirty:false};AMI.lista=[];R=null;screen='title';setCrowns(10);setGems(1);store(SKO_K,'[]');try{localStorage.removeItem(GIL_CODA);localStorage.removeItem(GIL_FATTE)}catch(e){}
-      await gilCarica();r.stendardo=skOwned().filter(x=>/@stendardo$/.test(x)).length===10&&!skOwned().some(x=>/@leggenda$/.test(x));r.pallino=gilAvvN()===2;
+      await gilCarica();r.stendardo=skOwned().filter(x=>/@stendardo$/.test(x)).length===Object.keys(CLASSES).length&&!skOwned().some(x=>/@leggenda$/.test(x));r.pallino=gilAvvN()===2;
       openGilda();await sleep(60);const M=()=>document.querySelector('.modal');
       r.sezioni=['Premi da ritirare','La settimana della gilda','Sconfiggete 26 élite','Vincete 8 partite','Ignivora della gilda','950 punti di vita su 2250','Livello 6 della gilda','Il tuo livello nella gilda: 5 · Cavaliere'].every(x=>M().textContent.includes(x));
       r.titoli=[...M().querySelectorAll('.amrow .badge')].some(x=>x.textContent==='Recluta');
       await gilRitira();r.ritira=getCrowns()===65&&getGems()===3&&DB.premi.length===0&&!M().textContent.includes('Premi da ritirare');closeModal();
-      DB.lv=10;DB.pe=5000;await gilCarica();r.leggenda=skOwned().filter(x=>/@leggenda$/.test(x)).length===10;
+      DB.lv=10;DB.pe=5000;await gilCarica();r.leggenda=skOwned().filter(x=>/@leggenda$/.test(x)).length===Object.keys(CLASSES).length;
       R=null;solo=true;pickCls='guerriero';pickDg='rocca';pickMode='normal';pickLvl=0;startSolo();ctx(ME);r.bonus=run.gilOro===.1&&run.max===91&&run.potions.length===2&&run.relics.length===2&&/gilda/.test(run.vApplied);
       const tk=todayKey;todayKey=()=>'20261121';try{localStorage.removeItem(DAILY_K)}catch(e){}startDaily();ctx(ME);r.giorno=!run.gilOro&&!/gilda/.test(run.vApplied||'');todayKey=tk;
       R=null;solo=true;startSolo();ctx(ME);R.phase='end';R.win=true;render();await sleep(150);render();const n1=DB.ch.filter(x=>x.startsWith('gilda_partita')).length;render();await sleep(60);
@@ -1166,6 +1166,39 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     ok(nv.amici&&nv.azioni&&nv.gilda&&nv.invito&&nv.invitoFalso,'nomi con le maiuscole: amici, richieste, gilda e inviti mostrano il nome scelto (le azioni usano il nome vero, un nome che non corrisponde si ignora)');
     ok(nv.combat&&nv.stanza&&nv.vecchio&&nv.senza&&nv.esce,'nomi con le maiuscole: in combattimento e nelle stanze; profili di prima prendono il nome delle stanze; senza risposta resta il nome di prima');
     ok(!en.length,'nomi con le maiuscole: nessun errore nella pagina '+en.slice(0,2).join(' | '));await cn.close()}
+
+  console.log('7al. Bardo (v10.20): Ispirazione, Bis!, Canzone del Coraggio, Leggenda Vivente, Gran Finale, aspetti e Sfida del giorno');
+  {const bd=await page.evaluate(async()=>{const sleep=ms=>new Promise(t=>setTimeout(t,ms));const r={};SET.tut=false;SPEED=0;
+      r.classe=!!CLASSES.bardo&&CLASSES.bardo.deck.length===10&&CLASSES.bardo.deck.every(id=>CARDS[id]&&CARDS[id].cl==='bardo')&&Object.values(CARDS).filter(d=>d.cl==='bardo').length===14
+        &&STARTER_RELICS.includes('liuto')&&!!OMPOW.bardo&&TALENTS.bardo.length===5&&CN('bardo','f')==='Barda'&&CLASSES.bardo.price===120;
+      r.aspetti=JSON.stringify(skinsFor('bardo'))===JSON.stringify(['cremisi','autunno','dorato','ombra','gelo']);
+      solo=false;isHost=true;ME='pA';myName='Manu';chan=null;modal=null;R=newLobby('BARD');R.players.pA.cls='bardo';
+      R.players.pB={pid:'pB',name:'Sara',cls:'guerriero',ready:true};R.order.push('pB');online=new Set(R.order);startRunRoom(0,'BARDO');
+      startCombat(['goblin'],'combat');R.phase='combat';const c=R.combat,e=c.enemies[0];e.hp=e.max=9999;e.blk=0;e.st={};e.intent={d:0};
+      const A_=c.heroes.pA,B_=c.heroes.pB;let n=0;
+      const dai=(h,id,up)=>{const x={id,uid:9e6+(n++),up:!!up};h.hand.push(x);h.energy=9;return x};
+      const gioca=(pid,id,ap,up)=>{ctx(pid);const h=c.heroes[pid];h.ended=false;const x=dai(h,id,up);const p=e.hp;playCard(x.uid,0,ap||pid);ctx(ME);return p-e.hp};
+      const pulisci=()=>{[A_,B_].forEach(h=>{h.st={};h.pw={};h.blk=0});e.st={};e.blk=0};
+      pulisci();gioca('pA','cantoisp','pB');r.dato=B_.st.insp===4&&!A_.st.insp;
+      const d1=gioca('pB','colpo'),d2=gioca('pB','colpo');r.consuma=d1-d2===4&&!B_.st.insp;
+      pulisci();A_.st.insp=3;const r1=gioca('pA','ritornello');r.ritIsp=A_.st.insp===1;pulisci();const r2=gioca('pA','ritornello');r.ognicolpo=r1-r2===6&&r.ritIsp;
+      pulisci();A_.st.insp=5;gioca('pA','strimpellata');r.dopo=A_.st.insp===2;
+      pulisci();A_.st.insp=2;const f1=gioca('pA','granfinale'),f2=gioca('pA','granfinale');r.triplo=f1-f2===6;
+      pulisci();gioca('pA','bis','pB');r.bisDato=B_.st.bis===1;const b1=gioca('pB','colpo');r.bis=b1===2*gioca('pB','colpo')&&!B_.st.bis;
+      pulisci();gioca('pA','bis','pA');gioca('pA','canzonecor');r.bisPotere=A_.st.bis===1&&A_.pw.canzone===2;gioca('pA','passodanza');r.bisArmatura=A_.blk===10&&!A_.st.bis;
+      pulisci();A_.pw.canzone=2;ctx('pA');heroTurnStart(A_,2);ctx(ME);r.canzone=B_.st.insp===2&&A_.st.insp===2+(R.players.pA.relics.includes('liuto')?2:0);
+      pulisci();A_.pw.leggenda=1;gioca('pA','cantoisp','pB');r.leggenda=B_.st.insp===8;
+      pulisci();ctx('pA');const sv=simHit('c',(()=>{const x=dai(A_,'stoccata');return x.uid})(),0,0);ctx(ME);r.anteprima=!!sv;
+      R=null;solo=true;ME='solo';isHost=true;online=new Set(['solo']);screen='title';render();
+      const giorni=[];let k='20261101';for(let i=0;i<80;i++){giorni.push(k);k=dayAdd(k,1)}
+      const prima=giorni.filter(d=>d<HERO_DAY.bardo),dopo=giorni.filter(d=>d>=HERO_DAY.bardo);
+      r.sfida=prima.every(d=>dailyInfo(d).cls!=='bardo')&&dopo.some(d=>dailyInfo(d).cls==='bardo');
+      return r});
+    ok(bd.classe&&bd.aspetti,'Bardo: classe, 14 carte, reliquia Liuto Incantato, poteri Luce/Ombra, 5 talenti, Barda, aspetti (Autunno al posto di Smeraldo) '+JSON.stringify(bd));
+    ok(bd.dato&&bd.consuma&&bd.ognicolpo&&bd.dopo&&bd.triplo,'Ispirazione: si dà a un alleato, si somma a ogni colpo del prossimo Attacco e poi si consuma; Strimpellata la dà dopo il colpo; Gran Finale la conta il triplo');
+    ok(bd.bisDato&&bd.bis&&bd.bisPotere&&bd.bisArmatura,'Bis!: la prossima carta (anche di un alleato) si gioca 2 volte, i Poteri no');
+    ok(bd.canzone&&bd.leggenda,'Canzone del Coraggio dà Ispirazione a tutto il gruppo a ogni turno; Leggenda Vivente la raddoppia');
+    ok(bd.sfida,'Sfida del giorno: il Bardo entra solo dal '+'21/11/2026, i giorni prima restano uguali')}
 
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
