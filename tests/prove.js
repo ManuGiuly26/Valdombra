@@ -1227,6 +1227,57 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     ok(bs.sangue&&bs.sete&&bs.bevi&&bs.furia,'Berserker: Sangue per Sangue toglie 3 PV, Sete di Sangue e Bevi il Sangue ridanno vita, Furia Cieca dà Forza quando perde PV');
     ok(bs.immortale&&bs.finito&&bs.vendetta,'Furore Immortale: non si scende sotto 1 PV fino al turno dopo; Vendetta di Sangue: metà dei PV mancanti, almeno 10')}
 
+  console.log('7an. Eroi (v10.22): pannelli «Crescita eroi» e «Personaggi» (si sbloccano qui), aspetti di tutti gli eroi nella Bottega');
+  {const ep=await page.evaluate(async()=>{const sleep=ms=>new Promise(t=>setTimeout(t,ms));const r={};SET.tut=false;const h0=load(HEROES_K),c0=getCrowns(),sk0=load(SKO_K);
+      store(HEROES_K,JSON.stringify([]));setCrowns(130);R=null;screen='title';modal=null;render();
+      openCrescita(null,'pers');await sleep(30);const M=()=>document.querySelector('.modal');
+      r.titolo=modal.title==='Eroi'&&!!M().querySelector('.crtabs')&&M().querySelectorAll('.pers').length===Object.keys(CLASSES).length;
+      r.bloccati=M().querySelectorAll('.pers.locked').length===Object.keys(CLASSES).filter(k=>CLASSES[k].price).length;
+      const bardo=()=>[...M().querySelectorAll('.pers')].find(x=>/Bardo/.test(x.textContent));
+      bardo().querySelector('.persaz .btn').click();await sleep(20);r.conferma=/Sì, sblocca per 120 Corone/.test(bardo().textContent)&&!heroOwned('bardo');
+      [...bardo().querySelectorAll('.btn')].find(b=>/Sì, sblocca/.test(b.textContent)).click();await sleep(30);
+      r.comprato=heroOwned('bardo')&&getCrowns()===10&&!!modal&&modal.crescita&&/Già tuo/.test(bardo().textContent);
+      r.poche=!![...M().querySelectorAll('.pers')].find(x=>/Berserker/.test(x.textContent)).querySelector('button[disabled]');
+      [...M().querySelectorAll('.crtabs .btn')].find(b=>/Crescita/.test(b.textContent)).click();await sleep(20);r.crescita=!!M().querySelector('.prow.tal');
+      closeModal();UI.skCls='berserker';openBottega();await sleep(300);render();await sleep(30);
+      const sk=M().querySelectorAll('.skcls');r.tutti=sk.length===Object.keys(CLASSES).length&&M().querySelectorAll('.skcls.locked').length===Object.keys(CLASSES).filter(k=>!heroOwned(k)).length;
+      const g0=getGems?getGems():0;const bx=[...M().querySelectorAll('.shopitem .relicbox')].find(x=>/Cremisi/.test(x.textContent));bx.click();await sleep(20);
+      r.nonCompra=!skOwned().includes('berserker@cremisi')&&/da sbloccare/i.test(M().textContent);
+      closeModal();store(HEROES_K,h0||'[]');setCrowns(c0);if(sk0!=null)store(SKO_K,sk0);screen='title';render();return r});
+    ok(ep.titolo&&ep.bloccati&&ep.conferma&&ep.comprato&&ep.poche&&ep.crescita,'Eroi: «Personaggi» mostra tutti gli eroi; si sblocca con conferma e si resta nella finestra; senza Corone il pulsante è spento; «Crescita eroi» c\'è ancora '+JSON.stringify(ep));
+    ok(ep.tutti&&ep.nonCompra,'Bottega: ci sono gli aspetti di tutti gli eroi; per quelli da sbloccare si vedono ma non si comprano')}
+
+  console.log('7ao. Fabbro (v10.23): Corazza, carte potenziate in mano, Capolavoro per sempre, Officina, Incudine Runica e «Forgia» dalla mappa');
+  {const fb=await page.evaluate(async()=>{const sleep=ms=>new Promise(t=>setTimeout(t,ms));const r={};SET.tut=false;SPEED=0;
+      r.classe=!!CLASSES.fabbro&&CLASSES.fabbro.deck.length===10&&CLASSES.fabbro.deck.every(id=>CARDS[id]&&CARDS[id].cl==='fabbro')&&Object.values(CARDS).filter(d=>d.cl==='fabbro').length===14
+        &&STARTER_RELICS.includes('incudine')&&!!OMPOW.fabbro&&TALENTS.fabbro.length===5&&CN('fabbro','f')==='Fabbra'&&CLASSES.fabbro.hp===84;
+      r.aspetti=JSON.stringify(skinsFor('fabbro'))===JSON.stringify(['cremisi','smeraldo','dorato','ombra','gelo']);
+      R=null;solo=true;ME='solo';isHost=true;online=new Set(['solo']);modal=null;pickCls='fabbro';pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();ctx(ME);
+      startCombat(['goblin','goblin'],'combat');R.phase='combat';ctx(ME);const c=R.combat,e=c.enemies[0],e2=c.enemies[1];[e,e2].forEach(x=>{x.hp=x.max=9999;x.blk=0;x.st={};x.intent={d:0}});
+      const h=g.hero;let n=0;const nuova=(id,up)=>({id,uid:9e6+(n++),up:!!up});
+      const gioca=(id,up)=>{ctx(ME);h.ended=false;h.energy=9;const x=nuova(id,up);h.hand.push(x);const p=e.hp;playCard(x.uid,0,ME);ctx(ME);return p-e.hp};
+      const pulisci=()=>{h.st={};h.pw={};h.blk=0;h.hand=[];e.st={};e2.st={}};
+      r.reliquia=run.relics.includes('incudine');
+      pulisci();PLATE(ME,2);h.blk=0;h.hand=[];heroTurnStart(h,c.turn+1);r.corazza=h.blk>=2&&h.st.plate===2;h.blk=0;hurtHero(5);r.cala=h.st.plate===1;
+      pulisci();h.hand=[nuova('colpomartello'),nuova('scudoforgiato'),nuova('colpomartello')];gioca('forgiare');r.forgia1=h.hand.filter(x=>x.up).length===1;
+      pulisci();h.hand=[nuova('colpomartello'),nuova('scudoforgiato'),nuova('colpomartello')];gioca('forgiare',true);r.forgiaTutte=h.hand.every(x=>x.up);
+      pulisci();const m0=gioca('martellorun');pulisci();h.hand=[nuova('colpomartello',true),nuova('scudoforgiato',true)];const m2=gioca('martellorun');r.runico=m2-m0===6;
+      pulisci();const a2=e2.hp;gioca('scintille',true);r.scintille=e2.hp<a2;
+      pulisci();h.hand=[nuova('colpomartello'),nuova('scudoforgiato')];gioca('affilatura');const col=h.hand.find(x=>x.id==='colpomartello');r.affila=col.af===3&&vals(col).d===9;
+      pulisci();const dk=run.deck.find(x=>x.id==='colpomartello'&&!x.up);const cp={...dk,uid:9e6+(n++)};h.hand=[cp];gioca('capolavoro');r.capolavoro=cp.up&&dk.up;
+      pulisci();h.pw.officina=1;h.draw=[nuova('colpomartello'),nuova('scudoforgiato'),nuova('colpomartello'),nuova('scudoforgiato'),nuova('colpomartello')];h.disc=[];heroTurnStart(h,c.turn+2);r.officina=h.hand.some(x=>x.up);
+      run.incN=0;run.forgia=0;run.talents=[];e.hp=0;e2.hp=0;e.dead=e2.dead=true;winCombat();r.carica1=run.incN===1&&!run.forgia;
+      startCombat(['goblin'],'combat');R.phase='combat';ctx(ME);R.combat.enemies[0].hp=0;R.combat.enemies[0].dead=true;winCombat();ctx(ME);r.carica2=run.forgia===1&&run.incN===0;
+      R.phase='map';run.screen=null;render();await sleep(20);r.pulsante=!!document.querySelector('.forgiabtn');
+      const i=run.deck.findIndex(canUp);const nm=run.deck[i].id;ACT.forgia({i},run,ME);r.forgiata=run.deck[i].up&&run.forgia===0;render();await sleep(20);r.sparito=!document.querySelector('.forgiabtn');
+      run.forgia=1;R.phase='combat';ACT.forgia({i:run.deck.findIndex(canUp)},run,ME);r.nonInCombattimento=run.forgia===1;
+      run.talents=['fb5'];run.forgia=0;run.incN=0;startCombat(['goblin'],'combat');R.phase='combat';ctx(ME);R.combat.enemies[0].hp=0;R.combat.enemies[0].dead=true;winCombat();ctx(ME);r.maestro=run.forgia===1;
+      R=null;solo=true;ME='solo';screen='title';modal=null;render();return r});
+    ok(fb.classe&&fb.aspetti&&fb.reliquia,'Fabbro: classe, 14 carte, Incudine Runica, poteri Luce/Ombra, 5 talenti, Fabbra, aspetti '+JSON.stringify(fb));
+    ok(fb.corazza&&fb.cala,'Corazza: a inizio turno dà altrettanta Armatura e cala di 1 quando un nemico toglie PV');
+    ok(fb.forgia1&&fb.forgiaTutte&&fb.runico&&fb.scintille&&fb.affila&&fb.capolavoro&&fb.officina,'Fabbro: Forgiare (una carta, tutte se potenziata), Martello Runico, Scintille+, Affilatura, Capolavoro per sempre, Officina da Campo');
+    ok(fb.carica1&&fb.carica2&&fb.pulsante&&fb.forgiata&&fb.sparito&&fb.nonInCombattimento&&fb.maestro,'Incudine Runica: si carica ogni 2 vittorie (ogni vittoria col talento), «Forgia» sulla mappa potenzia una carta, non in combattimento')}
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;
