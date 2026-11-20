@@ -1200,6 +1200,33 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     ok(bd.canzone&&bd.leggenda,'Canzone del Coraggio dà Ispirazione a tutto il gruppo a ogni turno; Leggenda Vivente la raddoppia');
     ok(bd.sfida,'Sfida del giorno: il Bardo entra solo dal '+'21/11/2026, i giorni prima restano uguali')}
 
+  console.log('7am. Berserker (v10.21): Furore, carte che feriscono e ridanno vita, Furia Cieca, Furore Immortale, Vendetta di Sangue');
+  {const bs=await page.evaluate(async()=>{const sleep=ms=>new Promise(t=>setTimeout(t,ms));const r={};SET.tut=false;SPEED=0;
+      r.classe=!!CLASSES.berserker&&CLASSES.berserker.deck.length===10&&CLASSES.berserker.deck.every(id=>CARDS[id]&&CARDS[id].cl==='berserker')&&Object.values(CARDS).filter(d=>d.cl==='berserker').length===14
+        &&STARTER_RELICS.includes('totem')&&!!OMPOW.berserker&&TALENTS.berserker.length===5&&CN('berserker','f')==='Berserker'&&CLASSES.berserker.hp===84;
+      r.aspetti=JSON.stringify(skinsFor('berserker'))===JSON.stringify(['cremisi','smeraldo','dorato','ombra','gelo']);
+      R=null;solo=true;ME='solo';isHost=true;online=new Set(['solo']);modal=null;pickCls='berserker';pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();ctx(ME);
+      startCombat(['goblin','goblin'],'combat');R.phase='combat';ctx(ME);const c=R.combat,e=c.enemies[0],e2=c.enemies[1];[e,e2].forEach(x=>{x.hp=x.max=9999;x.blk=0;x.st={};x.intent={d:0}});
+      const h=g.hero;let n=0;
+      const gioca=(id,up)=>{ctx(ME);h.ended=false;h.energy=9;const x={id,uid:9e6+(n++),up:!!up};h.hand.push(x);const p=e.hp;playCard(x.uid,0,ME);ctx(ME);return p-e.hp};
+      const pulisci=()=>{h.st={};h.pw={};h.blk=0;e.st={};e2.st={};run.talents=[]};
+      r.reliquia=run.relics.includes('totem');
+      pulisci();run.hp=run.max;const d1=gioca('colpoascia');run.hp=Math.floor(run.max/2);const d2=gioca('colpoascia');r.furore=d2-d1===3&&furOf(ME);
+      render();await sleep(20);r.chip=/Furore \+3/.test(document.querySelector('.pi .info, .info').textContent);
+      run.hp=Math.floor(run.max*.55);r.sopra=!furOf(ME);run.talents=['br3'];r.talento=furOf(ME);
+      pulisci();run.hp=run.max;let hp0=run.hp;const s1=gioca('sanguexsangue');r.sangue=run.hp===hp0-3&&s1>=12;
+      pulisci();run.hp=40;const s2=gioca('setesangue');r.sete=run.hp===40+curaMod(ME,Math.floor(s2/2))&&s2>0;
+      pulisci();run.hp=40;const s3=gioca('bevisangue');r.bevi=run.hp===40+curaMod(ME,s3);
+      pulisci();run.hp=run.max;gioca('furiacieca');gioca('ritosangue');r.furia=h.st.str===1;
+      pulisci();run.hp=run.max;gioca('immortale');run.hp=3;L(10);r.immortale=run.hp===1&&!h.down&&h.st.str===2;heroTurnStart(h,c.turn+1);r.finito=!h.st.immortale;
+      pulisci();run.hp=run.max-60;const v1=gioca('vendetta');run.hp=run.max;const v2=gioca('vendetta');r.vendetta=v1===30+FUR_D&&v2===10;
+      pulisci();run.hp=Math.floor(run.max/2);const a2=e2.hp;gioca('turbineascia');r.turbine=a2-e2.hp===2*(5+3);
+      R=null;solo=true;ME='solo';screen='title';render();return r});
+    ok(bs.classe&&bs.aspetti&&bs.reliquia,'Berserker: classe, 14 carte, Totem della Furia, poteri Luce/Ombra, 5 talenti, aspetti '+JSON.stringify(bs));
+    ok(bs.furore&&bs.chip&&bs.sopra&&bs.talento&&bs.turbine,'Furore: con metà dei PV o meno +3 danni a ogni colpo (chip «Furore»), al 60% col talento; Turbine d\'Ascia colpisce 2 volte');
+    ok(bs.sangue&&bs.sete&&bs.bevi&&bs.furia,'Berserker: Sangue per Sangue toglie 3 PV, Sete di Sangue e Bevi il Sangue ridanno vita, Furia Cieca dà Forza quando perde PV');
+    ok(bs.immortale&&bs.finito&&bs.vendetta,'Furore Immortale: non si scende sotto 1 PV fino al turno dopo; Vendetta di Sangue: metà dei PV mancanti, almeno 10')}
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;
