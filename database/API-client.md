@@ -75,7 +75,7 @@ Non scrive niente e non serve `client`.
 { "azione": "ping" }
 ```
 ```json
-{ "ok": true, "azione": "ping", "dati": { "api": 1, "ora": "2026-11-18T11:54:52", "azioni": ["ping", "visita", "partita", "accedi", "mie_statistiche", "admin", "reimposta_password"] } }
+{ "ok": true, "azione": "ping", "dati": { "api": 1, "ora": "2026-11-18T11:54:52", "azioni": ["ping", "visita", "partita", "accedi", "mie_statistiche", "admin", "reimposta_password", "amici", "gilda", "nomi"] } }
 ```
 
 ### `visita`: l'app è stata aperta
@@ -143,8 +143,9 @@ Nome e password del profilo del gioco (gli stessi del gioco web) vanno in `dati`
 { "azione": "accedi", "client": { ... }, "dati": { "nome": "manugiuly", "password": "..." } }
 ```
 ```json
-{ "ok": true, "azione": "accedi", "chi": { "giocatore": "manugiuly", "admin": true, ... }, "dati": { "nome": "manugiuly", "token": "3932296e-..." } }
+{ "ok": true, "azione": "accedi", "chi": { "giocatore": "manugiuly", "admin": true, ... }, "dati": { "nome": "manugiuly", "token": "3932296e-...", "mostra": "ManuGiuly" } }
 ```
+`nome` è il nome vero del profilo, sempre in minuscolo: usalo per `giocatore` e per tutte le altre chiamate. `mostra` (dalla v10.19) è **come si vede il nome**, con le maiuscole e le minuscole scelte dal giocatore: usalo solo per mostrarlo. Per i profili di prima, se `mostra` era ancora vuoto, il server lo riempie con il nome scritto qui per accedere.
 Il profilo si crea dal gioco web (o con `profilo_crea`, vedi sotto). Il token resta valido finché esiste il profilo e finché nessuno cambia la password (vedi `reimposta_password`); se una chiamata risponde `credenziali`, cancella il token salvato e fai accedere di nuovo il giocatore, spiegandogli che forse la password è stata cambiata da un altro dispositivo.
 
 ### `reimposta_password`: scegliere una password nuova
@@ -186,7 +187,21 @@ Dalla v10.4 (`database/amici.sql` e `database/api-amici.sql`, applicati il 19/11
 - Errori: `serve_accesso`, `credenziali` (token non più valido: fai accedere di nuovo), `dati_non_validi` (`op` sconosciuta).
 - I nomi sono sempre in minuscolo. Il token non finisce nel registro delle chiamate.
 
-**Chi è in gioco e inviti (Realtime, come il gioco web).** Con il profilo collegato il gioco si iscrive al canale Supabase Realtime `valdombra-amici` con la presenza; la chiave della presenza **non è il nome** ma la sua impronta: `'a' + (hashStr('am#' + nome_in_minuscolo) >>> 0).toString(36)`, dove `hashStr` è la stessa funzione del gioco web (`index.html`). Un amico è «in gioco» se la sua impronta è tra le chiavi della presenza. Per invitare un amico nella propria stanza si manda sullo stesso canale il broadcast `invito` con `{"a": impronta_dell_amico, "da": mio_nome, "c": "ABCD"}` (codice della stanza). Chi lo riceve lo mostra solo se `a` è la sua impronta e `da` è nella sua lista amici; «Entra» fa entrare nella stanza `c` come col link d'invito.
+**Chi è in gioco e inviti (Realtime, come il gioco web).** Con il profilo collegato il gioco si iscrive al canale Supabase Realtime `valdombra-amici` con la presenza; la chiave della presenza **non è il nome** ma la sua impronta: `'a' + (hashStr('am#' + nome_in_minuscolo) >>> 0).toString(36)`, dove `hashStr` è la stessa funzione del gioco web (`index.html`). Un amico è «in gioco» se la sua impronta è tra le chiavi della presenza. Per invitare un amico nella propria stanza si manda sullo stesso canale il broadcast `invito` con `{"a": impronta_dell_amico, "da": mio_nome, "dm": come_si_vede_il_mio_nome, "c": "ABCD"}` (codice della stanza; `dm` dalla v10.19, facoltativo: si mostra solo se è uguale a `da` a parte le maiuscole). Chi lo riceve lo mostra solo se `a` è la sua impronta e `da` è nella sua lista amici; «Entra» fa entrare nella stanza `c` come col link d'invito.
+
+### `nomi`: come si vedono i nomi (maiuscole e minuscole)
+
+Dalla v10.19 (`database/nomi.sql`). Ogni profilo ha un nome vero in minuscolo (per accedere, per gli amici, per la gilda e per tutte le chiamate) e un nome **da mostrare** con le maiuscole e le minuscole scelte dal giocatore (`Manu`, `MANU`, `manu`...). Serve `giocatore`.
+
+- `{"op": "mio"}` → `{ "nome": "manu", "mostra": "Manu" }`: come si vede il mio nome.
+- `{"op": "mio", "nuovo": "MaNu"}` → cambia come si vede il mio nome e risponde come sopra. Può cambiare **solo maiuscole e minuscole** (lettere, numeri, `_ . -`, da 3 a 20): altrimenti errore `nome_diverso`.
+- `{"op": "lista", "nomi": ["pandoris", "luca"]}` (al massimo 200) → `{ "nomi": { "pandoris": "PanDoris", "luca": "luca" } }`: per mostrare amici, membri e richieste della gilda, i migliori della settimana. I nomi che non esistono non ci sono. Le chiavi sono in minuscolo.
+
+```json
+{ "azione": "nomi", "client": { ... }, "giocatore": { "nome": "manu", "token": "..." }, "dati": { "op": "lista", "nomi": ["pandoris", "luca"] } }
+```
+- Errori: `serve_accesso`, `credenziali`, `nome_diverso`, `dati_non_validi` (`op` sconosciuta o `nomi` che non è una lista da 0 a 200).
+- Mostra sempre `mostra` al posto del nome vero; per confrontare due nomi usa sempre quello in minuscolo. Se un nome non è nella risposta, mostra quello in minuscolo.
 
 ### `gilda`: la gilda
 
@@ -255,6 +270,7 @@ Serve `giocatore` con un profilo amministratore (oggi `manugiuly`). Restituisce 
 | `non_autorizzato` | il profilo non è amministratore |
 | `dati_non_validi` | un campo di `dati` manca o non va bene (vedi `dettaglio`) |
 | `password_corta` | in `reimposta_password` la password nuova ha meno di 4 o più di 72 caratteri |
+| `nome_diverso` | in `nomi` il nome nuovo non è lo stesso a parte le maiuscole e le minuscole |
 | `errore_interno` | problema del server: riprova più tardi |
 
 Ogni errore ha anche `messaggio`, un testo in italiano che si può mostrare al giocatore.
@@ -392,6 +408,7 @@ Cambiamenti recenti del gioco web da riportare nell'app per restare uguali:
 - **v10.7**: l'**Ombra** del giocatore si vede sempre nella barra in alto («Ombra N/10», anche sulla mappa) e con la sua barra in cima alle stanze: Mercante, Falò (anche spento), eventi, tesori e strade segrete, perché alcune scelte dipendono da quanta Ombra hai.
 - **v10.8**: **Gilde** (serve il profilo). Finestra «Gilda» accanto ad «Amici» (Profilo, Multigiocatore, menu, stanza). Senza gilda: le mie richieste (Annulla), entra con codice, cerca (Entra se aperta, «Chiedi di entrare» se chiusa, «Piena»), crea (nome, descrizione, aperta/chiusa, **150 Corone**). In gilda: nome, livello, aperta/chiusa, membri x/posti; richieste (capo e vice) con Accetta/Rifiuta; membri col pallino verde e i pulsanti per ruolo (capo: Fai vice / Togli vice, Fai capo, Allontana; vice: Allontana i membri); codice d'invito (capo e vice) con Copia e «Fanne uno nuovo»; impostazioni del capo (aperta/chiusa, nome, descrizione, **posto in più a 5 + 2 × (posti − 15) Gemme**, fino a 30); «Esci dalla gilda» con conferma. Nella stanza «Invita» anche per i compagni di gilda in gioco (etichetta «gilda»); gli inviti si accettano da amici e compagni di gilda.
 - **v10.9**: **settimana della gilda** (`database/gilde2.sql`, applicato): a fine partita il gioco chiama `gilda_partita(p_nome, p_token, p_id uuid nuovo per partita, p_dati {vinta, piano, assedio, nemici, elite, boss, abitanti, gruppo})` → `{esito, pe, punti_boss, missioni_completate, gilda}`; una volta sola per id, 40 al giorno. `gilda_mia` ora ha anche `settimana` (missioni, boss, io, migliori) e `premi` da ritirare; `gilda_ritira(p_nome, p_token, p_id null)` → `{corone, gemme, premi}` da aggiungere nel gioco. Bonus della gilda a inizio partita (non nella sfida del giorno): liv. 2 +5% oro dai combattimenti, 4 una pozione, 6 +5 PV max, 8 +10% oro, 10 una reliquia. Livello personale (PE 100/300/600/1000/1500/2200/3000/4000/5000), titoli Recluta 1, Scudiero 3, Cavaliere 5, Campione 7, Leggenda 10; aspetti «Stendardo» (5) e «Leggenda» (10) in `pixel/aspetti/`. Nell'endpoint unico l'azione `gilda` ha anche le operazioni `partita` (`{op:'partita', id: UUID nuovo per partita, partita: {vinta, piano, assedio, nemici, elite, boss, abitanti, gruppo}}`) e `ritira` (`{op:'ritira', premio?}` → `{corone, gemme, premi}`), da `database/api-gilde2.sql`, applicato il 19/11/2026.
+- **v10.19**: **nomi con le maiuscole e le minuscole** (`database/nomi.sql`, migrazione `nomi_maiuscole` applicata il 20/11/2026). Il nome vero resta in minuscolo (per accedere va scritto come si vuole); in più c'è come si vede: colonna `profili.mostra`. Nel gioco web: `profilo_crea` salva il nome come è stato scritto; `profilo_accedi` riempie `mostra` se è ancora vuoto; `profilo_mostra(p_nome, p_token, p_nuovo?)` → testo (legge o cambia, solo maiuscole e minuscole, altrimenti `nome_diverso`); `nomi_mostra(p_nome, p_token, p_nomi text[])` → `{nome: come si vede}` (al massimo 200). Nell'endpoint unico l'azione `nomi` (op `mio` e `lista`) e `mostra` nella risposta di `accedi`. Nel Profilo il pannello «Come si vede il tuo nome» (campo e «Salva»). Il gioco mostra il nome scelto nel Profilo, in Impostazioni, tra gli amici, nella gilda (membri, richieste, chi colpisce di più il boss), negli inviti e in combattimento da solo; il nome delle stanze preso dal profilo usa quello scelto. Le azioni (accetta, togli, caccia, invita...) e i confronti usano sempre il nome in minuscolo. Nell'invito Realtime c'è il campo nuovo `dm` (come si vede il nome di chi invita): si usa solo se è uguale a `da` a parte le maiuscole. Profili di prima: all'avvio, se il nome si vede ancora tutto minuscolo, il gioco usa il nome delle stanze del dispositivo se è lo stesso nome con le maiuscole. Prove 7ak.
 - **v10.18**: in gruppo, quando il tuo eroe è **a terra**, al posto della mano compare «Sei morto/morta» con cosa puoi fare (un compagno può rianimarti con una carta o con la Piuma di Fenice; se il gruppo vince il combattimento ti rialzi con un quarto dei PV) e il pulsante «Esci dal dungeon»; nella barra in basso «Sei morto: aspetta i compagni». Prima diceva «Hai finito il turno… Riprendi il turno».
 - **v10.17**: **Provocazione** vale anche contro gli attacchi che colpiscono tutto il gruppo: se un eroe ha Provocazione, un attacco «a tutti» (danni ed effetti, per esempio Debole) colpisce solo lui; sopra il nemico la scritta «→ tutti» diventa «→ te» o il nome di chi provoca.
 - **v10.16**: **eroine**. Sopra la scelta dell'eroe «Genere: Maschile / Femminile» (uno per tutti gli eroi, gratis), salvato in `valdombra-genere` (`m`/`f`) e sincronizzato nel profilo come le altre chiavi. Nomi femminili: Guerriera, Maga, Ladra, Chierica, Necromante, Ranger, Druida, Monaca, Guardiana, Paladina (con gli articoli al femminile: «della Maga», «con la Guerriera»). Immagini: `pixel/<eroe>-f.png` e `pixel/<eroe>-f-attacco|difesa|colpito.png` (strisce di 7 celle 84×84), aspetti in `pixel/aspetti/<eroe>-f-<aspetto>(-attacco|-difesa|-colpito).png`; se un'immagine femminile manca si usa quella maschile. Gli aspetti posseduti (`eroe@aspetto`) valgono per tutte e due le versioni. **Guerriero** e **Ladro** maschi hanno figure, animazioni e aspetti nuovi (stessi nomi di file). In gruppo il genere va nello zaino che si manda alla stanza (`loadout` con `g: 'm'|'f'`), e nella stanza e in combattimento ognuno si vede col suo. I testi che parlano al giocatore si adattano («Sei caduta», «Ti sei ammalata», «Sei sicura…», «Bentornata»). In combattimento da solo il nome dell'eroe è il **nome del profilo** con l'iniziale maiuscola (senza profilo il nome dell'eroe); in gruppo resta il nome scelto.

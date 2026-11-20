@@ -1132,6 +1132,41 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
       store(GEN_K,g0);R=null;solo=true;ME='solo';isHost=true;online=new Set(['solo']);screen='title';render();return r});
     ok(dm.vivo&&dm.maschio&&dm.femmina&&dm.esci,'a terra in gruppo: al posto di «Hai finito il turno» compare «Sei morto/morta» con la rianimazione e il pulsante «Esci dal dungeon» '+JSON.stringify(dm))}
 
+  console.log('7ak. Nomi con maiuscole e minuscole (v10.19): profilo, amici, gilda, inviti e combattimento con il nome scritto dal giocatore (database simulato)');
+  {const cn=await browser.newContext({viewport:{width:1280,height:860}});await cn.route(/^https?:\/\//,r=>r.abort());const pn=await cn.newPage();const en=[];pn.on('pageerror',e=>en.push(e.message));await pn.goto(PAGE);await pn.waitForTimeout(400);
+    const nv=await pn.evaluate(async()=>{const sleep=ms=>new Promise(t=>setTimeout(t,ms));SET.tut=false;saveSet();const r={},rpc0=window.accRpc,my0=myName;
+      const DB={ch:[],mostra:null,altri:{pandoris:'PanDoris',luca:'Luca',sara:'SaRa'}};
+      const mia=()=>({gilda:{id:3,nome:'Lupi',descrizione:'',aperta:true,posti:15,livello:5,pe:6000},io:{ruolo:'capo',pe:300},membri:[{nome:'manu',ruolo:'capo',pe:300},{nome:'sara',ruolo:'membro',pe:900}],richieste:[{nome:'luca',creata:'2026-11-19T10:00:00Z'}],
+        settimana:{inizio:'2026-11-16',fine:'2026-11-22',missioni:[],boss:{boss:'lich',vita:3000,danni:500,sconfitto:null},io:{partite:0,boss:0,missioni:{}},migliori:[{nome:'sara',boss:400,partite:3}]},premi:[],dungeon:{oggi:null,gilda_oggi:false}});
+      window.accRpc=async(fn,a)=>{DB.ch.push(fn+':'+JSON.stringify(a));
+        if(fn==='profilo_accedi'){if(DB.mostra==null&&String(a.p_nome).trim().toLowerCase()==='manu')DB.mostra=String(a.p_nome).trim();return [{token:'11111111-1111-1111-1111-111111111111',rev:3,dati:{}}]}
+        if(fn==='profilo_mostra'){if(a.p_nuovo!=null){if(String(a.p_nuovo).toLowerCase()!=='manu')throw new Error('nome_diverso');DB.mostra=a.p_nuovo}return DB.mostra||'manu'}
+        if(fn==='nomi_mostra'){const o={};(a.p_nomi||[]).forEach(n=>{if(DB.altri[n])o[n]=DB.altri[n]});o.luca2='Intruso';return o}
+        if(fn==='amici_lista')return [{nome:'pandoris',stato:'amici'},{nome:'luca',stato:'ricevuta'}];if(fn==='amici_codice')return 'K7PX2M';if(fn==='gilda_mia')return mia();
+        if(fn==='profilo_leggi')return [{rev:ACC?ACC.rev:1,dati:{}}];if(fn==='profilo_salva')return (ACC?ACC.rev:1)+1;return null};
+      ACC=null;R=null;screen='title';myName='';const M=()=>document.querySelector('.modal');
+      UI.accN='MaNu';UI.accP='pw1234';await accLogin(false);await sleep(40);
+      r.accesso=!!ACC&&ACC.nome==='manu'&&ACC.mostra==='MaNu'&&DB.mostra==='MaNu';
+      openProfilo();await sleep(30);r.profilo=/Collegato come MaNu/.test(M().textContent)&&M().querySelector('#nvnome').value==='MaNu'&&/Come si vede il tuo nome/.test(M().textContent);
+      UI.nvN='Manu';await accMostraSalva();await sleep(10);r.cambia=ACC.mostra==='Manu'&&DB.mostra==='Manu'&&/Collegato come Manu/.test(M().textContent)&&/Fatto/.test(M().textContent);
+      const n0=DB.ch.filter(x=>x.startsWith('profilo_mostra')).length;UI.nvN='Mario';await accMostraSalva();await sleep(10);
+      r.diverso=ACC.mostra==='Manu'&&/solo le maiuscole/.test(M().textContent)&&DB.ch.filter(x=>x.startsWith('profilo_mostra')).length===n0;closeModal();
+      await amiciCarica();await sleep(60);openAmici();await sleep(30);const ta=M().textContent;
+      r.amici=/PanDoris/.test(ta)&&/Luca/.test(ta)&&!/pandoris/.test(ta)&&NV('luca2')==='luca2';
+      r.azioni=!!M().querySelector(`[onclick*="amRispondi('luca'"]`);closeModal();
+      await gilCarica();await sleep(60);openGilda();await sleep(30);r.gilda=/SaRa/.test(M().textContent)&&/Luca/.test(M().textContent)&&/colpisce di più: SaRa 400/.test(M().textContent);closeModal();
+      amiciInvitoArrivato({a:amH('manu'),da:'pandoris',dm:'PANDORIS',c:'ABCD'});await sleep(20);r.invito=NV('pandoris')==='PANDORIS'&&/PANDORIS/.test(document.body.textContent);
+      amiciInvitoArrivato({a:amH('manu'),da:'pandoris',dm:'Mario',c:'ABCE'});await sleep(20);r.invitoFalso=NV('pandoris')==='PANDORIS';
+      solo=true;r.combat=nomeEroe({pid:'solo',cls:'mago'})==='Manu';
+      myName='manu';UI.nvN='MANU';await accMostraSalva();r.stanza=myName==='MANU'&&NV('manu')==='MANU';
+      DB.mostra=null;ACC.mostra=undefined;myName='Manu';await accMostraCarica();r.vecchio=ACC.mostra==='Manu'&&DB.mostra==='Manu';
+      window.accRpc=async()=>null;ACC.mostra=undefined;await accMostraCarica();r.senza=NV('manu')==='manu'&&nomeEroe({pid:'solo',cls:'mago'})==='Manu';
+      AMI.inviti=[];accLogout();r.esce=UI.nvMsg===''&&UI.nvN===null;window.accRpc=rpc0;ACC=null;myName=my0;R=null;modal=null;screen='title';render();return r});
+    ok(nv.accesso&&nv.profilo&&nv.cambia&&nv.diverso,'nomi con le maiuscole: si vede il nome scritto per accedere; nel Profilo si cambiano solo maiuscole e minuscole, un nome diverso non si salva '+JSON.stringify(nv));
+    ok(nv.amici&&nv.azioni&&nv.gilda&&nv.invito&&nv.invitoFalso,'nomi con le maiuscole: amici, richieste, gilda e inviti mostrano il nome scelto (le azioni usano il nome vero, un nome che non corrisponde si ignora)');
+    ok(nv.combat&&nv.stanza&&nv.vecchio&&nv.senza&&nv.esce,'nomi con le maiuscole: in combattimento e nelle stanze; profili di prima prendono il nome delle stanze; senza risposta resta il nome di prima');
+    ok(!en.length,'nomi con le maiuscole: nessun errore nella pagina '+en.slice(0,2).join(' | '));await cn.close()}
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;
