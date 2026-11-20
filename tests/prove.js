@@ -663,14 +663,14 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     try{localStorage.removeItem('valdombra-novita-viste')}catch(e){}SET.menu=true;render();r.primaVolta=novitaNuove()===1;SET.menu=m0;render();return r});
   ok(nv.descr&&nv.noImp&&nv.lista&&nv.pallino&&nv.messaggi&&nv.letti&&nv.impSenza&&nv.impCon&&nv.noBtn&&nv.primaVolta,'menu essenziale: descrizione sotto il titolo, Impostazioni solo in alto a destra, Novità come messaggi con pallino rosso per quelle nuove (che sparisce dopo averle lette); col menu completo le Novità restano nelle Impostazioni '+JSON.stringify(nv));
 
-  console.log('7n. Forme del Druido a inizio turno (Gufo: 2 carte in più; Orso: 2 Armatura)');
+  console.log('7n. Forme del Druido a inizio turno (Gufo: 2 carte in più; Orso: 1 Armatura dalla v10.24)');
   const fo=await page.evaluate(async()=>{const r={};SET.tut=false;SPEED=0;const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     const turno=async form=>{R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);modal=null;pickCls='druido';pickDg='rocca';pickMode='norm';pickLvl=0;startSolo();ctx(ME);
       startCombat(['orco'],'combat');ctx(ME);g.enemies[0].hp=g.enemies[0].max=999;g.enemies[0].intent={d:0};const h=g.hero;
       for(let i=0;i<10;i++)h.draw.push({id:'artiglio',up:false,uid:uid++});h.form=form;h.formed=1;h.hand=[];
       dispatch(ME,{t:'end'});let w=0;while(R.combat&&R.combat.busy&&w<400){await sleep(5);w++}ctx(ME);return {mano:g.hero.hand.length,blk:g.hero.blk}};
     const base=await turno(null),gufo=await turno('gufo'),orso=await turno('orso');
-    r.gufo=gufo.mano===base.mano+2;r.orso=orso.blk>=base.blk+2;r.dett=[base,gufo,orso];R=null;screen='title';render();return r});
+    r.gufo=gufo.mano===base.mano+2;r.orso=orso.blk>=base.blk+1;r.dett=[base,gufo,orso];R=null;screen='title';render();return r});
   {// controllo del codice: un commento // messo dopo del codice non deve lasciare altro codice sulla stessa riga (non verrebbe eseguito: è successo al Gufo nella 9.0)
     const src=require('fs').readFileSync(path.resolve(__dirname,'..','index.html'),'utf8');const a0=src.indexOf('<script>'),b0=src.lastIndexOf('</script>');const off=src.slice(0,a0).split('\n').length-1;
     const spenti=[];src.slice(a0,b0).split('\n').forEach((l,i)=>{const m=l.match(/[;})\]]\s*\/\/(?!\/)(.*)$/);if(m&&/if\(|\)\{|=>\{|;\s*[A-Za-z_$][\w$.]*\(|\bconst |\blet |\breturn /.test(m[1]))spenti.push('riga '+(i+off+1)+': '+l.trim().slice(0,90))});
@@ -680,7 +680,7 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     ok(!doppie.length,'nessuna carta ha lo stesso nome interno di un\'altra (la seconda cancellerebbe la prima)'+(doppie.length?' — '+doppie.join(', '):''));
     const fuori=await page.evaluate(()=>Object.entries(CLASSES).flatMap(([k,c])=>c.deck.filter(id=>!CARDS[id]||(CARDS[id].cl&&CARDS[id].cl!==k)).map(id=>k+':'+id)));
     ok(!fuori.length,'il mazzo iniziale di ogni eroe ha solo carte sue (Raggio di Gelo per il Mago, Raffica di Pugni per il Monaco)'+(fuori.length?' — '+fuori.join(', '):''));}
-  ok(fo.gufo&&fo.orso,'forme del Druido a inizio turno: il Gufo fa pescare 2 carte in più, l\'Orso dà 2 Armatura '+JSON.stringify(fo.dett));
+  ok(fo.gufo&&fo.orso,'forme del Druido a inizio turno: il Gufo fa pescare 2 carte in più, l\'Orso dà 1 Armatura '+JSON.stringify(fo.dett));
 
   console.log('7o. Carta ingrandita in combattimento: anteprima delle due facce, si gioca solo dalla mano');
   {const c4=await browser.newContext({viewport:{width:1280,height:800}});await c4.route(/^https?:\/\//,r=>r.abort());const p4=await c4.newPage();const e4=[];p4.on('pageerror',e=>e4.push(e.message));await p4.goto(PAGE);await p4.waitForTimeout(300);
@@ -1277,6 +1277,45 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     ok(fb.corazza&&fb.cala,'Corazza: a inizio turno dà altrettanta Armatura e cala di 1 quando un nemico toglie PV');
     ok(fb.forgia1&&fb.forgiaTutte&&fb.runico&&fb.scintille&&fb.affila&&fb.capolavoro&&fb.officina,'Fabbro: Forgiare (una carta, tutte se potenziata), Martello Runico, Scintille+, Affilatura, Capolavoro per sempre, Officina da Campo');
     ok(fb.carica1&&fb.carica2&&fb.pulsante&&fb.forgiata&&fb.sparito&&fb.nonInCombattimento&&fb.maestro,'Incudine Runica: si carica ogni 2 vittorie (ogni vittoria col talento), «Forgia» sulla mappa potenzia una carta, non in combattimento')}
+
+  console.log('7ap. v10.24: carte del Gufo e forme più deboli, mostri più forti in Cripte e Abisso, salvati e persi del cancello, aspetto prima della partita, Impresa con tutti gli eroi');
+  {const v=await page.evaluate(async()=>{const sleep=ms=>new Promise(t=>setTimeout(t,ms));const r={};SET.tut=false;SPEED=0;
+      r.carte=['picchiata','occhinotte'].every(k=>CARDS[k]&&CARDS[k].cl==='druido')&&Object.values(CARDS).filter(d=>d.cl==='druido').length===14;
+      const avvia=(cls,dg,mode,ids)=>{R=null;solo=true;ME='solo';isHost=true;chan=null;online=new Set(['solo']);modal=null;pickCls=cls;pickDg=dg;pickMode=mode||'norm';pickLvl=0;startSolo();ctx(ME);
+        if(ids){if(mode!=='porta')R.dg=dg;/* Cripte e Abisso qui non sono sbloccati: si sceglie il dungeon a mano */startCombat(ids,'combat');R.phase='combat';ctx(ME)}};
+      avvia('druido','rocca','norm',['goblin','goblin']);const e=R.combat.enemies[0],e2=R.combat.enemies[1];[e,e2].forEach(x=>{x.hp=x.max=9999;x.blk=0;x.st={};x.intent={d:0}});
+      const h=g.hero;let n=0;const nuova=id=>({id,uid:9e6+(n++),up:false});
+      const gioca=(id,form)=>{ctx(ME);h.ended=false;h.energy=9;h.form=form||null;h.st={};e.st={};e2.st={};const x=nuova(id);h.hand.push(x);const p=e.hp;playCard(x.uid,0,ME);ctx(ME);return p-e.hp};
+      h.hand=[];r.pantera=gioca('artiglio','pantera')===2*(6+2);
+      h.hand=[];gioca('picchiata','serpente');r.serpente=e.st.poison===1;
+      h.hand=[];r.picchiataBase=gioca('picchiata',null)===7;h.hand=[nuova('artiglio'),nuova('artiglio'),nuova('artiglio')];r.picchiataGufo=gioca('picchiata','gufo')===7+3;
+      h.hand=[];h.draw=[nuova('artiglio'),nuova('artiglio')];gioca('occhinotte',null);r.occhiUno=e.st.vuln===2&&!e2.st.vuln&&h.hand.length===0;
+      h.hand=[];h.draw=[nuova('artiglio'),nuova('artiglio')];gioca('occhinotte','gufo');r.occhiGufo=e.st.vuln===2&&e2.st.vuln===2&&h.hand.length===1;
+      r.forme=/2 danni/.test(FORMS.pantera[1])&&/1 Armatura all/.test(FORMS.orso[1])&&/1 Veleno/.test(FORMS.serpente[1]);
+      // mostri: Rocca come prima, Cripte come 2 livelli in più, Abisso come 4, anche al Livello di Assedio 0
+      const liv={};for(const dg of ['rocca','cripte','abisso']){avvia('guerriero',dg,'norm',['goblin']);liv[dg]={Lm:R.combat.Lm,bonus:R.combat.enemies[0].bonus}}
+      r.livelli=liv.rocca.Lm===0&&liv.cripte.Lm===2&&liv.abisso.Lm===4&&liv.rocca.bonus===0&&liv.cripte.bonus===1&&liv.abisso.bonus===2;r.liv=liv;
+      avvia('guerriero','rocca','porta');r.cancelloNo=R.combat.Lm===0;
+      // cancello: Persi in alto e totali nel Diario
+      render();r.persiBarra=/Persi/.test((document.querySelector('.portabar')||{}).textContent||'');
+      const st0=getStats();R.porta.salvati=12;R.porta.persi=3;R.porta.gruppo=0;endRun(false);statsAward();const st1=getStats();
+      r.totali=(st1.pRuns|0)===(st0.pRuns|0)+1&&(st1.pSalvati|0)===(st0.pSalvati|0)+12&&(st1.pPersi|0)===(st0.pPersi|0)+3&&(st1.pBest|0)>=12;
+      R=null;screen='title';render();openDiario('stat');await sleep(30);r.diario=!!document.querySelector('.modal')&&/Abitanti persi in tutto/.test(document.querySelector('.modal').textContent);closeModal();
+      // Impresa con tutti gli eroi
+      const A=ACH.find(a=>a.id==='eroi10'),N=Object.keys(CLASSES).length,cls=o=>({cls:Object.fromEntries(Object.keys(CLASSES).slice(0,o).map(k=>[k,{wins:1}]))});
+      r.impresa=N===13&&A.d.includes('13')&&!A.ok(cls(12))&&A.ok(cls(13));
+      // aspetto prima della partita: solo quelli già tuoi, e la scelta resta
+      const h0=load(HEROES_K),o0=load(SKO_K),s0=load(SKS_K);store(HEROES_K,JSON.stringify(['fabbro']));store(SKO_K,JSON.stringify(['fabbro@gelo']));store(SKS_K,'{}');
+      pickCls='fabbro';R=null;screen='title';SET.menu=false;render();await sleep(20);const bt=[...document.querySelectorAll('.skpick .skp')];
+      r.scelta=bt.length===2&&/Classico/.test(bt[0].textContent)&&/Gelo/.test(bt[1].textContent);bt[1].click();await sleep(20);r.salvata=skSel().fabbro==='gelo'&&!!document.querySelector('.skpick .skp.on')&&/Gelo/.test(document.querySelector('.skpick .skp.on').textContent);
+      pickCls='bardo';render();await sleep(20);r.bloccato=!heroOwned('bardo')&&!document.querySelector('.skpick');
+      store(HEROES_K,h0||'[]');store(SKO_K,o0||'[]');store(SKS_K,s0||'{}');pickCls='guerriero';R=null;screen='title';modal=null;render();return r});
+    ok(v.carte&&v.pantera&&v.serpente&&v.forme,'Druido: 14 carte con Picchiata del Gufo e Occhi nella Notte; Pantera +2 danni, Serpente 1 Veleno, testi delle forme '+JSON.stringify(v));
+    ok(v.picchiataBase&&v.picchiataGufo&&v.occhiUno&&v.occhiGufo,'carte del Gufo: Picchiata +1 danno per carta in mano, Occhi nella Notte a tutti e pesca 1 solo in forma di Gufo');
+    ok(v.livelli&&v.cancelloNo,'mostri: Cripte come Assedio +2 e Abisso come +4 anche al livello 0, non nel cancello '+JSON.stringify(v.liv));
+    ok(v.persiBarra&&v.totali&&v.diario,'Aprite il cancello: «Persi» nella barra dell\'ondata, salvati e persi in tutto nel Diario');
+    ok(v.impresa,'Impresa «Leggenda di Valdombra» con tutti e 13 gli eroi');
+    ok(v.scelta&&v.salvata&&v.bloccato,'aspetto scelto anche prima della partita (solo quelli già tuoi, non per gli eroi da sbloccare)')}
 
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
