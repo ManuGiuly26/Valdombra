@@ -1317,6 +1317,11 @@ const ok=(cond,msg)=>{console.log((cond?'  ok   ':'  ERRORE ')+msg);if(!cond)fal
     ok(v.impresa,'Impresa «Leggenda di Valdombra» con tutti e 13 gli eroi');
     ok(v.scelta&&v.salvata&&v.bloccato,'aspetto scelto anche prima della partita (solo quelli già tuoi, non per gli eroi da sbloccare)')}
 
+  console.log('7aq. v10.28: amici e compagni di gilda in gioco anche dall\'app (campo «online» dal database)');
+  {const o=await page.evaluate(()=>{const l0=AMI.lista,on0=AMI.on;AMI.on=new Set();AMI.lista=[{nome:'zapp',stato:'amici',online:true},{nome:'zweb',stato:'amici',online:false}];
+      const r={app:amOnline('zapp'),spento:!amOnline('zweb')};AMI.on=new Set([amH('zweb')]);r.realtime=amOnline('zweb');AMI.lista=l0;AMI.on=on0;r.battito=typeof presenzaBattito==='function';return r});
+    ok(o.app&&o.spento&&o.realtime&&o.battito,'in gioco: dal database (app) o dalla presenza Realtime (web) '+JSON.stringify(o))}
+
   console.log('8. Grafica Pixellab');
   const px=await page.evaluate(async()=>{const r={};const sleep=ms=>new Promise(t=>setTimeout(t,ms));
     SPEED=0;SET.tut=false;SET.anim=true;setSkin('guerriero',null);r.base=SET_DEF.px===true;
